@@ -1,0 +1,88 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Application;
+use App\Models\School;
+use Illuminate\Http\Request;
+
+class PortalController extends Controller
+{
+    /**
+     * Landing page — hero, features, stats, CTA.
+     */
+    public function home()
+    {
+        $appCount = Application::active()->count();
+        $schoolCount = School::active()->count();
+
+        return view('portal.home', compact('appCount', 'schoolCount'));
+    }
+
+    /**
+     * Solutions / Applications listing.
+     */
+    public function solutions()
+    {
+        $applications = Application::active()->ordered()->get();
+
+        return view('portal.solutions', compact('applications'));
+    }
+
+    /**
+     * Contact page with form.
+     */
+    public function contact()
+    {
+        return view('portal.contact');
+    }
+
+    /**
+     * Handle contact form submission.
+     */
+    public function contactStore(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|max:150',
+            'subject' => 'required|string|max:200',
+            'message' => 'required|string|max:3000',
+        ]);
+
+        // Store as activity log for admin review
+        \App\Models\ActivityLog::log('contact_form_submitted', 'portal', null, [
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'subject' => $request->input('subject'),
+            'message' => $request->input('message'),
+        ]);
+
+        return redirect()->route('portal.contact')
+            ->with('success', app()->getLocale() === 'tr'
+                ? 'Mesajınız başarıyla gönderildi. En kısa sürede size dönüş yapacağız.'
+                : 'Your message has been sent successfully. We will get back to you soon.');
+    }
+
+    /**
+     * Switch portal locale — saves to session and (if authenticated) to user DB.
+     */
+    public function switchLocale(Request $request)
+    {
+        $locale = $request->input('locale', 'tr');
+
+        if (!in_array($locale, ['tr', 'en'])) {
+            $locale = 'tr';
+        }
+
+        // Save to session (for guests and auth users alike)
+        session(['locale' => $locale]);
+        app()->setLocale($locale);
+
+        // If user is logged in, persist preference to DB
+        if (auth()->check()) {
+            auth()->user()->update(['locale' => $locale]);
+        }
+
+        return back();
+    }
+}

@@ -1,0 +1,44 @@
+@extends('admin.layouts.auth')
+
+@section('title', __('admin.2fa'))
+
+@section('content')
+    <div class="bg-white dark:bg-[#0E2442]/50 rounded-2xl shadow-xl p-8 transition-colors duration-200">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-[#0B6AB2] dark:text-[#0B6AB2]">
+                Dopi<span class="bg-gradient-to-r from-[#F87D17] to-[#FFB347] bg-clip-text text-transparent">Future</span>
+            </h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">{{ __('admin.2fa') }}</p>
+        </div>
+
+        <form action="{{ route('admin.2fa.verify') }}" method="POST" class="space-y-5">
+            @csrf
+            <div>
+                <label for="code" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {{ __('admin.enter_code') }}
+                </label>
+                <input type="text" id="code" name="code" required autofocus autocomplete="one-time-code" maxlength="8"
+                    class="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-[#1A3A5C] bg-white dark:bg-[#0A1628] text-gray-900 dark:text-gray-100 text-center text-lg tracking-widest focus:ring-[#0B6AB2] focus:border-[#0B6AB2] transition-colors @error('code') border-red-500 @enderror"
+                    placeholder="000000">
+                @error('code')
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                @enderror
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    {{ __('admin.scan_qr') }}
+                </p>
+            </div>
+
+            <button type="submit"
+                class="w-full py-2.5 px-4 bg-[#0B6AB2] hover:bg-[#13398E] text-white font-medium rounded-lg transition-colors focus:ring-[#0B6AB2]">
+                {{ __('admin.confirm') }}
+            </button>
+        </form>
+
+        <div class="mt-4 text-center">
+            <a href="{{ route('admin.login') }}"
+                class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                ← {{ __('admin.back') }}
+            </a>
+        </div>
+    </div>
+@endsection

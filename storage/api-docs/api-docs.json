@@ -1,0 +1,2114 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Panel26 Admin API",
+        "description": "Panel26 Admin Panel REST API - Bearer token and API Key authentication supported. All endpoints accept ?lang=tr|en query parameter for localized responses.",
+        "contact": {
+            "email": "admin@panel26.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/api/v1",
+            "description": "API V1 Server"
+        }
+    ],
+    "paths": {
+        "/api/v1/api-keys": {
+            "get": {
+                "tags": [
+                    "API Keys"
+                ],
+                "summary": "List user's API keys",
+                "operationId": "52edf81f45babb0c286cf9874c0d12cf",
+                "responses": {
+                    "200": {
+                        "description": "API key list"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "API Keys"
+                ],
+                "summary": "Create a new API key",
+                "operationId": "008fedf7a7006b61dc25260834483c74",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "abilities": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "ip_restrictions": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "expires_at": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "API key created (plain key shown once)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/api-keys/{id}/rotate": {
+            "post": {
+                "tags": [
+                    "API Keys"
+                ],
+                "summary": "Rotate an API key",
+                "operationId": "8f1080b3606bf63403e8abfdd1af9110",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Key rotated (new key shown once)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/api-keys/{id}/revoke": {
+            "post": {
+                "tags": [
+                    "API Keys"
+                ],
+                "summary": "Revoke an API key",
+                "operationId": "638a4d068fe3a7042cfab16beb3302cb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Key revoked"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/api-keys/{id}": {
+            "delete": {
+                "tags": [
+                    "API Keys"
+                ],
+                "summary": "Delete an API key",
+                "operationId": "7ba9b3a40b3854ac0b5cda1c0f90ac8b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Key deleted"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/applications": {
+            "get": {
+                "tags": [
+                    "Applications"
+                ],
+                "summary": "List all active applications",
+                "operationId": "eefea4f3aa108bff020986971f4883f0",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "tr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "slug": {
+                                                        "type": "string"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "description": {
+                                                        "type": "string"
+                                                    },
+                                                    "icon": {
+                                                        "type": "string"
+                                                    },
+                                                    "color": {
+                                                        "type": "string"
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/applications/{slug}": {
+            "get": {
+                "tags": [
+                    "Applications"
+                ],
+                "summary": "Get a single application by slug",
+                "operationId": "9d8b372a0901cf8c9783be6812b3ae25",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login with email and password",
+                "operationId": "a7997e7c1e3bfed64d4e56de82415931",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@panel26.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password"
+                                    },
+                                    "device_name": {
+                                        "type": "string",
+                                        "example": "iPhone 15"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful"
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    },
+                    "429": {
+                        "description": "Too many attempts"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/2fa/verify": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify 2FA code after login",
+                "operationId": "9603911543c0af235000cf8c6a3dea2a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "temp_token",
+                                    "code"
+                                ],
+                                "properties": {
+                                    "temp_token": {
+                                        "type": "string"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "2FA verified"
+                    },
+                    "401": {
+                        "description": "Invalid code"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout and revoke current token",
+                "operationId": "f6b8957b4c0b25636613a9f0512a8ba9",
+                "responses": {
+                    "200": {
+                        "description": "Logged out"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get current authenticated user",
+                "operationId": "37d33f0281f67d31d05b4c45eea0143b",
+                "responses": {
+                    "200": {
+                        "description": "Current user data"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/tokens": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "List user tokens",
+                "operationId": "05bc8b5814457db2031ac48b61cb52dc",
+                "responses": {
+                    "200": {
+                        "description": "Token list"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/tokens/{id}": {
+            "delete": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Revoke a token",
+                "operationId": "042c7380c777a77a7d0d80febc942829",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Token revoked"
+                    },
+                    "404": {
+                        "description": "Token not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/account": {
+            "delete": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Delete current user account (GDPR compliant)",
+                "operationId": "667ec795ae736092cd302803313b5465",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "password"
+                                ],
+                                "properties": {
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Account deleted"
+                    },
+                    "401": {
+                        "description": "Invalid password"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/account/delete-request": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Request account deletion (sends confirmation email)",
+                "operationId": "962e9babb93167f465a390f914055c06",
+                "responses": {
+                    "200": {
+                        "description": "Confirmation email sent"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/cms/pages": {
+            "get": {
+                "tags": [
+                    "CMS"
+                ],
+                "summary": "List published pages",
+                "operationId": "cmsListPages",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "template",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "tr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated list of published pages",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/cms/pages/{slug}": {
+            "get": {
+                "tags": [
+                    "CMS"
+                ],
+                "summary": "Get a single published page by slug",
+                "operationId": "cmsShowPage",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "tr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Page detail"
+                    },
+                    "404": {
+                        "description": "Page not found"
+                    }
+                }
+            }
+        },
+        "/cms/posts": {
+            "get": {
+                "tags": [
+                    "CMS"
+                ],
+                "summary": "List published posts",
+                "operationId": "cmsListPosts",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "Category slug",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "tag",
+                        "in": "query",
+                        "description": "Tag slug",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "featured",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "tr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated list of published posts"
+                    }
+                }
+            }
+        },
+        "/cms/posts/{slug}": {
+            "get": {
+                "tags": [
+                    "CMS"
+                ],
+                "summary": "Get a single published post by slug (increments view count)",
+                "operationId": "cmsShowPost",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "tr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Post detail with author, categories, tags"
+                    },
+                    "404": {
+                        "description": "Post not found"
+                    }
+                }
+            }
+        },
+        "/cms/categories": {
+            "get": {
+                "tags": [
+                    "CMS"
+                ],
+                "summary": "List active categories with children",
+                "operationId": "cmsListCategories",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Category type",
+                        "schema": {
+                            "type": "string",
+                            "default": "post",
+                            "enum": [
+                                "post",
+                                "page",
+                                "faq"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "tr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tree of active categories"
+                    }
+                }
+            }
+        },
+        "/cms/tags": {
+            "get": {
+                "tags": [
+                    "CMS"
+                ],
+                "summary": "List all tags",
+                "operationId": "cmsListTags",
+                "parameters": [
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "tr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of all tags"
+                    }
+                }
+            }
+        },
+        "/cms/menus": {
+            "get": {
+                "tags": [
+                    "CMS"
+                ],
+                "summary": "List active menus with items",
+                "operationId": "cmsListMenus",
+                "parameters": [
+                    {
+                        "name": "location",
+                        "in": "query",
+                        "description": "Filter by location (header, footer, sidebar)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "tr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of active menus with nested items"
+                    }
+                }
+            }
+        },
+        "/faqs": {
+            "get": {
+                "tags": [
+                    "FAQ"
+                ],
+                "summary": "List all active FAQ categories with their active FAQs",
+                "operationId": "faqList",
+                "parameters": [
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "tr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "FAQ categories with nested FAQ items",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "object"
+                                                    },
+                                                    "slug": {
+                                                        "type": "string"
+                                                    },
+                                                    "faqs": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "question": {
+                                                                    "type": "object"
+                                                                },
+                                                                "answer": {
+                                                                    "type": "object"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/faqs/{category}": {
+            "get": {
+                "tags": [
+                    "FAQ"
+                ],
+                "summary": "Get a single FAQ category with its active FAQs",
+                "operationId": "faqShowCategory",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "FAQ category ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "tr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "FAQ category with FAQ items"
+                    },
+                    "404": {
+                        "description": "Category not found"
+                    }
+                }
+            }
+        },
+        "/forms/{slug}": {
+            "get": {
+                "tags": [
+                    "Forms"
+                ],
+                "summary": "Get an active form definition by slug",
+                "description": "Returns the form structure including field definitions for rendering on the client side.",
+                "operationId": "formShow",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "tr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Form definition",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "slug": {
+                                                    "type": "string"
+                                                },
+                                                "description": {
+                                                    "type": "string"
+                                                },
+                                                "fields": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "text",
+                                                                    "email",
+                                                                    "textarea",
+                                                                    "select",
+                                                                    "checkbox",
+                                                                    "radio",
+                                                                    "number",
+                                                                    "tel",
+                                                                    "date",
+                                                                    "file"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "object"
+                                                            },
+                                                            "required": {
+                                                                "type": "boolean"
+                                                            },
+                                                            "options": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                },
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "requires_captcha": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Form not found or inactive"
+                    }
+                }
+            }
+        },
+        "/forms/{slug}/submit": {
+            "post": {
+                "tags": [
+                    "Forms"
+                ],
+                "summary": "Submit a form",
+                "description": "Validates submitted data against the form field definitions and stores the submission. Validation rules are dynamically derived from the field types and required flags.",
+                "operationId": "formSubmit",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "data": {
+                                        "description": "Key-value pairs where keys are field names",
+                                        "type": "object",
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Form submitted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Form not found or inactive"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/roles": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "List roles",
+                "operationId": "30e8b9c4728f8bbb1a01ed1eaf5c6809",
+                "responses": {
+                    "200": {
+                        "description": "Role list"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/languages": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "List active languages",
+                "operationId": "d46a5aa8f88b1a2c59be939b7dca982c",
+                "responses": {
+                    "200": {
+                        "description": "Language list"
+                    }
+                }
+            }
+        },
+        "/api/v1/settings/public": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "Get public settings",
+                "operationId": "678dc5b323d0bc464f82ab2f879a3e6d",
+                "responses": {
+                    "200": {
+                        "description": "Public settings"
+                    }
+                }
+            }
+        },
+        "/api/v1/activity-logs": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "List activity logs",
+                "operationId": "c0262c1cbe6a251a67f5d34a60b49246",
+                "parameters": [
+                    {
+                        "name": "module",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Log list"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/licenses": {
+            "get": {
+                "tags": [
+                    "Licenses"
+                ],
+                "summary": "List licenses for the authenticated user's schools",
+                "operationId": "33f6eb0816d31b679cda5fddaf5559e4",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKey": []
+                    }
+                ]
+            }
+        },
+        "/media": {
+            "get": {
+                "tags": [
+                    "Media"
+                ],
+                "summary": "List media files",
+                "operationId": "mediaList",
+                "parameters": [
+                    {
+                        "name": "folder",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "/"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filter: 'images' for image-only",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "images"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 24
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated list of media files"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Media"
+                ],
+                "summary": "Upload a media file",
+                "operationId": "mediaStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "file": {
+                                        "description": "File to upload (max 10MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "folder": {
+                                        "description": "Target folder path",
+                                        "type": "string"
+                                    },
+                                    "alt_text": {
+                                        "description": "Alt text translations {tr, en}",
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "File uploaded successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/media/{media}": {
+            "delete": {
+                "tags": [
+                    "Media"
+                ],
+                "summary": "Delete a media file",
+                "operationId": "mediaDestroy",
+                "parameters": [
+                    {
+                        "name": "media",
+                        "in": "path",
+                        "description": "Media ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Media not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/notifications": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "List user notifications (paginated)",
+                "operationId": "notificationList",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated notifications"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/notifications/unread-count": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Get unread notification count",
+                "operationId": "notificationUnreadCount",
+                "responses": {
+                    "200": {
+                        "description": "Unread count",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/notifications/{id}/read": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark a notification as read",
+                "operationId": "notificationMarkRead",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notification marked as read"
+                    },
+                    "404": {
+                        "description": "Notification not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/notifications/read-all": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark all notifications as read",
+                "operationId": "notificationMarkAllRead",
+                "responses": {
+                    "200": {
+                        "description": "All notifications marked as read"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/notifications/{id}": {
+            "delete": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Delete a notification",
+                "operationId": "notificationDestroy",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notification deleted"
+                    },
+                    "404": {
+                        "description": "Notification not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/auth/device-token": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Register or update FCM device token",
+                "operationId": "updateDeviceToken",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "device_token",
+                                    "device_platform"
+                                ],
+                                "properties": {
+                                    "device_token": {
+                                        "type": "string"
+                                    },
+                                    "device_platform": {
+                                        "type": "string",
+                                        "enum": [
+                                            "ios",
+                                            "android",
+                                            "web"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token updated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/register": {
+            "post": {
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Submit a school registration request",
+                "operationId": "7361cfc598f3e9af3199d2929eadb9e1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "school_name",
+                                    "contact_name",
+                                    "contact_surname",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "school_name": {
+                                        "type": "string",
+                                        "maxLength": 200
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    },
+                                    "contact_name": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    },
+                                    "contact_surname": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "maxLength": 30
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "maxLength": 2000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Registration request created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "id": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/schools": {
+            "get": {
+                "tags": [
+                    "Schools"
+                ],
+                "summary": "List active schools",
+                "operationId": "8efa272c10a306bbd9d278e779559d63",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKey": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/schools/{id}": {
+            "get": {
+                "tags": [
+                    "Schools"
+                ],
+                "summary": "Get a school with its classes",
+                "operationId": "cdd32155d8d69378228cf7e0cd4065d1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKey": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "List users with pagination",
+                "operationId": "12e989554c281d650dff75443acabf54",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "inactive",
+                                "banned"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "role",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "tr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User list"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Create a new user",
+                "operationId": "64da9b5a20fa4f20e947ed61b2bbb6da",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "surname": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "phone": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string"
+                                    },
+                                    "locale": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string"
+                                    },
+                                    "roles": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User created"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/{id}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get user details",
+                "operationId": "a9d321d5dc6bc2613c6cf5ba92b76c89",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User details"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update a user",
+                "operationId": "5bcda8371b3cb9f863a47620e636be9b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Delete a user",
+                "operationId": "0446b3779430bbd9ca0f106d9fd0a2ed",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Sanctum Bearer Token",
+                "bearerFormat": "token",
+                "scheme": "bearer"
+            },
+            "apiKeyAuth": {
+                "type": "apiKey",
+                "description": "API Key authentication",
+                "name": "X-API-KEY",
+                "in": "header"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "API Keys",
+            "description": "API Key management"
+        },
+        {
+            "name": "Applications",
+            "description": "DopiFuture Application management"
+        },
+        {
+            "name": "Auth",
+            "description": "Authentication endpoints"
+        },
+        {
+            "name": "CMS",
+            "description": "Public CMS endpoints (pages, posts, categories, tags, menus)"
+        },
+        {
+            "name": "FAQ",
+            "description": "Public FAQ endpoints"
+        },
+        {
+            "name": "Forms",
+            "description": "Public form display and submission"
+        },
+        {
+            "name": "General",
+            "description": "General endpoints (roles, languages, settings, activity)"
+        },
+        {
+            "name": "Licenses",
+            "description": "DopiFuture License management"
+        },
+        {
+            "name": "Media",
+            "description": "Authenticated media management endpoints"
+        },
+        {
+            "name": "Notifications",
+            "description": "User notification management"
+        },
+        {
+            "name": "Registration",
+            "description": "Public school registration"
+        },
+        {
+            "name": "Schools",
+            "description": "DopiFuture School management"
+        },
+        {
+            "name": "Users",
+            "description": "User management endpoints"
+        }
+    ]
+}
