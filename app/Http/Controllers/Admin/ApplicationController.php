@@ -67,11 +67,16 @@ class ApplicationController extends Controller
             ->limit(200)
             ->get(['id', 'name', 'surname', 'email']);
 
+        // Connector hazır mı?
+        $connector = $application->resolveConnector();
+        $connectorReady = $connector && $connector::isReady();
+
         return view('admin.applications.show', compact(
             'application',
             'users',
             'syncStats',
-            'availableUsers'
+            'availableUsers',
+            'connectorReady'
         ));
     }
 
@@ -210,6 +215,10 @@ class ApplicationController extends Controller
             return back()->with('success', "{$user->full_name} başarıyla senkronlandı.");
         }
 
+        if (($result['error'] ?? '') === 'not_ready') {
+            return back()->with('info', "Kullanıcı atandı. Bu uygulamanın entegrasyonu henüz tamamlanmadığı için senkronizasyon yapılamadı.");
+        }
+
         return back()->with('warning', "Kullanıcı atandı ama senkron başarısız: {$result['error']}");
     }
 
@@ -242,6 +251,10 @@ class ApplicationController extends Controller
 
         if ($result['success']) {
             return back()->with('success', "{$user->full_name} başarıyla senkronlandı.");
+        }
+
+        if (($result['error'] ?? '') === 'not_ready') {
+            return back()->with('info', 'Bu uygulamanın API entegrasyonu henüz tamamlanmadı. Senkronizasyon şu an yapılamıyor.');
         }
 
         return back()->with('error', "Senkron başarısız: {$result['error']}");

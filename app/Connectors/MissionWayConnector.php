@@ -155,4 +155,9 @@ class MissionWayConnector implements AppConnectorInterface
         $slug = preg_replace('/[^a-z0-9]/', '', $slug);
         return $slug ?: 'user';
     }
+
+    public static function isReady(): bool
+    {
+        return true;
+    }
 }

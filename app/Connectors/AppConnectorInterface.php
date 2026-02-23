@@ -35,4 +35,10 @@ interface AppConnectorInterface
      * Harici sistemden kullanıcı verisini getir (raporlama için).
      */
     public function getUser(User $user): ?array;
+
+    /**
+     * Connector entegrasyonu tamamlanmış mı?
+     * false ise henüz API endpoint'leri hazır değil.
+     */
+    public static function isReady(): bool;
 }

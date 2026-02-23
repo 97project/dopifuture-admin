@@ -15,6 +15,12 @@
             </div>
             <div class="divide-y divide-gray-50 dark:divide-[#1A3A5C]/50">
                 @foreach($userApps as $app)
+                    @php
+                        $appName = is_array($app->name) ? ($app->name[app()->getLocale()] ?? $app->name['tr'] ?? reset($app->name)) : $app->name;
+                        $syncStatus = $app->pivot->sync_status ?? 'pending';
+                        $connector = $app->resolveConnector();
+                        $isReady = $connector && $connector::isReady();
+                    @endphp
                     <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50/50 dark:hover:bg-[#0A1628]/30 transition group">
                         <div class="flex items-center gap-4">
                             <div class="w-10 h-10 rounded-xl flex items-center justify-center"
@@ -29,14 +35,21 @@
                                 @endif
                             </div>
                             <div>
-                                <h4 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $app->name }}</h4>
+                                <h4 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $appName }}</h4>
                                 <p class="text-[10px] text-gray-400 mt-0.5">{{ $app->slug }}</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
                             {{-- Sync Status Badge --}}
-                            @php $syncStatus = $app->pivot->sync_status ?? 'pending'; @endphp
-                            @if($syncStatus === 'synced')
+                            @if(!$isReady)
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 dark:bg-gray-800/40 text-gray-500"
+                                    title="API entegrasyonu henüz tamamlanmadı">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01" />
+                                    </svg>
+                                    Entegrasyon Bekleniyor
+                                </span>
+                            @elseif($syncStatus === 'synced')
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Senkron
                                 </span>
@@ -67,16 +80,18 @@
 
                             {{-- Aksiyon butonları --}}
                             <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                                {{-- Tekrar Senkronla --}}
-                                <form action="{{ route('admin.applications.sync-user', [$app, $user]) }}" method="POST" class="inline">
-                                    @csrf
-                                    <button type="submit" title="Tekrar Senkronla"
-                                        class="p-1.5 rounded-lg text-[#0B6AB2] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
-                                    </button>
-                                </form>
+                                {{-- Tekrar Senkronla (sadece hazır connector'larda) --}}
+                                @if($isReady)
+                                    <form action="{{ route('admin.applications.sync-user', [$app, $user]) }}" method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit" title="Tekrar Senkronla"
+                                            class="p-1.5 rounded-lg text-[#0B6AB2] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @endif
                                 {{-- App Detay --}}
                                 <a href="{{ route('admin.applications.show', $app) }}" title="Uygulama Detay"
                                     class="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">

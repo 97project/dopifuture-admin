@@ -26,6 +26,11 @@ class ApplicationSyncService
             return ['success' => false, 'error' => 'Connector bulunamadı: ' . $app->slug];
         }
 
+        // Connector henüz hazır değilse senkron deneme
+        if (!$connector::isReady()) {
+            return ['success' => false, 'error' => 'not_ready'];
+        }
+
         $result = $connector->syncUser($user);
 
         // Pivot güncelle
@@ -188,6 +193,11 @@ class ApplicationSyncService
      */
     private function updatePivotSync(User $user, Application $app, array $result): void
     {
+        // not_ready durumunda pivot güncelleme — pending kalsın
+        if (($result['error'] ?? null) === 'not_ready') {
+            return;
+        }
+
         $pivotData = [
             'sync_status' => $result['success'] ? 'synced' : 'failed',
             'synced_at' => $result['success'] ? now() : null,

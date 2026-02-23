@@ -115,4 +115,9 @@ class WayStartupConnector implements AppConnectorInterface
         $body = $response->json('message', '');
         return str_contains(strtolower($body), 'already exists');
     }
+
+    public static function isReady(): bool
+    {
+        return true;
+    }
 }
