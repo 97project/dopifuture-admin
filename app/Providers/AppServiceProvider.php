@@ -20,6 +20,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // UserObserver — kullanıcı update/delete → tüm app'lere yansıt
+        \App\Models\User::observe(\App\Observers\UserObserver::class);
+
         // Register policies for vendor/non-standard models
         Gate::policy(\Spatie\Permission\Models\Role::class, \App\Policies\RolePolicy::class);
 

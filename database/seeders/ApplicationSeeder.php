@@ -19,6 +19,7 @@ class ApplicationSeeder extends Seeder
                 ],
                 'icon' => 'rocket',
                 'color' => '#3B82F6',
+                'connector_class' => 'App\\Connectors\\MissionWayConnector',
                 'sort_order' => 1,
             ],
             [
@@ -30,6 +31,7 @@ class ApplicationSeeder extends Seeder
                 ],
                 'icon' => 'briefcase',
                 'color' => '#10B981',
+                'connector_class' => 'App\\Connectors\\WayStartupConnector',
                 'sort_order' => 2,
             ],
             [
@@ -41,6 +43,7 @@ class ApplicationSeeder extends Seeder
                 ],
                 'icon' => 'star',
                 'color' => '#8B5CF6',
+                'connector_class' => 'App\\Connectors\\RoleGalaxyConnector',
                 'sort_order' => 3,
             ],
             [
@@ -52,6 +55,7 @@ class ApplicationSeeder extends Seeder
                 ],
                 'icon' => 'cpu',
                 'color' => '#F59E0B',
+                'connector_class' => 'App\\Connectors\\WayAiCoachConnector',
                 'sort_order' => 4,
             ],
             [
@@ -63,6 +67,7 @@ class ApplicationSeeder extends Seeder
                 ],
                 'icon' => 'book-open',
                 'color' => '#EF4444',
+                'connector_class' => 'App\\Connectors\\StudySpaceConnector',
                 'sort_order' => 5,
             ],
         ];

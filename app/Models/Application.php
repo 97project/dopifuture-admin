@@ -71,7 +71,21 @@ class Application extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'application_user')
-            ->withPivot('granted_by', 'granted_at')
+            ->withPivot('granted_by', 'granted_at', 'synced_at', 'sync_status', 'sync_error')
             ->withTimestamps();
+    }
+
+    /* ─── Connector ──────────────────────────────────── */
+
+    /**
+     * connector_class alanından connector instance oluşturur.
+     */
+    public function resolveConnector(): ?\App\Connectors\AppConnectorInterface
+    {
+        if (!$this->connector_class || !class_exists($this->connector_class)) {
+            return null;
+        }
+
+        return app($this->connector_class);
     }
 }

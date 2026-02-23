@@ -139,4 +139,93 @@ class ApplicationController extends Controller
         return redirect()->route('admin.applications.index')
             ->with('success', __('admin.application_deleted'));
     }
+
+    /* ─── Connector Sync Endpoints ───────────────────── */
+
+    /**
+     * Kullanıcıyı uygulamaya ata ve senkronla.
+     */
+    public function assignUser(Request $request, Application $application)
+    {
+        $this->authorize('update', $application);
+
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $user = \App\Models\User::findOrFail($request->input('user_id'));
+
+        // Pivot'a ekle (zaten yoksa)
+        if (!$application->users()->where('user_id', $user->id)->exists()) {
+            $application->users()->attach($user->id, [
+                'granted_by' => auth()->id(),
+                'granted_at' => now(),
+                'sync_status' => 'pending',
+            ]);
+        }
+
+        // Senkronla
+        $syncService = app(\App\Services\ApplicationSyncService::class);
+        $result = $syncService->syncUserToApp($user, $application);
+
+        ActivityLog::log('assigned_user', 'applications', $application, [], [
+            'user_id' => $user->id,
+            'sync_result' => $result['success'],
+        ]);
+
+        if ($result['success']) {
+            return back()->with('success', "{$user->full_name} başarıyla senkronlandı.");
+        }
+
+        return back()->with('warning', "Kullanıcı atandı ama senkron başarısız: {$result['error']}");
+    }
+
+    /**
+     * Kullanıcıyı uygulamadan çıkar ve uzak sistemden sil.
+     */
+    public function removeUser(Request $request, Application $application, \App\Models\User $user)
+    {
+        $this->authorize('update', $application);
+
+        $syncService = app(\App\Services\ApplicationSyncService::class);
+        $syncService->removeUserFromApp($user, $application);
+
+        ActivityLog::log('removed_user', 'applications', $application, [], [
+            'user_id' => $user->id,
+        ]);
+
+        return back()->with('success', "{$user->full_name} uygulamadan çıkarıldı.");
+    }
+
+    /**
+     * Kullanıcıyı tekrar senkronla (manuel).
+     */
+    public function syncUser(Request $request, Application $application, \App\Models\User $user)
+    {
+        $this->authorize('update', $application);
+
+        $syncService = app(\App\Services\ApplicationSyncService::class);
+        $result = $syncService->syncUserToApp($user, $application);
+
+        if ($result['success']) {
+            return back()->with('success', "{$user->full_name} başarıyla senkronlandı.");
+        }
+
+        return back()->with('error', "Senkron başarısız: {$result['error']}");
+    }
+
+    /**
+     * Uygulamanın tüm kullanıcılarını toplu senkronla.
+     */
+    public function syncAll(Request $request, Application $application)
+    {
+        $this->authorize('update', $application);
+
+        $syncService = app(\App\Services\ApplicationSyncService::class);
+        $results = $syncService->syncAllUsersForApp($application);
+
+        ActivityLog::log('sync_all', 'applications', $application, [], $results);
+
+        return back()->with('success', "Toplu senkron: {$results['synced']}/{$results['total']} başarılı, {$results['failed']} başarısız.");
+    }
 }
