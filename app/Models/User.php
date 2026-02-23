@@ -92,7 +92,9 @@ class User extends Authenticatable
 
     public function applications()
     {
-        return $this->belongsToMany(Application::class, 'application_user')->withPivot('granted_by', 'granted_at')->withTimestamps();
+        return $this->belongsToMany(Application::class, 'application_user')
+            ->withPivot('granted_by', 'granted_at', 'synced_at', 'sync_status', 'sync_error')
+            ->withTimestamps();
     }
 
     public function getFullNameAttribute(): string
