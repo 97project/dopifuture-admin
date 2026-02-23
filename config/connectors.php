@@ -26,35 +26,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Role Galaxy
+    | Vega Main App  (Role Galaxy + Way AI Coach + Study Space)
     |--------------------------------------------------------------------------
     */
-    'role_galaxy' => [
-        'base_url' => env('ROLE_GALAXY_URL'),
-        'api_key' => env('ROLE_GALAXY_API_KEY'),
-        'timeout' => env('ROLE_GALAXY_TIMEOUT', 10),
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Way AI Coach
-    |--------------------------------------------------------------------------
-    */
-    'way_ai_coach' => [
-        'base_url' => env('WAY_AI_COACH_URL'),
-        'api_key' => env('WAY_AI_COACH_API_KEY'),
-        'timeout' => env('WAY_AI_COACH_TIMEOUT', 10),
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Study Space
-    |--------------------------------------------------------------------------
-    */
-    'study_space' => [
-        'base_url' => env('STUDY_SPACE_URL'),
-        'api_key' => env('STUDY_SPACE_API_KEY'),
-        'timeout' => env('STUDY_SPACE_TIMEOUT', 10),
+    'vega' => [
+        'base_url' => env('VEGA_API_URL', 'https://vega.dopi.app'),
+        'api_key' => env('VEGA_API_KEY'),
+        'timeout' => env('VEGA_TIMEOUT', 15),
     ],
 
 ];
