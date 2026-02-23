@@ -73,7 +73,7 @@ class ApplicationSeeder extends Seeder
         ];
 
         foreach ($apps as $data) {
-            Application::firstOrCreate(
+            Application::updateOrCreate(
                 ['slug' => $data['slug']],
                 $data
             );

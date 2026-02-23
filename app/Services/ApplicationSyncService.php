@@ -142,6 +142,39 @@ class ApplicationSyncService
     }
 
     /**
+     * Yeni kullanıcıyı tüm aktif uygulamalara ata ve senkronla.
+     */
+    public function assignUserToAllActiveApps(User $user): array
+    {
+        $apps = Application::where('is_active', true)
+            ->whereNotNull('connector_class')
+            ->get();
+
+        $results = [];
+
+        foreach ($apps as $app) {
+            // Pivot'a ekle (zaten yoksa)
+            if (!$app->users()->where('user_id', $user->id)->exists()) {
+                $app->users()->attach($user->id, [
+                    'granted_by' => auth()->id(),
+                    'granted_at' => now(),
+                    'sync_status' => 'pending',
+                ]);
+            }
+
+            // Senkronla
+            $results[$app->slug] = $this->syncUserToApp($user, $app);
+        }
+
+        Log::channel('daily')->info('[AppSync] Kullanıcı tüm app\'lere atandı', [
+            'userId' => $user->id,
+            'appCount' => count($results),
+        ]);
+
+        return $results;
+    }
+
+    /**
      * Harici sistemden kullanıcı verisini getir.
      */
     public function getRemoteUser(User $user, Application $app): ?array

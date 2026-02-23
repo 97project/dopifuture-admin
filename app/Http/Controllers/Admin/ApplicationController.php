@@ -34,12 +34,45 @@ class ApplicationController extends Controller
         return view('admin.applications.index', compact('applications', 'stats'));
     }
 
-    public function show(Application $application)
+    public function show(Request $request, Application $application)
     {
         $this->authorize('view', $application);
-        $application->loadCount('users');
-        $application->load('users');
-        return view('admin.applications.show', compact('application'));
+
+        // Users with sync pivot data
+        $usersQuery = $application->users();
+
+        // Search filter
+        if ($search = $request->input('search')) {
+            $usersQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('surname', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $usersQuery->orderByPivot('created_at', 'desc')->paginate(25);
+
+        // Sync stats
+        $syncStats = [
+            'total' => $application->users()->count(),
+            'synced' => $application->users()->wherePivot('sync_status', 'synced')->count(),
+            'failed' => $application->users()->wherePivot('sync_status', 'failed')->count(),
+            'pending' => $application->users()->wherePivot('sync_status', 'pending')->count(),
+        ];
+
+        // All users for assignment dropdown (exclude already assigned)
+        $assignedIds = $application->users()->pluck('users.id')->toArray();
+        $availableUsers = \App\Models\User::whereNotIn('id', $assignedIds)
+            ->orderBy('name')
+            ->limit(200)
+            ->get(['id', 'name', 'surname', 'email']);
+
+        return view('admin.applications.show', compact(
+            'application',
+            'users',
+            'syncStats',
+            'availableUsers'
+        ));
     }
 
     public function create()

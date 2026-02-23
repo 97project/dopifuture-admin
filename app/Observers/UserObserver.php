@@ -18,6 +18,21 @@ class UserObserver
     }
 
     /**
+     * Yeni kullanıcı oluşturulduğunda tüm aktif app'lere otomatik ata + senkronla.
+     */
+    public function created(User $user): void
+    {
+        try {
+            $this->syncService->assignUserToAllActiveApps($user);
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[UserObserver] Otomatik atama hatası', [
+                'userId' => $user->id,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * Kullanıcı güncellendiğinde tüm app'lere yansıt.
      */
     public function updated(User $user): void
