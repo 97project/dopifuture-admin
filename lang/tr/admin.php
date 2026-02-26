@@ -454,7 +454,8 @@ return [
     'total_size' => 'Toplam Boyut',
     'total_students' => 'Toplam Öğrenci',
     'total_teachers' => 'Toplam Öğretmen',
-    'overview' => 'Genel Bakış',
+    'dashboard' => 'Genel Bakış',
+    'reports' => 'Raporlar',
     'more' => 'Daha Fazla',
 
     // Profile & Auth
@@ -582,4 +583,6 @@ return [
     'view_all' => 'Tümünü Gör',
     'notification_mode' => 'Bildirim Modu',
     'contact_sent' => 'Mesajınız başarıyla gönderildi. En kısa sürede size dönüş yapacağız.',
+    'portal_access_denied' => 'Admin kullanıcıları Portal\'a erişemez. Lütfen Admin Paneli\'ni kullanın.',
+    'seat_limit_reached' => 'Bu okul için öğrenci kontenjanı dolmuştur. Daha fazla kontenjan eklemek için yöneticinize başvurun.',
 ];

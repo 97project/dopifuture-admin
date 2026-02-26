@@ -220,5 +220,72 @@
                 </tbody>
             </table>
         </div>
+    {{-- Teacher → My Classes --}}
+    @if(isset($data['myClasses']) && auth()->user()->hasRole('teacher'))
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; margin-bottom:2rem;">
+            @foreach($data['myClasses'] as $cls)
+            <div class="stat-card" style="position:relative;">
+                <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.75rem;">
+                    <div>
+                        <h3 style="color:white; font-weight:600; font-size:1rem;">{{ $cls->name }}</h3>
+                        <span style="font-size:0.75rem; color:var(--gray-500);">{{ $cls->school->name ?? '' }}</span>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:1.75rem; font-weight:800; color:var(--brand-400);">{{ $cls->students_count }}</div>
+                        <div style="font-size:0.7rem; color:var(--gray-500);">{{ $isTr ? 'Öğrenci' : 'Students' }}</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:0.5rem;">
+                    <a href="{{ route('portal.reports.class', $cls) }}" class="btn btn-primary btn-sm" style="flex:1; text-align:center;">📊 {{ $isTr ? 'Sınıf Raporu' : 'Class Report' }}</a>
+                    <a href="{{ route('portal.classes.show', $cls) }}" class="btn btn-ghost btn-sm">{{ $isTr ? 'Detay' : 'Detail' }}</a>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        @if($data['myClasses']->count() === 0)
+        <div class="form-card" style="text-align:center; padding:2rem;">
+            <div style="font-size:2rem; margin-bottom:0.5rem;">📚</div>
+            <p style="color:var(--gray-500);">{{ $isTr ? 'Henüz sınıf atanmamış.' : 'No classes assigned yet.' }}</p>
+        </div>
+        @endif
     @endif
+
+    {{-- Student → My Applications --}}
+    @if(isset($data['myApplications']) && auth()->user()->hasRole('student'))
+        <h2 style="color:white; font-size:1.1rem; font-weight:600; margin-bottom:1rem;">🎓 {{ $isTr ? 'Uygulamalarım' : 'My Applications' }}</h2>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1rem; margin-bottom:2rem;">
+            @foreach($data['myApplications'] as $app)
+            <div class="stat-card">
+                <h3 style="color:white; font-weight:600; margin-bottom:0.25rem;">{{ $app->getTranslation('name') }}</h3>
+                <p style="font-size:0.75rem; color:var(--gray-500); margin-bottom:0.75rem;">{{ $app->getTranslation('description') ? \Str::limit($app->getTranslation('description'), 60) : '' }}</p>
+                <a href="{{ route('portal.reports') }}" class="btn btn-primary btn-sm" style="width:100%; text-align:center;">📊 {{ $isTr ? 'Raporlarım' : 'My Reports' }}</a>
+            </div>
+            @endforeach
+        </div>
+
+        @if(isset($data['myClasses']) && $data['myClasses']->count())
+        <h2 style="color:white; font-size:1.1rem; font-weight:600; margin-bottom:1rem;">📚 {{ $isTr ? 'Sınıflarım' : 'My Classes' }}</h2>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1rem; margin-bottom:2rem;">
+            @foreach($data['myClasses'] as $cls)
+            <div class="stat-card">
+                <h3 style="color:white; font-weight:600;">{{ $cls->name }}</h3>
+                <span style="font-size:0.75rem; color:var(--gray-500);">{{ $cls->school->name ?? '' }}</span>
+            </div>
+            @endforeach
+        </div>
+        @endif
+
+        @if($data['myApplications']->count() === 0)
+        <div class="form-card" style="text-align:center; padding:2rem;">
+            <div style="font-size:2rem; margin-bottom:0.5rem;">📱</div>
+            <p style="color:var(--gray-500);">{{ $isTr ? 'Henüz uygulama atanmamış.' : 'No applications assigned yet.' }}</p>
+        </div>
+        @endif
+    @endif
+
+    {{-- Quick Action: Reports Link --}}
+    <div style="margin-top:1.5rem; text-align:center;">
+        <a href="{{ route('portal.reports') }}" class="btn btn-primary">📊 {{ $isTr ? 'Detaylı Raporlara Git' : 'View Detailed Reports' }}</a>
+    </div>
 @endsection

@@ -200,6 +200,12 @@ Route::prefix('admin')->name('admin.')->middleware(['web', \App\Http\Middleware\
         Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
         Route::put('permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
         Route::post('permissions/sync', [PermissionController::class, 'sync'])->name('permissions.sync');
+
+        // ── Reports ──────────────────────────────────────────
+        Route::get('reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/{app:slug}', [\App\Http\Controllers\Admin\ReportController::class, 'appReport'])->name('reports.app');
+        Route::get('reports/school/{school}', [\App\Http\Controllers\Admin\ReportController::class, 'schoolReport'])->name('reports.school');
+        Route::get('reports/student/{user}', [\App\Http\Controllers\Admin\ReportController::class, 'studentReport'])->name('reports.student');
     });
 });
 
@@ -236,12 +242,16 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
 });
 
 // ── Authenticated: Portal Dashboard ──────────────────────────────────────
-Route::middleware(['auth', \App\Http\Middleware\SetLocale::class])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Middleware\PortalRole::class])->group(function () {
     Route::post('logout', [\App\Http\Controllers\PortalAuthController::class, 'logout'])->name('portal.logout');
     Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('portal.dashboard');
     Route::get('profile', [\App\Http\Controllers\DashboardController::class, 'profile'])->name('portal.profile');
     Route::put('profile', [\App\Http\Controllers\DashboardController::class, 'profileUpdate'])->name('portal.profile.update');
-    Route::get('reports', [\App\Http\Controllers\DashboardController::class, 'reports'])->name('portal.reports');
+    Route::get('reports', [\App\Http\Controllers\PortalReportController::class, 'index'])->name('portal.reports');
+    Route::get('reports/{app:slug}', [\App\Http\Controllers\PortalReportController::class, 'appReport'])->name('portal.reports.app');
+    Route::get('reports/student/{user}', [\App\Http\Controllers\PortalReportController::class, 'studentReport'])->name('portal.reports.student');
+    Route::get('reports/class/{class}', [\App\Http\Controllers\PortalReportController::class, 'classReport'])->name('portal.reports.class');
+    Route::get('reports/class/{class}/{app:slug}', [\App\Http\Controllers\PortalReportController::class, 'classReport'])->name('portal.reports.class.app');
 
     // CRUD: Schools (with show/detail page)
     Route::resource('schools', \App\Http\Controllers\PortalSchoolController::class)

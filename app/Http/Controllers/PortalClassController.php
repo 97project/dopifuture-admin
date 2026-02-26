@@ -11,6 +11,12 @@ class PortalClassController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
+
+        // Student cannot access classes management
+        if ($user->hasRole('student')) {
+            abort(403);
+        }
+
         $query = SchoolClass::with('school')->withCount('students');
 
         // Scope by role
@@ -38,12 +44,15 @@ class PortalClassController extends Controller
 
     public function create()
     {
+        $this->guardClassManagement();
         $schools = $this->getAvailableSchools();
         return view('portal.classes.form', ['class' => new SchoolClass, 'schools' => $schools]);
     }
 
     public function store(Request $request)
     {
+        $this->guardClassManagement();
+
         $data = $request->validate([
             'school_id' => 'required|exists:schools,id',
             'name' => 'required|string|max:50',
@@ -61,6 +70,7 @@ class PortalClassController extends Controller
 
     public function edit(SchoolClass $class)
     {
+        $this->guardClassManagement();
         $this->authorizeSchool($class->school_id);
         $schools = $this->getAvailableSchools();
         return view('portal.classes.form', compact('class', 'schools'));
@@ -68,6 +78,7 @@ class PortalClassController extends Controller
 
     public function update(Request $request, SchoolClass $class)
     {
+        $this->guardClassManagement();
         $this->authorizeSchool($class->school_id);
 
         $data = $request->validate([
@@ -86,6 +97,7 @@ class PortalClassController extends Controller
 
     public function destroy(SchoolClass $class)
     {
+        $this->guardClassManagement();
         $this->authorizeSchool($class->school_id);
         $class->delete();
         return redirect()->route('portal.classes.index')
@@ -94,20 +106,28 @@ class PortalClassController extends Controller
 
     private function getAvailableSchools()
     {
-        $user = auth()->user();
-        if ($user->hasAnyRole(['super-admin', 'admin', 'license-manager'])) {
-            return School::active()->get();
-        }
-        return $user->schools()->get();
+        return auth()->user()->schools()->get();
     }
 
     private function authorizeSchool(int $schoolId): void
     {
         $user = auth()->user();
-        if ($user->hasAnyRole(['super-admin', 'admin', 'license-manager']))
-            return;
+        // Teacher can view classes they're assigned to
+        if ($user->hasRole('teacher')) {
+            return; // Already scoped in index(), show checks separately
+        }
         if ($user->schools()->where('schools.id', $schoolId)->exists())
             return;
         abort(403);
+    }
+
+    /**
+     * Only school-admin and school-principal can create/edit/delete classes.
+     */
+    private function guardClassManagement(): void
+    {
+        if (!auth()->user()->hasAnyRole(['school-admin', 'school-principal'])) {
+            abort(403);
+        }
     }
 }

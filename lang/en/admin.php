@@ -2,6 +2,7 @@
 
 return [
     'dashboard' => 'Dashboard',
+    'reports' => 'Reports',
     'welcome' => 'Welcome',
     'total_users' => 'Total Users',
     'active_users' => 'Active Users',
@@ -560,4 +561,6 @@ return [
     'view_all' => 'View All',
     'notification_mode' => 'Notification Mode',
     'contact_sent' => 'Your message has been sent successfully. We will get back to you soon.',
+    'portal_access_denied' => 'Admin users cannot access the Portal. Please use the Admin Panel.',
+    'seat_limit_reached' => 'Student seat limit has been reached for this school. Please contact your administrator to add more seats.',
 ];

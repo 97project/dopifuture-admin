@@ -12,4 +12,6 @@ return [
     '2fa_token_expired' => 'İki faktörlü doğrulama süresi doldu.',
     'invalid_token' => 'Geçersiz token.',
     'password_incorrect' => 'Şifre yanlış.',
+    'no_portal_access' => 'Bu hesabın portal erişimi yoktur. Lütfen Admin Paneli\'ni kullanın.',
+    'insufficient_permissions' => 'Bu işlemi gerçekleştirmek için yeterli yetkiniz yok.',
 ];

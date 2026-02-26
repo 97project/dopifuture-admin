@@ -9,6 +9,28 @@ use Illuminate\Http\Request;
 
 class PortalLicenseController extends Controller
 {
+    public function __construct()
+    {
+        // Teacher and student cannot access license management at all
+        $this->middleware(function ($request, $next) {
+            if (auth()->user()->hasAnyRole(['teacher', 'student'])) {
+                abort(403);
+            }
+            return $next($request);
+        });
+    }
+
+    /**
+     * Guard: only school-admin can mutate licenses.
+     * school-principal → read-only (index, show).
+     */
+    private function guardLicenseAdmin(): void
+    {
+        if (auth()->user()->hasRole('school-principal')) {
+            abort(403, __('auth.insufficient_permissions'));
+        }
+    }
+
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -36,6 +58,7 @@ class PortalLicenseController extends Controller
 
     public function addPurchase(Request $request, License $license)
     {
+        $this->guardLicenseAdmin();
         $this->authorizeSchool($license->school_id);
 
         $user = auth()->user();
@@ -58,12 +81,14 @@ class PortalLicenseController extends Controller
 
     public function create()
     {
+        $this->guardLicenseAdmin();
         $schools = $this->getAvailableSchools();
         return view('portal.licenses.form', ['license' => new License, 'schools' => $schools]);
     }
 
     public function store(Request $request)
     {
+        $this->guardLicenseAdmin();
         $data = $request->validate([
             'school_id' => 'required|exists:schools,id',
             'seat_count' => 'required|integer|min:1',
@@ -97,6 +122,7 @@ class PortalLicenseController extends Controller
 
     public function edit(License $license)
     {
+        $this->guardLicenseAdmin();
         $this->authorizeSchool($license->school_id);
         $schools = $this->getAvailableSchools();
         return view('portal.licenses.form', compact('license', 'schools'));
@@ -104,6 +130,7 @@ class PortalLicenseController extends Controller
 
     public function update(Request $request, License $license)
     {
+        $this->guardLicenseAdmin();
         $this->authorizeSchool($license->school_id);
 
         $data = $request->validate([
@@ -132,6 +159,7 @@ class PortalLicenseController extends Controller
 
     public function destroy(License $license)
     {
+        $this->guardLicenseAdmin();
         $this->authorizeSchool($license->school_id);
         $license->delete();
         return redirect()->route('portal.licenses.index')

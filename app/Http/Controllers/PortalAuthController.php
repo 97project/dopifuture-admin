@@ -32,8 +32,23 @@ class PortalAuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            // Set user locale preference in session
             $user = Auth::user();
+
+            // Block admin-level roles from portal
+            $portalRoles = ['school-admin', 'school-principal', 'teacher', 'student'];
+            if (!$user->hasAnyRole($portalRoles)) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()
+                    ->withInput($request->only('email', 'remember'))
+                    ->withErrors([
+                        'email' => __('auth.no_portal_access'),
+                    ]);
+            }
+
+            // Set user locale preference in session
             if ($user->locale) {
                 session(['locale' => $user->locale]);
                 app()->setLocale($user->locale);

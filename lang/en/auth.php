@@ -12,4 +12,6 @@ return [
     '2fa_token_expired' => 'Two-factor authentication token has expired.',
     'invalid_token' => 'Invalid token.',
     'password_incorrect' => 'Password is incorrect.',
+    'no_portal_access' => 'This account does not have portal access. Please use the Admin Panel.',
+    'insufficient_permissions' => 'You do not have sufficient permissions to perform this action.',
 ];

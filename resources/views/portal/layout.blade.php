@@ -439,6 +439,56 @@
             color: var(--gray-400);
             font-size: 0.9rem;
         }
+
+        /* ─── Responsive ────────────────────── */
+        @media (max-width: 768px) {
+            .portal-header-inner {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .portal-nav {
+                flex-wrap: wrap;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .portal-nav a {
+                padding: 0.4rem 0.7rem;
+                font-size: 0.78rem;
+            }
+
+            .portal-main {
+                padding: 1.5rem 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .data-table-wrap {
+                overflow-x: auto;
+            }
+
+            .data-table {
+                min-width: 600px;
+            }
+
+            .page-header h1 {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .portal-nav a {
+                padding: 0.35rem 0.5rem;
+                font-size: 0.72rem;
+            }
+        }
     </style>
 </head>
 
@@ -458,27 +508,25 @@
             <nav class="portal-nav">
                 @auth
                     <a href="{{ route('portal.dashboard') }}"
-                        class="{{ request()->routeIs('portal.dashboard') ? 'active' : '' }}">{{ app()->getLocale() === 'tr' ? 'Genel Bakış' : 'Dashboard' }}</a>
-                    @if(auth()->user()->hasAnyRole(['super-admin', 'admin', 'school-admin']))
+                        class="{{ request()->routeIs('portal.dashboard') ? 'active' : '' }}">{{ __('admin.dashboard') }}</a>
+                    @if(auth()->user()->hasAnyRole(['school-admin', 'school-principal']))
                         <a href="{{ route('portal.schools.index') }}"
-                            class="{{ request()->routeIs('portal.schools.*') ? 'active' : '' }}">{{ app()->getLocale() === 'tr' ? 'Okullar' : 'Schools' }}</a>
+                            class="{{ request()->routeIs('portal.schools.*') ? 'active' : '' }}">{{ __('admin.schools') }}</a>
                     @endif
-                    @if(auth()->user()->hasAnyRole(['super-admin', 'admin', 'school-admin', 'school-principal', 'teacher']))
+                    @if(auth()->user()->hasAnyRole(['school-admin', 'school-principal', 'teacher']))
                         <a href="{{ route('portal.classes.index') }}"
-                            class="{{ request()->routeIs('portal.classes.*') ? 'active' : '' }}">{{ app()->getLocale() === 'tr' ? 'Sınıflar' : 'Classes' }}</a>
+                            class="{{ request()->routeIs('portal.classes.*') ? 'active' : '' }}">{{ __('admin.classes') }}</a>
                     @endif
-                    @if(auth()->user()->hasAnyRole(['super-admin', 'admin', 'school-admin']))
+                    @if(auth()->user()->hasAnyRole(['school-admin', 'school-principal']))
                         <a href="{{ route('portal.users.index') }}"
-                            class="{{ request()->routeIs('portal.users.*') ? 'active' : '' }}">{{ app()->getLocale() === 'tr' ? 'Kullanıcılar' : 'Users' }}</a>
+                            class="{{ request()->routeIs('portal.users.*') ? 'active' : '' }}">{{ __('admin.users') }}</a>
                     @endif
-                    @if(auth()->user()->hasAnyRole(['super-admin', 'admin', 'license-manager', 'school-admin']))
+                    @if(auth()->user()->hasAnyRole(['school-admin', 'school-principal']))
                         <a href="{{ route('portal.licenses.index') }}"
-                            class="{{ request()->routeIs('portal.licenses.*') ? 'active' : '' }}">{{ app()->getLocale() === 'tr' ? 'Lisanslar' : 'Licenses' }}</a>
+                            class="{{ request()->routeIs('portal.licenses.*') ? 'active' : '' }}">{{ __('admin.licenses') }}</a>
                     @endif
-                    @if(auth()->user()->hasAnyRole(['super-admin', 'admin', 'moderator', 'school-admin', 'school-principal']))
-                        <a href="{{ route('portal.reports') }}"
-                            class="{{ request()->routeIs('portal.reports') ? 'active' : '' }}">{{ app()->getLocale() === 'tr' ? 'Raporlar' : 'Reports' }}</a>
-                    @endif
+                    <a href="{{ route('portal.reports') }}"
+                        class="{{ request()->routeIs('portal.reports*') ? 'active' : '' }}">{{ __('admin.reports') }}</a>
                     <a href="{{ route('portal.profile') }}"
                         class="{{ request()->routeIs('portal.profile') ? 'active' : '' }}">{{ app()->getLocale() === 'tr' ? 'Profilim' : 'Profile' }}</a>
                     <form action="{{ route('portal.logout') }}" method="POST" style="display:inline;">
@@ -536,4 +584,5 @@
     </footer>
 </body>
 
+@yield('scripts')
 </html>

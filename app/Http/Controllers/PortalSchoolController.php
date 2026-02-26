@@ -44,11 +44,13 @@ class PortalSchoolController extends Controller
 
     public function create()
     {
+        $this->guardSchoolAdmin();
         return view('portal.schools.form', ['school' => new School]);
     }
 
     public function store(Request $request)
     {
+        $this->guardSchoolAdmin();
         $data = $request->validate([
             'name_tr' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
@@ -77,12 +79,14 @@ class PortalSchoolController extends Controller
 
     public function edit(School $school)
     {
+        $this->guardSchoolAdmin();
         $this->authorizeSchool($school);
         return view('portal.schools.form', compact('school'));
     }
 
     public function update(Request $request, School $school)
     {
+        $this->guardSchoolAdmin();
         $this->authorizeSchool($school);
 
         $data = $request->validate([
@@ -114,6 +118,7 @@ class PortalSchoolController extends Controller
 
     public function destroy(School $school)
     {
+        $this->guardSchoolAdmin();
         $this->authorizeSchool($school);
         $school->delete();
         return redirect()->route('portal.schools.index')
@@ -123,10 +128,19 @@ class PortalSchoolController extends Controller
     private function authorizeSchool(School $school): void
     {
         $user = auth()->user();
-        if ($user->hasAnyRole(['super-admin', 'admin', 'license-manager']))
-            return;
         if ($user->schools()->where('schools.id', $school->id)->exists())
             return;
         abort(403);
+    }
+
+    /**
+     * Only school-admin can create/edit/delete schools.
+     * Principal, teacher, student → 403.
+     */
+    private function guardSchoolAdmin(): void
+    {
+        if (!auth()->user()->hasRole('school-admin')) {
+            abort(403, __('auth.insufficient_permissions'));
+        }
     }
 }
