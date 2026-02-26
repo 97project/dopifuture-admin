@@ -100,7 +100,22 @@ class SchoolController extends Controller
         $this->authorize('view', $school);
 
         $school->load(['classes.teachers', 'classes.students', 'admins', 'principals', 'licenses']);
-        return view('admin.schools.show', compact('school'));
+
+        // Uygulama sync istatistikleri — bu okuldaki öğrencilerin uygulama durumu
+        $studentIds = $school->students->pluck('id')->toArray();
+        $appSyncStats = [];
+        if (count($studentIds) > 0) {
+            $appSyncStats = \App\Models\Application::active()
+                ->withCount([
+                    'users as school_total' => fn($q) => $q->whereIn('users.id', $studentIds),
+                    'users as school_synced' => fn($q) => $q->whereIn('users.id', $studentIds)->where('application_user.sync_status', 'synced'),
+                    'users as school_failed' => fn($q) => $q->whereIn('users.id', $studentIds)->where('application_user.sync_status', 'failed'),
+                ])
+                ->having('school_total', '>', 0)
+                ->get();
+        }
+
+        return view('admin.schools.show', compact('school', 'appSyncStats'));
     }
 
     public function edit(School $school)

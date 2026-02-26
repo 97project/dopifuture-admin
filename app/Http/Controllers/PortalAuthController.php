@@ -45,9 +45,7 @@ class PortalAuthController extends Controller
         return back()
             ->withInput($request->only('email', 'remember'))
             ->withErrors([
-                'email' => app()->getLocale() === 'tr'
-                    ? 'Girdiğiniz bilgiler hatalıdır.'
-                    : 'These credentials do not match our records.',
+                'email' => __('auth.failed'),
             ]);
     }
 

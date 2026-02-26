@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Page;
+use App\Http\Requests\PageStoreRequest;
+use App\Http\Requests\PageUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -50,26 +52,9 @@ class PageController extends Controller
         return view('admin.pages.create');
     }
 
-    public function store(Request $request)
+    public function store(PageStoreRequest $request)
     {
-        $this->authorize('create', Page::class);
-
-        $data = $request->validate([
-            'title' => 'required|array',
-            'title.*' => 'string|max:255',
-            'slug' => 'nullable|string|max:255|unique:pages,slug',
-            'content' => 'nullable|array',
-            'content.*' => 'nullable|string',
-            'excerpt' => 'nullable|array',
-            'meta_title' => 'nullable|array',
-            'meta_description' => 'nullable|array',
-            'featured_image' => 'nullable|image|max:2048',
-            'template' => 'nullable|string|max:100',
-            'status' => 'required|in:draft,published,archived',
-            'published_at' => 'nullable|date',
-            'sort_order' => 'nullable|integer',
-            'is_homepage' => 'boolean',
-        ]);
+        $data = $request->validated();
 
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = $request->file('featured_image')->store('pages', 'public');
@@ -89,26 +74,9 @@ class PageController extends Controller
         return view('admin.pages.edit', compact('page'));
     }
 
-    public function update(Request $request, Page $page)
+    public function update(PageUpdateRequest $request, Page $page)
     {
-        $this->authorize('update', $page);
-
-        $data = $request->validate([
-            'title' => 'required|array',
-            'title.*' => 'string|max:255',
-            'slug' => 'nullable|string|max:255|unique:pages,slug,' . $page->id,
-            'content' => 'nullable|array',
-            'content.*' => 'nullable|string',
-            'excerpt' => 'nullable|array',
-            'meta_title' => 'nullable|array',
-            'meta_description' => 'nullable|array',
-            'featured_image' => 'nullable|image|max:2048',
-            'template' => 'nullable|string|max:100',
-            'status' => 'required|in:draft,published,archived',
-            'published_at' => 'nullable|date',
-            'sort_order' => 'nullable|integer',
-            'is_homepage' => 'boolean',
-        ]);
+        $data = $request->validated();
 
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = $request->file('featured_image')->store('pages', 'public');

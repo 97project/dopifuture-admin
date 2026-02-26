@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 
@@ -35,11 +36,10 @@ class PermissionController extends Controller
             'alias_en' => $request->input('alias_en'),
         ]);
 
-        activity()
-            ->performedOn($permission)
-            ->causedBy(auth()->user())
-            ->withProperties(['alias_tr' => $permission->alias_tr, 'alias_en' => $permission->alias_en])
-            ->log('permission_alias_updated');
+        ActivityLog::log('permission_alias_updated', 'permissions', $permission, [
+            'alias_tr' => $permission->alias_tr,
+            'alias_en' => $permission->alias_en,
+        ]);
 
         return back()->with('success', __('admin.saved'));
     }
@@ -54,3 +54,4 @@ class PermissionController extends Controller
         return back()->with('success', __('admin.permissions_synced'));
     }
 }
+

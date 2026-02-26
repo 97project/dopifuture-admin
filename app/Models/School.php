@@ -23,7 +23,6 @@ class School extends Model
     protected function casts(): array
     {
         return [
-            'name' => 'array',
             'is_active' => 'boolean',
         ];
     }
@@ -34,6 +33,12 @@ class School extends Model
     {
         $locale = $locale ?: app()->getLocale();
         $value = $this->{$field};
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (is_array($decoded)) {
+                $value = $decoded;
+            }
+        }
         if (is_array($value)) {
             return $value[$locale] ?? $value[config('app.fallback_locale', 'tr')] ?? '';
         }
@@ -42,13 +47,19 @@ class School extends Model
 
     public function getNameAttribute($value): string
     {
+        // JSON alanını normalleştir — en fazla tek decode yeterli
         if (is_string($value)) {
-            $value = json_decode($value, true);
+            $decoded = json_decode($value, true);
+            if (is_array($decoded)) {
+                $value = $decoded;
+            }
         }
+
         if (is_array($value)) {
             $locale = app()->getLocale();
             return $value[$locale] ?? $value[config('app.fallback_locale', 'tr')] ?? '';
         }
+
         return (string) $value;
     }
 

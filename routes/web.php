@@ -173,6 +173,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web', \App\Http\Middleware\
         Route::post('applications/{application}/users', [ApplicationController::class, 'assignUser'])->name('applications.assign-user');
         Route::delete('applications/{application}/users/{user}', [ApplicationController::class, 'removeUser'])->name('applications.remove-user');
         Route::post('applications/{application}/users/{user}/sync', [ApplicationController::class, 'syncUser'])->name('applications.sync-user');
+        Route::get('applications/{application}/users/{user}/report', [ApplicationController::class, 'userReport'])->name('applications.user-report');
         Route::post('applications/{application}/sync-all', [ApplicationController::class, 'syncAll'])->name('applications.sync-all');
 
         // ── DopiFuture: Schools ──────────────────────────────

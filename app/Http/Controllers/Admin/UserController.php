@@ -66,7 +66,6 @@ class UserController extends Controller
         $this->authorize('create', User::class);
 
         $data = $request->validated();
-        $data['password'] = $data['password'];
 
         $user = User::create(collect($data)->except(['roles', 'avatar', 'password_confirmation'])->toArray());
 
@@ -122,9 +121,6 @@ class UserController extends Controller
             case 'classes':
                 $data['classes'] = $user->classes()->with(['school', 'students', 'teachers'])->get();
                 break;
-            case 'applications':
-                $data['applications'] = $user->applications()->get();
-                break;
             case 'audit':
                 $actorLogs = ActivityLog::forActor(User::class, $user->id)
                     ->latest('created_at');
@@ -135,6 +131,49 @@ class UserController extends Controller
                 $data['activityLogs'] = ($logType === 'subject' ? $subjectLogs : $actorLogs)
                     ->paginate(15, ['*'], 'logs_page');
                 $data['logType'] = $logType;
+                break;
+            default:
+                // app_ prefix'li tab'lar → uygulama-özel veri
+                if (str_starts_with($tab, 'app_')) {
+                    $slug = str_replace('app_', '', $tab);
+                    $app = $user->applications()->where('slug', $slug)->first();
+                    $data['currentApp'] = $app;
+                    $data['appSlug'] = $slug;
+                    $data['remoteUser'] = null;
+                    $data['sessions'] = [];
+                    $data['connectorReady'] = false;
+
+                    if ($app) {
+                        $connector = $app->resolveConnector();
+                        $data['connectorReady'] = $connector && $connector::isReady();
+
+                        if ($data['connectorReady']) {
+                            try {
+                                $data['remoteUser'] = $connector->getUser($user);
+
+                                // Vega uygulamaları için oturum verileri
+                                if ($connector instanceof \App\Connectors\VegaConnector && $data['remoteUser']) {
+                                    $vegaId = $data['remoteUser']['id'] ?? null;
+                                    if ($vegaId) {
+                                        $sessionType = match ($slug) {
+                                            'way-ai-coach' => 'lecturer',
+                                            'role-galaxy' => 'simulator',
+                                            default => 'all',
+                                        };
+                                        $result = $connector->getUserSessions($vegaId, $sessionType);
+                                        $data['sessions'] = $result['sessions'] ?? [];
+                                    }
+                                }
+                            } catch (\Throwable $e) {
+                                \Log::channel('daily')->error('[UserController] App tab veri hatası', [
+                                    'userId' => $user->id,
+                                    'slug' => $slug,
+                                    'error' => $e->getMessage(),
+                                ]);
+                            }
+                        }
+                    }
+                }
                 break;
         }
 

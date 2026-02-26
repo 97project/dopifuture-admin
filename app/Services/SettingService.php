@@ -68,7 +68,7 @@ class SettingService
             $updated++;
         }
 
-        Cache::flush();
+        $this->clearSettingsCache();
 
         return $updated;
     }
@@ -83,7 +83,7 @@ class SettingService
             ['value' => $value]
         );
 
-        Cache::flush();
+        $this->clearSettingsCache();
 
         return $setting;
     }
@@ -96,5 +96,17 @@ class SettingService
         return Setting::whereIn('group', ['general', 'appearance'])
             ->get()
             ->mapWithKeys(fn($s) => [$s->group . '.' . $s->key => $s->typed_value]);
+    }
+
+    /**
+     * Clear only settings-related cache keys (not sessions/permissions/etc.).
+     */
+    private function clearSettingsCache(): void
+    {
+        $groups = Setting::distinct()->pluck('group');
+        foreach ($groups as $group) {
+            Cache::forget("settings.{$group}");
+        }
+        Cache::forget('settings.all');
     }
 }

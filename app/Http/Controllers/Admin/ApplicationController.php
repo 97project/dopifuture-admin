@@ -38,6 +38,8 @@ class ApplicationController extends Controller
     {
         $this->authorize('view', $application);
 
+        $activeTab = $request->input('tab', 'overview');
+
         // Users with sync pivot data
         $usersQuery = $application->users();
 
@@ -71,13 +73,161 @@ class ApplicationController extends Controller
         $connector = $application->resolveConnector();
         $connectorReady = $connector && $connector::isReady();
 
+        // API health kontrolü (tüm connector'lar)
+        $apiHealth = null;
+        if ($connector instanceof \App\Connectors\VegaConnector) {
+            $apiHealth = $connector->getHealth();
+        } elseif ($connector instanceof \App\Connectors\MissionWayConnector) {
+            $apiHealth = $connector->getHealthCheck();
+        } elseif ($connector instanceof \App\Connectors\WayStartupConnector) {
+            $apiHealth = $connector->getHealthCheck();
+        }
+
+        // Connector tipi belirleme (view'da partial seçimi için)
+        $connectorType = 'generic';
+        if ($connector instanceof \App\Connectors\VegaConnector) {
+            $connectorType = 'vega';
+        } elseif ($connector instanceof \App\Connectors\MissionWayConnector) {
+            $connectorType = 'missionway';
+        } elseif ($connector instanceof \App\Connectors\WayStartupConnector) {
+            $connectorType = 'waystartup';
+        }
+
+        // Rapor sekmesi verisi
+        $reportData = null;
+        if ($activeTab === 'report' && $connector && $connectorReady) {
+            $reportData = $this->gatherReportData($application, $connector);
+        }
+
         return view('admin.applications.show', compact(
             'application',
             'users',
             'syncStats',
             'availableUsers',
-            'connectorReady'
+            'connectorReady',
+            'apiHealth',
+            'activeTab',
+            'connectorType',
+            'reportData'
         ));
+    }
+
+    /**
+     * Tek kullanıcı için connector'dan detaylı rapor.
+     */
+    public function userReport(Request $request, Application $application, \App\Models\User $user)
+    {
+        $this->authorize('view', $application);
+
+        $connector = $application->resolveConnector();
+        if (!$connector) {
+            return back()->with('error', 'Bu uygulama için connector tanımlı değil.');
+        }
+
+        $report = $connector->getUserReport($user);
+
+        $connectorType = 'generic';
+        if ($connector instanceof \App\Connectors\VegaConnector) {
+            $connectorType = 'vega';
+        } elseif ($connector instanceof \App\Connectors\MissionWayConnector) {
+            $connectorType = 'missionway';
+        } elseif ($connector instanceof \App\Connectors\WayStartupConnector) {
+            $connectorType = 'waystartup';
+        }
+
+        return view('admin.applications.user-report', compact(
+            'application',
+            'user',
+            'report',
+            'connectorType'
+        ));
+    }
+
+    /**
+     * Uygulama raporları için toplu veri toplama.
+     */
+    private function gatherReportData(Application $application, $connector): array
+    {
+        $data = [
+            'connector_type' => get_class($connector),
+            'user_count' => $application->users()->count(),
+            'synced_count' => $application->users()->wherePivot('sync_status', 'synced')->count(),
+        ];
+
+        // Vega uygulamaları — modül bazlı genel bakış
+        if ($connector instanceof \App\Connectors\VegaConnector) {
+            $data['app_slug'] = $application->slug;
+            $data['module'] = match ($application->slug) {
+                'role-galaxy' => 'simulator',
+                'way-ai-coach' => 'lecturer',
+                'study-space' => 'all',
+                default => 'all',
+            };
+        }
+
+        // MissionWay — simülasyonlar + oturumlar + player composition
+        if ($connector instanceof \App\Connectors\MissionWayConnector) {
+            // Simülasyon listesi
+            $data['simulations'] = $connector->getSimulations(['limit' => 50]) ?? [];
+
+            // Oturum istatistikleri
+            $sessions = $connector->getSimulationSessions(['limit' => 100]);
+            $sessionList = [];
+            if (is_array($sessions)) {
+                $sessionList = isset($sessions['data']) ? $sessions['data'] : (isset($sessions[0]) ? $sessions : []);
+            }
+            $data['session_stats'] = [
+                'total' => count($sessionList),
+                'by_status' => collect($sessionList)->groupBy('status')->map(fn($group) => $group->count())->toArray(),
+            ];
+
+            // Örnek player composition
+            $sampleUsers = $application->users()->limit(5)->get();
+            $compositions = [];
+            foreach ($sampleUsers as $user) {
+                $comp = $connector->getUser($user);
+                if ($comp) {
+                    $compositions[] = [
+                        'user_id' => $user->id,
+                        'user_name' => $user->full_name,
+                        'data' => $comp,
+                    ];
+                }
+            }
+            $data['sample_compositions'] = $compositions;
+
+            // API health
+            $data['api_health'] = $connector->getHealthCheck();
+        }
+
+        // WayStartup — simülasyonlar + genel ilerleme
+        if ($connector instanceof \App\Connectors\WayStartupConnector) {
+            // Simülasyon listesi
+            $data['simulations'] = $connector->getSimulations(['limit' => 50]) ?? [];
+
+            // İlerleme ile birlikte simülasyonlar
+            $data['simulations_with_progress'] = $connector->getSimulationsWithProgress() ?? [];
+
+            // Örnek kullanıcı verileri
+            $sampleUsers = $application->users()->limit(5)->get();
+            $memberSamples = [];
+            foreach ($sampleUsers as $user) {
+                $member = $connector->getUser($user);
+                if ($member) {
+                    $memberSamples[] = [
+                        'user_id' => $user->id,
+                        'user_name' => $user->full_name,
+                        'data' => $member,
+                    ];
+                }
+            }
+            $data['sample_members'] = $memberSamples;
+
+            // API health
+            $data['api_health'] = $connector->getHealthCheck();
+        }
+
+        return $data;
     }
 
     public function create()

@@ -427,6 +427,67 @@ class VegaConnector implements AppConnectorInterface
         }
     }
 
+    /**
+     * Kullanıcının Vega üzerindeki detaylı raporunu getir.
+     * 1. Email ile Vega kullanıcısını bul → Vega ID
+     * 2. Vega profilini getir (roller, premium, istatistik)
+     * 3. Oturum geçmişini getir (lecturer + simulator)
+     */
+    public function getUserReport(User $user): ?array
+    {
+        try {
+            // 1. Email ile Vega kullanıcısını bul
+            $vegaUser = $this->findByEmail($user->email);
+            if (!$vegaUser) {
+                return [
+                    'success' => false,
+                    'data' => [],
+                    'error' => 'Kullanıcı Vega sisteminde bulunamadı',
+                ];
+            }
+
+            $vegaId = $vegaUser['id'] ?? null;
+            if (!$vegaId) {
+                return [
+                    'success' => false,
+                    'data' => ['remote_user' => $vegaUser],
+                    'error' => 'Vega kullanıcı ID bulunamadı',
+                ];
+            }
+
+            // 2. Detaylı profil
+            $profile = $this->getRemoteUserById($vegaId);
+
+            // 3. Oturum geçmişi (lecturer + simulator)
+            $sessionsResult = $this->getUserSessions($vegaId, 'all');
+
+            return [
+                'success' => true,
+                'data' => [
+                    'vega_id' => $vegaId,
+                    'profile' => $profile ?? $vegaUser,
+                    'sessions' => $sessionsResult['sessions'] ?? [],
+                    'session_count' => count($sessionsResult['sessions'] ?? []),
+                    'modules' => [
+                        'lecturer' => collect($sessionsResult['sessions'] ?? [])->where('module', 'lecturer')->count(),
+                        'simulator' => collect($sessionsResult['sessions'] ?? [])->where('module', 'simulator')->count(),
+                    ],
+                ],
+                'error' => null,
+            ];
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[Vega] getUserReport hatası', [
+                'userId' => $user->id,
+                'message' => $e->getMessage(),
+            ]);
+            return [
+                'success' => false,
+                'data' => [],
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
     /* ═══════════════════════════════════════════════════
      *  Internal Helpers
      * ═══════════════════════════════════════════════════ */
@@ -454,13 +515,43 @@ class VegaConnector implements AppConnectorInterface
     }
 
     /**
-     * Vega API'den tüm kullanıcıları çek ve email ile eşleştir.
-     * Sayfalı arama — ilk sayfadan başlar, eşleşme bulunana kadar devam eder.
+     * Vega API'den kullanıcıyı email ile ara.
+     * Önce search parametresi ile dene, desteklenmiyorsa sayfalı fallback.
      */
     private function findByEmail(string $email): ?array
     {
+        // 1) Önce search parametresi ile tek request dene
+        try {
+            $response = $this->request('GET', '/api/v1/users', [
+                'search' => $email,
+                'per_page' => 5,
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json('data', []);
+                $users = $data['users'] ?? $data;
+
+                if (is_array($users)) {
+                    foreach ($users as $vegaUser) {
+                        if (isset($vegaUser['email']) && mb_strtolower($vegaUser['email']) === mb_strtolower($email)) {
+                            return $vegaUser;
+                        }
+                    }
+                }
+
+                // Search worked but no exact match found
+                return null;
+            }
+        } catch (\Throwable $e) {
+            // Search parameter might not be supported, fall through to paginated approach
+            Log::channel('daily')->warning('[Vega] search param desteklenmiyor, fallback', [
+                'message' => $e->getMessage(),
+            ]);
+        }
+
+        // 2) Fallback: Sayfalı arama (max 3 sayfa güvenlik limiti)
         $page = 1;
-        $maxPages = 10; // safety limit
+        $maxPages = 3;
 
         while ($page <= $maxPages) {
             $response = $this->request('GET', '/api/v1/users', [

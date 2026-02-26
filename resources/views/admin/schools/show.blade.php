@@ -93,7 +93,7 @@
         <div x-data="{ activeTab: '{{ request('tab', 'general') }}' }">
             <div class="border-b border-gray-200 dark:border-[#1A3A5C]">
                 <nav class="flex gap-6 px-1 -mb-px" role="tablist">
-                    @foreach(['general' => __('admin.general'), 'classes' => __('admin.classes'), 'users' => __('admin.users'), 'licenses' => __('admin.licenses')] as $tab => $label)
+                    @foreach(['general' => __('admin.general'), 'classes' => __('admin.classes'), 'users' => __('admin.users'), 'licenses' => __('admin.licenses'), 'applications' => 'Uygulamalar'] as $tab => $label)
                         <button @click="activeTab = '{{ $tab }}'"
                             :class="activeTab === '{{ $tab }}' ? 'border-[#0B6AB2] text-[#0B6AB2] dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
                             class="py-3 px-1 text-sm font-medium border-b-2 transition" role="tab">{{ $label }}</button>
@@ -289,6 +289,74 @@
                     </table>
                 </div>
             </div>
+
+        {{-- Applications Tab --}}
+        <div x-show="activeTab === 'applications'" x-cloak class="pt-6">
+            @if(!empty($appSyncStats) && count($appSyncStats) > 0)
+                <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] overflow-hidden">
+                    <div class="px-5 py-3 border-b border-gray-100 dark:border-[#1A3A5C]">
+                        <h4 class="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <svg class="w-4 h-4 text-[#0B6AB2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z" />
+                            </svg>
+                            Öğrenci Uygulama Durumu
+                        </h4>
+                    </div>
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-100 dark:border-[#1A3A5C]">
+                                <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Uygulama</th>
+                                <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Atanmış</th>
+                                <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Senkron</th>
+                                <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Başarısız</th>
+                                <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Oran</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50 dark:divide-[#1A3A5C]/50">
+                            @foreach($appSyncStats as $appStat)
+                                @php
+                                    $appName = is_array($appStat->name) ? ($appStat->name[app()->getLocale()] ?? reset($appStat->name)) : $appStat->name;
+                                    $pct = $appStat->school_total > 0 ? round(($appStat->school_synced / $appStat->school_total) * 100) : 0;
+                                @endphp
+                                <tr class="hover:bg-gray-50/50 dark:hover:bg-[#0A1628]/30 transition">
+                                    <td class="px-5 py-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[10px] font-bold" style="background: {{ $appStat->color ?? '#0B6AB2' }}">
+                                                {{ strtoupper(substr(is_array($appStat->name) ? reset($appStat->name) : $appStat->name, 0, 2)) }}
+                                            </div>
+                                            <div>
+                                                <a href="{{ route('admin.applications.show', $appStat) }}" class="font-medium text-gray-900 dark:text-white hover:text-[#0B6AB2] transition">{{ $appName }}</a>
+                                                <p class="text-[10px] text-gray-400">{{ $appStat->slug }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-3 text-center font-semibold tabular-nums">{{ $appStat->school_total }}</td>
+                                    <td class="px-5 py-3 text-center text-emerald-600 font-semibold tabular-nums">{{ $appStat->school_synced }}</td>
+                                    <td class="px-5 py-3 text-center text-red-500 font-semibold tabular-nums">{{ $appStat->school_failed }}</td>
+                                    <td class="px-5 py-3">
+                                        <div class="flex items-center gap-2 justify-center">
+                                            <div class="w-16 bg-gray-100 dark:bg-[#0A1628] rounded-full h-2 overflow-hidden">
+                                                <div class="h-full rounded-full {{ $pct >= 80 ? 'bg-emerald-500' : ($pct >= 50 ? 'bg-amber-500' : 'bg-red-500') }}" style="width: {{ min($pct, 100) }}%"></div>
+                                            </div>
+                                            <span class="text-xs font-bold {{ $pct >= 80 ? 'text-emerald-500' : ($pct >= 50 ? 'text-amber-500' : 'text-red-500') }} tabular-nums">{{ $pct }}%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-12 text-center">
+                    <div class="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-[#0A1628] flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-7 h-7 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
+                        </svg>
+                    </div>
+                    <p class="text-sm font-medium text-gray-400">Bu okulun öğrencilerine henüz uygulama atanmamış</p>
+                </div>
+            @endif
+        </div>
 
         </div>
     </div>

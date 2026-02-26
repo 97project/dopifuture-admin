@@ -181,8 +181,8 @@ class NotificationService
             try {
                 // Create JWT for Google OAuth2
                 $now = time();
-                $header = base64url_encode(json_encode(['alg' => 'RS256', 'typ' => 'JWT']));
-                $payload = base64url_encode(json_encode([
+                $header = self::base64urlEncode(json_encode(['alg' => 'RS256', 'typ' => 'JWT']));
+                $payload = self::base64urlEncode(json_encode([
                     'iss' => $credentials['client_email'],
                     'scope' => 'https://www.googleapis.com/auth/firebase.messaging',
                     'aud' => 'https://oauth2.googleapis.com/token',
@@ -192,7 +192,7 @@ class NotificationService
 
                 $signatureInput = "{$header}.{$payload}";
                 openssl_sign($signatureInput, $signature, $credentials['private_key'], 'SHA256');
-                $jwt = "{$signatureInput}." . base64url_encode($signature);
+                $jwt = "{$signatureInput}." . self::base64urlEncode($signature);
 
                 // Exchange JWT for access token
                 $response = Http::asForm()->post('https://oauth2.googleapis.com/token', [
@@ -228,13 +228,11 @@ class NotificationService
         }
         return $text;
     }
-}
 
-/**
- * URL-safe base64 encode helper.
- */
-if (!function_exists('base64url_encode')) {
-    function base64url_encode(string $data): string
+    /**
+     * URL-safe base64 encode helper.
+     */
+    private static function base64urlEncode(string $data): string
     {
         return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }

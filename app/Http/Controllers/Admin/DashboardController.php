@@ -61,9 +61,14 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // App usage stats
+        // App usage stats with sync details
         $appStats = Application::active()
-            ->withCount('users')
+            ->withCount([
+                'users',
+                'users as synced_count' => fn($q) => $q->where('application_user.sync_status', 'synced'),
+                'users as failed_count' => fn($q) => $q->where('application_user.sync_status', 'failed'),
+                'users as pending_count' => fn($q) => $q->where('application_user.sync_status', 'pending'),
+            ])
             ->orderByDesc('users_count')
             ->take(6)
             ->get();

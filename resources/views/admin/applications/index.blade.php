@@ -107,9 +107,9 @@
                             <td class="px-5 py-3">
                                 <div class="flex items-center gap-3">
                                     @if($app->icon)
-                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-lg"
-                                            style="background: {{ $app->color ?? '#0B6AB2' }}20">
-                                            {{ $app->icon }}
+                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                                            style="background: {{ $app->color ?? '#0B6AB2' }}20; color: {{ $app->color ?? '#0B6AB2' }}">
+                                            @include('admin.partials._app_icon', ['icon' => $app->icon, 'class' => 'w-4 h-4'])
                                         </div>
                                     @endif
                                     <span class="font-medium text-gray-900 dark:text-white">{{ $app->name }}</span>

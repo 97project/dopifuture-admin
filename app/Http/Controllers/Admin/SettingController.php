@@ -53,7 +53,12 @@ class SettingController extends Controller
             ]);
         }
 
-        Cache::flush();
+        // Clear only settings-related cache keys (not sessions/permissions)
+        $settingGroups = \App\Models\Setting::distinct()->pluck('group');
+        foreach ($settingGroups as $group) {
+            Cache::forget("settings.{$group}");
+        }
+        Cache::forget('settings.all');
 
         return redirect()->route('admin.settings.index')
             ->with('success', __('admin.settings_updated'));

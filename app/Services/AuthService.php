@@ -106,10 +106,13 @@ class AuthService
         }
 
         try {
-            $response = file_get_contents(
-                'https://www.google.com/recaptcha/api/siteverify?secret=' . urlencode($secret) . '&response=' . urlencode($token)
-            );
-            $result = json_decode($response, true);
+            $response = \Illuminate\Support\Facades\Http::asForm()
+                ->timeout(5)
+                ->post('https://www.google.com/recaptcha/api/siteverify', [
+                    'secret' => $secret,
+                    'response' => $token,
+                ]);
+            $result = $response->json();
             return $result['success'] ?? false;
         } catch (\Exception $e) {
             return true;

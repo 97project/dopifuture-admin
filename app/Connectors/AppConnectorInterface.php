@@ -37,6 +37,14 @@ interface AppConnectorInterface
     public function getUser(User $user): ?array;
 
     /**
+     * Kullanıcının uygulama bazlı detaylı raporunu getir.
+     * Her connector kendi API yapısına göre rapor verisini döndürür.
+     *
+     * @return array{success: bool, data: array, error: ?string}|null
+     */
+    public function getUserReport(User $user): ?array;
+
+    /**
      * Connector entegrasyonu tamamlanmış mı?
      * false ise henüz API endpoint'leri hazır değil.
      */

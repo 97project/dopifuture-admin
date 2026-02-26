@@ -278,7 +278,7 @@
                                     </div>
                                     <div class="w-full bg-gray-100 dark:bg-[#0A1628] rounded-full h-2 overflow-hidden">
                                         <div class="h-full rounded-full transition-all duration-500
-                                                                {{ $item['percent'] >= 90 ? 'bg-gradient-to-r from-red-400 to-red-500' : ($item['percent'] >= 70 ? 'bg-gradient-to-r from-amber-400 to-amber-500' : 'bg-gradient-to-r from-emerald-400 to-emerald-500') }}"
+                                                                            {{ $item['percent'] >= 90 ? 'bg-gradient-to-r from-red-400 to-red-500' : ($item['percent'] >= 70 ? 'bg-gradient-to-r from-amber-400 to-amber-500' : 'bg-gradient-to-r from-emerald-400 to-emerald-500') }}"
                                             style="width: {{ min($item['percent'], 100) }}%">
                                         </div>
                                     </div>
@@ -304,24 +304,44 @@
                     <div class="space-y-3">
                         @php $maxUsers = $appStats->max('users_count') ?: 1; @endphp
                         @foreach($appStats as $app)
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                            @php
+                                $syncPct = $app->users_count > 0 ? round(($app->synced_count / $app->users_count) * 100) : 0;
+                            @endphp
+                            <a href="{{ route('admin.applications.show', $app) }}" class="flex items-center gap-3 group">
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0 group-hover:scale-110 transition-transform"
                                     style="background: {{ $app->color ?? '#0B6AB2' }}">
-                                    {{ strtoupper(substr($app->name, 0, 2)) }}
+                                    {{ strtoupper(substr(is_array($app->name) ? (reset($app->name)) : $app->name, 0, 2)) }}
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <div class="flex justify-between items-center mb-1">
                                         <span
-                                            class="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{{ $app->name }}</span>
-                                        <span class="text-xs font-bold text-gray-500 tabular-nums">{{ $app->users_count }}</span>
-                                    </div>
-                                    <div class="w-full bg-gray-100 dark:bg-[#0A1628] rounded-full h-1.5">
-                                        <div class="h-full rounded-full transition-all duration-500"
-                                            style="width: {{ ($app->users_count / $maxUsers) * 100 }}%; background: {{ $app->color ?? '#0B6AB2' }}">
+                                            class="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{{ is_array($app->name) ? ($app->name[app()->getLocale()] ?? reset($app->name)) : $app->name }}</span>
+                                        <div class="flex items-center gap-1.5">
+                                            <span
+                                                class="text-xs font-bold text-gray-500 tabular-nums">{{ $app->users_count }}</span>
+                                            @if($app->users_count > 0)
+                                                <span
+                                                    class="text-[9px] px-1 py-0.5 rounded {{ $syncPct >= 80 ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600' : ($syncPct >= 50 ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600' : 'bg-red-50 dark:bg-red-900/20 text-red-500') }} font-bold tabular-nums"
+                                                    title="Synced: {{ $app->synced_count }} / Failed: {{ $app->failed_count }} / Pending: {{ $app->pending_count }}">
+                                                    {{ $syncPct }}%
+                                                </span>
+                                            @endif
                                         </div>
                                     </div>
+                                    <div class="w-full bg-gray-100 dark:bg-[#0A1628] rounded-full h-1.5 flex overflow-hidden">
+                                        @if($app->users_count > 0)
+                                            <div class="h-full bg-emerald-500 transition-all duration-500"
+                                                style="width: {{ ($app->synced_count / $app->users_count) * 100 }}%"></div>
+                                            <div class="h-full bg-red-400 transition-all duration-500"
+                                                style="width: {{ ($app->failed_count / $app->users_count) * 100 }}%"></div>
+                                            <div class="h-full bg-amber-400 transition-all duration-500"
+                                                style="width: {{ ($app->pending_count / $app->users_count) * 100 }}%"></div>
+                                        @else
+                                            <div class="h-full bg-gray-300 dark:bg-gray-700" style="width: 100%"></div>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
+                            </a>
                         @endforeach
                     </div>
                 @else
@@ -350,10 +370,10 @@
                             <div class="flex items-start gap-3">
                                 <div
                                     class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5
-                                                    {{ $log->action === 'created' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' : '' }}
-                                                    {{ $log->action === 'updated' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : '' }}
-                                                    {{ $log->action === 'deleted' ? 'bg-red-100 dark:bg-red-900/30 text-red-600' : '' }}
-                                                    {{ !in_array($log->action, ['created', 'updated', 'deleted']) ? 'bg-gray-100 dark:bg-gray-800 text-gray-500' : '' }}">
+                                                                {{ $log->action === 'created' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' : '' }}
+                                                                {{ $log->action === 'updated' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : '' }}
+                                                                {{ $log->action === 'deleted' ? 'bg-red-100 dark:bg-red-900/30 text-red-600' : '' }}
+                                                                {{ !in_array($log->action, ['created', 'updated', 'deleted']) ? 'bg-gray-100 dark:bg-gray-800 text-gray-500' : '' }}">
                                     @if($log->action === 'created')
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />

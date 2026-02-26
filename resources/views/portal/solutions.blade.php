@@ -124,7 +124,8 @@
                     </style>
                     <div class="app-icon-wrap" style="background: {{ $app->color ?? '#3b82f6' }}20;">
                         @if($app->icon)
-                            <span style="color: {{ $app->color ?? '#3b82f6' }};">{{ $app->icon }}</span>
+                            <span
+                                style="color: {{ $app->color ?? '#3b82f6' }};">@include('admin.partials._app_icon', ['icon' => $app->icon, 'class' => 'w-6 h-6'])</span>
                         @else
                             <svg width="24" height="24" fill="none" stroke="{{ $app->color ?? '#3b82f6' }}" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
