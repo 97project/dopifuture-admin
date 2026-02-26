@@ -53,7 +53,7 @@ class PortalLicenseController extends Controller
         $license->purchases()->create($data);
 
         return redirect()->route('portal.licenses.show', $license)
-            ->with('success', app()->getLocale() === 'tr' ? 'Lisans alımı eklendi.' : 'Purchase added.');
+            ->with('success', __('admin.purchase_added'));
     }
 
     public function create()
@@ -76,9 +76,7 @@ class PortalLicenseController extends Controller
 
         // Single license per school — prevent duplicates
         if (License::where('school_id', $data['school_id'])->exists()) {
-            $msg = app()->getLocale() === 'tr'
-                ? 'Bu okulun zaten bir lisansı var. Lütfen mevcut lisansı düzenleyin veya satın alma ekleyin.'
-                : 'This school already has a license. Please edit the existing license or add a purchase.';
+            $msg = __('admin.license_already_exists');
             return back()->withErrors(['school_id' => $msg])->withInput();
         }
 
@@ -94,7 +92,7 @@ class PortalLicenseController extends Controller
         ]);
 
         return redirect()->route('portal.licenses.index')
-            ->with('success', app()->getLocale() === 'tr' ? 'Lisans oluşturuldu.' : 'License created.');
+            ->with('success', __('admin.license_created'));
     }
 
     public function edit(License $license)
@@ -129,7 +127,7 @@ class PortalLicenseController extends Controller
         ]);
 
         return redirect()->route('portal.licenses.index')
-            ->with('success', app()->getLocale() === 'tr' ? 'Lisans güncellendi.' : 'License updated.');
+            ->with('success', __('admin.license_updated'));
     }
 
     public function destroy(License $license)
@@ -137,7 +135,7 @@ class PortalLicenseController extends Controller
         $this->authorizeSchool($license->school_id);
         $license->delete();
         return redirect()->route('portal.licenses.index')
-            ->with('success', app()->getLocale() === 'tr' ? 'Lisans silindi.' : 'License deleted.');
+            ->with('success', __('admin.license_deleted'));
     }
 
     private function getAvailableSchools()

@@ -7,6 +7,7 @@ use App\Traits\ApiResponse;
 use App\Services\AuthService;
 use App\Services\TwoFactorService;
 use App\Http\Requests\LoginRequest;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 
 /**
@@ -66,7 +67,7 @@ class AuthController extends Controller
         $token = $this->authService->createApiToken($user, $deviceName);
 
         return $this->success([
-            'user' => $this->formatUser($user),
+            'user' => UserResource::make($user)->withPermissions(),
             'token' => $token,
             'token_type' => 'Bearer',
         ]);
@@ -120,7 +121,7 @@ class AuthController extends Controller
         $token = $this->authService->createApiToken($user, $request->input('device_name', 'api'));
 
         return $this->success([
-            'user' => $this->formatUser($user),
+            'user' => UserResource::make($user)->withPermissions(),
             'token' => $token,
             'token_type' => 'Bearer',
         ]);
@@ -157,7 +158,7 @@ class AuthController extends Controller
      */
     public function me(Request $request)
     {
-        return $this->success($this->formatUser($request->user()));
+        return $this->success(UserResource::make($request->user())->withPermissions());
     }
 
     /**
@@ -249,23 +250,4 @@ class AuthController extends Controller
         return $this->success(null, ['message' => __('api.deletion_request_sent')]);
     }
 
-    protected function formatUser($user): array
-    {
-        return [
-            'id' => $user->id,
-            'name' => $user->name,
-            'surname' => $user->surname,
-            'full_name' => $user->full_name,
-            'email' => $user->email,
-            'phone' => $user->phone,
-            'locale' => $user->locale,
-            'timezone' => $user->timezone,
-            'status' => $user->status,
-            'dark_mode' => $user->dark_mode,
-            'has_2fa' => $user->hasTwoFactorEnabled(),
-            'avatar_url' => $user->avatar_url,
-            'roles' => $user->getRoleNames(),
-            'permissions' => $user->getAllPermissions()->pluck('name'),
-        ];
-    }
 }

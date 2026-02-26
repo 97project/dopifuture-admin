@@ -372,6 +372,8 @@ return [
     'expires_at' => 'Expiry Date',
     'seat_limit_reached' => 'License seat limit has been reached.',
     'license_expired' => 'This license has expired.',
+    'purchase_added' => 'Purchase added successfully.',
+    'license_already_exists' => 'This school already has a license. Please edit the existing license or add a purchase.',
 
     // DopiFuture — Registration Requests
     'registration_requests' => 'Registration Requests',
@@ -557,4 +559,5 @@ return [
     'hold_ctrl' => 'Hold Ctrl to select multiple',
     'view_all' => 'View All',
     'notification_mode' => 'Notification Mode',
+    'contact_sent' => 'Your message has been sent successfully. We will get back to you soon.',
 ];

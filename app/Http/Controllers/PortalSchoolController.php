@@ -72,7 +72,7 @@ class PortalSchoolController extends Controller
         ]);
 
         return redirect()->route('portal.schools.index')
-            ->with('success', app()->getLocale() === 'tr' ? 'Okul oluşturuldu.' : 'School created.');
+            ->with('success', __('admin.school_created'));
     }
 
     public function edit(School $school)
@@ -109,7 +109,7 @@ class PortalSchoolController extends Controller
         ]);
 
         return redirect()->route('portal.schools.index')
-            ->with('success', app()->getLocale() === 'tr' ? 'Okul güncellendi.' : 'School updated.');
+            ->with('success', __('admin.school_updated'));
     }
 
     public function destroy(School $school)
@@ -117,7 +117,7 @@ class PortalSchoolController extends Controller
         $this->authorizeSchool($school);
         $school->delete();
         return redirect()->route('portal.schools.index')
-            ->with('success', app()->getLocale() === 'tr' ? 'Okul silindi.' : 'School deleted.');
+            ->with('success', __('admin.school_deleted'));
     }
 
     private function authorizeSchool(School $school): void

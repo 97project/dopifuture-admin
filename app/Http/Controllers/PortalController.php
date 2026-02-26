@@ -58,9 +58,7 @@ class PortalController extends Controller
         ]);
 
         return redirect()->route('portal.contact')
-            ->with('success', app()->getLocale() === 'tr'
-                ? 'Mesajınız başarıyla gönderildi. En kısa sürede size dönüş yapacağız.'
-                : 'Your message has been sent successfully. We will get back to you soon.');
+            ->with('success', __('admin.contact_sent'));
     }
 
     /**

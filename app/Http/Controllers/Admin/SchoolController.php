@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\School;
 use App\Models\ActivityLog;
+use App\Http\Requests\SchoolStoreRequest;
+use App\Http\Requests\SchoolUpdateRequest;
 use Illuminate\Http\Request;
 
 class SchoolController extends Controller
@@ -62,22 +64,8 @@ class SchoolController extends Controller
         return view('admin.schools.create');
     }
 
-    public function store(Request $request)
+    public function store(SchoolStoreRequest $request)
     {
-        $this->authorize('create', School::class);
-
-        $request->validate([
-            'name_tr' => 'required|string|max:200',
-            'name_en' => 'required|string|max:200',
-            'country' => 'nullable|string|max:100',
-            'city' => 'nullable|string|max:100',
-            'address' => 'nullable|string|max:500',
-            'phone' => 'nullable|string|max:30',
-            'email' => 'nullable|email|max:150',
-            'website' => 'nullable|url|max:255',
-            'is_active' => 'nullable|boolean',
-        ]);
-
         $school = School::create([
             'name' => ['tr' => $request->input('name_tr'), 'en' => $request->input('name_en')],
             'country' => $request->input('country'),
@@ -128,21 +116,8 @@ class SchoolController extends Controller
         return view('admin.schools.edit', compact('school', 'nameData'));
     }
 
-    public function update(Request $request, School $school)
+    public function update(SchoolUpdateRequest $request, School $school)
     {
-        $this->authorize('update', $school);
-
-        $request->validate([
-            'name_tr' => 'required|string|max:200',
-            'name_en' => 'required|string|max:200',
-            'country' => 'nullable|string|max:100',
-            'city' => 'nullable|string|max:100',
-            'address' => 'nullable|string|max:500',
-            'phone' => 'nullable|string|max:30',
-            'email' => 'nullable|email|max:150',
-            'website' => 'nullable|url|max:255',
-            'is_active' => 'nullable|boolean',
-        ]);
 
         $school->update([
             'name' => ['tr' => $request->input('name_tr'), 'en' => $request->input('name_en')],

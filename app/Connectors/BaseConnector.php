@@ -4,12 +4,13 @@ namespace App\Connectors;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 
 /**
- * Base class for external API connectors.
- * Provides shared HTTP request helpers, health check, and error detection.
+ * Base class for external API connectors (MissionWay, WayStartup).
+ * Provides shared HTTP helpers, health check, and error detection.
+ *
+ * x-api-key header authentication.
  */
 abstract class BaseConnector
 {
@@ -17,8 +18,14 @@ abstract class BaseConnector
     protected string $apiKey;
     protected int $timeout;
 
+    /** Override in subclass for log prefixes, e.g. 'MissionWay' */
+    protected string $logPrefix = 'Connector';
+
+    /** Override in subclass if health endpoint differs */
+    protected string $healthEndpoint = '/health/simple';
+
     /**
-     * Initialise from connector config.
+     * Initialise from connector config key.
      */
     public function __construct(string $configKey)
     {
@@ -30,57 +37,72 @@ abstract class BaseConnector
 
     /* ─── HTTP helpers ──────────────────────────────── */
 
-    protected function request(string $method, string $path, array $data = []): Response
-    {
-        $url = $this->baseUrl . $path;
-
-        $request = Http::withHeaders([
-            'Accept' => 'application/json',
-            'Authorization' => 'Bearer ' . $this->apiKey,
-        ])->timeout($this->timeout);
-
-        return match (strtoupper($method)) {
-            'GET' => $request->get($url, $data),
-            'POST' => $request->post($url, $data),
-            'PUT' => $request->put($url, $data),
-            'PATCH' => $request->patch($url, $data),
-            'DELETE' => $request->delete($url, $data),
-            default => $request->get($url, $data),
-        };
-    }
-
-    protected function apiGet(string $path, array $query = []): ?array
+    /**
+     * Generic authenticated GET request with error logging.
+     */
+    protected function apiGet(string $path, array $params = []): ?array
     {
         try {
-            $response = $this->request('GET', $path, $query);
-            return $response->successful() ? $response->json() : null;
+            $response = Http::timeout($this->timeout)
+                ->withHeaders(['x-api-key' => $this->apiKey])
+                ->get("{$this->baseUrl}{$path}", $params);
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+
+            Log::channel('daily')->warning("[{$this->logPrefix}] GET yanıt hatası", [
+                'path' => $path,
+                'status' => $response->status(),
+            ]);
+            return null;
         } catch (\Throwable $e) {
-            Log::channel('daily')->error(static::class . ' GET ' . $path, [
-                'error' => $e->getMessage(),
+            Log::channel('daily')->error("[{$this->logPrefix}] API GET hatası", [
+                'path' => $path,
+                'message' => $e->getMessage(),
             ]);
             return null;
         }
     }
 
+    /**
+     * Authenticated POST request.
+     */
+    protected function apiPost(string $path, array $data = []): Response
+    {
+        return Http::timeout($this->timeout)
+            ->withHeaders(['x-api-key' => $this->apiKey])
+            ->post("{$this->baseUrl}{$path}", $data);
+    }
+
+    /**
+     * Authenticated DELETE request.
+     */
+    protected function apiDelete(string $path): Response
+    {
+        return Http::timeout($this->timeout)
+            ->withHeaders(['x-api-key' => $this->apiKey])
+            ->delete("{$this->baseUrl}{$path}");
+    }
+
     /* ─── Health check ──────────────────────────────── */
 
-    public function getHealthCheck(): array
+    public function getHealthCheck(): ?array
     {
         try {
-            $start = microtime(true);
-            $response = $this->request('GET', '/api/v1/health');
-            $elapsed = round((microtime(true) - $start) * 1000);
+            $response = Http::timeout(5)
+                ->get("{$this->baseUrl}{$this->healthEndpoint}");
 
             return [
                 'status' => $response->successful() ? 'ok' : 'error',
-                'code' => $response->status(),
-                'latency_ms' => $elapsed,
+                'http_code' => $response->status(),
+                'data' => $response->json(),
             ];
         } catch (\Throwable $e) {
             return [
                 'status' => 'unreachable',
-                'code' => 0,
-                'error' => $e->getMessage(),
+                'http_code' => null,
+                'data' => ['error' => $e->getMessage()],
             ];
         }
     }
@@ -89,18 +111,14 @@ abstract class BaseConnector
 
     protected function isDuplicateError(Response $response): bool
     {
-        if ($response->status() === 409) {
-            return true;
-        }
+        $body = $response->json('message', '');
+        return is_string($body) && str_contains(strtolower($body), 'already exists');
+    }
 
-        $body = $response->json();
-        $message = $body['message'] ?? $body['error'] ?? '';
+    /* ─── Static ─────────────────────────────────── */
 
-        if (is_string($message)) {
-            return str_contains(strtolower($message), 'already exists')
-                || str_contains(strtolower($message), 'duplicate');
-        }
-
-        return false;
+    public static function isReady(): bool
+    {
+        return true;
     }
 }

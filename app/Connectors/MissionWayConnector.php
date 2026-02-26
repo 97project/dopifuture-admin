@@ -3,7 +3,6 @@
 namespace App\Connectors;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -21,17 +20,13 @@ use Illuminate\Support\Facades\Log;
  * Health:
  *   GET /health/simple
  */
-class MissionWayConnector implements AppConnectorInterface
+class MissionWayConnector extends BaseConnector implements AppConnectorInterface
 {
-    private string $baseUrl;
-    private string $apiKey;
-    private int $timeout;
+    protected string $logPrefix = 'MissionWay';
 
     public function __construct()
     {
-        $this->baseUrl = rtrim(config('connectors.mission_way.base_url'), '/');
-        $this->apiKey = config('connectors.mission_way.api_key');
-        $this->timeout = config('connectors.mission_way.timeout', 10);
+        parent::__construct('mission_way');
     }
 
     /* ─── Interface: syncUser ──────────────────────────── */
@@ -53,9 +48,7 @@ class MissionWayConnector implements AppConnectorInterface
         ];
 
         try {
-            $response = Http::timeout($this->timeout)
-                ->withHeaders(['x-api-key' => $this->apiKey])
-                ->post("{$this->baseUrl}/v1/player-compositions", $payload);
+            $response = $this->apiPost('/v1/player-compositions', $payload);
 
             if ($response->status() === 400 && $this->isDuplicateError($response)) {
                 Log::channel('daily')->info('[MissionWay] Kullanıcı zaten mevcut', [
@@ -108,9 +101,7 @@ class MissionWayConnector implements AppConnectorInterface
     public function removeUser(User $user): bool
     {
         try {
-            $response = Http::timeout($this->timeout)
-                ->withHeaders(['x-api-key' => $this->apiKey])
-                ->delete("{$this->baseUrl}/v1/player-compositions/by-user/{$user->id}");
+            $response = $this->apiDelete("/v1/player-compositions/by-user/{$user->id}");
 
             if ($response->status() === 204 || $response->status() === 404) {
                 Log::channel('daily')->info('[MissionWay] Kullanıcı silindi', ['userId' => $user->id]);
@@ -139,15 +130,7 @@ class MissionWayConnector implements AppConnectorInterface
     public function getUser(User $user): ?array
     {
         try {
-            $response = Http::timeout($this->timeout)
-                ->withHeaders(['x-api-key' => $this->apiKey])
-                ->get("{$this->baseUrl}/v1/player-compositions/by-user/{$user->id}");
-
-            if ($response->successful()) {
-                return $response->json();
-            }
-
-            return null;
+            return $this->apiGet("/v1/player-compositions/by-user/{$user->id}") ?: null;
         } catch (\Throwable $e) {
             Log::channel('daily')->error('[MissionWay] GET hatası', [
                 'userId' => $user->id,
@@ -216,17 +199,11 @@ class MissionWayConnector implements AppConnectorInterface
 
     /* ─── Simulations ──────────────────────────────────── */
 
-    /**
-     * GET /v1/simulations
-     */
     public function getSimulations(array $params = []): ?array
     {
         return $this->apiGet('/v1/simulations', $params);
     }
 
-    /**
-     * GET /v1/simulations/{id}
-     */
     public function getSimulation(int $id, array $params = []): ?array
     {
         return $this->apiGet("/v1/simulations/{$id}", $params);
@@ -234,17 +211,11 @@ class MissionWayConnector implements AppConnectorInterface
 
     /* ─── Simulation Sessions ──────────────────────────── */
 
-    /**
-     * GET /v1/simulation-sessions
-     */
     public function getSimulationSessions(array $params = []): ?array
     {
         return $this->apiGet('/v1/simulation-sessions', $params);
     }
 
-    /**
-     * GET /v1/simulation-sessions/{id}
-     */
     public function getSimulationSession(int $id, array $params = []): ?array
     {
         return $this->apiGet("/v1/simulation-sessions/{$id}", $params);
@@ -252,17 +223,11 @@ class MissionWayConnector implements AppConnectorInterface
 
     /* ─── Session Players ──────────────────────────────── */
 
-    /**
-     * GET /v1/session-players/by-session/{sessionId}
-     */
     public function getSessionPlayers(int $sessionId): ?array
     {
         return $this->apiGet("/v1/session-players/by-session/{$sessionId}");
     }
 
-    /**
-     * GET /v1/session-players/by-player/{playerId}
-     */
     public function getPlayerSessions(int $playerId): ?array
     {
         $result = $this->apiGet("/v1/session-players/by-player/{$playerId}");
@@ -271,17 +236,11 @@ class MissionWayConnector implements AppConnectorInterface
 
     /* ─── Players ──────────────────────────────────────── */
 
-    /**
-     * GET /v1/players
-     */
     public function getPlayers(array $params = []): ?array
     {
         return $this->apiGet('/v1/players', $params);
     }
 
-    /**
-     * GET /v1/players/{id}
-     */
     public function getPlayer(int $id, array $params = []): ?array
     {
         return $this->apiGet("/v1/players/{$id}", $params);
@@ -289,9 +248,6 @@ class MissionWayConnector implements AppConnectorInterface
 
     /* ─── Player Profiles ──────────────────────────────── */
 
-    /**
-     * GET /v1/player-profiles/by-player/{playerId}
-     */
     public function getPlayerProfile(int $playerId): ?array
     {
         return $this->apiGet("/v1/player-profiles/by-player/{$playerId}");
@@ -299,9 +255,6 @@ class MissionWayConnector implements AppConnectorInterface
 
     /* ─── Player Progress ──────────────────────────────── */
 
-    /**
-     * GET /v1/player-progresses
-     */
     public function getPlayerProgressList(array $params = []): ?array
     {
         $result = $this->apiGet('/v1/player-progresses', $params);
@@ -312,66 +265,7 @@ class MissionWayConnector implements AppConnectorInterface
         return is_array($result) ? $result : [];
     }
 
-    /* ─── Health ───────────────────────────────────────── */
-
-    /**
-     * GET /health/simple
-     */
-    public function getHealthCheck(): ?array
-    {
-        try {
-            $response = Http::timeout(5)
-                ->get("{$this->baseUrl}/health/simple");
-
-            return [
-                'status' => $response->successful() ? 'ok' : 'error',
-                'http_code' => $response->status(),
-                'data' => $response->json(),
-            ];
-        } catch (\Throwable $e) {
-            return [
-                'status' => 'unreachable',
-                'http_code' => null,
-                'data' => ['error' => $e->getMessage()],
-            ];
-        }
-    }
-
     /* ─── Helpers ──────────────────────────────────────── */
-
-    /**
-     * Generic authenticated GET request.
-     */
-    private function apiGet(string $path, array $params = []): ?array
-    {
-        try {
-            $response = Http::timeout($this->timeout)
-                ->withHeaders(['x-api-key' => $this->apiKey])
-                ->get("{$this->baseUrl}{$path}", $params);
-
-            if ($response->successful()) {
-                return $response->json();
-            }
-
-            Log::channel('daily')->warning('[MissionWay] GET yanıt hatası', [
-                'path' => $path,
-                'status' => $response->status(),
-            ]);
-            return null;
-        } catch (\Throwable $e) {
-            Log::channel('daily')->error('[MissionWay] API GET hatası', [
-                'path' => $path,
-                'message' => $e->getMessage(),
-            ]);
-            return null;
-        }
-    }
-
-    private function isDuplicateError($response): bool
-    {
-        $body = $response->json('message', '');
-        return str_contains(strtolower($body), 'already exists');
-    }
 
     private function slugify(mixed $name): string
     {
@@ -382,10 +276,5 @@ class MissionWayConnector implements AppConnectorInterface
         $slug = preg_replace('/\s+/', '', $slug);
         $slug = preg_replace('/[^a-z0-9]/', '', $slug);
         return $slug ?: 'user';
-    }
-
-    public static function isReady(): bool
-    {
-        return true;
     }
 }

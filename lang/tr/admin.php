@@ -396,6 +396,8 @@ return [
     'expires_at' => 'Bitiş Tarihi',
     'seat_limit_reached' => 'Lisans kontenjanı dolmuştur.',
     'license_expired' => 'Bu lisansın süresi dolmuştur.',
+    'purchase_added' => 'Lisans alımı başarıyla eklendi.',
+    'license_already_exists' => 'Bu okulun zaten bir lisansı var. Lütfen mevcut lisansı düzenleyin veya satın alma ekleyin.',
 
     // DopiFuture — Registration Requests
     'registration_requests' => 'Kayıt Talepleri',
@@ -579,4 +581,5 @@ return [
     'hold_ctrl' => 'Birden fazla seçmek için Ctrl basılı tutun',
     'view_all' => 'Tümünü Gör',
     'notification_mode' => 'Bildirim Modu',
+    'contact_sent' => 'Mesajınız başarıyla gönderildi. En kısa sürede size dönüş yapacağız.',
 ];

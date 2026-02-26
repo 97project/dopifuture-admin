@@ -3,7 +3,6 @@
 namespace App\Connectors;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -22,17 +21,13 @@ use Illuminate\Support\Facades\Log;
  * Health:
  *   GET /health/simple
  */
-class WayStartupConnector implements AppConnectorInterface
+class WayStartupConnector extends BaseConnector implements AppConnectorInterface
 {
-    private string $baseUrl;
-    private string $apiKey;
-    private int $timeout;
+    protected string $logPrefix = 'WayStartup';
 
     public function __construct()
     {
-        $this->baseUrl = rtrim(config('connectors.way_startup.base_url'), '/');
-        $this->apiKey = config('connectors.way_startup.api_key');
-        $this->timeout = config('connectors.way_startup.timeout', 10);
+        parent::__construct('way_startup');
     }
 
     /* ─── Interface: syncUser ──────────────────────────── */
@@ -51,9 +46,7 @@ class WayStartupConnector implements AppConnectorInterface
         ];
 
         try {
-            $response = Http::timeout($this->timeout)
-                ->withHeaders(['x-api-key' => $this->apiKey])
-                ->post("{$this->baseUrl}/v1/startup/members", $payload);
+            $response = $this->apiPost('/v1/startup/members', $payload);
 
             if ($response->status() === 400 && $this->isDuplicateError($response)) {
                 Log::channel('daily')->info('[WayStartup] Üye zaten mevcut', [
@@ -116,9 +109,7 @@ class WayStartupConnector implements AppConnectorInterface
                 return true; // zaten yok
             }
 
-            $response = Http::timeout($this->timeout)
-                ->withHeaders(['x-api-key' => $this->apiKey])
-                ->delete("{$this->baseUrl}/v1/startup/members/{$memberId}");
+            $response = $this->apiDelete("/v1/startup/members/{$memberId}");
 
             if ($response->status() === 200 || $response->status() === 204 || $response->status() === 404) {
                 Log::channel('daily')->info('[WayStartup] Üye silindi', [
@@ -150,15 +141,7 @@ class WayStartupConnector implements AppConnectorInterface
     public function getUser(User $user): ?array
     {
         try {
-            $response = Http::timeout($this->timeout)
-                ->withHeaders(['x-api-key' => $this->apiKey])
-                ->get("{$this->baseUrl}/v1/startup/members/by-user/{$user->id}");
-
-            if ($response->successful()) {
-                return $response->json();
-            }
-
-            return null;
+            return $this->apiGet("/v1/startup/members/by-user/{$user->id}") ?: null;
         } catch (\Throwable $e) {
             Log::channel('daily')->error('[WayStartup] GET üye hatası', [
                 'userId' => $user->id,
@@ -224,25 +207,16 @@ class WayStartupConnector implements AppConnectorInterface
 
     /* ─── Simulations ──────────────────────────────────── */
 
-    /**
-     * GET /v1/startup/simulations
-     */
     public function getSimulations(array $params = []): ?array
     {
         return $this->apiGet('/v1/startup/simulations', $params);
     }
 
-    /**
-     * GET /v1/startup/simulations/with-progress
-     */
     public function getSimulationsWithProgress(): ?array
     {
         return $this->apiGet('/v1/startup/simulations/with-progress');
     }
 
-    /**
-     * GET /v1/startup/simulations/{id}
-     */
     public function getSimulation(int $id): ?array
     {
         return $this->apiGet("/v1/startup/simulations/{$id}");
@@ -250,9 +224,6 @@ class WayStartupConnector implements AppConnectorInterface
 
     /* ─── Steps ────────────────────────────────────────── */
 
-    /**
-     * GET /v1/startup/steps/simulation/{simulationId}
-     */
     public function getSteps(int $simulationId): ?array
     {
         $result = $this->apiGet("/v1/startup/steps/simulation/{$simulationId}");
@@ -261,18 +232,12 @@ class WayStartupConnector implements AppConnectorInterface
 
     /* ─── User Progress ────────────────────────────────── */
 
-    /**
-     * GET /v1/startup/userprogress/member/{memberId}
-     */
     public function getUserProgress(int $memberId): ?array
     {
         $result = $this->apiGet("/v1/startup/userprogress/member/{$memberId}");
         return is_array($result) ? $result : [];
     }
 
-    /**
-     * GET /v1/startup/userprogress/member/{memberId}/simulation/{simulationId}
-     */
     public function getUserProgressForSimulation(int $memberId, int $simulationId): ?array
     {
         return $this->apiGet("/v1/startup/userprogress/member/{$memberId}/simulation/{$simulationId}");
@@ -280,86 +245,14 @@ class WayStartupConnector implements AppConnectorInterface
 
     /* ─── User Step Progress ───────────────────────────── */
 
-    /**
-     * GET /v1/startup/userstepprogress/member/{memberId}
-     */
     public function getUserStepProgress(int $memberId): ?array
     {
         $result = $this->apiGet("/v1/startup/userstepprogress/member/{$memberId}");
         return is_array($result) ? $result : [];
     }
 
-    /**
-     * GET /v1/startup/userstepprogress/member/{memberId}/step/{stepId}
-     */
     public function getUserStepProgressForStep(int $memberId, int $stepId): ?array
     {
         return $this->apiGet("/v1/startup/userstepprogress/member/{$memberId}/step/{$stepId}");
-    }
-
-    /* ─── Health ───────────────────────────────────────── */
-
-    /**
-     * GET /health/simple
-     */
-    public function getHealthCheck(): ?array
-    {
-        try {
-            $response = Http::timeout(5)
-                ->get("{$this->baseUrl}/health/simple");
-
-            return [
-                'status' => $response->successful() ? 'ok' : 'error',
-                'http_code' => $response->status(),
-                'data' => $response->json(),
-            ];
-        } catch (\Throwable $e) {
-            return [
-                'status' => 'unreachable',
-                'http_code' => null,
-                'data' => ['error' => $e->getMessage()],
-            ];
-        }
-    }
-
-    /* ─── Helpers ──────────────────────────────────────── */
-
-    /**
-     * Generic authenticated GET request.
-     */
-    private function apiGet(string $path, array $params = []): ?array
-    {
-        try {
-            $response = Http::timeout($this->timeout)
-                ->withHeaders(['x-api-key' => $this->apiKey])
-                ->get("{$this->baseUrl}{$path}", $params);
-
-            if ($response->successful()) {
-                return $response->json();
-            }
-
-            Log::channel('daily')->warning('[WayStartup] GET yanıt hatası', [
-                'path' => $path,
-                'status' => $response->status(),
-            ]);
-            return null;
-        } catch (\Throwable $e) {
-            Log::channel('daily')->error('[WayStartup] API GET hatası', [
-                'path' => $path,
-                'message' => $e->getMessage(),
-            ]);
-            return null;
-        }
-    }
-
-    private function isDuplicateError($response): bool
-    {
-        $body = $response->json('message', '');
-        return str_contains(strtolower($body), 'already exists');
-    }
-
-    public static function isReady(): bool
-    {
-        return true;
     }
 }

@@ -7,6 +7,7 @@ use App\Traits\ApiResponse;
 use App\Models\User;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
+use App\Http\Resources\UserResource;
 use App\Services\AvatarService;
 use Illuminate\Http\Request;
 
@@ -62,7 +63,7 @@ class UserController extends Controller
 
         $paginator = $query->paginate($request->input('per_page', 15));
 
-        $data = collect($paginator->items())->map(fn($u) => $this->formatUser($u));
+        $data = collect($paginator->items())->map(fn($u) => UserResource::make($u));
 
         return $this->success($data, [
             'current_page' => $paginator->currentPage(),
@@ -103,7 +104,7 @@ class UserController extends Controller
             $user->syncRoles($request->input('roles'));
         }
 
-        return $this->created($this->formatUser($user->fresh('roles')));
+        return $this->created(UserResource::make($user->fresh('roles')));
     }
 
     /**
@@ -120,7 +121,7 @@ class UserController extends Controller
     public function show(User $user)
     {
         $user->load('roles', 'permissions');
-        return $this->success($this->formatUser($user));
+        return $this->success(UserResource::make($user));
     }
 
     /**
@@ -153,7 +154,7 @@ class UserController extends Controller
             $user->syncRoles($request->input('roles'));
         }
 
-        return $this->success($this->formatUser($user->fresh('roles')));
+        return $this->success(UserResource::make($user->fresh('roles')));
     }
 
     /**
@@ -173,25 +174,4 @@ class UserController extends Controller
         return $this->success(null, ['message' => __('api.user_deleted')]);
     }
 
-    protected function formatUser(User $user): array
-    {
-        return [
-            'id' => $user->id,
-            'name' => $user->name,
-            'surname' => $user->surname,
-            'full_name' => $user->full_name,
-            'email' => $user->email,
-            'phone' => $user->phone,
-            'locale' => $user->locale,
-            'timezone' => $user->timezone,
-            'status' => $user->status,
-            'dark_mode' => $user->dark_mode,
-            'avatar_url' => $user->avatar_url,
-            'has_2fa' => $user->hasTwoFactorEnabled(),
-            'roles' => $user->getRoleNames(),
-            'email_verified_at' => $user->email_verified_at?->toIso8601String(),
-            'last_login_at' => $user->last_login_at?->toIso8601String(),
-            'created_at' => $user->created_at?->toIso8601String(),
-        ];
-    }
 }

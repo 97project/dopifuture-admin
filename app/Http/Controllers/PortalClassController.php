@@ -56,7 +56,7 @@ class PortalClassController extends Controller
         SchoolClass::create(array_merge($data, ['is_active' => true]));
 
         return redirect()->route('portal.classes.index')
-            ->with('success', app()->getLocale() === 'tr' ? 'Sınıf oluşturuldu.' : 'Class created.');
+            ->with('success', __('admin.class_created'));
     }
 
     public function edit(SchoolClass $class)
@@ -81,7 +81,7 @@ class PortalClassController extends Controller
         $class->update($data);
 
         return redirect()->route('portal.classes.index')
-            ->with('success', app()->getLocale() === 'tr' ? 'Sınıf güncellendi.' : 'Class updated.');
+            ->with('success', __('admin.class_updated'));
     }
 
     public function destroy(SchoolClass $class)
@@ -89,7 +89,7 @@ class PortalClassController extends Controller
         $this->authorizeSchool($class->school_id);
         $class->delete();
         return redirect()->route('portal.classes.index')
-            ->with('success', app()->getLocale() === 'tr' ? 'Sınıf silindi.' : 'Class deleted.');
+            ->with('success', __('admin.class_deleted'));
     }
 
     private function getAvailableSchools()

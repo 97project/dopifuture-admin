@@ -89,7 +89,7 @@ class PortalUserController extends Controller
         }
 
         return redirect()->route('portal.users.index')
-            ->with('success', app()->getLocale() === 'tr' ? 'Kullanıcı oluşturuldu.' : 'User created.');
+            ->with('success', __('admin.user_created'));
     }
 
     public function edit(User $user)
@@ -124,14 +124,14 @@ class PortalUserController extends Controller
         $user->syncRoles([$data['role']]);
 
         return redirect()->route('portal.users.index')
-            ->with('success', app()->getLocale() === 'tr' ? 'Kullanıcı güncellendi.' : 'User updated.');
+            ->with('success', __('admin.user_updated'));
     }
 
     public function destroy(User $user)
     {
         $user->delete();
         return redirect()->route('portal.users.index')
-            ->with('success', app()->getLocale() === 'tr' ? 'Kullanıcı silindi.' : 'User deleted.');
+            ->with('success', __('admin.user_deleted'));
     }
 
     private function getAllowedRoles(): \Illuminate\Support\Collection

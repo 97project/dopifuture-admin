@@ -196,7 +196,7 @@ class RolePermissionSeeder extends Seeder
             [
                 'name' => 'Admin',
                 'surname' => 'User',
-                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'password' => \Illuminate\Support\Facades\Hash::make('Dp!F2026#Adm1n$'),
                 'email_verified_at' => now(),
                 'status' => 'active',
                 'locale' => 'tr',
