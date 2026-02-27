@@ -585,4 +585,10 @@ return [
     'contact_sent' => 'Mesajınız başarıyla gönderildi. En kısa sürede size dönüş yapacağız.',
     'portal_access_denied' => 'Admin kullanıcıları Portal\'a erişemez. Lütfen Admin Paneli\'ni kullanın.',
     'seat_limit_reached' => 'Bu okul için öğrenci kontenjanı dolmuştur. Daha fazla kontenjan eklemek için yöneticinize başvurun.',
+    'purchase_added' => 'Lisans kredi satın alımı başarıyla eklendi.',
+    'license_already_exists' => 'Bu okul için zaten bir lisans mevcut.',
+    'school_deleted' => 'Okul başarıyla silindi.',
+    'class_deleted' => 'Sınıf başarıyla silindi.',
+    'license_deleted' => 'Lisans başarıyla silindi.',
+    'current_password_incorrect' => 'Mevcut şifre hatalı.',
 ];

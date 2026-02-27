@@ -563,4 +563,10 @@ return [
     'contact_sent' => 'Your message has been sent successfully. We will get back to you soon.',
     'portal_access_denied' => 'Admin users cannot access the Portal. Please use the Admin Panel.',
     'seat_limit_reached' => 'Student seat limit has been reached for this school. Please contact your administrator to add more seats.',
+    'purchase_added' => 'License credit purchase has been added successfully.',
+    'license_already_exists' => 'A license already exists for this school.',
+    'school_deleted' => 'School has been deleted successfully.',
+    'class_deleted' => 'Class has been deleted successfully.',
+    'license_deleted' => 'License has been deleted successfully.',
+    'current_password_incorrect' => 'The current password is incorrect.',
 ];
