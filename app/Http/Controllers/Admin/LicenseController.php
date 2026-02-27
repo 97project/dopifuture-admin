@@ -71,18 +71,8 @@ class LicenseController extends Controller
         return view('admin.licenses.create', compact('schools'));
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\LicenseStoreRequest $request)
     {
-        $this->authorize('create', License::class);
-
-        $request->validate([
-            'school_id' => 'required|exists:schools,id|unique:licenses,school_id',
-            'seat_count' => 'required|integer|min:1',
-            'starts_at' => 'nullable|date',
-            'expires_at' => 'nullable|date|after_or_equal:starts_at',
-            'notes' => 'nullable|string|max:1000',
-            'is_active' => 'nullable|boolean',
-        ]);
 
         $license = License::create([
             'school_id' => $request->input('school_id'),
@@ -107,18 +97,8 @@ class LicenseController extends Controller
         return view('admin.licenses.edit', compact('license', 'schools'));
     }
 
-    public function update(Request $request, License $license)
+    public function update(\App\Http\Requests\LicenseUpdateRequest $request, License $license)
     {
-        $this->authorize('update', $license);
-
-        $request->validate([
-            'school_id' => 'required|exists:schools,id|unique:licenses,school_id,' . $license->id,
-            'seat_count' => 'required|integer|min:1',
-            'starts_at' => 'nullable|date',
-            'expires_at' => 'nullable|date|after_or_equal:starts_at',
-            'notes' => 'nullable|string|max:1000',
-            'is_active' => 'nullable|boolean',
-        ]);
 
         $license->update([
             'school_id' => $request->input('school_id'),

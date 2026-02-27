@@ -65,17 +65,8 @@ class ClassController extends Controller
         return view('admin.classes.create', compact('schools'));
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\ClassStoreRequest $request)
     {
-        $this->authorize('create', SchoolClass::class);
-
-        $request->validate([
-            'school_id' => 'required|exists:schools,id',
-            'name' => 'required|string|max:100',
-            'grade_level' => 'nullable|string|max:20',
-            'academic_year' => 'nullable|string|max:10',
-            'is_active' => 'nullable|boolean',
-        ]);
 
         $class = SchoolClass::create([
             'school_id' => $request->input('school_id'),
@@ -98,17 +89,8 @@ class ClassController extends Controller
         return view('admin.classes.edit', compact('class', 'schools'));
     }
 
-    public function update(Request $request, SchoolClass $class)
+    public function update(\App\Http\Requests\ClassUpdateRequest $request, SchoolClass $class)
     {
-        $this->authorize('update', $class);
-
-        $request->validate([
-            'school_id' => 'required|exists:schools,id',
-            'name' => 'required|string|max:100',
-            'grade_level' => 'nullable|string|max:20',
-            'academic_year' => 'nullable|string|max:10',
-            'is_active' => 'nullable|boolean',
-        ]);
 
         $class->update([
             'school_id' => $request->input('school_id'),

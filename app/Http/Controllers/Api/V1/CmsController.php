@@ -27,7 +27,7 @@ class CmsController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/cms/pages",
+     *     path="/api/v1/pages",
      *     operationId="cmsListPages",
      *     tags={"CMS"},
      *     summary="List published pages",
@@ -60,7 +60,7 @@ class CmsController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/cms/pages/{slug}",
+     *     path="/api/v1/pages/{slug}",
      *     operationId="cmsShowPage",
      *     tags={"CMS"},
      *     summary="Get a single published page by slug",
@@ -80,7 +80,7 @@ class CmsController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/cms/posts",
+     *     path="/api/v1/posts",
      *     operationId="cmsListPosts",
      *     tags={"CMS"},
      *     summary="List published posts",
@@ -116,7 +116,7 @@ class CmsController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/cms/posts/{slug}",
+     *     path="/api/v1/posts/{slug}",
      *     operationId="cmsShowPost",
      *     tags={"CMS"},
      *     summary="Get a single published post by slug (increments view count)",
@@ -137,7 +137,7 @@ class CmsController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/cms/categories",
+     *     path="/api/v1/categories",
      *     operationId="cmsListCategories",
      *     tags={"CMS"},
      *     summary="List active categories with children",
@@ -162,7 +162,7 @@ class CmsController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/cms/tags",
+     *     path="/api/v1/tags",
      *     operationId="cmsListTags",
      *     tags={"CMS"},
      *     summary="List all tags",
@@ -180,7 +180,7 @@ class CmsController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/cms/menus",
+     *     path="/api/v1/menus",
      *     operationId="cmsListMenus",
      *     tags={"CMS"},
      *     summary="List active menus with items",

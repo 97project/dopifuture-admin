@@ -17,7 +17,7 @@ class FaqApiController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/faqs",
+     *     path="/api/v1/faqs",
      *     operationId="faqList",
      *     tags={"FAQ"},
      *     summary="List all active FAQ categories with their active FAQs",
@@ -53,7 +53,7 @@ class FaqApiController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/faqs/{category}",
+     *     path="/api/v1/faqs/{category}",
      *     operationId="faqShowCategory",
      *     tags={"FAQ"},
      *     summary="Get a single FAQ category with its active FAQs",

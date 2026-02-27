@@ -38,20 +38,9 @@ class CategoryController extends Controller
         return view('admin.categories.create', compact('type', 'parents'));
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\CategoryStoreRequest $request)
     {
-        $this->authorize('create', Category::class);
-
-        $data = $request->validate([
-            'name' => 'required|array',
-            'name.*' => 'string|max:255',
-            'slug' => 'nullable|string|max:255|unique:categories,slug',
-            'description' => 'nullable|array',
-            'parent_id' => 'nullable|integer|exists:categories,id',
-            'sort_order' => 'nullable|integer',
-            'is_active' => 'boolean',
-            'type' => 'required|in:post,page,faq',
-        ]);
+        $data = $request->validated();
 
         Category::create($data);
 
@@ -68,19 +57,9 @@ class CategoryController extends Controller
         return view('admin.categories.edit', compact('category', 'parents'));
     }
 
-    public function update(Request $request, Category $category)
+    public function update(\App\Http\Requests\CategoryUpdateRequest $request, Category $category)
     {
-        $this->authorize('update', $category);
-
-        $data = $request->validate([
-            'name' => 'required|array',
-            'name.*' => 'string|max:255',
-            'slug' => 'nullable|string|max:255|unique:categories,slug,' . $category->id,
-            'description' => 'nullable|array',
-            'parent_id' => 'nullable|integer|exists:categories,id',
-            'sort_order' => 'nullable|integer',
-            'is_active' => 'boolean',
-        ]);
+        $data = $request->validated();
 
         $category->update($data);
 
