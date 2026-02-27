@@ -61,11 +61,6 @@ class PortalLicenseController extends Controller
         $this->guardLicenseAdmin();
         $this->authorizeSchool($license->school_id);
 
-        $user = auth()->user();
-        if (!$user->hasAnyRole(['super-admin', 'admin', 'license-manager'])) {
-            abort(403);
-        }
-
         $data = $request->validate([
             'seat_count' => 'required|integer|min:1',
             'amount' => 'nullable|numeric|min:0',
