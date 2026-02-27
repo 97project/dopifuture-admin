@@ -517,69 +517,73 @@ class VegaConnector implements AppConnectorInterface
     /**
      * Vega API'den kullanıcıyı email ile ara.
      * Önce search parametresi ile dene, desteklenmiyorsa sayfalı fallback.
+     * Sonuçlar 10 dakika cache'lenir (bulk sync performansı için).
      */
     private function findByEmail(string $email): ?array
     {
-        // 1) Önce search parametresi ile tek request dene
-        try {
-            $response = $this->request('GET', '/api/v1/users', [
-                'search' => $email,
-                'per_page' => 5,
-            ]);
+        $cacheKey = 'vega.user.email.' . md5(strtolower($email));
 
-            if ($response->successful()) {
-                $data = $response->json('data', []);
-                $users = $data['users'] ?? $data;
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 600, function () use ($email) {
+            // 1) Önce search parametresi ile tek request dene
+            try {
+                $response = $this->request('GET', '/api/v1/users', [
+                    'search' => $email,
+                    'per_page' => 5,
+                ]);
 
-                if (is_array($users)) {
-                    foreach ($users as $vegaUser) {
-                        if (isset($vegaUser['email']) && mb_strtolower($vegaUser['email']) === mb_strtolower($email)) {
-                            return $vegaUser;
+                if ($response->successful()) {
+                    $data = $response->json('data', []);
+                    $users = $data['users'] ?? $data;
+
+                    if (is_array($users)) {
+                        foreach ($users as $vegaUser) {
+                            if (isset($vegaUser['email']) && mb_strtolower($vegaUser['email']) === mb_strtolower($email)) {
+                                return $vegaUser;
+                            }
                         }
+                    }
+
+                    // Search worked but no exact match found
+                    return null;
+                }
+            } catch (\Throwable $e) {
+                Log::channel('daily')->warning('[Vega] search param desteklenmiyor, fallback', [
+                    'message' => $e->getMessage(),
+                ]);
+            }
+
+            // 2) Fallback: Sayfalı arama (max 3 sayfa güvenlik limiti)
+            $page = 1;
+            $maxPages = 3;
+
+            while ($page <= $maxPages) {
+                $response = $this->request('GET', '/api/v1/users', [
+                    'page' => $page,
+                    'per_page' => 50,
+                ]);
+
+                if (!$response->successful()) {
+                    return null;
+                }
+
+                $data = $response->json('data', []);
+                $users = $data['users'] ?? [];
+
+                foreach ($users as $vegaUser) {
+                    if (isset($vegaUser['email']) && mb_strtolower($vegaUser['email']) === mb_strtolower($email)) {
+                        return $vegaUser;
                     }
                 }
 
-                // Search worked but no exact match found
-                return null;
-            }
-        } catch (\Throwable $e) {
-            // Search parameter might not be supported, fall through to paginated approach
-            Log::channel('daily')->warning('[Vega] search param desteklenmiyor, fallback', [
-                'message' => $e->getMessage(),
-            ]);
-        }
-
-        // 2) Fallback: Sayfalı arama (max 3 sayfa güvenlik limiti)
-        $page = 1;
-        $maxPages = 3;
-
-        while ($page <= $maxPages) {
-            $response = $this->request('GET', '/api/v1/users', [
-                'page' => $page,
-                'per_page' => 50,
-            ]);
-
-            if (!$response->successful()) {
-                return null;
-            }
-
-            $data = $response->json('data', []);
-            $users = $data['users'] ?? [];
-
-            foreach ($users as $vegaUser) {
-                if (isset($vegaUser['email']) && mb_strtolower($vegaUser['email']) === mb_strtolower($email)) {
-                    return $vegaUser;
+                $lastPage = $data['last_page'] ?? 1;
+                if ($page >= $lastPage) {
+                    break;
                 }
+
+                $page++;
             }
 
-            $lastPage = $data['last_page'] ?? 1;
-            if ($page >= $lastPage) {
-                break;
-            }
-
-            $page++;
-        }
-
-        return null;
+            return null;
+        });
     }
 }

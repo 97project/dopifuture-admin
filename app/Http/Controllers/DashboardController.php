@@ -165,7 +165,7 @@ class DashboardController extends Controller
                 return back()->withErrors(['current_password' => __('admin.current_password_incorrect')]);
             }
 
-            $user->update(['password' => $request->input('new_password')]);
+            $user->update(['password' => \Illuminate\Support\Facades\Hash::make($request->input('new_password'))]);
         }
 
         return back()->with('success', __('admin.saved'));

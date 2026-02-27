@@ -75,7 +75,13 @@ class Setting extends Model
 
     public static function clearCache(): void
     {
-        Cache::flush();
+        // Clear only settings cache keys — NOT the entire cache store
+        $groups = self::distinct()->pluck('group');
+        foreach ($groups as $group) {
+            Cache::forget("settings.{$group}");
+        }
+        // Also clear the full settings blob if it's cached
+        Cache::forget('settings.all');
     }
 
     public function scopeForGroup($query, string $group)
