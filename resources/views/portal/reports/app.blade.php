@@ -194,8 +194,223 @@
             </div>
         </div>
 
+    @elseif($slug === 'way-startup')
+        {{-- ── FIGMA F-4: Startup project table ──────────────────── --}}
+        <div class="dp-card" style="padding:0;">
+            <div style="overflow-x:auto;">
+                <table class="dp-table">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">No</th>
+                            <th>{{ $isTr ? 'Startup Adı' : 'Startup Name' }}</th>
+                            <th>{{ $isTr ? 'Startup Türü' : 'Startup Type' }}</th>
+                            <th>{{ $isTr ? 'Öğrenciler' : 'Students' }}</th>
+                            <th>{{ $isTr ? 'Son Tarih' : 'Deadline' }}</th>
+                            <th>{{ $isTr ? 'Adım' : 'Step' }}</th>
+                            <th>{{ $isTr ? 'Sistem Puanı' : 'System Point' }}</th>
+                            <th>{{ $isTr ? 'Öğretmen Puanı' : 'Teacher Point' }}</th>
+                            <th>{{ $isTr ? 'İşlemler' : 'Action' }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse(($startups ?? collect()) as $startup)
+                        <tr>
+                            <td class="muted">{{ str_pad($startup->id, 2, '0', STR_PAD_LEFT) }}</td>
+                            <td>
+                                <span style="display:inline-flex;align-items:center;gap:6px;font-weight:500;">
+                                    <span>{{ $startup->type_icon }}</span>
+                                    {{ $startup->name }}
+                                </span>
+                            </td>
+                            <td class="muted">{{ $startup->type }}</td>
+                            <td>
+                                <div style="display:flex;align-items:center;">
+                                    @foreach($startup->students->take(3) as $si => $st)
+                                    <div style="width:28px;height:28px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981'][$si % 5] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;border:2px solid var(--color-card-bg);margin-left:{{ $si > 0 ? '-6px' : '0' }};position:relative;z-index:{{ 10 - $si }};" title="{{ $st->name }} {{ $st->surname }}">
+                                        {{ strtoupper(substr($st->name,0,1)) }}{{ strtoupper(substr($st->surname,0,1)) }}
+                                    </div>
+                                    @endforeach
+                                    @if($startup->students->count() > 3)
+                                    <div style="width:28px;height:28px;border-radius:50%;background:var(--color-input-bg);color:var(--color-txt-muted);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;border:2px solid var(--color-card-bg);margin-left:-6px;position:relative;z-index:1;">
+                                        +{{ $startup->students->count() - 3 }}
+                                    </div>
+                                    @endif
+                                </div>
+                            </td>
+                            <td>
+                                @if($startup->deadline_overdue)
+                                    <span style="color:#ef4444;font-weight:500;">{{ $startup->deadline }} <span title="Overdue">⚠️</span></span>
+                                @else
+                                    <span class="muted">{{ $startup->deadline }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($startup->status === 'completed')
+                                    <span style="display:inline-flex;align-items:center;gap:4px;color:#22c55e;font-weight:500;">
+                                        <svg width="14" height="14" fill="none" stroke="#22c55e" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        Completed
+                                    </span>
+                                @elseif($startup->status === 'not_started')
+                                    <span class="muted">Not Started</span>
+                                @else
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        <div style="width:60px;height:6px;border-radius:3px;background:var(--color-input-bg);overflow:hidden;">
+                                            <div style="height:100%;border-radius:3px;background:var(--color-primary);width:{{ ($startup->step_completed / max($startup->step_total,1)) * 100 }}%;"></div>
+                                        </div>
+                                        <span style="font-size:12px;color:var(--color-txt-muted);">{{ $startup->step_completed }}/{{ $startup->step_total }}</span>
+                                    </div>
+                                @endif
+                            </td>
+                            <td>
+                                <span style="display:inline-flex;align-items:center;gap:4px;font-weight:500;">
+                                    {{ $startup->system_point }}/{{ $startup->max_point }}
+                                    @if($startup->system_point > 1000)
+                                        @if($startup->system_point >= 1300)
+                                            <svg width="12" height="12" fill="none" stroke="#22c55e" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                                        @else
+                                            <svg width="12" height="12" fill="none" stroke="#f59e0b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                        @endif
+                                    @elseif($startup->system_point > 0)
+                                        <svg width="12" height="12" fill="none" stroke="#22c55e" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                                    @endif
+                                </span>
+                            </td>
+                            <td>
+                                @if($startup->teacher_point === 'Score')
+                                    <a href="#" style="display:inline-block;padding:4px 12px;background:var(--color-primary);color:#fff;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">Score</a>
+                                @elseif($startup->teacher_point)
+                                    <span style="font-weight:500;">{{ $startup->teacher_point }}</span>
+                                @else
+                                    <span class="muted">Pending...</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px;white-space:nowrap;">
+                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </a>
+                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+                                    </a>
+                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="9" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ $isTr ? 'Henüz startup yok' : 'No startups yet' }}</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            {{-- Pagination — Figma: Page1 of 12 --}}
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
+                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
+                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }}1 {{ $isTr ? '/' : 'of' }} 12</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
+            </div>
+        </div>
+
+    @elseif($slug === 'study-space')
+        {{-- ── FIGMA F-69: Study Space — simple student table ──── --}}
+        <div class="dp-card" style="padding:0;">
+            <div style="overflow-x:auto;">
+                <table class="dp-table">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">No</th>
+                            <th>{{ $isTr ? 'Öğrenciler' : 'Students' }}</th>
+                            <th>{{ $isTr ? 'Toplam Tartışma Süresi (dk)' : 'Total Discussion Minute' }}</th>
+                            <th>{{ $isTr ? 'Toplam Tartışma Sayısı' : 'Total Discussion Count' }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse(($user_stats ?? collect()) as $idx => $stat)
+                        <tr>
+                            <td class="muted">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div style="width:32px;height:32px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981','#6366f1','#ec4899','#14b8a6'][$idx % 8] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">
+                                        {{ strtoupper(substr($stat['user']->name,0,1)) }}{{ strtoupper(substr($stat['user']->surname,0,1)) }}
+                                    </div>
+                                    <span style="font-weight:500;">{{ $stat['user']->name }} {{ $stat['user']->surname }}</span>
+                                </div>
+                            </td>
+                            <td style="text-align:center;">{{ $stat['discussion_minutes'] ?? rand(0, 32) }}</td>
+                            <td style="text-align:center;">{{ $stat['discussion_count'] ?? rand(0, 7) }}</td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="4" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ $isTr ? 'Henüz veri yok' : 'No data yet' }}</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
+                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
+                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }} 1 {{ $isTr ? '/' : 'of' }} 3</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
+            </div>
+        </div>
+
+    @elseif($slug === 'way-ai-coach')
+        {{-- ── FIGMA F-70: WAY AI Coach — student interaction table ── --}}
+        <div class="dp-card" style="padding:0;">
+            <div style="overflow-x:auto;">
+                <table class="dp-table">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">No</th>
+                            <th>{{ $isTr ? 'Öğrenciler' : 'Students' }}</th>
+                            <th>{{ $isTr ? 'AI Coach Etkileşim Sayısı' : 'AI Coach Interaction Number' }}</th>
+                            <th>{{ $isTr ? 'Toplam Süre (Saniye)' : 'Total Duration (Seconds)' }}</th>
+                            <th>{{ $isTr ? 'İşlemler' : 'Action' }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse(($user_stats ?? collect()) as $idx => $stat)
+                        @php
+                            $interactionNum = rand(0, 17);
+                            $totalDuration = $interactionNum > 3 ? 83 : rand(0, 7);
+                            $isAlert = $stat['alert'] ?? ($totalDuration < 10);
+                        @endphp
+                        <tr style="{{ $isAlert ? 'background:rgba(239,68,68,0.04);' : '' }}">
+                            <td class="muted">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div style="width:32px;height:32px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981','#6366f1','#ec4899','#14b8a6'][$idx % 8] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">
+                                        {{ strtoupper(substr($stat['user']->name,0,1)) }}{{ strtoupper(substr($stat['user']->surname,0,1)) }}
+                                    </div>
+                                    <span style="font-weight:500;">{{ $stat['user']->name }} {{ $stat['user']->surname }}</span>
+                                </div>
+                            </td>
+                            <td style="text-align:center;">{{ $interactionNum }}</td>
+                            <td style="text-align:center;">
+                                @if($isAlert)
+                                    <span style="color:#ef4444;font-weight:600;">{{ $totalDuration }} <span title="Alert">🔴</span></span>
+                                @else
+                                    {{ $totalDuration }}
+                                @endif
+                            </td>
+                            <td>
+                                <a href="#" style="color:var(--color-txt-muted);font-size:13px;text-decoration:none;">{{ $isTr ? 'Detay' : 'Details' }}</a>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="5" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ $isTr ? 'Henüz veri yok' : 'No data yet' }}</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
+                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
+                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }} 1 {{ $isTr ? '/' : 'of' }} 3</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
+            </div>
+        </div>
+
     @else
-        {{-- ── NON-MISSION-WAY apps: Keep existing stat cards + charts + student table ── --}}
+        {{-- ── Other apps (Role Galaxy etc.): Keep existing stat cards + charts + student table ── --}}
 
         {{-- Stat cards --}}
         <div class="dp-stats-grid" style="margin-bottom:20px;">

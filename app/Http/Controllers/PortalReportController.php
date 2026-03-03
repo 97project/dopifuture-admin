@@ -106,6 +106,53 @@ class PortalReportController extends Controller
             }
         }
 
+        // ── WAY STARTUP: Figma F-4 Assignments mock data ───────────
+        $startups = collect();
+        if ($app->slug === 'way-startup') {
+            $startupData = [
+                ['SmartClass',   'Edtech',           2, 12, 150, 1500, null,   'in_progress'],
+                ['VitaCare',     'Healthcare Tech',   0, 12,   0, 1500, null,   'not_started'],
+                ['StudyFund',    'Fintech',           3, 12, 450, 1500, null,   'in_progress'],
+                ['TrendBox',     'E-commerce',        0, 12,1100, 1500, 'Score','completed'],
+                ['FutureBot',    'Robotics',          0, 12,   0, 1500, null,   'not_started'],
+                ['DreamVR',      'Virtual Reality',   0, 12, 750, 1500, null,   'completed'],
+                ['LifeCheck',    'Healthcare Tech',   6, 12, 600, 1500, null,   'in_progress'],
+                ['SenseFit',     'Wearable Tech',     0, 12,1300, 1500, 'Score','completed'],
+                ['EasyTrip',     'Travel Management', 0, 12, 350, 1500, null,   'not_started'],
+                ['SafeCore',     'Cybersecurity',    11, 12,1300, 1500, null,   'in_progress'],
+                ['DialogAI',     'Conversational AI', 0, 12,   0, 1500, null,   'not_started'],
+                ['TokenLab',     'Blockchain',        0, 12,1200, 1500, null,   'completed'],
+                ['ShopNest',     'E-commerce',        2, 12, 300, 1500, null,   'in_progress'],
+                ['TrustNet',     'Cybersecurity',     0, 12,1450, 1500, 'Score','completed'],
+                ['Learnify',     'Edtech',            0, 12,   0, 1500, null,   'not_started'],
+            ];
+            $typeIcons = [
+                'Edtech' => '📚', 'Healthcare Tech' => '🏥', 'Fintech' => '💰',
+                'E-commerce' => '🛒', 'Robotics' => '🤖', 'Virtual Reality' => '🎮',
+                'Wearable Tech' => '⌚', 'Travel Management' => '✈️',
+                'Cybersecurity' => '🔒', 'Conversational AI' => '💬', 'Blockchain' => '🔗',
+            ];
+            foreach ($startupData as $idx => $row) {
+                $studentSlice = $mockStudents->random(rand(2, 4));
+                $deadlineOverdue = in_array($idx, [9, 12, 14]);
+                $startups->push((object)[
+                    'id'            => $idx + 1,
+                    'name'          => $row[0],
+                    'type'          => $row[1],
+                    'type_icon'     => $typeIcons[$row[1]] ?? '📁',
+                    'students'      => $studentSlice,
+                    'deadline'      => $deadlineOverdue ? now()->subDays(rand(10,50))->format('m/d/Y') : '03/16/2026',
+                    'deadline_overdue' => $deadlineOverdue,
+                    'step_completed'=> $row[2],
+                    'step_total'    => $row[3],
+                    'system_point'  => $row[4],
+                    'max_point'     => $row[5],
+                    'teacher_point' => $row[6],
+                    'status'        => $row[7],
+                ]);
+            }
+        }
+
         // ── USER STATS for Performance tab ─────────────────────────
         $userStats = $mockStudents->map(function($s, $i) use ($app) {
             $base = [
@@ -153,6 +200,7 @@ class PortalReportController extends Controller
             'app'              => $app,
             'user'             => $user,
             'missions'         => $missions,
+            'startups'         => $startups,
             'total_missions'   => 24,
             'total_progress'   => 38,
             'total_completed'  => 27,
