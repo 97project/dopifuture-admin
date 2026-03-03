@@ -447,12 +447,13 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 32px; height: 32px;
+            min-width: 32px; min-height: 32px;
             border-radius: 6px;
             cursor: pointer;
             border: none;
             background: transparent;
             transition: all 0.15s;
+            gap: 4px;
         }
 
         .dp-action:hover { background: var(--color-input-bg); }

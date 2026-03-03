@@ -286,13 +286,13 @@
                             </td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;white-space:nowrap;">
-                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);">
+                                    <a href="{{ route('portal.reports.startup.detail', $startup->id) }}" class="dp-action" title="{{ $isTr ? 'Düzenle' : 'Edit' }}" style="color:var(--color-txt-muted);">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     </a>
-                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);">
+                                    <a href="#" class="dp-action" title="{{ $isTr ? 'Ayarlar' : 'Settings' }}" style="color:var(--color-txt-muted);">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
                                     </a>
-                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);">
+                                    <a href="#" class="dp-action" title="{{ $isTr ? 'Sil' : 'Delete' }}" style="color:var(--color-txt-muted);">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </a>
                                 </div>
@@ -393,7 +393,7 @@
                                 @endif
                             </td>
                             <td>
-                                <a href="#" style="color:var(--color-txt-muted);font-size:13px;text-decoration:none;">{{ $isTr ? 'Detay' : 'Details' }}</a>
+                                <a href="{{ route('portal.reports.coach.questions', $stat['user']->id) }}" style="color:var(--color-primary);font-size:13px;font-weight:500;text-decoration:none;">{{ $isTr ? 'Detay' : 'Details' }}</a>
                             </td>
                         </tr>
                         @empty
@@ -409,8 +409,102 @@
             </div>
         </div>
 
+    @elseif($slug === 'role-galaxy')
+        {{-- ── FIGMA Role Galaxy v1: Stat cards + student table ──── --}}
+        {{-- Stat cards --}}
+        <div style="display:flex;gap:16px;margin-bottom:20px;">
+            <div class="dp-stat-card" style="flex:1;">
+                <div class="s-value">5</div>
+                <div class="s-label">{{ $isTr ? 'Ort. Galaxy Katılımı' : 'Average Galaxy Join' }}</div>
+            </div>
+            <div class="dp-stat-card" style="flex:1;">
+                <div class="s-value">64</div>
+                <div class="s-label">{{ $isTr ? 'Ort. Süre (Saniye)' : 'Average Duration (Sec)' }}</div>
+            </div>
+        </div>
+
+        <div class="dp-card" style="padding:0;">
+            <div style="overflow-x:auto;">
+                <table class="dp-table">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">No</th>
+                            <th>{{ $isTr ? 'Öğrenciler' : 'Students' }}</th>
+                            <th>{{ $isTr ? 'Son Etkileşim' : 'Last Interaction' }}</th>
+                            <th>{{ $isTr ? 'Toplam Katılım' : 'Total Role Galaxies Joined' }}</th>
+                            <th>{{ $isTr ? 'Toplam Süre (Saniye)' : 'Total Duration (Seconds)' }}</th>
+                            <th>{{ $isTr ? 'Son 5 Katılım' : 'Last 5 Role Galaxies Joined' }}</th>
+                            <th>{{ $isTr ? 'İşlemler' : 'Action' }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse(($user_stats ?? collect()) as $idx => $stat)
+                        @php
+                            $lastInteractions = ['1 month ago','2 weeks ago','3 days ago','1 week ago','5 days ago','2 months ago','1 day ago','4 weeks ago'];
+                            $totalJoined = rand(2, 15);
+                            $totalDur = rand(10, 120);
+                            $galaxyIcons = ['🌍','🚀','🔬','💡','🎭','🎨','🏗️','📊'];
+                        @endphp
+                        <tr>
+                            <td class="muted">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div style="width:32px;height:32px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981','#6366f1','#ec4899','#14b8a6'][$idx % 8] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">
+                                        {{ strtoupper(substr($stat['user']->name,0,1)) }}{{ strtoupper(substr($stat['user']->surname,0,1)) }}
+                                    </div>
+                                    <span style="font-weight:500;">{{ $stat['user']->name }} {{ $stat['user']->surname }}</span>
+                                </div>
+                            </td>
+                            <td class="muted">{{ $lastInteractions[$idx % count($lastInteractions)] }}</td>
+                            <td style="text-align:center;">{{ $totalJoined }}</td>
+                            <td style="text-align:center;">
+                                <span style="display:inline-flex;align-items:center;gap:4px;">
+                                    {{ $totalDur }}
+                                    @if($totalDur < 30)
+                                        <svg width="12" height="12" fill="none" stroke="#ef4444" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    @elseif($totalDur < 60)
+                                        <svg width="12" height="12" fill="none" stroke="#f59e0b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    @else
+                                        <svg width="12" height="12" fill="none" stroke="#22c55e" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                                    @endif
+                                </span>
+                            </td>
+                            <td>
+                                <div style="display:flex;gap:4px;">
+                                    @for($g = 0; $g < 5; $g++)
+                                        <span style="font-size:16px;" title="Galaxy {{ $g+1 }}">{{ $galaxyIcons[($idx + $g) % count($galaxyIcons)] }}</span>
+                                    @endfor
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px;white-space:nowrap;">
+                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </a>
+                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+                                    </a>
+                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="7" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ $isTr ? 'Henüz veri yok' : 'No data yet' }}</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
+                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
+                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }} 1 {{ $isTr ? '/' : 'of' }} 12</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
+            </div>
+        </div>
+
     @else
-        {{-- ── Other apps (Role Galaxy etc.): Keep existing stat cards + charts + student table ── --}}
+        {{-- ── Remaining apps: stat cards + charts + student table ── --}}
 
         {{-- Stat cards --}}
         <div class="dp-stats-grid" style="margin-bottom:20px;">
