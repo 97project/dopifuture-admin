@@ -199,7 +199,7 @@
                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                             clip-rule="evenodd" />
                     </svg>
-                    2FA Security
+                    {{ __('admin.login_pill_schools') }}
                 </div>
                 <div
                     class="glass-card px-4 py-2 rounded-full text-xs text-blue-100 font-medium flex items-center gap-2">
@@ -208,7 +208,7 @@
                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                             clip-rule="evenodd" />
                     </svg>
-                    REST API
+                    {{ __('admin.login_pill_licenses') }}
                 </div>
                 <div
                     class="glass-card px-4 py-2 rounded-full text-xs text-blue-100 font-medium flex items-center gap-2">
@@ -217,7 +217,7 @@
                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                             clip-rule="evenodd" />
                     </svg>
-                    Multi-language
+                    {{ __('admin.login_pill_progress') }}
                 </div>
                 <div
                     class="glass-card px-4 py-2 rounded-full text-xs text-blue-100 font-medium flex items-center gap-2">
@@ -226,7 +226,7 @@
                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                             clip-rule="evenodd" />
                     </svg>
-                    Push Notifications
+                    {{ __('admin.login_pill_apps') }}
                 </div>
             </div>
 

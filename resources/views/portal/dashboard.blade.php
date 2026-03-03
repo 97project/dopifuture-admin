@@ -1,291 +1,158 @@
-@extends('portal.layout')
-@section('title', app()->getLocale() === 'tr' ? 'Genel Bakış' : 'Dashboard')
+@extends('portal.app')
+@section('title', app()->getLocale() === 'tr' ? 'Lisans Yönetimi' : 'License Management')
+
+
 @php $isTr = app()->getLocale() === 'tr'; @endphp
 
 @section('content')
-    <div class="page-header">
-        <h1>{{ $isTr ? 'Hoş Geldiniz' : 'Welcome' }}, {{ auth()->user()->name }} 👋</h1>
-        <p>{{ $isTr ? 'Portal genel bakışı ve özet istatistikler.' : 'Portal overview and summary statistics.' }}</p>
+
+    {{-- ═══ HEADER — Figma F-51: "Lisans Yönetimi" + "+ Add New License" button ═══ --}}
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <h2 style="font-size:24px; font-weight:700; color:var(--color-txt-dark); margin:0;">
+            {{ $isTr ? 'Lisans Yönetimi' : 'License Management' }}
+        </h2>
+        <button onclick="document.getElementById('addLicenseModal').classList.add('show')"
+                style="display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:#10B981; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; transition:background 0.2s;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            {{ $isTr ? 'Yeni Lisans Ekle' : 'Add New License' }}
+        </button>
     </div>
 
-    {{-- Stat Cards --}}
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(139,92,246,0.15);">
-                <svg width="20" height="20" fill="none" stroke="#a78bfa" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
+    {{-- ═══ LICENSE TABLE — Figma F-51: 1117-25324 ═══ --}}
+    <div class="dp-card">
+        {{-- Search --}}
+        <div style="margin-bottom:16px;">
+            <div class="dp-search" style="width:280px;">
+                <svg width="16" height="16" fill="none" stroke="var(--color-txt-muted)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" placeholder="{{ $isTr ? 'Ara...' : 'Search...' }}">
             </div>
-            <div class="stat-value">{{ $data['totalClasses'] ?? 0 }}</div>
-            <div class="stat-name">{{ $isTr ? 'Toplam Sınıf' : 'Total Classes' }}</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(34,197,94,0.15);">
-                <svg width="20" height="20" fill="none" stroke="#4ade80" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-            </div>
-            <div class="stat-value">{{ $data['totalUsers'] ?? 0 }}</div>
-            <div class="stat-name">{{ $isTr ? 'Toplam Kullanıcı' : 'Total Users' }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(251,191,36,0.15);">
-                <svg width="20" height="20" fill="none" stroke="#fbbf24" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-            </div>
-            <div class="stat-value">{{ $data['activeLicenses'] ?? 0 }} <span class="sub">/
-                    {{ $data['totalLicenses'] ?? 0 }}</span></div>
-            <div class="stat-name">{{ $isTr ? 'Aktif Lisans' : 'Active Licenses' }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(236,72,153,0.15);">
-                <svg width="20" height="20" fill="none" stroke="#f472b6" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-            </div>
-            <div class="stat-value">{{ $data['totalStudents'] ?? 0 }}</div>
-            <div class="stat-name">{{ $isTr ? 'Öğrenci' : 'Students' }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(14,165,233,0.15);">
-                <svg width="20" height="20" fill="none" stroke="#38bdf8" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <div class="stat-value">{{ $data['totalTeachers'] ?? 0 }}</div>
-            <div class="stat-name">{{ $isTr ? 'Öğretmen' : 'Teachers' }}</div>
-        </div>
-    </div>
 
-    {{-- App Usage --}}
-    @if(isset($data['appStats']) && $data['appStats']->count())
-        <div class="data-table-wrap">
-            <div class="data-table-header">
-                <h3>
-                    <svg width="18" height="18" fill="none" stroke="var(--brand-400)" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
-                    {{ $isTr ? 'Uygulama Kullanımı' : 'Application Usage' }}
-                </h3>
-            </div>
-            <div style="padding: 1.25rem;">
-                @php $maxAppUsers = $data['appStats']->max('users_count') ?: 1; @endphp
-                @foreach($data['appStats'] as $app)
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
-                        <span
-                            style="width: 140px; font-size: 0.85rem; color: var(--gray-300); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $app->getTranslation('name') }}</span>
-                        <div class="progress-bar" style="flex: 1; height: 8px;">
-                            <div class="fill"
-                                style="width: {{ ($app->users_count / $maxAppUsers) * 100 }}%; background: linear-gradient(90deg, var(--brand-500), var(--brand-400));">
-                            </div>
+        <div style="overflow-x:auto;">
+        <table class="dp-table">
+            <thead>
+                <tr>
+                    <th style="width:40px;">No</th>
+                    <th>{{ $isTr ? 'Okul Adı' : 'School Name' }}</th>
+                    <th>{{ $isTr ? 'Ülke/Şehir' : 'Country/State' }}</th>
+                    <th>{{ $isTr ? 'Toplam Lisans' : 'Total Licenses' }}</th>
+                    <th>{{ $isTr ? 'Durum' : 'Status' }}</th>
+                    <th>{{ $isTr ? 'Satın Alma Tarihi' : 'Purchase Date' }}</th>
+                    <th>{{ $isTr ? 'Lisans Süresi' : 'License Duration' }}</th>
+                    <th>{{ $isTr ? 'E-posta' : 'E-mail' }}</th>
+                    <th style="text-align:right;">{{ $isTr ? 'İşlemler' : 'Actions' }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse(($data['licenses'] ?? []) as $idx => $license)
+                <tr style="{{ ($license['status'] ?? '') === 'cancelled' ? 'background:rgba(239,68,68,0.04);' : '' }}">
+                    <td style="color:var(--color-txt-muted);">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
+                    <td style="font-weight:500;">{{ $license['school'] ?? '' }}</td>
+                    <td class="muted">{{ $license['location'] ?? '—' }}</td>
+                    <td>{{ $license['total'] ?? 0 }}</td>
+                    <td>
+                        @php $st = $license['status'] ?? 'active'; @endphp
+                        @if($st === 'active')
+                            <span class="dp-badge dp-badge-active">
+                                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="margin-right:4px;"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Active
+                            </span>
+                        @elseif($st === 'not_started')
+                            <span class="dp-badge" style="background:rgba(107,114,128,0.1);color:#6B7280;">
+                                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Not Started
+                            </span>
+                        @elseif($st === 'cancelled')
+                            <span class="dp-badge" style="background:rgba(239,68,68,0.1);color:#EF4444;">
+                                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="margin-right:4px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z"/></svg>
+                                Cancelled
+                            </span>
+                        @elseif($st === 'expired')
+                            <span class="dp-badge" style="background:rgba(245,158,11,0.1);color:#F59E0B;">Expired</span>
+                        @endif
+                    </td>
+                    <td class="muted">{{ $license['purchase_date'] ?? '—' }}</td>
+                    <td class="muted">{{ $license['duration'] ?? '—' }}</td>
+                    <td class="muted" style="font-size:13px;">{{ $license['email'] ?? '—' }}</td>
+                    <td style="text-align:right;">
+                        <div style="display:flex;gap:6px;justify-content:flex-end;">
+                            <button class="dp-action dp-action-edit" title="{{ $isTr ? 'Düzenle' : 'Edit' }}" style="background:none;border:none;cursor:pointer;color:var(--color-txt-muted);padding:4px;">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            <button class="dp-action" title="{{ $isTr ? 'Detay' : 'Details' }}" style="background:none;border:none;cursor:pointer;color:var(--color-primary);padding:4px;">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            </button>
+                            <button class="dp-action" title="{{ $isTr ? 'Sil' : 'Delete' }}" style="background:none;border:none;cursor:pointer;color:var(--color-error-red);padding:4px;">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
                         </div>
-                        <span
-                            style="font-size: 0.8rem; color: var(--gray-500); min-width: 40px; text-align: right;">{{ $app->users_count }}</span>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
-    {{-- License Utilization --}}
-    @if(isset($data['licenseStats']) && $data['licenseStats']->count())
-        <div class="data-table-wrap">
-            <div class="data-table-header">
-                <h3>
-                    <svg width="18" height="18" fill="none" stroke="#fbbf24" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                    {{ $isTr ? 'Lisans Durumu' : 'License Status' }}
-                </h3>
-            </div>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>{{ $isTr ? 'Okul' : 'School' }}</th>
-                        <th>{{ $isTr ? 'Doluluk' : 'Utilization' }}</th>
-                        <th>{{ $isTr ? 'Kalan Hak' : 'Remaining' }}</th>
-                        <th>{{ $isTr ? 'Bitiş' : 'Expiry' }}</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($data['licenseStats'] as $lic)
-                        @php
-                            $total = $lic->totalSeats();
-                            $pct = $total > 0 ? round(($lic->used_seats / $total) * 100) : 0;
-                            $remaining = $lic->availableSeats();
-                        @endphp
-                        <tr>
-                            <td style="font-weight: 500; color: white;">
-                                {{ $lic->school?->getTranslation('name') ?? ($lic->notes ?: '—') }}
-                            </td>
-                            <td>
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <div class="progress-bar" style="flex:1; max-width: 100px;">
-                                        <div class="fill"
-                                            style="width: {{ $pct }}%; background: {{ $pct >= 90 ? '#f87171' : ($pct >= 70 ? '#fbbf24' : '#4ade80') }};">
-                                        </div>
-                                    </div>
-                                    <span
-                                        style="font-size: 0.75rem; color: var(--gray-400);">{{ $lic->used_seats }}/{{ $lic->totalSeats() }}</span>
-                                </div>
-                            </td>
-                            <td style="font-weight: 600; color: {{ $remaining > 0 ? '#4ade80' : '#f87171' }};">
-                                {{ $remaining }}
-                            </td>
-                            <td style="font-size: 0.8rem; color: var(--gray-500);">{{ $lic->expires_at?->format('d.m.Y') ?? '—' }}
-                            </td>
-                            <td>
-                                <a href="{{ route('portal.licenses.show', $lic) }}"
-                                    class="btn btn-ghost btn-sm">{{ $isTr ? 'Detay' : 'Detail' }}</a>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    @endif
-
-    {{-- School Distribution --}}
-    @if(isset($data['schoolDistribution']) && $data['schoolDistribution']->count())
-        <div class="data-table-wrap">
-            <div class="data-table-header">
-                <h3>
-                    <svg width="18" height="18" fill="none" stroke="#4ade80" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                    {{ $isTr ? 'Okul Dağılımı' : 'School Distribution' }}
-                </h3>
-            </div>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>{{ $isTr ? 'Okul' : 'School' }}</th>
-                        <th>{{ $isTr ? 'Kullanıcı' : 'Users' }}</th>
-                        <th>{{ $isTr ? 'Sınıf' : 'Classes' }}</th>
-                        <th>{{ $isTr ? 'Lisans' : 'Licenses' }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($data['schoolDistribution'] as $school)
-                        <tr>
-                            <td style="font-weight: 500; color: white;">{{ $school->getTranslation('name') }}</td>
-                            <td>{{ $school->users_count }}</td>
-                            <td>{{ $school->classes_count }}</td>
-                            <td>{{ $school->licenses_count }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    @endif
-
-    {{-- Recent Users --}}
-    @if(isset($data['recentUsers']) && $data['recentUsers']->count())
-        <div class="data-table-wrap">
-            <div class="data-table-header">
-                <h3>
-                    <svg width="18" height="18" fill="none" stroke="#a78bfa" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {{ $isTr ? 'Son Eklenen Kullanıcılar' : 'Recent Users' }}
-                </h3>
-            </div>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>{{ $isTr ? 'Ad Soyad' : 'Name' }}</th>
-                        <th>E-posta</th>
-                        <th>{{ $isTr ? 'Tarih' : 'Date' }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($data['recentUsers'] as $ru)
-                        <tr>
-                            <td style="color: white;">{{ $ru->name }} {{ $ru->surname }}</td>
-                            <td>{{ $ru->email }}</td>
-                            <td style="font-size: 0.8rem; color: var(--gray-500);">{{ $ru->created_at?->format('d.m.Y H:i') }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    {{-- Teacher → My Classes --}}
-    @if(isset($data['myClasses']) && auth()->user()->hasRole('teacher'))
-        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; margin-bottom:2rem;">
-            @foreach($data['myClasses'] as $cls)
-            <div class="stat-card" style="position:relative;">
-                <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.75rem;">
-                    <div>
-                        <h3 style="color:white; font-weight:600; font-size:1rem;">{{ $cls->name }}</h3>
-                        <span style="font-size:0.75rem; color:var(--gray-500);">{{ $cls->school->name ?? '' }}</span>
-                    </div>
-                    <div style="text-align:right;">
-                        <div style="font-size:1.75rem; font-weight:800; color:var(--brand-400);">{{ $cls->students_count }}</div>
-                        <div style="font-size:0.7rem; color:var(--gray-500);">{{ $isTr ? 'Öğrenci' : 'Students' }}</div>
-                    </div>
-                </div>
-                <div style="display:flex; gap:0.5rem;">
-                    <a href="{{ route('portal.reports.class', $cls) }}" class="btn btn-primary btn-sm" style="flex:1; text-align:center;">📊 {{ $isTr ? 'Sınıf Raporu' : 'Class Report' }}</a>
-                    <a href="{{ route('portal.classes.show', $cls) }}" class="btn btn-ghost btn-sm">{{ $isTr ? 'Detay' : 'Detail' }}</a>
-                </div>
-            </div>
-            @endforeach
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="9" style="text-align:center;padding:40px;color:var(--color-txt-muted);">
+                        {{ $isTr ? 'Henüz lisans bulunamadı.' : 'No licenses found.' }}
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
         </div>
 
-        @if($data['myClasses']->count() === 0)
-        <div class="form-card" style="text-align:center; padding:2rem;">
-            <div style="font-size:2rem; margin-bottom:0.5rem;">📚</div>
-            <p style="color:var(--gray-500);">{{ $isTr ? 'Henüz sınıf atanmamış.' : 'No classes assigned yet.' }}</p>
+        {{-- Pagination — Figma F-51 ═══ --}}
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 0 0; border-top:1px solid var(--color-border); margin-top:16px;">
+            <button style="padding:8px 16px; border:1px solid var(--color-border); border-radius:6px; background:#fff; cursor:pointer; font-size:13px; color:var(--color-txt-muted);">
+                {{ $isTr ? 'Önceki' : 'Previous' }}
+            </button>
+            <span style="font-size:13px; color:var(--color-txt-muted);">
+                {{ $isTr ? 'Sayfa 1 / 12' : 'Page 1 of 12' }}
+            </span>
+            <button style="padding:8px 16px; border:1px solid var(--color-border); border-radius:6px; background:#fff; cursor:pointer; font-size:13px; color:var(--color-txt-muted);">
+                {{ $isTr ? 'Sonraki' : 'Next' }}
+            </button>
         </div>
-        @endif
-    @endif
-
-    {{-- Student → My Applications --}}
-    @if(isset($data['myApplications']) && auth()->user()->hasRole('student'))
-        <h2 style="color:white; font-size:1.1rem; font-weight:600; margin-bottom:1rem;">🎓 {{ $isTr ? 'Uygulamalarım' : 'My Applications' }}</h2>
-        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1rem; margin-bottom:2rem;">
-            @foreach($data['myApplications'] as $app)
-            <div class="stat-card">
-                <h3 style="color:white; font-weight:600; margin-bottom:0.25rem;">{{ $app->getTranslation('name') }}</h3>
-                <p style="font-size:0.75rem; color:var(--gray-500); margin-bottom:0.75rem;">{{ $app->getTranslation('description') ? \Str::limit($app->getTranslation('description'), 60) : '' }}</p>
-                <a href="{{ route('portal.reports') }}" class="btn btn-primary btn-sm" style="width:100%; text-align:center;">📊 {{ $isTr ? 'Raporlarım' : 'My Reports' }}</a>
-            </div>
-            @endforeach
-        </div>
-
-        @if(isset($data['myClasses']) && $data['myClasses']->count())
-        <h2 style="color:white; font-size:1.1rem; font-weight:600; margin-bottom:1rem;">📚 {{ $isTr ? 'Sınıflarım' : 'My Classes' }}</h2>
-        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1rem; margin-bottom:2rem;">
-            @foreach($data['myClasses'] as $cls)
-            <div class="stat-card">
-                <h3 style="color:white; font-weight:600;">{{ $cls->name }}</h3>
-                <span style="font-size:0.75rem; color:var(--gray-500);">{{ $cls->school->name ?? '' }}</span>
-            </div>
-            @endforeach
-        </div>
-        @endif
-
-        @if($data['myApplications']->count() === 0)
-        <div class="form-card" style="text-align:center; padding:2rem;">
-            <div style="font-size:2rem; margin-bottom:0.5rem;">📱</div>
-            <p style="color:var(--gray-500);">{{ $isTr ? 'Henüz uygulama atanmamış.' : 'No applications assigned yet.' }}</p>
-        </div>
-        @endif
-    @endif
-
-    {{-- Quick Action: Reports Link --}}
-    <div style="margin-top:1.5rem; text-align:center;">
-        <a href="{{ route('portal.reports') }}" class="btn btn-primary">📊 {{ $isTr ? 'Detaylı Raporlara Git' : 'View Detailed Reports' }}</a>
     </div>
+
+    {{-- ═══ ADD LICENSE MODAL — Figma F-52: 1151-12665 ═══ --}}
+    <div class="dp-modal-overlay" id="addLicenseModal">
+        <div class="dp-modal" style="max-width:500px;">
+            <div class="dp-modal-header">
+                <h3>{{ $isTr ? 'Yeni Lisans Ekle' : 'Add New License' }}</h3>
+                <button class="dp-modal-close" onclick="document.getElementById('addLicenseModal').classList.remove('show')">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="dp-modal-body" style="display:flex;flex-direction:column;gap:16px;">
+                <div>
+                    <label class="dp-label">{{ $isTr ? 'Okul Adı' : 'School Name' }}</label>
+                    <input class="dp-input" type="text" placeholder="{{ $isTr ? 'Okul adı girin' : 'Enter school name' }}">
+                </div>
+                <div>
+                    <label class="dp-label">{{ $isTr ? 'Ülke/Şehir' : 'Country/State' }}</label>
+                    <input class="dp-input" type="text" placeholder="{{ $isTr ? 'Ülke/şehir girin' : 'Enter country/state' }}">
+                </div>
+                <div>
+                    <label class="dp-label">{{ $isTr ? 'Lisans Sayısı' : 'Number of Licenses' }}</label>
+                    <input class="dp-input" type="number" placeholder="0">
+                </div>
+                <div>
+                    <label class="dp-label">{{ $isTr ? 'Lisans Süresi' : 'License Duration' }}</label>
+                    <input class="dp-input" type="text" placeholder="{{ $isTr ? 'Örn: 12/31/2026' : 'e.g. 12/31/2026' }}">
+                </div>
+                <div>
+                    <label class="dp-label">{{ $isTr ? 'E-posta' : 'E-mail' }}</label>
+                    <input class="dp-input" type="email" placeholder="{{ $isTr ? 'E-posta girin' : 'Enter email' }}">
+                </div>
+            </div>
+            <div class="dp-modal-footer">
+                <button type="button" class="dp-btn dp-btn-secondary" onclick="document.getElementById('addLicenseModal').classList.remove('show')">
+                    {{ $isTr ? 'İptal' : 'Cancel' }}
+                </button>
+                <button type="button" class="dp-btn dp-btn-primary">
+                    {{ $isTr ? 'Kaydet' : 'Save' }}
+                </button>
+            </div>
+        </div>
+    </div>
+
 @endsection

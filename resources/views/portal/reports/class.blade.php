@@ -1,83 +1,67 @@
-@extends('portal.layout')
+@extends('portal.app')
 @section('title', $class->name . ' — ' . __('admin.reports'))
+@section('page-title', $class->name . ' — Rapor')
 
 @section('content')
-<div class="page-header">
-    <div style="display:flex; align-items:center; gap:1rem;">
-        <a href="{{ route('portal.reports') }}" class="btn btn-ghost btn-sm">← {{ app()->getLocale() === 'tr' ? 'Geri' : 'Back' }}</a>
-        <div>
-            <h1>{{ $class->name }}</h1>
-            <p>{{ $class->school->name ?? '' }} — {{ app()->getLocale() === 'tr' ? 'Sınıf raporu' : 'Class report' }}</p>
-        </div>
+@php $isTr = app()->getLocale() === 'tr'; @endphp
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+    <div>
+        <div style="font-size:18px;font-weight:600;">{{ $class->name }}</div>
+        <p style="font-size:13px;color:var(--text-muted);margin:4px 0 0;">{{ $class->school->name ?? '' }} — {{ $isTr ? 'Sınıf raporu' : 'Class report' }}</p>
     </div>
+    <a href="{{ route('portal.reports') }}" class="dp-btn-ghost">← {{ $isTr ? 'Geri' : 'Back' }}</a>
 </div>
 
-{{-- Class Info --}}
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-value">{{ $class->students->count() }}</div>
-        <div class="stat-name">{{ app()->getLocale() === 'tr' ? 'Öğrenci' : 'Students' }}</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-value">{{ $class->teachers->count() }}</div>
-        <div class="stat-name">{{ app()->getLocale() === 'tr' ? 'Öğretmen' : 'Teachers' }}</div>
-    </div>
+{{-- Stats --}}
+<div class="dp-stats-grid" style="margin-bottom:20px;">
+    <div class="dp-stat-card"><div class="s-value">{{ $class->students->count() }}</div><div class="s-label">{{ $isTr ? 'Öğrenci' : 'Students' }}</div></div>
+    <div class="dp-stat-card"><div class="s-value">{{ $class->teachers->count() }}</div><div class="s-label">{{ $isTr ? 'Öğretmen' : 'Teachers' }}</div></div>
 </div>
 
-{{-- App Filter --}}
-<div style="display:flex; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap;">
-    <a href="{{ route('portal.reports.class', $class) }}" class="btn {{ !$selectedApp ? 'btn-primary' : 'btn-ghost' }} btn-sm">
-        {{ app()->getLocale() === 'tr' ? 'Tümü' : 'All' }}
-    </a>
+{{-- App Filter Tabs --}}
+<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+    <a href="{{ route('portal.reports.class', $class) }}" class="{{ !$selectedApp ? 'dp-btn' : 'dp-btn-ghost' }}" style="font-size:13px;">{{ $isTr ? 'Tümü' : 'All' }}</a>
     @foreach($apps as $a)
-    <a href="{{ route('portal.reports.class.app', [$class, $a->slug]) }}" class="btn {{ $selectedApp && $selectedApp->id === $a->id ? 'btn-primary' : 'btn-ghost' }} btn-sm">
-        {{ $a->name }}
-    </a>
+    <a href="{{ route('portal.reports.class.app', [$class, $a->slug]) }}" class="{{ $selectedApp && $selectedApp->id === $a->id ? 'dp-btn' : 'dp-btn-ghost' }}" style="font-size:13px;">{{ $a->name }}</a>
     @endforeach
 </div>
 
 {{-- Single App Detailed View --}}
 @if($selectedApp && isset($reportData['app']))
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-value">{{ $reportData['total_progress'] ?? 0 }}</div>
-            <div class="stat-name">{{ app()->getLocale() === 'tr' ? 'Toplam İlerleme' : 'Total Progress' }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" style="color:#4ade80;">{{ $reportData['total_completed'] ?? 0 }}</div>
-            <div class="stat-name">{{ app()->getLocale() === 'tr' ? 'Tamamlanan' : 'Completed' }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" style="color:var(--brand-400);">{{ isset($reportData['avg_score']) && $reportData['avg_score'] ? number_format($reportData['avg_score'], 1) : '-' }}</div>
-            <div class="stat-name">{{ app()->getLocale() === 'tr' ? 'Ort. Puan' : 'Avg Score' }}</div>
-        </div>
+    <div class="dp-stats-grid" style="margin-bottom:20px;">
+        <div class="dp-stat-card"><div class="s-value">{{ $reportData['total_progress'] ?? 0 }}</div><div class="s-label">{{ $isTr ? 'Toplam İlerleme' : 'Total Progress' }}</div></div>
+        <div class="dp-stat-card"><div class="s-value" style="color:var(--active-green);">{{ $reportData['total_completed'] ?? 0 }}</div><div class="s-label">{{ $isTr ? 'Tamamlanan' : 'Completed' }}</div></div>
+        <div class="dp-stat-card"><div class="s-value" style="color:var(--primary);">{{ isset($reportData['avg_score']) && $reportData['avg_score'] ? number_format($reportData['avg_score'], 1) : '-' }}</div><div class="s-label">{{ $isTr ? 'Ort. Puan' : 'Avg Score' }}</div></div>
     </div>
 
-    {{-- Student Table --}}
     @if(isset($reportData['user_stats']) && count($reportData['user_stats']))
-    <div class="data-table-wrap">
-        <div class="data-table-header"><h3>👥 {{ app()->getLocale() === 'tr' ? 'Öğrenci Performansı' : 'Student Performance' }}</h3></div>
-        <table class="data-table">
+    <div class="dp-card">
+        <div class="dp-card-title">👥 {{ $isTr ? 'Öğrenci Performansı' : 'Student Performance' }}</div>
+        <table class="dp-table">
             <thead><tr>
-                <th>{{ app()->getLocale() === 'tr' ? 'Öğrenci' : 'Student' }}</th>
-                <th>{{ app()->getLocale() === 'tr' ? 'Tamamlanma' : 'Completion' }}</th>
-                <th>{{ app()->getLocale() === 'tr' ? 'Puan' : 'Score' }}</th>
+                <th>{{ $isTr ? 'Öğrenci' : 'Student' }}</th>
+                <th>{{ $isTr ? 'Tamamlanma' : 'Completion' }}</th>
+                <th>{{ $isTr ? 'Puan' : 'Score' }}</th>
                 <th></th>
             </tr></thead>
             <tbody>
             @foreach($reportData['user_stats'] as $us)
             <tr>
-                <td style="color:white; font-weight:500;">{{ $us['user']->name ?? '' }} {{ $us['user']->surname ?? '' }}</td>
                 <td>
-                    <div style="display:flex; align-items:center; gap:0.5rem;">
-                        <div class="progress-bar" style="width:80px;">
-                            <div class="fill" style="width:{{ $us['completion_rate'] }}%; background:{{ $us['completion_rate'] >= 80 ? '#4ade80' : '#fbbf24' }};"></div>
-                        </div>
+                    <div class="dp-td-avatar">
+                        <div class="av">{{ strtoupper(substr($us['user']->name??'',0,1).substr($us['user']->surname??'',0,1)) }}</div>
+                        <span style="font-weight:500;">{{ $us['user']->name ?? '' }} {{ $us['user']->surname ?? '' }}</span>
+                    </div>
+                </td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div class="dp-progress" style="width:80px;"><div class="dp-progress-fill" style="width:{{ $us['completion_rate'] }}%;{{ $us['completion_rate'] < 40 ? 'background:#fbbf24;' : '' }}"></div></div>
                         {{ $us['completion_rate'] }}%
                     </div>
                 </td>
                 <td>{{ $us['avg_score'] ? number_format($us['avg_score'], 1) : '-' }}</td>
-                <td><a href="{{ route('portal.reports.student', $us['user']) }}" class="btn btn-ghost btn-sm">{{ app()->getLocale() === 'tr' ? 'Detay' : 'Detail' }}</a></td>
+                <td><a href="{{ route('portal.reports.student', $us['user']) }}" class="dp-action dp-action-view"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a></td>
             </tr>
             @endforeach
             </tbody>
@@ -86,42 +70,41 @@
     @endif
 @else
     {{-- All Apps Summary --}}
-    <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; margin-bottom:2rem;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:24px;">
     @foreach($reportData as $r)
-        <div class="stat-card">
-            <h3 style="color:white; font-weight:600; margin-bottom:0.75rem;">{{ $r['app']->name }}</h3>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+        <div class="dp-card">
+            <div style="font-weight:600;font-size:15px;margin-bottom:12px;">{{ $r['app']->name }}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                 <div>
-                    <div style="font-size:1.25rem; font-weight:700; color:#4ade80;">{{ $r['completed'] }}<span style="color:var(--gray-500); font-size:0.8rem; font-weight:400;">/{{ $r['total_progress'] }}</span></div>
-                    <div style="font-size:0.7rem; color:var(--gray-500);">{{ app()->getLocale() === 'tr' ? 'Tamamlanan' : 'Completed' }}</div>
+                    <div style="font-size:20px;font-weight:700;color:var(--active-green);">{{ $r['completed'] }}<span style="color:var(--text-muted);font-size:12px;font-weight:400;">/{{ $r['total_progress'] }}</span></div>
+                    <div style="font-size:11px;color:var(--text-muted);">{{ $isTr ? 'Tamamlanan' : 'Completed' }}</div>
                 </div>
                 <div>
-                    <div style="font-size:1.25rem; font-weight:700; color:var(--brand-400);">{{ $r['avg_score'] ? number_format($r['avg_score'], 1) : '-' }}</div>
-                    <div style="font-size:0.7rem; color:var(--gray-500);">{{ app()->getLocale() === 'tr' ? 'Ort. Puan' : 'Avg Score' }}</div>
+                    <div style="font-size:20px;font-weight:700;color:var(--primary);">{{ $r['avg_score'] ? number_format($r['avg_score'], 1) : '-' }}</div>
+                    <div style="font-size:11px;color:var(--text-muted);">{{ $isTr ? 'Ort. Puan' : 'Avg Score' }}</div>
                 </div>
             </div>
-            <div class="progress-bar" style="margin-top:0.75rem;">
-                <div class="fill" style="width:{{ $r['completion_rate'] }}%; background:linear-gradient(90deg,#4ade80,#22d3ee);"></div>
-            </div>
+            <div class="dp-progress" style="margin-top:12px;"><div class="dp-progress-fill" style="width:{{ $r['completion_rate'] }}%;"></div></div>
         </div>
     @endforeach
     </div>
 
     {{-- Students List --}}
-    <div class="data-table-wrap">
-        <div class="data-table-header"><h3>👥 {{ app()->getLocale() === 'tr' ? 'Sınıf Öğrencileri' : 'Class Students' }}</h3></div>
-        <table class="data-table">
-            <thead><tr>
-                <th>{{ app()->getLocale() === 'tr' ? 'Öğrenci' : 'Student' }}</th>
-                <th>Email</th>
-                <th></th>
-            </tr></thead>
+    <div class="dp-card">
+        <div class="dp-card-title">👥 {{ $isTr ? 'Sınıf Öğrencileri' : 'Class Students' }}</div>
+        <table class="dp-table">
+            <thead><tr><th>{{ $isTr ? 'Öğrenci' : 'Student' }}</th><th>Email</th><th></th></tr></thead>
             <tbody>
             @foreach($class->students as $s)
             <tr>
-                <td style="color:white; font-weight:500;">{{ $s->name }} {{ $s->surname }}</td>
-                <td>{{ $s->email }}</td>
-                <td><a href="{{ route('portal.reports.student', $s) }}" class="btn btn-ghost btn-sm">{{ app()->getLocale() === 'tr' ? 'Rapor' : 'Report' }}</a></td>
+                <td>
+                    <div class="dp-td-avatar">
+                        <div class="av">{{ strtoupper(substr($s->name,0,1).substr($s->surname??'',0,1)) }}</div>
+                        <span style="font-weight:500;">{{ $s->name }} {{ $s->surname }}</span>
+                    </div>
+                </td>
+                <td class="muted">{{ $s->email }}</td>
+                <td><a href="{{ route('portal.reports.student', $s) }}" class="dp-action dp-action-view"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a></td>
             </tr>
             @endforeach
             </tbody>

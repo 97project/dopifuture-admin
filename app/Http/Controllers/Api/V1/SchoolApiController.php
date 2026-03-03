@@ -24,7 +24,6 @@ class SchoolApiController extends Controller
      */
     public function index(): JsonResponse
     {
-        $locale = app()->getLocale();
         $schools = School::active()
             ->withCount(['classes', 'users'])
             ->get();
@@ -32,8 +31,9 @@ class SchoolApiController extends Controller
         return response()->json([
             'data' => $schools->map(fn($s) => [
                 'id' => $s->id,
-                'name' => $s->getTranslation('name', $locale),
+                'name' => $s->name,
                 'country' => $s->country,
+                'state' => $s->state,
                 'city' => $s->city,
                 'phone' => $s->phone,
                 'email' => $s->email,
@@ -58,14 +58,14 @@ class SchoolApiController extends Controller
      */
     public function show(School $school): JsonResponse
     {
-        $locale = app()->getLocale();
         $school->load(['classes' => fn($q) => $q->active(), 'licenses' => fn($q) => $q->active()]);
 
         return response()->json([
             'data' => [
                 'id' => $school->id,
-                'name' => $school->getTranslation('name', $locale),
+                'name' => $school->name,
                 'country' => $school->country,
+                'state' => $school->state,
                 'city' => $school->city,
                 'address' => $school->address,
                 'phone' => $school->phone,

@@ -1,93 +1,88 @@
-@extends('portal.layout')
+@extends('portal.app')
 @section('title', app()->getLocale() === 'tr' ? 'Profilim' : 'My Profile')
-@php $isTr = app()->getLocale() === 'tr';
-$user = auth()->user(); @endphp
+@section('page-title', app()->getLocale() === 'tr' ? 'Profilim' : 'My Profile')
+@php $isTr = app()->getLocale() === 'tr'; $user = auth()->user(); @endphp
 
 @section('content')
-    <div class="page-header">
-        <h1>{{ $isTr ? 'Profilim' : 'My Profile' }}</h1>
-        <p>{{ $isTr ? 'Kişisel bilgilerinizi ve şifrenizi güncelleyin.' : 'Update your personal information and password.' }}
+    {{-- Figma §4.8: Profile Avatar --}}
+    <div style="text-align:center;margin-bottom:24px;">
+        <div class="dp-profile-avatar">
+            {{ strtoupper(substr($user->name,0,1) . substr($user->surname ?? '',0,1)) }}
+        </div>
+        <h2 style="font-size:24px;font-weight:700;color:var(--color-txt);margin:0;">{{ $user->name }} {{ $user->surname ?? '' }}</h2>
+        <p style="font-size:14px;color:var(--color-txt-muted);margin-top:4px;">
+            @foreach($user->roles as $r) {{ $r->name }} @endforeach
         </p>
     </div>
 
-    @if(session('success'))
-        <div class="alert-success">{{ session('success') }}</div>
-    @endif
-
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; max-width: 900px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:900px;margin:0 auto;">
         {{-- Personal Info --}}
-        <div class="form-card">
-            <h3 style="font-size: 1rem; font-weight: 600; color: white; margin-bottom: 1.25rem;">
-                {{ $isTr ? 'Kişisel Bilgiler' : 'Personal Details' }}</h3>
+        <div class="dp-card">
+            <div class="dp-card-title">{{ $isTr ? 'Kişisel Bilgiler' : 'Personal Details' }}</div>
             <form action="{{ route('portal.profile.update') }}" method="POST">
                 @csrf @method('PUT')
-                <div style="margin-bottom: 1rem;">
-                    <label class="form-label">{{ __('admin.name') }} *</label>
-                    <input type="text" name="name" value="{{ old('name', $user->name) }}" required class="form-input">
-                    @error('name') <p class="form-error">{{ $message }}</p> @enderror
+                <div class="dp-form-group">
+                    <label class="dp-form-label">{{ __('admin.name') }} *</label>
+                    <input type="text" name="name" value="{{ old('name', $user->name) }}" required class="dp-form-input">
+                    @error('name') <p class="dp-form-error">{{ $message }}</p> @enderror
                 </div>
-                <div style="margin-bottom: 1rem;">
-                    <label class="form-label">{{ __('admin.surname') }}</label>
-                    <input type="text" name="surname" value="{{ old('surname', $user->surname) }}" class="form-input">
+                <div class="dp-form-group">
+                    <label class="dp-form-label">{{ __('admin.surname') }}</label>
+                    <input type="text" name="surname" value="{{ old('surname', $user->surname) }}" class="dp-form-input">
                 </div>
-                <div style="margin-bottom: 1rem;">
-                    <label class="form-label">E-posta</label>
-                    <input type="email" value="{{ $user->email }}" class="form-input" disabled
-                        style="opacity: 0.5; cursor: not-allowed;">
+                <div class="dp-form-group">
+                    <label class="dp-form-label">E-posta</label>
+                    <input type="email" value="{{ $user->email }}" class="dp-form-input" disabled style="opacity:0.5;cursor:not-allowed;">
                 </div>
-                <div style="margin-bottom: 1rem;">
-                    <label class="form-label">{{ $isTr ? 'Telefon' : 'Phone' }}</label>
-                    <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" class="form-input">
+                <div class="dp-form-group">
+                    <label class="dp-form-label">{{ $isTr ? 'Telefon' : 'Phone' }}</label>
+                    <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" class="dp-form-input">
                 </div>
-                <div style="margin-bottom: 1rem;">
-                    <label class="form-label">{{ $isTr ? 'Dil' : 'Language' }}</label>
-                    <select name="locale" class="form-select">
+                <div class="dp-form-group">
+                    <label class="dp-form-label">{{ $isTr ? 'Dil' : 'Language' }}</label>
+                    <select name="locale" class="dp-form-select">
                         <option value="tr" {{ old('locale', $user->locale) === 'tr' ? 'selected' : '' }}>Türkçe</option>
                         <option value="en" {{ old('locale', $user->locale) === 'en' ? 'selected' : '' }}>English</option>
                     </select>
                 </div>
-                <button type="submit" class="btn-primary" style="width: 100%;">{{ $isTr ? 'Güncelle' : 'Update' }}</button>
+                <button type="submit" class="dp-btn-submit">{{ $isTr ? 'Güncelle' : 'Update' }}</button>
             </form>
         </div>
 
-        {{-- Password --}}
         <div>
-            <div class="form-card" style="margin-bottom: 1.5rem;">
-                <h3 style="font-size: 1rem; font-weight: 600; color: white; margin-bottom: 1.25rem;">
-                    {{ $isTr ? 'Şifre Değiştir' : 'Change Password' }}</h3>
+            {{-- Password Change --}}
+            <div class="dp-card" style="margin-bottom:20px;">
+                <div class="dp-card-title">{{ $isTr ? 'Şifre Değiştir' : 'Change Password' }}</div>
                 <form action="{{ route('portal.profile.update') }}" method="POST">
                     @csrf @method('PUT')
-                    <div style="margin-bottom: 1rem;">
-                        <label class="form-label">{{ $isTr ? 'Mevcut Şifre' : 'Current Password' }}</label>
-                        <input type="password" name="current_password" class="form-input">
-                        @error('current_password') <p class="form-error">{{ $message }}</p> @enderror
+                    <div class="dp-form-group">
+                        <label class="dp-form-label">{{ $isTr ? 'Mevcut Şifre' : 'Current Password' }}</label>
+                        <input type="password" name="current_password" class="dp-form-input">
+                        @error('current_password') <p class="dp-form-error">{{ $message }}</p> @enderror
                     </div>
-                    <div style="margin-bottom: 1rem;">
-                        <label class="form-label">{{ $isTr ? 'Yeni Şifre' : 'New Password' }}</label>
-                        <input type="password" name="password" class="form-input">
-                        @error('password') <p class="form-error">{{ $message }}</p> @enderror
+                    <div class="dp-form-group">
+                        <label class="dp-form-label">{{ $isTr ? 'Yeni Şifre' : 'New Password' }}</label>
+                        <input type="password" name="password" class="dp-form-input">
+                        @error('password') <p class="dp-form-error">{{ $message }}</p> @enderror
                     </div>
-                    <div style="margin-bottom: 1rem;">
-                        <label class="form-label">{{ $isTr ? 'Şifre Tekrar' : 'Confirm Password' }}</label>
-                        <input type="password" name="password_confirmation" class="form-input">
+                    <div class="dp-form-group">
+                        <label class="dp-form-label">{{ $isTr ? 'Şifre Tekrar' : 'Confirm Password' }}</label>
+                        <input type="password" name="password_confirmation" class="dp-form-input">
                     </div>
-                    <button type="submit" class="btn-primary"
-                        style="width: 100%;">{{ $isTr ? 'Şifreyi Değiştir' : 'Change Password' }}</button>
+                    <button type="submit" class="dp-btn-submit">{{ $isTr ? 'Şifreyi Değiştir' : 'Change Password' }}</button>
                 </form>
             </div>
 
             {{-- Role Info --}}
-            <div class="form-card">
-                <h3 style="font-size: 1rem; font-weight: 600; color: white; margin-bottom: 0.75rem;">
-                    {{ $isTr ? 'Hesap Bilgileri' : 'Account Info' }}</h3>
-                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                    <span class="form-label" style="margin: 0;">{{ $isTr ? 'Rol:' : 'Role:' }}</span>
+            <div class="dp-card">
+                <div class="dp-card-title">{{ $isTr ? 'Hesap Bilgileri' : 'Account Info' }}</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <span style="font-size:14px;font-weight:500;color:var(--text-secondary);">{{ $isTr ? 'Rol:' : 'Role:' }}</span>
                     @foreach($user->roles as $r)
-                        <span class="badge badge-info">{{ $r->name }}</span>
+                        <span class="dp-badge dp-badge-pending">{{ $r->name }}</span>
                     @endforeach
                 </div>
-                <p style="font-size: 0.8rem; color: var(--gray-500);">{{ $isTr ? 'Kayıt:' : 'Joined:' }}
-                    {{ $user->created_at?->format('d.m.Y') }}</p>
+                <p style="font-size:13px;color:var(--text-muted);">{{ $isTr ? 'Kayıt:' : 'Joined:' }} {{ $user->created_at?->format('d.m.Y') }}</p>
             </div>
         </div>
     </div>

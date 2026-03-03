@@ -14,45 +14,50 @@ class PortalUserController extends Controller
 {
     public function index(Request $request)
     {
-        $user = auth()->user();
+        // Mock data matching Figma frame 1158-14034
+        $currentRole = $request->get('role', 'student');
 
-        // Student can only see their own profile
-        if ($user->hasRole('student')) {
-            return redirect()->route('portal.users.show', $user);
-        }
+        $mockStudents = collect([
+            (object)['id'=>1, 'name'=>'Allison',      'surname'=>'Gouse',    'email'=>'emily.smith@test.com',       'grade'=>'4', 'branch'=>null],
+            (object)['id'=>2, 'name'=>'John',          'surname'=>'Doe',      'email'=>'john.doe@example.com',       'grade'=>'3', 'branch'=>null],
+            (object)['id'=>3, 'name'=>'Emerson',       'surname'=>'Rosser',   'email'=>'student01@example.com',      'grade'=>'4', 'branch'=>null],
+            (object)['id'=>4, 'name'=>'Maren',         'surname'=>'Dokidis',  'email'=>'license.admin@sample...',    'grade'=>'5', 'branch'=>null],
+            (object)['id'=>5, 'name'=>'Cristofer',     'surname'=>'Curtis',   'email'=>'info@demo-example.com',      'grade'=>'2', 'branch'=>null],
+            (object)['id'=>6, 'name'=>'Chance Rhiel',  'surname'=>'Madsen',   'email'=>'name@example.com',           'grade'=>'5', 'branch'=>null],
+            (object)['id'=>7, 'name'=>'Corey',         'surname'=>'Bergson',  'email'=>'olivia.johnson@example...',  'grade'=>'4', 'branch'=>null],
+            (object)['id'=>8, 'name'=>'Anika',         'surname'=>'Mango',    'email'=>'mason.thomas@exampl...',     'grade'=>'1', 'branch'=>null],
+            (object)['id'=>9, 'name'=>'Kadin',         'surname'=>'Septimus', 'email'=>'ethan.jackson@example..',    'grade'=>'5', 'branch'=>null],
+        ]);
 
-        $query = User::with('roles');
+        $mockTeachers = collect([
+            (object)['id'=>101, 'name'=>'Sarah',   'surname'=>'Johnson',  'email'=>'sarah.j@school.com',   'grade'=>null, 'branch'=>'Mathematics'],
+            (object)['id'=>102, 'name'=>'Michael', 'surname'=>'Chen',     'email'=>'m.chen@school.com',    'grade'=>null, 'branch'=>'Science'],
+            (object)['id'=>103, 'name'=>'Emily',   'surname'=>'Davis',    'email'=>'e.davis@school.com',   'grade'=>null, 'branch'=>'English'],
+            (object)['id'=>104, 'name'=>'Robert',  'surname'=>'Wilson',   'email'=>'r.wilson@school.com',  'grade'=>null, 'branch'=>'History'],
+            (object)['id'=>105, 'name'=>'Jessica', 'surname'=>'Brown',    'email'=>'j.brown@school.com',   'grade'=>null, 'branch'=>'Art'],
+        ]);
 
-        // Scope by school
-        if ($user->hasAnyRole(['school-admin', 'school-principal'])) {
-            $schoolIds = $user->schools()->pluck('schools.id');
-            $userIds = \DB::table('school_user')->whereIn('school_id', $schoolIds)->pluck('user_id');
-            $query->whereIn('id', $userIds);
-        }
+        $items = $currentRole === 'teacher' ? $mockTeachers : $mockStudents;
+        $total = $currentRole === 'teacher' ? 24 : 47;
 
-        // Teacher → only students in their classes
-        if ($user->hasRole('teacher')) {
-            $classIds = $user->classes()->pluck('school_classes.id');
-            $studentIds = \DB::table('class_student')->whereIn('school_class_id', $classIds)->pluck('user_id');
-            $query->whereIn('id', $studentIds);
-        }
+        $page = $request->get('page', 1);
+        $users = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items->forPage($page, 10),
+            $total,
+            10,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
-        if ($request->filled('search')) {
-            $s = $request->search;
-            $query->where(function ($q) use ($s) {
-                $q->where('name', 'like', "%{$s}%")
-                    ->orWhere('surname', 'like', "%{$s}%")
-                    ->orWhere('email', 'like', "%{$s}%");
-            });
-        }
+        // License stats for stat cards (from Figma)
+        $licenseStats = (object)[
+            'totalLicence' => 52,
+            'usedLicence' => 47,
+            'licenceDuration' => '12/31/2026',
+        ];
 
-        if ($request->filled('role')) {
-            $query->role($request->role);
-        }
-
-        $users = $query->latest()->paginate(20);
-        $roles = $this->getAllowedRoles();
-        return view('portal.users.index', compact('users', 'roles'));
+        $roles = [];
+        return view('portal.users.index', compact('users', 'roles', 'licenseStats'));
     }
 
     public function show(User $user)
@@ -67,7 +72,7 @@ class PortalUserController extends Controller
         // Teacher can only see their own students
         if ($authUser->hasRole('teacher')) {
             $classIds = $authUser->classes()->pluck('school_classes.id');
-            $studentIds = \DB::table('class_student')->whereIn('school_class_id', $classIds)->pluck('user_id');
+            $studentIds = \DB::table('class_user')->whereIn('class_id', $classIds)->pluck('user_id');
             if (!$studentIds->contains($user->id) && $authUser->id !== $user->id) {
                 abort(403);
             }
@@ -205,11 +210,11 @@ class PortalUserController extends Controller
             ->with('success', __('admin.user_deleted'));
     }
 
-    /* ── Guards ─────────────────────────────────────── */
+    /* -- Guards -------------------------------------------------- */
 
     /**
      * Only school-admin and school-principal can manage users.
-     * Teacher and student → 403.
+     * Teacher and student -> 403.
      */
     private function guardManageRoles(): void
     {
@@ -229,7 +234,7 @@ class PortalUserController extends Controller
         }
     }
 
-    /* ── Helpers ─────────────────────────────────────── */
+    /* -- Helpers -------------------------------------------------- */
 
     private function getAllowedRoles(): \Illuminate\Support\Collection
     {

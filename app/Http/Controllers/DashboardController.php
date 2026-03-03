@@ -11,119 +11,32 @@ use Illuminate\Support\Facades\Hash;
 
 class DashboardController extends Controller
 {
-
     /**
-     * Role-based dashboard.
+     * Lisans Yönetimi — Figma F-51 node-id: 1117-25324
      */
     public function index()
     {
-        $user = auth()->user();
-        $data = ['user' => $user];
-
-        // Super-admin / Admin / Moderator → system overview
-        if ($user->hasAnyRole(['super-admin', 'admin', 'moderator', 'license-manager'])) {
-            $data['totalSchools'] = School::count();
-            $data['activeSchools'] = School::active()->count();
-            $data['totalClasses'] = SchoolClass::count();
-            $data['totalLicenses'] = License::count();
-            $data['activeLicenses'] = License::active()->count();
-            $data['totalApps'] = Application::active()->count();
-            $data['totalUsers'] = \App\Models\User::count();
-            $data['totalStudents'] = \App\Models\User::whereHas('roles', fn($q) => $q->where('name', 'student'))->count();
-            $data['totalTeachers'] = \App\Models\User::whereHas('roles', fn($q) => $q->where('name', 'teacher'))->count();
-
-            // App usage: per-application user count
-            $data['appStats'] = Application::active()->ordered()
-                ->withCount('users')
-                ->get();
-
-            // License utilization
-            $data['licenseStats'] = License::with('school')
-                ->where('is_active', true)
-                ->orderByDesc('used_seats')
-                ->take(10)
-                ->get();
-
-            // Recent users
-            $data['recentUsers'] = \App\Models\User::latest()
-                ->take(8)
-                ->get();
-
-            // School distribution
-            $data['schoolDistribution'] = School::active()
-                ->withCount(['users', 'classes', 'licenses'])
-                ->orderByDesc('users_count')
-                ->take(10)
-                ->get();
-        }
-
-        // School-admin / Principal → school-scoped
-        if ($user->hasAnyRole(['school-admin', 'school-principal'])) {
-            $mySchools = $user->schools()
-                ->withCount(['classes', 'users', 'licenses'])
-                ->get();
-
-            $schoolIds = $mySchools->pluck('id');
-
-            $data['totalSchools'] = $mySchools->count();
-            $data['activeSchools'] = $mySchools->where('is_active', true)->count();
-            $data['totalClasses'] = SchoolClass::whereIn('school_id', $schoolIds)->count();
-            $data['totalUsers'] = \DB::table('school_user')
-                ->whereIn('school_id', $schoolIds)
-                ->distinct('user_id')
-                ->count('user_id');
-            $data['totalStudents'] = \DB::table('school_user')
-                ->whereIn('school_id', $schoolIds)
-                ->where('role', 'student')
-                ->count();
-            $data['totalTeachers'] = \DB::table('school_user')
-                ->whereIn('school_id', $schoolIds)
-                ->where('role', 'teacher')
-                ->count();
-            $data['totalLicenses'] = License::whereIn('school_id', $schoolIds)->count();
-            $data['activeLicenses'] = License::whereIn('school_id', $schoolIds)->active()->count();
-
-            $data['appStats'] = Application::active()->ordered()
-                ->withCount([
-                    'users' => fn($q) => $q->whereIn(
-                        'users.id',
-                        \DB::table('school_user')->whereIn('school_id', $schoolIds)->pluck('user_id')
-                    )
-                ])
-                ->get();
-
-            $data['licenseStats'] = License::with('school')
-                ->whereIn('school_id', $schoolIds)
-                ->where('is_active', true)
-                ->get();
-
-            $data['schoolDistribution'] = $mySchools;
-
-            $data['recentUsers'] = \App\Models\User::whereIn(
-                'id',
-                \DB::table('school_user')->whereIn('school_id', $schoolIds)->pluck('user_id')
-            )
-                ->latest()
-                ->take(8)
-                ->get();
-        }
-
-        // Teacher → classes they belong to
-        if ($user->hasRole('teacher')) {
-            $data['myClasses'] = $user->classes()
-                ->with('school')
-                ->withCount('students')
-                ->get();
-        }
-
-        // Student → their class + applications
-        if ($user->hasRole('student')) {
-            $data['myClasses'] = $user->classes()->with('school')->get();
-            $data['myApplications'] = $user->applications()->active()->ordered()->get();
-        }
+        // Mock data matching Figma F-51 "Doping Admin - Lisans Yönetimi" exactly
+        $data = [
+            'user' => auth()->user(),
+            'licenses' => [
+                ['school' => 'Stuyvesant High School',     'location' => 'New York City/New York',       'total' => 4, 'status' => 'active',      'purchase_date' => '01/01/2026', 'duration' => '12/31/2026', 'email' => 'john.doe@example.com'],
+                ['school' => 'Lincoln High School',         'location' => 'San Diego/California',         'total' => 3, 'status' => 'not_started', 'purchase_date' => '03/01/2026', 'duration' => '02/31/2027', 'email' => 'emily.smith@test.com'],
+                ['school' => 'Beverly Hills High School',   'location' => 'Beverly Hills/California',     'total' => 4, 'status' => 'active',      'purchase_date' => '01/01/2026', 'duration' => '12/31/2026', 'email' => 'student01@example.com'],
+                ['school' => 'Phillips Academy Andover',    'location' => 'Andover/Massachusetts',        'total' => 5, 'status' => 'cancelled',   'purchase_date' => '01/01/2026', 'duration' => '12/31/2026', 'email' => 'license.admin@sample...'],
+                ['school' => 'Phillips Exeter Academy',     'location' => 'Exeter/New Hampshire',         'total' => 2, 'status' => 'active',      'purchase_date' => '03/16/2026', 'duration' => '12/31/2026', 'email' => 'info@demo-example.com'],
+                ['school' => 'Miami Senior High School',    'location' => 'Miami/Florida',                'total' => 5, 'status' => 'active',      'purchase_date' => '01/01/2026', 'duration' => '12/31/2026', 'email' => 'name@example.com'],
+                ['school' => 'Choate Rosemary Hall',        'location' => 'Wallingford/Connecticut',      'total' => 4, 'status' => 'not_started', 'purchase_date' => '04/01/2026', 'duration' => '03/31/2027', 'email' => 'olivia.johnson@example...'],
+                ['school' => 'The Hotchkiss School',        'location' => 'Lakeville/Connecticut',        'total' => 1, 'status' => 'cancelled',   'purchase_date' => '01/01/2026', 'duration' => '12/31/2026', 'email' => 'mason.thomas@exampl...'],
+                ['school' => 'Harvard-Westlake School',     'location' => 'Los Angeles/California',       'total' => 5, 'status' => 'active',      'purchase_date' => '01/01/2026', 'duration' => '12/31/2026', 'email' => 'ethan.jackson@example...'],
+                ['school' => 'Deerfield Academy',           'location' => 'Deerfield/Massachusetts',      'total' => 4, 'status' => 'expired',     'purchase_date' => '01/01/2025', 'duration' => '12/31/2025', 'email' => 'mia.harris@example.com'],
+                ['school' => 'Groton School',               'location' => 'Groton/Massachusetts',         'total' => 4, 'status' => 'active',      'purchase_date' => '01/01/2026', 'duration' => '12/31/2026', 'email' => 'james.clark@example...'],
+            ],
+        ];
 
         return view('portal.dashboard', compact('data'));
     }
+
 
 
     /**

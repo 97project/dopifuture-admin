@@ -113,6 +113,7 @@
                                                     __('admin.website') => $school->website,
                                                     __('admin.address') => $school->address,
                                                     __('admin.country') => $school->country,
+                                                    __('admin.state') => $school->state,
                                                     __('admin.city') => $school->city,
                                                 ] as $label => $value)
 

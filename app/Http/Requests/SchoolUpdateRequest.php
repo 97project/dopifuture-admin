@@ -14,9 +14,9 @@ class SchoolUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name_tr' => 'required|string|max:200',
-            'name_en' => 'required|string|max:200',
+            'name' => 'required|string|max:255',
             'country' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:150',
             'city' => 'nullable|string|max:100',
             'address' => 'nullable|string|max:500',
             'phone' => 'nullable|string|max:30',

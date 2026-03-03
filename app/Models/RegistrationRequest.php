@@ -9,6 +9,9 @@ class RegistrationRequest extends Model
     protected $fillable = [
         'school_name',
         'country',
+        'state',
+        'city',
+        'student_count',
         'contact_name',
         'contact_surname',
         'email',

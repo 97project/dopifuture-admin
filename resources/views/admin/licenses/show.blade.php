@@ -96,12 +96,11 @@
                     <button @click="activeTab = 'details'"
                         :class="activeTab === 'details' ? 'border-[#0B6AB2] text-[#0B6AB2]' : 'border-transparent text-gray-500 hover:text-gray-700'"
                         class="py-3 px-1 text-sm font-medium border-b-2 transition">{{ __('admin.details') }}</button>
-                    @if($license->purchases && $license->purchases->count())
-                        <button @click="activeTab = 'purchases'"
-                            :class="activeTab === 'purchases' ? 'border-[#0B6AB2] text-[#0B6AB2]' : 'border-transparent text-gray-500 hover:text-gray-700'"
-                            class="py-3 px-1 text-sm font-medium border-b-2 transition">{{ __('admin.purchases') }}
-                            ({{ $license->purchases->count() }})</button>
-                    @endif
+                    <button @click="activeTab = 'purchases'"
+                        :class="activeTab === 'purchases' ? 'border-[#0B6AB2] text-[#0B6AB2]' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                        class="py-3 px-1 text-sm font-medium border-b-2 transition">{{ __('admin.purchase_history') }}
+                        <span class="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-600">{{ $license->purchases->count() + 1 }}</span>
+                    </button>
                 </nav>
             </div>
 
@@ -142,44 +141,148 @@
                             <dd class="col-span-2 text-sm text-gray-900 dark:text-white">{{ $license->admin?->name ?? '—' }}
                             </dd>
                         </div>
+                        @if($license->notes)
+                        <div class="grid grid-cols-3 px-5 py-3">
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-400">{{ __('admin.notes') }}</dt>
+                            <dd class="col-span-2 text-sm text-gray-500">{{ $license->notes }}</dd>
+                        </div>
+                        @endif
                     </dl>
                 </div>
             </div>
 
-            @if($license->purchases && $license->purchases->count())
-                <div x-show="activeTab === 'purchases'" x-cloak class="pt-6">
-                    <div
-                        class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] overflow-hidden">
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="border-b border-gray-100 dark:border-[#1A3A5C]">
-                                    <th
-                                        class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                                        {{ __('admin.date') }}</th>
-                                    <th
-                                        class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                                        {{ __('admin.seats') }}</th>
-                                    <th
-                                        class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                                        {{ __('admin.notes') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-50 dark:divide-[#1A3A5C]/50">
-                                @foreach($license->purchases as $purchase)
-                                    <tr class="hover:bg-gray-50/50 dark:hover:bg-[#0A1628]/30 transition">
-                                        <td class="px-5 py-3 text-gray-500 text-xs">
-                                            {{ $purchase->created_at?->format('d.m.Y H:i') }}</td>
-                                        <td class="px-5 py-3 text-center"><span
-                                                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-600">+{{ $purchase->seat_count }}</span>
-                                        </td>
-                                        <td class="px-5 py-3 text-gray-500 text-xs">{{ $purchase->notes ?? '—' }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+            <div x-show="activeTab === 'purchases'" x-cloak class="pt-6 space-y-5">
+                {{-- Add Purchase Form --}}
+                @can('update', $license)
+                <div x-data="{ showForm: false }">
+                    <button @click="showForm = !showForm"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-[#0B6AB2] rounded-lg hover:bg-[#13398E] transition mb-4">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        {{ __('admin.add_purchase') }}
+                    </button>
+                    <div x-show="showForm" x-cloak x-transition
+                        class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5 mb-5">
+                        <form action="{{ route('admin.licenses.add-purchase', $license) }}" method="POST">
+                            @csrf
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1">{{ __('admin.seat_count') }} *</label>
+                                    <input type="number" name="seat_count" min="1" required placeholder="50"
+                                        class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#1A3A5C] bg-white dark:bg-[#0A1628] text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1">{{ __('admin.amount') }}</label>
+                                    <input type="number" name="amount" step="0.01" min="0" placeholder="0.00"
+                                        class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#1A3A5C] bg-white dark:bg-[#0A1628] text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1">{{ __('admin.date') }}</label>
+                                    <input type="date" name="purchased_at" value="{{ date('Y-m-d') }}"
+                                        class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#1A3A5C] bg-white dark:bg-[#0A1628] text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1">{{ __('admin.notes') }}</label>
+                                    <input type="text" name="notes" placeholder="{{ __('admin.purchase_note_placeholder') }}"
+                                        class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#1A3A5C] bg-white dark:bg-[#0A1628] text-sm">
+                                </div>
+                            </div>
+                            <div class="flex justify-end mt-4">
+                                <button type="submit"
+                                    class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition">
+                                    {{ __('admin.save') }}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            @endif
+                @endcan
+
+                {{-- Purchase History Timeline --}}
+                <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] overflow-hidden">
+                    <div class="px-5 py-4 border-b border-gray-100 dark:border-[#1A3A5C]">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">{{ __('admin.purchase_history') }}</h3>
+                        <p class="text-xs text-gray-400 mt-0.5">{{ __('admin.purchase_history_desc') }}</p>
+                    </div>
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-100 dark:border-[#1A3A5C]">
+                                <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                                    {{ __('admin.date') }}</th>
+                                <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                                    {{ __('admin.description') }}</th>
+                                <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                                    {{ __('admin.seats') }}</th>
+                                <th class="text-right px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                                    {{ __('admin.amount') }}</th>
+                                <th class="text-right px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                                    {{ __('admin.running_total') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50 dark:divide-[#1A3A5C]/50">
+                            {{-- Initial license creation --}}
+                            @php $runningTotal = $license->seat_count; @endphp
+                            <tr class="bg-blue-50/30 dark:bg-blue-900/10">
+                                <td class="px-5 py-3 text-xs text-gray-500">
+                                    {{ $license->created_at?->format('d.m.Y H:i') }}
+                                </td>
+                                <td class="px-5 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30">
+                                            <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        </span>
+                                        <span class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ __('admin.initial_license') }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3 text-center">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-600">{{ $license->seat_count }}</span>
+                                </td>
+                                <td class="px-5 py-3 text-right text-xs text-gray-400">—</td>
+                                <td class="px-5 py-3 text-right text-xs font-bold text-gray-700 dark:text-gray-300">{{ $runningTotal }}</td>
+                            </tr>
+                            {{-- Subsequent purchases --}}
+                            @foreach($license->purchases->sortBy('created_at') as $purchase)
+                                @php $runningTotal += $purchase->seat_count; @endphp
+                                <tr class="hover:bg-gray-50/50 dark:hover:bg-[#0A1628]/30 transition">
+                                    <td class="px-5 py-3 text-xs text-gray-500">
+                                        {{ $purchase->purchased_at?->format('d.m.Y') ?? $purchase->created_at?->format('d.m.Y H:i') }}
+                                    </td>
+                                    <td class="px-5 py-3">
+                                        <div class="flex items-center gap-2">
+                                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                                                <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                            </span>
+                                            <span class="text-xs text-gray-600 dark:text-gray-400">{{ $purchase->notes ?? __('admin.seat_addition') }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-3 text-center">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600">+{{ $purchase->seat_count }}</span>
+                                    </td>
+                                    <td class="px-5 py-3 text-right text-xs text-gray-500">
+                                        @if($purchase->amount)
+                                            {{ number_format($purchase->amount, 2) }} ₺
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                    <td class="px-5 py-3 text-right text-xs font-bold text-gray-700 dark:text-gray-300">{{ $runningTotal }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr class="border-t-2 border-gray-200 dark:border-[#1A3A5C] bg-gray-50/50 dark:bg-[#0A1628]/30">
+                                <td colspan="2" class="px-5 py-3 text-xs font-bold uppercase text-gray-500">{{ __('admin.total') }}</td>
+                                <td class="px-5 py-3 text-center text-xs font-bold text-gray-900 dark:text-white">{{ $total }}</td>
+                                <td class="px-5 py-3 text-right text-xs font-bold text-gray-900 dark:text-white">
+                                    @if($license->purchases->sum('amount') > 0)
+                                        {{ number_format($license->purchases->sum('amount'), 2) }} ₺
+                                    @else — @endif
+                                </td>
+                                <td class="px-5 py-3 text-right text-xs font-bold text-[#0B6AB2]">{{ $total }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 @endsection

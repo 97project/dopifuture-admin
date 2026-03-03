@@ -34,18 +34,53 @@
             <form action="{{ route('register.store') }}" method="POST">
                 @csrf
 
-                {{-- School Name + Country --}}
+                {{-- School Name --}}
+                <div style="margin-bottom: 1.25rem;">
+                    <label class="form-label">{{ __('admin.school_name') }} *</label>
+                    <input type="text" name="school_name" value="{{ old('school_name') }}" required class="form-input"
+                        placeholder="{{ app()->getLocale() === 'tr' ? 'Okul adını giriniz' : 'Enter school name' }}">
+                    @error('school_name') <p class="form-error">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- Country + State --}}
                 <div class="form-grid-2" style="margin-bottom: 1.25rem;">
                     <div>
-                        <label class="form-label">{{ __('admin.school_name') }} *</label>
-                        <input type="text" name="school_name" value="{{ old('school_name') }}" required class="form-input"
-                            placeholder="{{ app()->getLocale() === 'tr' ? 'Örn: Atatürk İlkokulu' : 'e.g. Atatürk Primary School' }}">
-                        @error('school_name') <p class="form-error">{{ $message }}</p> @enderror
+                        <label class="form-label">{{ __('admin.country') }} *</label>
+                        <select name="country" id="reg_country" class="form-select" required
+                            onchange="loadRegStates(this.value)">
+                            <option value="">{{ __('admin.select_country') }}</option>
+                            @foreach($countries as $c)
+                                <option value="{{ $c->name }}" data-id="{{ $c->id }}" {{ old('country') == $c->name ? 'selected' : '' }}>
+                                    {{ $c->emoji }} {{ $c->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('country') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="form-label">{{ __('admin.country') }}</label>
-                        <input type="text" name="country" value="{{ old('country') }}" class="form-input"
-                            placeholder="{{ app()->getLocale() === 'tr' ? 'Türkiye' : 'Turkey' }}">
+                        <label class="form-label">{{ __('admin.state') }}</label>
+                        <select name="state" id="reg_state" class="form-select"
+                            onchange="loadRegCities(this.value)">
+                            <option value="">{{ __('admin.select_state') }}</option>
+                        </select>
+                        @error('state') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                {{-- City + Student Count --}}
+                <div class="form-grid-2" style="margin-bottom: 1.25rem;">
+                    <div>
+                        <label class="form-label">{{ __('admin.city') }}</label>
+                        <select name="city" id="reg_city" class="form-select">
+                            <option value="">{{ __('admin.select_city') }}</option>
+                        </select>
+                        @error('city') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="form-label">{{ app()->getLocale() === 'tr' ? 'Tahmini Öğrenci Sayısı' : 'Estimated Student Count' }}</label>
+                        <input type="number" name="student_count" value="{{ old('student_count') }}" min="1" class="form-input"
+                            placeholder="{{ app()->getLocale() === 'tr' ? 'Örn: 500' : 'e.g. 500' }}">
+                        @error('student_count') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
@@ -117,4 +152,53 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+<script>
+async function loadRegStates(countryName) {
+    const stateSelect = document.getElementById('reg_state');
+    const citySelect = document.getElementById('reg_city');
+    stateSelect.innerHTML = '<option value="">{{ __("admin.select_state") }}</option>';
+    citySelect.innerHTML = '<option value="">{{ __("admin.select_city") }}</option>';
+
+    const opt = document.querySelector(`#reg_country option[value="${countryName}"]`);
+    if (!opt) return;
+    const countryId = opt.dataset.id;
+    if (!countryId) return;
+
+    try {
+        const res = await fetch(`/api/public/states/${countryId}`);
+        const states = await res.json();
+        states.forEach(s => {
+            const o = document.createElement('option');
+            o.value = s.name;
+            o.dataset.id = s.id;
+            o.textContent = s.name;
+            stateSelect.appendChild(o);
+        });
+    } catch(e) { console.error(e); }
+}
+
+async function loadRegCities(stateName) {
+    const citySelect = document.getElementById('reg_city');
+    citySelect.innerHTML = '<option value="">{{ __("admin.select_city") }}</option>';
+
+    const opt = document.querySelector(`#reg_state option[value="${stateName}"]`);
+    if (!opt) return;
+    const stateId = opt.dataset.id;
+    if (!stateId) return;
+
+    try {
+        const res = await fetch(`/api/public/cities/${stateId}`);
+        const cities = await res.json();
+        cities.forEach(c => {
+            const o = document.createElement('option');
+            o.value = c.name;
+            o.textContent = c.name;
+            citySelect.appendChild(o);
+        });
+    } catch(e) { console.error(e); }
+}
+</script>
 @endsection

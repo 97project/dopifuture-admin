@@ -124,4 +124,35 @@ class LicenseController extends Controller
         return redirect()->route('admin.licenses.index')
             ->with('success', __('admin.license_deleted'));
     }
+
+    public function addPurchase(Request $request, License $license)
+    {
+        $this->authorize('update', $license);
+
+        $request->validate([
+            'seat_count' => 'required|integer|min:1',
+            'amount' => 'nullable|numeric|min:0',
+            'purchased_at' => 'nullable|date',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $oldTotal = $license->totalSeats();
+
+        $purchase = $license->purchases()->create([
+            'seat_count' => $request->input('seat_count'),
+            'amount' => $request->input('amount'),
+            'purchased_at' => $request->input('purchased_at', now()),
+            'notes' => $request->input('notes'),
+        ]);
+
+        ActivityLog::log('purchase_added', 'licenses', $license, [], [
+            'old_total_seats' => $oldTotal,
+            'new_total_seats' => $license->fresh()->totalSeats(),
+            'added_seats' => $purchase->seat_count,
+            'amount' => $purchase->amount,
+        ]);
+
+        return redirect()->route('admin.licenses.show', $license)
+            ->with('success', __('admin.purchase_added'));
+    }
 }

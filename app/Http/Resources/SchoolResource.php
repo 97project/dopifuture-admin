@@ -14,12 +14,12 @@ class SchoolResource extends JsonResource
     {
         return [
             'id'            => $this->id,
-            'name'          => $this->getTranslation('name', app()->getLocale()),
-            'slug'          => $this->slug,
-            'code'          => $this->code,
+            'name'          => $this->name,
             'email'         => $this->email,
             'phone'         => $this->phone,
             'address'       => $this->address,
+            'country'       => $this->country,
+            'state'         => $this->state,
             'city'          => $this->city,
             'is_active'     => $this->is_active,
             'users_count'   => $this->whenCounted('users'),

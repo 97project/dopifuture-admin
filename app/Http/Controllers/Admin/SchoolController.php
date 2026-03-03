@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\School;
+use App\Models\Country;
 use App\Models\ActivityLog;
 use App\Http\Requests\SchoolStoreRequest;
 use App\Http\Requests\SchoolUpdateRequest;
@@ -61,14 +62,16 @@ class SchoolController extends Controller
     public function create()
     {
         $this->authorize('create', School::class);
-        return view('admin.schools.create');
+        $countries = Country::orderBy('name')->get(['id', 'name']);
+        return view('admin.schools.create', compact('countries'));
     }
 
     public function store(SchoolStoreRequest $request)
     {
         $school = School::create([
-            'name' => ['tr' => $request->input('name_tr'), 'en' => $request->input('name_en')],
+            'name' => $request->input('name'),
             'country' => $request->input('country'),
+            'state' => $request->input('state'),
             'city' => $request->input('city'),
             'address' => $request->input('address'),
             'phone' => $request->input('phone'),
@@ -109,19 +112,17 @@ class SchoolController extends Controller
     public function edit(School $school)
     {
         $this->authorize('update', $school);
-
-        $rawName = $school->getRawOriginal('name');
-        $nameData = is_string($rawName) ? json_decode($rawName, true) : $rawName;
-
-        return view('admin.schools.edit', compact('school', 'nameData'));
+        $countries = Country::orderBy('name')->get(['id', 'name']);
+        return view('admin.schools.edit', compact('school', 'countries'));
     }
 
     public function update(SchoolUpdateRequest $request, School $school)
     {
 
         $school->update([
-            'name' => ['tr' => $request->input('name_tr'), 'en' => $request->input('name_en')],
+            'name' => $request->input('name'),
             'country' => $request->input('country'),
+            'state' => $request->input('state'),
             'city' => $request->input('city'),
             'address' => $request->input('address'),
             'phone' => $request->input('phone'),

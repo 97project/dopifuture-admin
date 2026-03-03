@@ -1,4 +1,4 @@
-@extends('portal.layout')
+@extends('portal.app')
 @section('title', app()->getLocale() === 'tr' ? 'Raporlar' : 'Reports')
 @php $isTr = app()->getLocale() === 'tr'; @endphp
 
@@ -119,7 +119,7 @@
                         @php $total = $lic->totalSeats();
                         $pct = $total > 0 ? round(($lic->used_seats / $total) * 100) : 0; @endphp
                         <tr>
-                            <td style="font-weight: 500; color: white;">{{ $lic->school?->getTranslation('name') ?? '—' }}</td>
+                            <td style="font-weight: 500; color: white;">{{ $lic->school?->name ?? '—' }}</td>
                             <td>{{ $lic->totalSeats() }}</td>
                             <td>{{ $lic->used_seats }}</td>
                             <td style="color: {{ $lic->availableSeats() > 0 ? '#4ade80' : '#f87171' }}; font-weight: 600;">
@@ -174,7 +174,7 @@
                 <tbody>
                     @foreach($schoolStats as $school)
                         <tr>
-                            <td style="font-weight: 500; color: white;">{{ $school->getTranslation('name') }}</td>
+                            <td style="font-weight: 500; color: white;">{{ $school->name }}</td>
                             <td>{{ $school->students_count }}</td>
                             <td>{{ $school->teachers_count }}</td>
                             <td>{{ $school->classes_count }}</td>

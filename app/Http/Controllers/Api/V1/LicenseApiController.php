@@ -36,7 +36,7 @@ class LicenseApiController extends Controller
         return response()->json([
             'data' => $licenses->map(fn($l) => [
                 'id' => $l->id,
-                'school' => $l->school?->getTranslation('name'),
+                'school' => $l->school?->name,
                 'seat_count' => $l->totalSeats(),
                 'used_seats' => $l->used_seats,
                 'available_seats' => $l->availableSeats(),

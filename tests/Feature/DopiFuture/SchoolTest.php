@@ -35,9 +35,10 @@ class SchoolTest extends TestCase
     private function makeSchool(array $overrides = []): School
     {
         return School::create(array_merge([
-            'name' => json_encode(['tr' => 'Test Okul', 'en' => 'Test School']),
-            'country' => 'TR',
-            'city' => 'Istanbul',
+            'name' => 'Test Okul',
+            'country' => 'Türkiye',
+            'state' => 'İstanbul',
+            'city' => 'Kadıköy',
             'email' => 'school' . uniqid() . '@test.com',
             'is_active' => true,
         ], $overrides));
@@ -106,10 +107,10 @@ class SchoolTest extends TestCase
         $count = School::count();
 
         $response = $this->actingAs($admin)->post('/admin/schools', [
-            'name_tr' => 'Yeni Okul',
-            'name_en' => 'New School',
-            'country' => 'TR',
-            'city' => 'Ankara',
+            'name' => 'Yeni Okul',
+            'country' => 'Türkiye',
+            'state' => 'Ankara',
+            'city' => 'Çankaya',
             'email' => 'new@school.com',
             'is_active' => true,
         ]);
@@ -124,10 +125,10 @@ class SchoolTest extends TestCase
         $school = $this->makeSchool(['email' => 'old@school.com']);
 
         $response = $this->actingAs($admin)->put("/admin/schools/{$school->id}", [
-            'name_tr' => 'Düzenlendi',
-            'name_en' => 'Edited',
-            'country' => 'TR',
-            'city' => 'Izmir',
+            'name' => 'Düzenlendi',
+            'country' => 'Türkiye',
+            'state' => 'İzmir',
+            'city' => 'Konak',
             'email' => 'updated@school.com',
             'is_active' => true,
         ]);

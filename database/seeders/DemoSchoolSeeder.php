@@ -52,16 +52,17 @@ class DemoSchoolSeeder extends Seeder
         }
 
         $school = School::create([
-            'name'      => json_encode(['tr' => 'Atatürk Anadolu Lisesi', 'en' => 'Atatürk Anatolian High School']),
+            'name'      => 'Atatürk Anadolu Lisesi',
             'country'   => 'Türkiye',
-            'city'      => 'İstanbul',
+            'state'     => 'İstanbul',
+            'city'      => 'Beşiktaş',
             'phone'     => '+90 212 555 0100',
             'email'     => 'info@ataturklisesi.demo.tr',
             'address'   => 'Beşiktaş Mahallesi, Eğitim Caddesi No:42, Beşiktaş/İstanbul',
             'website'   => 'https://ataturklisesi.demo.tr',
             'is_active' => true,
         ]);
-        $this->command->info("✅ School: {$school->getTranslation('name', 'tr')} (ID: {$school->id})");
+        $this->command->info("✅ School: {$school->name} (ID: {$school->id})");
 
         // ── License (30 seats) ────────────────────────
         $license = License::create([

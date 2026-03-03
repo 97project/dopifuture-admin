@@ -176,6 +176,12 @@ Route::prefix('admin')->name('admin.')->middleware(['web', \App\Http\Middleware\
         Route::get('applications/{application}/users/{user}/report', [ApplicationController::class, 'userReport'])->name('applications.user-report');
         Route::post('applications/{application}/sync-all', [ApplicationController::class, 'syncAll'])->name('applications.sync-all');
 
+        // ── Location API (cascading combobox) ───────────────
+
+        Route::get('api/countries', [\App\Http\Controllers\Admin\LocationController::class, 'countries'])->name('api.countries');
+        Route::get('api/states/{countryId}', [\App\Http\Controllers\Admin\LocationController::class, 'states'])->name('api.states');
+        Route::get('api/cities/{stateId}', [\App\Http\Controllers\Admin\LocationController::class, 'cities'])->name('api.cities');
+
         // ── DopiFuture: Schools ──────────────────────────────
 
         Route::resource('schools', SchoolController::class);
@@ -187,6 +193,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web', \App\Http\Middleware\
         // ── DopiFuture: Licenses ─────────────────────────────
 
         Route::resource('licenses', LicenseController::class);
+        Route::post('licenses/{license}/purchases', [LicenseController::class, 'addPurchase'])->name('licenses.add-purchase');
 
         // ── DopiFuture: Registration Requests ────────────────
 
@@ -194,6 +201,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web', \App\Http\Middleware\
         Route::get('registration-requests/{registrationRequest}', [RegistrationRequestController::class, 'show'])->name('registration-requests.show');
         Route::put('registration-requests/{registrationRequest}', [RegistrationRequestController::class, 'update'])->name('registration-requests.update');
         Route::delete('registration-requests/{registrationRequest}', [RegistrationRequestController::class, 'destroy'])->name('registration-requests.destroy');
+        Route::post('registration-requests/{registrationRequest}/convert', [RegistrationRequestController::class, 'convertToSchool'])->name('registration-requests.convert');
 
         // ── DopiFuture: Permissions ──────────────────────────
 
@@ -220,6 +228,10 @@ Route::get('account/delete/confirm/{user}', function (\App\Models\User $user) {
 Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
     Route::get('register', [\App\Http\Controllers\RegistrationController::class, 'create'])->name('register.create');
     Route::post('register', [\App\Http\Controllers\RegistrationController::class, 'store'])->name('register.store')->middleware('throttle:5,1');
+
+    // Public location API for cascading dropdowns
+    Route::get('api/public/states/{countryId}', [\App\Http\Controllers\Admin\LocationController::class, 'states'])->name('public.api.states');
+    Route::get('api/public/cities/{stateId}', [\App\Http\Controllers\Admin\LocationController::class, 'cities'])->name('public.api.cities');
 });
 
 // ── Portal: Auth Routes (separate from admin) ───────────────────────────
@@ -252,6 +264,9 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     Route::get('reports/student/{user}', [\App\Http\Controllers\PortalReportController::class, 'studentReport'])->name('portal.reports.student');
     Route::get('reports/class/{class}', [\App\Http\Controllers\PortalReportController::class, 'classReport'])->name('portal.reports.class');
     Route::get('reports/class/{class}/{app:slug}', [\App\Http\Controllers\PortalReportController::class, 'classReport'])->name('portal.reports.class.app');
+    Route::get('reports/mission/{id}', [\App\Http\Controllers\PortalReportController::class, 'missionDetail'])->name('portal.reports.mission.detail');
+    Route::get('reports/startup/{id}', [\App\Http\Controllers\PortalReportController::class, 'startupDetail'])->name('portal.reports.startup.detail');
+    Route::get('reports/coach/{id}/questions', [\App\Http\Controllers\PortalReportController::class, 'coachQuestions'])->name('portal.reports.coach.questions');
 
     // CRUD: Schools (with show/detail page)
     Route::resource('schools', \App\Http\Controllers\PortalSchoolController::class)

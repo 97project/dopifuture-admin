@@ -3,30 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Models\School;
+use App\Models\Country;
 use Illuminate\Http\Request;
 
 class PortalSchoolController extends Controller
 {
     public function index(Request $request)
     {
-        $user = auth()->user();
-        $query = School::query()->withCount(['classes', 'users', 'licenses']);
+        // TODO: Reconnect real data after Figma visual verification
+        $mockSchools = collect([
+            (object)['id'=>1, 'name'=>'Bahçeşehir Koleji',       'city'=>'İstanbul',  'classes_count'=>24, 'users_count'=>580, 'licenses_count'=>500, 'is_active'=>true],
+            (object)['id'=>2, 'name'=>'TED Ankara Koleji',       'city'=>'Ankara',    'classes_count'=>18, 'users_count'=>420, 'licenses_count'=>350, 'is_active'=>true],
+            (object)['id'=>3, 'name'=>'Özel Doğa Koleji',        'city'=>'İstanbul',  'classes_count'=>22, 'users_count'=>510, 'licenses_count'=>420, 'is_active'=>true],
+            (object)['id'=>4, 'name'=>'Özel Enka Okulları',      'city'=>'İstanbul',  'classes_count'=>14, 'users_count'=>320, 'licenses_count'=>280, 'is_active'=>true],
+            (object)['id'=>5, 'name'=>'Özel FMV Işık Okulları',  'city'=>'İstanbul',  'classes_count'=>16, 'users_count'=>380, 'licenses_count'=>310, 'is_active'=>true],
+            (object)['id'=>6, 'name'=>'Özel Darüşşafaka Lisesi', 'city'=>'İstanbul',  'classes_count'=>10, 'users_count'=>240, 'licenses_count'=>200, 'is_active'=>true],
+            (object)['id'=>7, 'name'=>'Özel Bilfen Koleji',      'city'=>'İstanbul',  'classes_count'=>20, 'users_count'=>460, 'licenses_count'=>380, 'is_active'=>false],
+            (object)['id'=>8, 'name'=>'Özel Koç Okulu',          'city'=>'İstanbul',  'classes_count'=>12, 'users_count'=>290, 'licenses_count'=>250, 'is_active'=>true],
+        ]);
 
-        // Scope: school-admin sees only their schools
-        if ($user->hasRole('school-admin') || $user->hasRole('school-principal')) {
-            $query->whereIn('id', $user->schools()->pluck('schools.id'));
-        }
+        $page = $request->get('page', 1);
+        $schools = new \Illuminate\Pagination\LengthAwarePaginator(
+            $mockSchools->forPage($page, 15),
+            $mockSchools->count(),
+            15,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
-        if ($request->filled('search')) {
-            $s = $request->search;
-            $query->where(function ($q) use ($s) {
-                $q->where('name', 'like', "%{$s}%")
-                    ->orWhere('email', 'like', "%{$s}%")
-                    ->orWhere('city', 'like', "%{$s}%");
-            });
-        }
-
-        $schools = $query->latest()->paginate(15);
         return view('portal.schools.index', compact('schools'));
     }
 
@@ -45,16 +49,17 @@ class PortalSchoolController extends Controller
     public function create()
     {
         $this->guardSchoolAdmin();
-        return view('portal.schools.form', ['school' => new School]);
+        $countries = Country::orderBy('name')->get(['id', 'name']);
+        return view('portal.schools.form', ['school' => new School, 'countries' => $countries]);
     }
 
     public function store(Request $request)
     {
         $this->guardSchoolAdmin();
         $data = $request->validate([
-            'name_tr' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
             'country' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:150',
             'city' => 'nullable|string|max:100',
             'phone' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:255',
@@ -63,8 +68,9 @@ class PortalSchoolController extends Controller
         ]);
 
         School::create([
-            'name' => ['tr' => $data['name_tr'], 'en' => $data['name_en'] ?? $data['name_tr']],
+            'name' => $data['name'],
             'country' => $data['country'] ?? null,
+            'state' => $data['state'] ?? null,
             'city' => $data['city'] ?? null,
             'phone' => $data['phone'] ?? null,
             'email' => $data['email'] ?? null,
@@ -81,7 +87,8 @@ class PortalSchoolController extends Controller
     {
         $this->guardSchoolAdmin();
         $this->authorizeSchool($school);
-        return view('portal.schools.form', compact('school'));
+        $countries = Country::orderBy('name')->get(['id', 'name']);
+        return view('portal.schools.form', compact('school', 'countries'));
     }
 
     public function update(Request $request, School $school)
@@ -90,9 +97,9 @@ class PortalSchoolController extends Controller
         $this->authorizeSchool($school);
 
         $data = $request->validate([
-            'name_tr' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
             'country' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:150',
             'city' => 'nullable|string|max:100',
             'phone' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:255',
@@ -102,8 +109,9 @@ class PortalSchoolController extends Controller
         ]);
 
         $school->update([
-            'name' => ['tr' => $data['name_tr'], 'en' => $data['name_en'] ?? $data['name_tr']],
+            'name' => $data['name'],
             'country' => $data['country'] ?? $school->country,
+            'state' => $data['state'] ?? $school->state,
             'city' => $data['city'] ?? $school->city,
             'phone' => $data['phone'] ?? $school->phone,
             'email' => $data['email'] ?? $school->email,

@@ -11,6 +11,7 @@ class School extends Model
     protected $fillable = [
         'name',
         'country',
+        'state',
         'city',
         'address',
         'phone',
@@ -25,42 +26,6 @@ class School extends Model
         return [
             'is_active' => 'boolean',
         ];
-    }
-
-    /* ─── Translatable helpers ───────────────────── */
-
-    public function getTranslation(string $field, ?string $locale = null): string
-    {
-        $locale = $locale ?: app()->getLocale();
-        $value = $this->{$field};
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-            if (is_array($decoded)) {
-                $value = $decoded;
-            }
-        }
-        if (is_array($value)) {
-            return $value[$locale] ?? $value[config('app.fallback_locale', 'tr')] ?? '';
-        }
-        return (string) $value;
-    }
-
-    public function getNameAttribute($value): string
-    {
-        // JSON alanını normalleştir — en fazla tek decode yeterli
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-            if (is_array($decoded)) {
-                $value = $decoded;
-            }
-        }
-
-        if (is_array($value)) {
-            $locale = app()->getLocale();
-            return $value[$locale] ?? $value[config('app.fallback_locale', 'tr')] ?? '';
-        }
-
-        return (string) $value;
     }
 
     /* ─── Scopes ─────────────────────────────────── */

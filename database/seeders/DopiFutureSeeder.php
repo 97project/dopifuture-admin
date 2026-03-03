@@ -319,7 +319,7 @@ class DopiFutureSeeder extends Seeder
                 'starts_at' => now()->subMonths(3)->toDateString(),
                 'expires_at' => now()->addYear()->toDateString(),
                 'is_active' => true,
-                'notes' => "School license — {$school->getTranslation('name', 'tr')}",
+                'notes' => "School license — {$school->name}",
             ]
         );
     }
