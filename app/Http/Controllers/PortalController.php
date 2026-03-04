@@ -18,7 +18,10 @@ class PortalController extends Controller
             return redirect()->route('portal.dashboard');
         }
 
-        return view('portal.home');
+        return view('portal.home', [
+            'appCount' => \App\Models\Application::count(),
+            'schoolCount' => \App\Models\School::count(),
+        ]);
     }
 
     /**
