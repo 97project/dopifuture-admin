@@ -13,6 +13,10 @@ class PortalController extends Controller
      */
     public function home()
     {
+        if (!auth()->check()) {
+            return redirect()->route('portal.login');
+        }
+
         // TODO: Reconnect real data after Figma parity is verified
         $avgLoginCount = 52;
         $avgLoginDuration = '2h 4m';
