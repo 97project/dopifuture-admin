@@ -1,78 +1,98 @@
 @extends('portal.app')
-@section('title', $license->exists ? (app()->getLocale() === 'tr' ? 'Lisans Düzenle' : 'Edit License') : (app()->getLocale() === 'tr' ? 'Yeni Lisans' : 'New License'))
-@section('page-title', $license->exists ? (app()->getLocale() === 'tr' ? 'Lisans Düzenle' : 'Edit License') : (app()->getLocale() === 'tr' ? 'Yeni Lisans' : 'New License'))
+@section('title', $license->exists ? (app()->getLocale() === 'tr' ? 'Lisans Düzenle' : 'Edit License') : (app()->getLocale() === 'tr' ? 'Yeni Lisans Ekle' : 'Add New Licence'))
+@section('page-title', $license->exists ? (app()->getLocale() === 'tr' ? 'Lisans Düzenle' : 'Edit License') : (app()->getLocale() === 'tr' ? 'Yeni Lisans Ekle' : 'Add New Licence'))
 @php $isTr = app()->getLocale() === 'tr'; @endphp
 
 @section('content')
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-        <div style="font-size:18px;font-weight:600;">{{ $license->exists ? ($isTr ? 'Lisans Düzenle' : 'Edit License') : ($isTr ? 'Yeni Lisans' : 'New License') }}</div>
-        <a href="{{ route('portal.licenses.index') }}" class="dp-btn-ghost">← {{ $isTr ? 'Lisanslara Dön' : 'Back to Licenses' }}</a>
-    </div>
+    {{-- ═══ Figma F-72: Add New Licence form — centered card ═══ --}}
+    <div style="max-width:640px;margin:0 auto;">
 
-    <div style="max-width:600px;">
+        {{-- Title + Subtitle --}}
+        <h2 style="font-size:24px;font-weight:700;margin:0 0 6px 0;color:#111;font-family:'Nunito',sans-serif;">
+            {{ $license->exists ? ($isTr ? 'Lisans Düzenle' : 'Edit License') : ($isTr ? 'Yeni Lisans Ekle' : 'Add New Licence') }}
+        </h2>
+        <p style="font-size:14px;color:#6B7280;margin:0 0 28px 0;">
+            {{ $isTr ? 'Yeni lisansınızı eklemek için aşağıdaki bilgileri doldurun.' : 'Fill in the details below to add your new licence.' }}
+        </p>
+
         <form action="{{ $license->exists ? route('portal.licenses.update', $license) : route('portal.licenses.store') }}" method="POST">
             @csrf
             @if($license->exists) @method('PUT') @endif
 
-            <div class="dp-card">
-                <div class="dp-form-group">
-                    <label class="dp-form-label">{{ $isTr ? 'Okul' : 'School' }} *</label>
-                    <select name="school_id" class="dp-form-select" required>
-                        <option value="">{{ $isTr ? 'Seçiniz' : 'Select' }}</option>
-                        @foreach($schools as $school)
-                            <option value="{{ $school->id }}" {{ old('school_id', $license->school_id) == $school->id ? 'selected' : '' }}>{{ $school->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('school_id') <p class="dp-form-error">{{ $message }}</p> @enderror
-                </div>
-                <div class="dp-form-grid" style="margin-bottom:16px;">
-                    <div>
-                        <label class="dp-form-label">{{ $isTr ? 'Koltuk Sayısı' : 'Seat Count' }} *</label>
-                        <input type="number" name="seat_count" value="{{ old('seat_count', $license->seat_count ?? 50) }}" min="1" required class="dp-form-input">
-                        @error('seat_count') <p class="dp-form-error">{{ $message }}</p> @enderror
-                    </div>
-                    @if($license->exists)
-                    <div>
-                        <label class="dp-form-label">{{ $isTr ? 'Kullanılan' : 'Used Seats' }}</label>
-                        <input type="number" name="used_seats" value="{{ old('used_seats', $license->used_seats) }}" min="0" class="dp-form-input">
-                    </div>
-                    @endif
-                </div>
-                <div class="dp-form-grid" style="margin-bottom:16px;">
-                    <div>
-                        <label class="dp-form-label">{{ $isTr ? 'Başlangıç' : 'Start Date' }} *</label>
-                        <input type="date" name="starts_at" value="{{ old('starts_at', $license->starts_at?->format('Y-m-d') ?? now()->format('Y-m-d')) }}" required class="dp-form-input">
-                        @error('starts_at') <p class="dp-form-error">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label class="dp-form-label">{{ $isTr ? 'Bitiş' : 'Expiry Date' }} *</label>
-                        <input type="date" name="expires_at" value="{{ old('expires_at', $license->expires_at?->format('Y-m-d') ?? now()->addYear()->format('Y-m-d')) }}" required class="dp-form-input">
-                        @error('expires_at') <p class="dp-form-error">{{ $message }}</p> @enderror
-                    </div>
-                </div>
-                <div class="dp-form-group">
-                    <label class="dp-form-label">{{ $isTr ? 'Notlar' : 'Notes' }}</label>
-                    <textarea name="notes" class="dp-form-textarea" rows="2">{{ old('notes', $license->notes) }}</textarea>
-                </div>
-                @if($license->exists)
-                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                        <input type="hidden" name="is_active" value="0">
-                        <input type="checkbox" name="is_active" value="1" {{ $license->is_active ? 'checked' : '' }} style="accent-color:var(--primary);">
-                        <span class="dp-form-label" style="margin:0;">{{ $isTr ? 'Aktif' : 'Active' }}</span>
-                    </label>
-                @endif
+            {{-- School Name --}}
+            <div style="margin-bottom:20px;">
+                <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">{{ $isTr ? 'Okul Adı' : 'School Name' }}</label>
+                <select name="school_id" style="width:100%;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;background:#F8FAFC;font-size:14px;color:#374151;outline:none;font-family:inherit;appearance:none;" required>
+                    <option value="">{{ $isTr ? 'Seçiniz' : 'Select School' }}</option>
+                    @foreach($schools as $school)
+                        <option value="{{ $school->id }}" {{ old('school_id', $license->school_id) == $school->id ? 'selected' : '' }}>{{ $school->name }}</option>
+                    @endforeach
+                </select>
+                @error('school_id') <p style="color:#EF4444;font-size:12px;margin-top:4px;">{{ $message }}</p> @enderror
             </div>
 
-            <div style="display:flex;gap:12px;align-items:center;margin-top:16px;">
-                <button type="submit" class="dp-btn">{{ $isTr ? 'Kaydet' : 'Save' }}</button>
-                <a href="{{ route('portal.licenses.index') }}" class="dp-btn-ghost">{{ $isTr ? 'İptal' : 'Cancel' }}</a>
-                @if($license->exists)
-                    <form action="{{ route('portal.licenses.destroy', $license) }}" method="POST" style="margin-left:auto;" onsubmit="return confirm('{{ $isTr ? 'Silmek istediğinize emin misiniz?' : 'Are you sure?' }}')">
-                        @csrf @method('DELETE')
-                        <button type="submit" style="background:var(--error-red);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;">{{ $isTr ? 'Sil' : 'Delete' }}</button>
-                    </form>
-                @endif
+            {{-- Country / State — side by side --}}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+                <div>
+                    <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">{{ $isTr ? 'Ülke' : 'Country' }}</label>
+                    <select name="country" style="width:100%;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;background:#F8FAFC;font-size:14px;color:#9CA3AF;outline:none;font-family:inherit;">
+                        <option value="">{{ $isTr ? 'Lütfen seçin' : 'Please select' }}</option>
+                        <option value="TR" {{ old('country', $license->country ?? '') === 'TR' ? 'selected' : '' }}>{{ $isTr ? 'Türkiye' : 'Turkey' }}</option>
+                        <option value="US" {{ old('country', $license->country ?? '') === 'US' ? 'selected' : '' }}>{{ $isTr ? 'ABD' : 'United States' }}</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">{{ $isTr ? 'Şehir' : 'State' }}</label>
+                    <select name="state" style="width:100%;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;background:#F8FAFC;font-size:14px;color:#9CA3AF;outline:none;font-family:inherit;">
+                        <option value="">{{ $isTr ? 'Lütfen seçin' : 'Please select' }}</option>
+                    </select>
+                </div>
             </div>
+
+            {{-- Products Checklist — Figma exact --}}
+            <div style="margin-bottom:24px;">
+                <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:12px;">{{ $isTr ? 'Hangi ürünleri eklemek istersiniz?' : 'Which products would you like to add?' }}</label>
+                @foreach(['mission_way' => 'Mission WAY', 'startup' => 'Startup', 'role_galaxy' => 'Role Galaxy', 'study_space' => 'Study Space', 'way_ai_coach' => 'WAY AI Coach'] as $key => $label)
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F3F4F6;">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15px;font-weight:500;color:#111;">
+                        <input type="checkbox" name="products[]" value="{{ $key }}"
+                            {{ in_array($key, old('products', $license->products ?? [])) ? 'checked' : '' }}
+                            style="width:22px;height:22px;border-radius:6px;accent-color:#3B82F6;cursor:pointer;">
+                        {{ $label }}
+                    </label>
+                    <select name="product_counts[{{ $key }}]" style="padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:13px;color:#9CA3AF;outline:none;font-family:inherit;">
+                        <option value="">{{ $isTr ? 'Sayı' : 'Number' }}</option>
+                        @for($i = 1; $i <= 12; $i++)
+                        <option value="{{ $i }}" {{ old("product_counts.$key", $license->{"count_$key"} ?? '') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                        @endfor
+                    </select>
+                </div>
+                @endforeach
+            </div>
+
+            {{-- License Duration / E-mail — side by side --}}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;">
+                <div>
+                    <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">{{ $isTr ? 'Lisans Süresi' : 'License Duration' }}</label>
+                    <select name="duration" style="width:100%;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;background:#F8FAFC;font-size:14px;color:#9CA3AF;outline:none;font-family:inherit;">
+                        <option value="">{{ $isTr ? 'Lütfen seçin' : 'Please select' }}</option>
+                        <option value="6" {{ old('duration', $license->duration ?? '') == 6 ? 'selected' : '' }}>6 {{ $isTr ? 'Ay' : 'Months' }}</option>
+                        <option value="12" {{ old('duration', $license->duration ?? '') == 12 ? 'selected' : '' }}>12 {{ $isTr ? 'Ay' : 'Months' }}</option>
+                        <option value="24" {{ old('duration', $license->duration ?? '') == 24 ? 'selected' : '' }}>24 {{ $isTr ? 'Ay' : 'Months' }}</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">E-mail</label>
+                    <input type="email" name="email" value="{{ old('email', $license->email ?? '') }}" placeholder="name@example.com"
+                        style="width:100%;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;background:#F8FAFC;font-size:14px;color:#374151;outline:none;font-family:inherit;box-sizing:border-box;">
+                </div>
+            </div>
+
+            {{-- Full-width blue Submit Button --}}
+            <button type="submit" style="width:100%;padding:16px;background:#1E3A8A;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;transition:background 0.2s;"
+                onmouseover="this.style.background='#1E40AF'" onmouseout="this.style.background='#1E3A8A'">
+                {{ $isTr ? 'Değişiklikleri Kaydet' : 'Save Changes' }}
+            </button>
         </form>
     </div>
 @endsection

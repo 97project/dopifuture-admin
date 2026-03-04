@@ -331,9 +331,7 @@
                             <td class="muted">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <div style="width:32px;height:32px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981','#6366f1','#ec4899','#14b8a6'][$idx % 8] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">
-                                        {{ strtoupper(substr($stat['user']->name,0,1)) }}{{ strtoupper(substr($stat['user']->surname,0,1)) }}
-                                    </div>
+                                    <img src="https://i.pravatar.cc/32?u={{ $stat['user']->id ?? ($idx + 100) }}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
                                     <span style="font-weight:500;">{{ $stat['user']->name }} {{ $stat['user']->surname }}</span>
                                 </div>
                             </td>
@@ -378,9 +376,7 @@
                             <td class="muted">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <div style="width:32px;height:32px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981','#6366f1','#ec4899','#14b8a6'][$idx % 8] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">
-                                        {{ strtoupper(substr($stat['user']->name,0,1)) }}{{ strtoupper(substr($stat['user']->surname,0,1)) }}
-                                    </div>
+                                    <img src="https://i.pravatar.cc/32?u={{ $stat['user']->id ?? ($idx + 200) }}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
                                     <span style="font-weight:500;">{{ $stat['user']->name }} {{ $stat['user']->surname }}</span>
                                 </div>
                             </td>
@@ -449,9 +445,7 @@
                             <td class="muted">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <div style="width:32px;height:32px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981','#6366f1','#ec4899','#14b8a6'][$idx % 8] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">
-                                        {{ strtoupper(substr($stat['user']->name,0,1)) }}{{ strtoupper(substr($stat['user']->surname,0,1)) }}
-                                    </div>
+                                    <img src="https://i.pravatar.cc/32?u={{ $stat['user']->id ?? ($idx + 300) }}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
                                     <span style="font-weight:500;">{{ $stat['user']->name }} {{ $stat['user']->surname }}</span>
                                 </div>
                             </td>

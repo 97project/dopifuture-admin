@@ -11,33 +11,37 @@
 
 @section('content')
 
-    {{-- ═══ 3 STAT CARDS — Figma 1158-14034 ═══ --}}
-    <div class="dp-stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom:20px;">
-        {{-- Total Licence — Figma: Green gradient --}}
-        <div class="dp-stat-card" style="background: linear-gradient(135deg, #059669 0%, #10B981 100%);">
-            <div class="s-icon">
-                <svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    {{-- ═══ 3 STAT CARDS — Figma 1158-14034: horizontal icon-left value-right ═══ --}}
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;">
+        {{-- Total Licence — Green --}}
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-radius:16px;background:linear-gradient(135deg,#059669,#10B981);color:#fff;">
+            <div style="display:flex;flex-direction:column;gap:4px;">
+                <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;">
+                    <svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <span style="font-size:13px;font-weight:500;opacity:0.9;">{{ $isTr ? 'Toplam Lisans' : 'Total Licence' }}</span>
             </div>
-            <div class="s-value">{{ $licenseStats->totalLicence ?? 52 }}</div>
-            <div class="s-label">{{ $isTr ? 'Toplam Lisans' : 'Total Licence' }}</div>
+            <span style="font-size:36px;font-weight:700;font-family:'Nunito',sans-serif;">{{ $licenseStats->totalLicence ?? 52 }}</span>
         </div>
-
-        {{-- Used Licence — Figma: Blue gradient --}}
-        <div class="dp-stat-card" style="background: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%);">
-            <div class="s-icon">
-                <svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        {{-- Used Licence — Blue --}}
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-radius:16px;background:linear-gradient(135deg,#0284C7,#38BDF8);color:#fff;">
+            <div style="display:flex;flex-direction:column;gap:4px;">
+                <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;">
+                    <svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                </div>
+                <span style="font-size:13px;font-weight:500;opacity:0.9;">{{ $isTr ? 'Kullanılan Lisans' : 'Used Licence' }}</span>
             </div>
-            <div class="s-value">{{ $licenseStats->usedLicence ?? 47 }}</div>
-            <div class="s-label">{{ $isTr ? 'Kullanılan Lisans' : 'Used Licence' }}</div>
+            <span style="font-size:36px;font-weight:700;font-family:'Nunito',sans-serif;">{{ $licenseStats->usedLicence ?? 47 }}</span>
         </div>
-
-        {{-- Licence Duration — Figma: Orange/pink gradient --}}
-        <div class="dp-stat-card" style="background: linear-gradient(135deg, #EA580C 0%, #FB923C 100%);">
-            <div class="s-icon">
-                <svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        {{-- Licence Duration — Orange --}}
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-radius:16px;background:linear-gradient(135deg,#EA580C,#FB923C);color:#fff;">
+            <div style="display:flex;flex-direction:column;gap:4px;">
+                <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;">
+                    <svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <span style="font-size:13px;font-weight:500;opacity:0.9;">{{ $isTr ? 'Lisans Süresi' : 'Licence Duration' }}</span>
             </div>
-            <div class="s-value">{{ $licenseStats->licenceDuration ?? '12/31/2026' }}</div>
-            <div class="s-label">{{ $isTr ? 'Lisans Süresi' : 'Licence Duration' }}</div>
+            <span style="font-size:28px;font-weight:700;font-family:'Nunito',sans-serif;">{{ $licenseStats->licenceDuration ?? '12/31/2026' }}</span>
         </div>
     </div>
 
@@ -56,7 +60,8 @@
             </a>
         </div>
 
-        <button type="button" class="dp-btn" onclick="document.getElementById('addUserModal').style.display='flex'">
+        <button type="button" onclick="document.getElementById('addUserModal').style.display='flex'"
+                style="display:inline-flex;align-items:center;gap:8px;padding:10px 24px;background:#10B981;color:#fff;border:none;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;">
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-width="2" d="M12 8v8m-4-4h8"/></svg>
             {{ $currentRole === 'teacher' ? ($isTr ? 'Yeni Öğretmen Ekle' : 'Add New Teacher') : ($isTr ? 'Yeni Öğrenci Ekle' : 'Add New Student') }}
         </button>
@@ -81,8 +86,9 @@
                     <td class="muted">{{ str_pad(($users->currentPage()-1)*$users->perPage()+$i+1, 2, '0', STR_PAD_LEFT) }}</td>
                     <td>
                         <div class="dp-td-avatar">
-                            <div class="av">{{ strtoupper(substr($u->name,0,1).substr($u->surname??'',0,1)) }}</div>
-                            <span style="font-weight:500;">{{ $u->name }} {{ $u->surname }}</span>
+                            <img src="https://ui-avatars.com/api/?name={{ urlencode($u->name . ' ' . ($u->surname ?? '')) }}&size=56&background=random&rounded=true&bold=true&font-size=0.4"
+                                 alt="{{ $u->name }}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+                            <span style="font-weight:500;color:#030719;">{{ $u->name }} {{ $u->surname }}</span>
                         </div>
                     </td>
                     <td class="muted">{{ $u->email }}</td>
