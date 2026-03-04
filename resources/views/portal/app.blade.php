@@ -948,8 +948,8 @@
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                 </button>
                 <a href="{{ route('portal.profile') }}" class="dp-user-link">
-                    <div class="dp-avatar">{{ strtoupper(substr($user->name??'U',0,1).substr($user->surname??'',0,1)) }}</div>
-                    <span class="dp-username" style="display:none;">{{ $user->name }}</span>
+                    <div class="dp-avatar">{{ strtoupper(substr($user?->name ?? 'U',0,1).substr($user?->surname ?? '',0,1)) }}</div>
+                    <span class="dp-username" style="display:none;">{{ $user?->name ?? '' }}</span>
                 </a>
             </div>
         </header>
