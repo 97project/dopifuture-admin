@@ -19,7 +19,7 @@ class AuthService
         }
 
         if ($user->isLocked()) {
-            $minutes = $user->locked_until->diffInMinutes(now());
+            $minutes = max(1, (int) ceil($user->locked_until->diffInMinutes(now(), false)));
             return ['success' => false, 'error' => 'account_locked', 'message' => __('auth.locked', ['minutes' => $minutes])];
         }
 
