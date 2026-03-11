@@ -2,20 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Connectors\MissionWayConnector;
+use App\Connectors\VegaConnector;
+use App\Connectors\WayStartupConnector;
 use App\Models\Application;
 use App\Models\SchoolClass;
 use App\Models\User;
+use App\Services\ConnectorSyncService;
 use App\Services\ReportService;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Portal-side reporting controller.
  * Access is scoped by role via PortalRole middleware.
+ *
+ * Rol bazlı erişim:
+ *   - Okul yöneticisi → tüm okul öğrencileri
+ *   - Öğretmen → kendi sınıflarının öğrencileri
+ *   - Öğrenci → sadece kendi verileri
  */
 class PortalReportController extends Controller
 {
-    public function __construct(private ReportService $reportService)
-    {
+    public function __construct(
+        private ReportService $reportService,
+        private ConnectorSyncService $syncService,
+    ) {
     }
 
     /**
@@ -26,20 +37,17 @@ class PortalReportController extends Controller
         $user = auth()->user();
         $data = ['user' => $user];
 
-        // Determine school IDs based on role
         if ($user->hasAnyRole(['school-admin', 'school-principal'])) {
             $schoolIds = $user->schools()->pluck('schools.id');
             $data['overview'] = $this->reportService->getSchoolOverviewStats($schoolIds);
             $data['apps'] = Application::active()->ordered()->get();
         } elseif ($user->hasRole('teacher')) {
-            // Teacher sees class-level overview
             $data['myClasses'] = $user->classes()
                 ->with('school')
                 ->withCount('students')
                 ->get();
             $data['apps'] = Application::active()->ordered()->get();
         } elseif ($user->hasRole('student')) {
-            // Student sees personal report
             $data['studentReport'] = $this->reportService->getStudentReport($user);
         }
 
@@ -49,151 +57,67 @@ class PortalReportController extends Controller
     /**
      * Per-application detailed report.
      * Figma F-38 (Assignments tab) + F-63 (Performance tab)
-     * TODO: Remove mock data block and reconnect ReportService when DB is populated.
+     *
+     * Canlı veri: ReportService (DB) + Connector (API) birleşimi.
      */
     public function appReport(Application $app)
     {
         $user = auth()->user();
+        $scopedUserIds = $this->getScopedUserIds($user);
 
-        // ── MOCK STUDENTS ──────────────────────────────────────────
-        $mockStudents = collect([
-            (object)['id'=>901,'name'=>'Elif','surname'=>'Demir','avatar'=>null,'classes'=>collect([(object)['name'=>'9-A']])],
-            (object)['id'=>902,'name'=>'Ahmet','surname'=>'Çelik','avatar'=>null,'classes'=>collect([(object)['name'=>'10-B']])],
-            (object)['id'=>903,'name'=>'Fatma','surname'=>'Şahin','avatar'=>null,'classes'=>collect([(object)['name'=>'9-A']])],
-            (object)['id'=>904,'name'=>'Emre','surname'=>'Aydın','avatar'=>null,'classes'=>collect([(object)['name'=>'11-C']])],
-            (object)['id'=>905,'name'=>'Selin','surname'=>'Öztürk','avatar'=>null,'classes'=>collect([(object)['name'=>'10-B']])],
-            (object)['id'=>906,'name'=>'Burak','surname'=>'Yılmaz','avatar'=>null,'classes'=>collect([(object)['name'=>'9-A']])],
-            (object)['id'=>907,'name'=>'Cansu','surname'=>'Koç','avatar'=>null,'classes'=>collect([(object)['name'=>'11-C']])],
-            (object)['id'=>908,'name'=>'Deniz','surname'=>'Arslan','avatar'=>null,'classes'=>collect([(object)['name'=>'10-B']])],
-        ]);
+        // ── ReportService ile DB'deki normalize edilmiş veriler ──
+        $reportData = $this->reportService->getAppReport($app, $scopedUserIds);
 
-        // ── MISSION WAY: Figma F-38 Assignments mock data ──────────
+        // ── Connector'dan uygulama bazlı canlı veriler ──
+        $connector = $app->resolveConnector();
         $missions = collect();
-        if ($app->slug === 'mission-way') {
-            $missionNames = [
-                'The Mystery of Göbeklitepe',
-                "The Sphinx's Code",
-                'The Trojan Horse Plan',
-                'Reinvent the Machine',
-                'After the Earthquake',
-                'The Village Choice',
-                'The Track Dilemma',
-                'The Quantum Lab Experiment',
-                'The Dinosaur Fossil',
-                'The Science Fair Decision',
-            ];
-            foreach ($missionNames as $idx => $name) {
-                $studentSlice = $mockStudents->random(rand(3, 5));
-                $hp = $idx === 1 || $idx === 4 ? null : rand(35, 100);
-                $rp = $idx === 1 || $idx === 5 ? null : rand(55, 100);
-                $ep = $idx === 1 || $idx === 5 ? null : rand(40, 100);
-                $ap = $idx === 1 || $idx === 2 || $idx === 3 || $idx === 5 || $idx === 7 || $idx === 9 ? null : rand(60, 100);
-                $missions->push((object)[
-                    'id'             => $idx + 1,
-                    'name'           => $name,
-                    'students'       => $studentSlice,
-                    'assigned_date'  => '01/01/2026',
-                    'deadline'       => '03/01/2026',
-                    'health_point'   => $hp,
-                    'resource_point' => $rp,
-                    'ethics_point'   => $ep,
-                    'adaptation_point' => $ap,
-                    'health_trend'   => $hp !== null ? ($hp < 50 ? 'down' : 'up') : null,
-                    'resource_trend' => $rp !== null ? ($rp < 60 ? 'down' : 'up') : null,
-                    'ethics_trend'   => $ep !== null ? ($ep < 50 ? 'down' : 'up') : null,
-                    'adaptation_trend' => $ap !== null ? ($ap >= 0 ? 'up' : 'down') : null,
-                ]);
-            }
-        }
-
-        // ── WAY STARTUP: Figma F-4 Assignments mock data ───────────
         $startups = collect();
-        if ($app->slug === 'way-startup') {
-            $startupData = [
-                ['SmartClass',   'Edtech',           2, 12, 150, 1500, null,   'in_progress'],
-                ['VitaCare',     'Healthcare Tech',   0, 12,   0, 1500, null,   'not_started'],
-                ['StudyFund',    'Fintech',           3, 12, 450, 1500, null,   'in_progress'],
-                ['TrendBox',     'E-commerce',        0, 12,1100, 1500, 'Score','completed'],
-                ['FutureBot',    'Robotics',          0, 12,   0, 1500, null,   'not_started'],
-                ['DreamVR',      'Virtual Reality',   0, 12, 750, 1500, null,   'completed'],
-                ['LifeCheck',    'Healthcare Tech',   6, 12, 600, 1500, null,   'in_progress'],
-                ['SenseFit',     'Wearable Tech',     0, 12,1300, 1500, 'Score','completed'],
-                ['EasyTrip',     'Travel Management', 0, 12, 350, 1500, null,   'not_started'],
-                ['SafeCore',     'Cybersecurity',    11, 12,1300, 1500, null,   'in_progress'],
-                ['DialogAI',     'Conversational AI', 0, 12,   0, 1500, null,   'not_started'],
-                ['TokenLab',     'Blockchain',        0, 12,1200, 1500, null,   'completed'],
-                ['ShopNest',     'E-commerce',        2, 12, 300, 1500, null,   'in_progress'],
-                ['TrustNet',     'Cybersecurity',     0, 12,1450, 1500, 'Score','completed'],
-                ['Learnify',     'Edtech',            0, 12,   0, 1500, null,   'not_started'],
-            ];
-            $typeIcons = [
-                'Edtech' => '📚', 'Healthcare Tech' => '🏥', 'Fintech' => '💰',
-                'E-commerce' => '🛒', 'Robotics' => '🤖', 'Virtual Reality' => '🎮',
-                'Wearable Tech' => '⌚', 'Travel Management' => '✈️',
-                'Cybersecurity' => '🔒', 'Conversational AI' => '💬', 'Blockchain' => '🔗',
-            ];
-            foreach ($startupData as $idx => $row) {
-                $studentSlice = $mockStudents->random(rand(2, 4));
-                $deadlineOverdue = in_array($idx, [9, 12, 14]);
-                $startups->push((object)[
-                    'id'            => $idx + 1,
-                    'name'          => $row[0],
-                    'type'          => $row[1],
-                    'type_icon'     => $typeIcons[$row[1]] ?? '📁',
-                    'students'      => $studentSlice,
-                    'deadline'      => $deadlineOverdue ? now()->subDays(rand(10,50))->format('m/d/Y') : '03/16/2026',
-                    'deadline_overdue' => $deadlineOverdue,
-                    'step_completed'=> $row[2],
-                    'step_total'    => $row[3],
-                    'system_point'  => $row[4],
-                    'max_point'     => $row[5],
-                    'teacher_point' => $row[6],
-                    'status'        => $row[7],
-                ]);
-            }
+
+        if ($connector instanceof MissionWayConnector) {
+            $missions = $this->getMissionWayLiveData($connector, $app, $scopedUserIds);
+        } elseif ($connector instanceof WayStartupConnector) {
+            $startups = $this->getWayStartupLiveData($connector, $app, $scopedUserIds);
         }
 
-        // ── USER STATS for Performance tab ─────────────────────────
-        $userStats = $mockStudents->map(function($s, $i) use ($app) {
-            $base = [
-                'user' => $s,
-                'total' => rand(4,8),
-                'completed' => rand(1,5),
-                'completion_rate' => rand(30,95),
-                'avg_score' => rand(45,92) + rand(0,9)/10,
-                'total_duration' => rand(1800, 14400),
-            ];
-            if ($app->slug === 'mission-way') {
-                $base['health_point'] = rand(60,100);
-                $base['resource_point'] = rand(40,95);
-                $base['ethics_point'] = rand(50,90);
-                $base['adaptation_point'] = rand(35,88);
-            } elseif ($app->slug === 'way-startup') {
-                $base['startup_type'] = ['Teknoloji','Sağlık','Eğitim','Finans'][$i % 4];
-                $base['deadline'] = now()->addDays(rand(5,30))->format('d.m.Y');
-                $base['teacher_score'] = rand(60,95);
-            } elseif ($app->slug === 'way-ai-coach') {
-                $base['alert'] = $i === 2;
-            } elseif ($app->slug === 'role-galaxy') {
-                $base['galaxy_selected'] = ['Liderlik','İletişim','Empati','Problem Çözme'][$i % 4];
-                $base['role_played'] = ['Kaptan','Arabulucu','Danışman','Gözlemci'][$i % 4];
-            } elseif ($app->slug === 'study-space') {
-                $base['discussion_minutes'] = rand(15,120);
-                $base['discussion_count'] = rand(3,18);
-            }
-            return $base;
-        })->values();
+        // ── Per-user stats from DB ──
+        $userStats = collect($reportData['user_stats'] ?? []);
 
-        $moduleStats = collect([
-            'simulation' => ['type'=>'simulation','total'=>12,'completed'=>8,'in_progress'=>3,'avg_score'=>72.5,'avg_duration'=>1800],
-            'step'       => ['type'=>'step','total'=>18,'completed'=>14,'in_progress'=>3,'avg_score'=>68.0,'avg_duration'=>900],
-            'practice'   => ['type'=>'practice','total'=>8,'completed'=>5,'in_progress'=>2,'avg_score'=>81.2,'avg_duration'=>1200],
-        ]);
+        // Connector-specific user enrichment
+        if ($connector) {
+            $userStats = $userStats->map(function ($stat) use ($connector, $app) {
+                $u = $stat['user'] ?? null;
+                if (!$u) return $stat;
 
-        $sessionsByDay = collect();
-        for ($d = 29; $d >= 0; $d--) {
-            $date = now()->subDays($d)->format('Y-m-d');
-            $sessionsByDay[$date] = rand(0, 8);
+                if ($connector instanceof MissionWayConnector) {
+                    $report = $connector->getUserReport($u);
+                    if ($report && ($report['success'] ?? false)) {
+                        $d = $report['data'] ?? [];
+                        $stat['health_point'] = $d['composition']['player']['healthMetric'] ?? null;
+                        $stat['resource_point'] = $d['composition']['player']['resourceMetric'] ?? null;
+                        $stat['ethics_point'] = $d['composition']['player']['ethicsMetric'] ?? null;
+                        $stat['adaptation_point'] = $d['composition']['player']['adaptationMetric'] ?? null;
+                    }
+                } elseif ($connector instanceof WayStartupConnector) {
+                    $report = $connector->getUserReport($u);
+                    if ($report && ($report['success'] ?? false)) {
+                        $d = $report['data'] ?? [];
+                        $stat['startup_type'] = $d['member']['type'] ?? null;
+                        $stat['teacher_score'] = $d['member']['teacherScore'] ?? null;
+                        $stat['completed_steps'] = $d['completed_steps'] ?? 0;
+                        $stat['total_steps'] = $d['total_steps'] ?? 0;
+                    }
+                } elseif ($connector instanceof VegaConnector) {
+                    $report = $connector->getUserReport($u);
+                    if ($report && ($report['success'] ?? false)) {
+                        $d = $report['data'] ?? [];
+                        $stat['session_count'] = $d['session_count'] ?? 0;
+                        $stat['lecturer_count'] = $d['modules']['lecturer'] ?? 0;
+                        $stat['simulator_count'] = $d['modules']['simulator'] ?? 0;
+                    }
+                }
+
+                return $stat;
+            })->values();
         }
 
         $data = [
@@ -201,16 +125,16 @@ class PortalReportController extends Controller
             'user'             => $user,
             'missions'         => $missions,
             'startups'         => $startups,
-            'total_missions'   => 24,
-            'total_progress'   => 38,
-            'total_completed'  => 27,
-            'total_sessions'   => 64,
-            'total_duration'   => 45600,
-            'avg_score'        => 74.3,
-            'module_stats'     => $moduleStats,
+            'total_missions'   => $reportData['total_progress'] ?? 0,
+            'total_progress'   => $reportData['total_progress'] ?? 0,
+            'total_completed'  => $reportData['total_completed'] ?? 0,
+            'total_sessions'   => $reportData['total_sessions'] ?? 0,
+            'total_duration'   => $reportData['total_duration'] ?? 0,
+            'avg_score'        => round($reportData['avg_score'] ?? 0, 1),
+            'module_stats'     => $reportData['module_stats'] ?? collect(),
             'user_stats'       => $userStats,
-            'sessions_by_day'  => $sessionsByDay,
-            'recent_sessions'  => collect(),
+            'sessions_by_day'  => $reportData['sessions_by_day'] ?? collect(),
+            'recent_sessions'  => $reportData['recent_sessions'] ?? collect(),
         ];
 
         return view('portal.reports.app', $data);
@@ -223,7 +147,6 @@ class PortalReportController extends Controller
     {
         $authUser = auth()->user();
 
-        // Authorization checks
         if ($authUser->hasRole('student') && $authUser->id !== $student->id) {
             abort(403);
         }
@@ -237,6 +160,11 @@ class PortalReportController extends Controller
         }
 
         $student->load(['roles', 'schools', 'classes.school', 'applications']);
+
+        // Önce connector data sync et (güncel veri için)
+        $this->syncService->syncAllAppsForUser($student);
+
+        // Sonra ReportService ile normalize edilmiş raporu getir
         $reportData = $this->reportService->getStudentReport($student);
 
         return view('portal.reports.student', [
@@ -253,7 +181,6 @@ class PortalReportController extends Controller
     {
         $user = auth()->user();
 
-        // Teacher must be assigned to the class
         if ($user->hasRole('teacher')) {
             if (!$user->classes()->where('school_classes.id', $class->id)->exists()) {
                 abort(403);
@@ -271,135 +198,330 @@ class PortalReportController extends Controller
         ]);
     }
 
-    /* ── Detail Pages ────────────────────────────────── */
+    /* ══════════════════════════════════════════════════════
+     *  Detail Pages — Canlı Connector Verisi
+     * ══════════════════════════════════════════════════════ */
 
     /**
      * Mission WAY — Mission Detail — Figma F-41/42/62
+     * Canlı veri: MissionWayConnector'dan simülasyon + oturumlar + oyuncu detayları.
      */
     public function missionDetail($id)
     {
-        $mission = (object)[
-            'id' => $id, 'title' => 'After the Earthquake',
-            'status' => 'Tamamlandı', 'difficulty' => 'Easy', 'created' => '28.02.2026',
-            'description' => 'Bu görevde öğrenciler dijital harita oluşturma sürecini öğrenecek ve pratik yapacaklar.',
-            'result' => 'The people willingly carry stones and repair walls with the belief that "salvation is near." However, the difference between the reinforcement time (35 min) and the door endurance time determines the lifespan of the lie. If reinforcement does not arrive on time, the people will open the doors.',
-            'completion_rate' => 72, 'avg_score' => 74.3,
-            'health' => 75, 'resource' => 40, 'ethics' => 85, 'adaptation' => 100,
-            'image' => 'https://images.unsplash.com/photo-1573648952826-b4f5e09c7370?w=1200&h=400&fit=crop',
-        ];
-        $students = collect([
-            (object)['name'=>'Chance','surname'=>'Rhiel Madsen','role'=>'Diplomat','grade'=>11,'completed'=>8,'total_missions'=>8,'health'=>7,'resource'=>8,'ethics'=>5,'adaptation'=>6],
-            (object)['name'=>'Emery','surname'=>'Dorwart','role'=>'Safety','grade'=>12,'completed'=>12,'total_missions'=>12,'health'=>9,'resource'=>12,'ethics'=>8,'adaptation'=>3],
-            (object)['name'=>'Kadin','surname'=>'Septimus','role'=>'Logistics','grade'=>10,'completed'=>5,'total_missions'=>5,'health'=>3,'resource'=>5,'ethics'=>2,'adaptation'=>5],
-            (object)['name'=>'Alena','surname'=>'Rosser','role'=>'Medic','grade'=>9,'completed'=>7,'total_missions'=>7,'health'=>4,'resource'=>6,'ethics'=>7,'adaptation'=>5],
-        ]);
-        $questions = collect([
-            (object)[
-                'question' => 'The earthquake has started! What should you do?',
-                'unanimity' => 75, 'health' => 45, 'resource' => 70, 'ethics' => 65, 'adaptation' => 100,
-                'options' => collect([
-                    (object)['text' => 'Get under the table (DUCK-COVER-HOLD ON)', 'correct' => true, 'selected' => true],
-                    (object)['text' => 'Run Outside', 'correct' => false, 'selected' => false],
-                    (object)['text' => 'Take the elevator down', 'correct' => false, 'selected' => false],
-                ]),
-            ],
-            (object)[
-                'question' => 'The earthquake has started! What should you do?',
-                'unanimity' => 100, 'health' => 45, 'resource' => 70, 'ethics' => 65, 'adaptation' => 100,
-                'options' => collect([
-                    (object)['text' => 'Get under the table (DUCK-COVER-HOLD ON)', 'correct' => true, 'selected' => false],
-                    (object)['text' => 'Run Outside', 'correct' => false, 'selected' => false],
-                    (object)['text' => 'Take the elevator down', 'correct' => false, 'selected' => true],
-                ]),
-            ],
-            (object)[
-                'question' => 'The earthquake has started! What should you do?',
-                'unanimity' => 75, 'health' => 45, 'resource' => 70, 'ethics' => 65, 'adaptation' => 100,
-                'options' => collect([
-                    (object)['text' => 'Get under the table (DUCK-COVER-HOLD ON)', 'correct' => true, 'selected' => false],
-                    (object)['text' => 'Run Outside', 'correct' => false, 'selected' => true],
-                    (object)['text' => 'Take the elevator down', 'correct' => false, 'selected' => false],
-                ]),
-            ],
-        ]);
+        $app = Application::where('slug', 'mission-way')->first();
+        $connector = $app ? $app->resolveConnector() : null;
+
+        $mission = null;
+        $students = collect();
+        $questions = collect();
+
+        if ($connector instanceof MissionWayConnector) {
+            // Simülasyon detayını API'den çek
+            $simData = $connector->getSimulation((int) $id);
+
+            if ($simData) {
+                $mission = (object) [
+                    'id'              => $simData['id'] ?? $id,
+                    'title'           => $simData['name'] ?? $simData['title'] ?? 'Simülasyon #' . $id,
+                    'status'          => $this->formatStatus($simData['status'] ?? 'active'),
+                    'difficulty'      => $simData['difficultyLevel'] ?? $simData['difficulty'] ?? '-',
+                    'created'         => isset($simData['createdAt']) ? \Carbon\Carbon::parse($simData['createdAt'])->format('d.m.Y') : '-',
+                    'description'     => $simData['description'] ?? '',
+                    'result'          => $simData['result'] ?? $simData['summary'] ?? '',
+                    'completion_rate' => $simData['completionRate'] ?? 0,
+                    'avg_score'       => $simData['avgScore'] ?? 0,
+                    'health'          => $simData['healthMetric'] ?? $simData['health'] ?? 0,
+                    'resource'        => $simData['resourceMetric'] ?? $simData['resource'] ?? 0,
+                    'ethics'          => $simData['ethicsMetric'] ?? $simData['ethics'] ?? 0,
+                    'adaptation'      => $simData['adaptationMetric'] ?? $simData['adaptation'] ?? 0,
+                    'image'           => $simData['coverImage'] ?? $simData['image'] ?? null,
+                ];
+
+                // Oturum oyuncularını çek
+                $sessions = $connector->getSimulationSessions(['filter' => "simulationId||eq||{$id}"]);
+                $sessionList = is_array($sessions) ? ($sessions['data'] ?? $sessions) : [];
+
+                foreach ($sessionList as $session) {
+                    $sessionId = $session['id'] ?? null;
+                    if (!$sessionId) continue;
+
+                    $players = $connector->getSessionPlayers($sessionId);
+                    if (is_array($players)) {
+                        foreach ($players as $player) {
+                            $students->push((object) [
+                                'name'           => $player['name'] ?? $player['playerName'] ?? 'Oyuncu',
+                                'surname'        => $player['surname'] ?? '',
+                                'role'           => $player['role'] ?? $player['roleName'] ?? '-',
+                                'grade'          => $player['grade'] ?? '-',
+                                'completed'      => $player['completedDecisions'] ?? $player['completed'] ?? 0,
+                                'total_missions' => $player['totalDecisions'] ?? $player['total'] ?? 0,
+                                'health'         => $player['healthMetric'] ?? $player['health'] ?? 0,
+                                'resource'       => $player['resourceMetric'] ?? $player['resource'] ?? 0,
+                                'ethics'         => $player['ethicsMetric'] ?? $player['ethics'] ?? 0,
+                                'adaptation'     => $player['adaptationMetric'] ?? $player['adaptation'] ?? 0,
+                            ]);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Simülasyon bulunamadıysa 404
+        if (!$mission) {
+            abort(404, 'Simülasyon bulunamadı veya API erişilemez.');
+        }
+
         return view('portal.reports.mission-detail', compact('mission', 'students', 'questions'));
     }
 
     /**
      * Startup — Project Detail — Figma F-66/67/68
+     * Canlı veri: WayStartupConnector'dan simülasyon + adımlar + üyeler.
      */
     public function startupDetail($id)
     {
-        $project = (object)['id'=>$id,'name'=>'StudyFund / Fintech','steps_completed'=>6,'total_steps'=>12,'product_score'=>120,'max_score'=>2500];
-        $steps = collect([
-            (object)['title'=>'Team Formation & Roles','responsible'=>'John Doe','ai_score'=>150,'score'=>150,'difficulty'=>'Easy','completed'=>true],
-            (object)['title'=>'Idea Generation','responsible'=>'Sophia Wilson','ai_score'=>150,'score'=>150,'difficulty'=>'Easy','completed'=>true],
-            (object)['title'=>'User Research','responsible'=>'Terry Franci','ai_score'=>150,'score'=>145,'difficulty'=>'Easy','completed'=>true],
-            (object)['title'=>'Benchmark','responsible'=>'John Doe','ai_score'=>150,'score'=>50,'difficulty'=>'Easy','completed'=>false],
-            (object)['title'=>'Ideation','responsible'=>'Sophia Wilson','ai_score'=>150,'score'=>150,'difficulty'=>'Medium','completed'=>true],
-            (object)['title'=>'Business Model Canvas','responsible'=>'Terry Franci','ai_score'=>150,'score'=>0,'difficulty'=>'Medium','completed'=>false],
-        ]);
-        $team = collect([
-            (object)['name'=>'John','surname'=>'Doe','steps'=>'Step 1, 4, 7'],
-            (object)['name'=>'Sophia','surname'=>'Wilson','steps'=>'Step 2, 5, 8'],
-            (object)['name'=>'Terry','surname'=>'Franci','steps'=>'Step 3, 6, 9'],
-        ]);
-        return view('portal.reports.startup-detail', compact('project', 'steps', 'team'));
+        $app = Application::where('slug', 'way-startup')->first();
+        $connector = $app ? $app->resolveConnector() : null;
+
+        $project = null;
+        $steps = collect();
+        $team = collect();
+
+        if ($connector instanceof WayStartupConnector) {
+            $simData = $connector->getSimulation((int) $id);
+
+            if ($simData) {
+                // Adımları çek
+                $stepsData = $connector->getSteps((int) $id);
+                $stepsData = is_array($stepsData) ? $stepsData : [];
+
+                $completedSteps = 0;
+                $totalScore = 0;
+                $maxScore = 0;
+
+                foreach ($stepsData as $step) {
+                    $isCompleted = ($step['status'] ?? '') === 'completed';
+                    if ($isCompleted) $completedSteps++;
+                    $stepScore = $step['score'] ?? $step['point'] ?? 0;
+                    $stepMax = $step['maxScore'] ?? $step['maxPoint'] ?? 150;
+                    $totalScore += $stepScore;
+                    $maxScore += $stepMax;
+
+                    $steps->push((object) [
+                        'title'       => $step['name'] ?? $step['title'] ?? 'Adım',
+                        'responsible' => $step['responsibleName'] ?? $step['assignee'] ?? '-',
+                        'ai_score'    => $step['aiScore'] ?? $stepMax,
+                        'score'       => $stepScore,
+                        'difficulty'  => $step['difficulty'] ?? $step['difficultyLevel'] ?? '-',
+                        'completed'   => $isCompleted,
+                    ]);
+                }
+
+                // Sorunlu adımı bul (puan < %30 ise)
+                $problemStep = null;
+                foreach ($stepsData as $si => $step) {
+                    $ss = $step['score'] ?? $step['point'] ?? 0;
+                    $sm = $step['maxScore'] ?? $step['maxPoint'] ?? 150;
+                    if ($sm > 0 && ($ss / $sm) < 0.3) {
+                        $problemStep = $si + 1;
+                        break;
+                    }
+                }
+
+                $project = (object) [
+                    'id'              => $simData['id'] ?? $id,
+                    'name'            => ($simData['name'] ?? '-') . ' / ' . ($simData['type'] ?? $simData['category'] ?? ''),
+                    'steps_completed' => $completedSteps,
+                    'total_steps'     => count($stepsData),
+                    'product_score'   => $totalScore,
+                    'max_score'       => $maxScore ?: 0,
+                    'problem_step'    => $problemStep,
+                ];
+
+                // Dosyaları ve linkleri çek
+                $files = collect($simData['files'] ?? $simData['attachments'] ?? $simData['submissions'] ?? [])
+                    ->filter(fn($f) => !empty($f['name'] ?? $f['fileName'] ?? null))
+                    ->map(fn($f) => [
+                        'step' => $f['stepId'] ?? $f['step'] ?? '-',
+                        'name' => $f['name'] ?? $f['fileName'] ?? '-',
+                        'size' => $f['size'] ?? $f['fileSize'] ?? '',
+                        'url'  => $f['url'] ?? $f['fileUrl'] ?? '',
+                    ])->values()->all();
+
+                $links = collect($simData['links'] ?? $simData['submittedLinks'] ?? [])
+                    ->filter(fn($l) => !empty($l['url'] ?? null))
+                    ->map(fn($l) => [
+                        'step' => $l['stepId'] ?? $l['step'] ?? '-',
+                        'url'  => $l['url'] ?? '',
+                    ])->values()->all();
+
+                // Üyeleri çek (simülasyona atanmış kullanıcılar)
+                if ($app) {
+                    $appUsers = $app->users()->limit(20)->get();
+                    foreach ($appUsers as $appUser) {
+                        $member = $connector->getUser($appUser);
+                        if ($member) {
+                            $team->push((object) [
+                                'name'    => $appUser->name,
+                                'surname' => $appUser->surname ?? '',
+                                'steps'   => $member['assignedSteps'] ?? '-',
+                            ]);
+                        }
+                    }
+                }
+            }
+        }
+
+        $files = $files ?? [];
+        $links = $links ?? [];
+
+        if (!$project) {
+            abort(404, 'Startup projesi bulunamadı veya API erişilemez.');
+        }
+
+        return view('portal.reports.startup-detail', compact('project', 'steps', 'team', 'files', 'links'));
     }
 
     /**
      * WAY AI Coach — Question Detail — Figma F-71/F-74
+     * Canlı veri: VegaConnector'dan oturum detayı + mesaj geçmişi.
      */
     public function coachQuestions($id)
     {
-        $student = (object)['name' => 'Ahmet Çelik'];
-        $questions = collect([
-            (object)[
-                'question' => 'Define the problem you want to solve in 2–3 precise sentences. Avoid general statements.',
-                'score' => 18, 'max_score' => 20,
-                'answer' => '"Users struggle to find reliable local plumbers because current directories lack verified reviews and transparent pricing."',
-                'feedback' => 'This is a clear and concise problem statement. It identifies the target (users looking for plumbers) and the specific pain points (lack of verification and price transparency). Well done.',
-                'health' => 65, 'resource' => 70, 'ethics' => 80, 'adaptation' => 60,
-                'options' => collect([]),
-            ],
-            (object)[
-                'question' => 'Identify your primary target user. Describe them using age range, context, and specific need.',
-                'score' => 18, 'max_score' => 20,
-                'answer' => '"Homeowners aged 30-50 living in urban areas who need emergency repair services but don\'t have a trusted network."',
-                'feedback' => 'Good specificity on age and context. You could narrow down \'urban areas\' to a specific region for an MVP, but this is a solid start.',
-                'health' => 70, 'resource' => 65, 'ethics' => 75, 'adaptation' => 55,
-                'options' => collect([]),
-            ],
-            (object)[
-                'question' => 'Explain why this problem is worth solving. Support your answer with a real-life example or observation.',
-                'score' => 18, 'max_score' => 20,
-                'answer' => '"It\'s worth solving because emergency repairs are high-stress. I saw my neighbor pay triple the standard rate for a leak because they couldn\'t verify quotes quickly."',
-                'feedback' => 'Excellent use of a real-life observation. It validates the emotional urgency and financial impact of the problem.',
-                'health' => 80, 'resource' => 60, 'ethics' => 85, 'adaptation' => 70,
-                'options' => collect([]),
-            ],
-            (object)[
-                'question' => 'List three different solution ideas.',
-                'score' => 19, 'max_score' => 20,
-                'answer' => '"1. An \'Uber for Plumbers\' app. 2. A community-vetted WhatsApp group. 3. A certification board website."',
-                'feedback' => 'Excellent use of a real-life observation. It validates the emotional urgency and financial impact of the problem.',
-                'health' => 75, 'resource' => 80, 'ethics' => 70, 'adaptation' => 65,
-                'options' => collect([]),
-            ],
-            (object)[
-                'question' => 'Select one idea and justify your choice using at least two logical reasons.',
-                'score' => 18, 'max_score' => 20,
-                'answer' => '"I choose the \'Uber for Plumbers\' app because it allows for real-time tracking and instant payments, which addresses the trust and speed issues directly."',
-                'feedback' => 'Strong justification linking back to the core problems of trust and speed. Ensure you consider the supply-side acquisition costs.',
-                'health' => 85, 'resource' => 75, 'ethics' => 80, 'adaptation' => 90,
-                'options' => collect([]),
-            ],
-        ]);
-        return view('portal.reports.coach-questions', compact('student', 'questions'));
+        $app = Application::where('slug', 'way-ai-coach')->first();
+        $connector = $app ? $app->resolveConnector() : null;
+
+        $student = null;
+        $questions = collect();
+        $sessionDuration = null;
+
+        if ($connector instanceof VegaConnector) {
+            // Oturum detayını çek (lecturer modülü)
+            $sessionData = $connector->getSessionDetail((string) $id, 'lecturer');
+
+            if ($sessionData) {
+                $student = (object) [
+                    'name' => $sessionData['userName'] ?? $sessionData['user']['name'] ?? 'Öğrenci',
+                    'surname' => $sessionData['userSurname'] ?? $sessionData['user']['surname'] ?? '',
+                ];
+
+                // Oturum süresi hesapla
+                $sessionDuration = null;
+                if (!empty($sessionData['startedAt']) && !empty($sessionData['endedAt'])) {
+                    $start = \Carbon\Carbon::parse($sessionData['startedAt']);
+                    $end = \Carbon\Carbon::parse($sessionData['endedAt']);
+                    $diffMinutes = $start->diffInMinutes($end);
+                    $sessionDuration = $diffMinutes > 60
+                        ? floor($diffMinutes / 60) . 'sa ' . ($diffMinutes % 60) . 'dk'
+                        : $diffMinutes . ' dk';
+                } elseif (!empty($sessionData['duration'])) {
+                    $sessionDuration = $sessionData['duration'] . ' dk';
+                }
+
+                // Oturumdaki soru-cevap mesajlarını parse et
+                $messages = $sessionData['messages'] ?? $sessionData['history'] ?? [];
+
+                foreach ($messages as $msg) {
+                    // AI tarafından sorulan sorular ve öğrenci cevapları
+                    if (($msg['role'] ?? '') === 'assistant' && isset($msg['question'])) {
+                        $questions->push((object) [
+                            'question'   => $msg['question'] ?? $msg['content'] ?? '',
+                            'score'      => $msg['score'] ?? 0,
+                            'max_score'  => $msg['maxScore'] ?? 20,
+                            'answer'     => $msg['studentAnswer'] ?? $msg['answer'] ?? '',
+                            'feedback'   => $msg['aiFeedback'] ?? $msg['feedback'] ?? '',
+                            'health'     => $msg['healthMetric'] ?? $msg['health'] ?? 0,
+                            'resource'   => $msg['resourceMetric'] ?? $msg['resource'] ?? 0,
+                            'ethics'     => $msg['ethicsMetric'] ?? $msg['ethics'] ?? 0,
+                            'adaptation' => $msg['adaptationMetric'] ?? $msg['adaptation'] ?? 0,
+                            'options'    => collect($msg['options'] ?? []),
+                        ]);
+                    }
+                }
+
+                // Mesaj bazlı Q&A yoksa, ham mesajlardan çıkar
+                if ($questions->isEmpty() && !empty($messages)) {
+                    $currentQuestion = null;
+                    foreach ($messages as $msg) {
+                        $role = $msg['role'] ?? $msg['sender'] ?? '';
+                        $content = $msg['content'] ?? $msg['text'] ?? '';
+
+                        if ($role === 'assistant') {
+                            $currentQuestion = $content;
+                        } elseif ($role === 'user' && $currentQuestion) {
+                            $questions->push((object) [
+                                'question'   => $currentQuestion,
+                                'score'      => $msg['score'] ?? 0,
+                                'max_score'  => 20,
+                                'answer'     => $content,
+                                'feedback'   => $msg['feedback'] ?? '',
+                                'health'     => 0,
+                                'resource'   => 0,
+                                'ethics'     => 0,
+                                'adaptation' => 0,
+                                'options'    => collect(),
+                            ]);
+                            $currentQuestion = null;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!$student) {
+            abort(404, 'AI Coach oturumu bulunamadı veya API erişilemez.');
+        }
+
+        return view('portal.reports.coach-questions', compact('student', 'questions', 'sessionDuration'));
     }
 
-    /* ── Helpers ─────────────────────────────────────── */
+    /**
+     * Study Space — Chatbot Session Detail
+     * Canlı veri: VegaConnector'dan chatbot oturum + mesaj geçmişi.
+     */
+    public function chatbotDetail($id)
+    {
+        $app = Application::where('slug', 'study-space')->first();
+        $connector = $app ? $app->resolveConnector() : null;
 
+        $student = null;
+        $messages = [];
+        $sessionDate = null;
+
+        if ($connector instanceof VegaConnector) {
+            $sessionData = $connector->getSessionDetail((string) $id, 'all');
+
+            if ($sessionData) {
+                $student = (object) [
+                    'name' => $sessionData['userName'] ?? $sessionData['user']['name'] ?? 'Öğrenci',
+                    'surname' => $sessionData['userSurname'] ?? $sessionData['user']['surname'] ?? '',
+                ];
+
+                $messages = $sessionData['messages'] ?? $sessionData['history'] ?? [];
+
+                if (!empty($sessionData['created_at'])) {
+                    $sessionDate = \Carbon\Carbon::parse($sessionData['created_at'])->format('d.m.Y H:i');
+                }
+            }
+        }
+
+        if (!$student) {
+            abort(404, 'Chatbot oturumu bulunamadı veya API erişilemez.');
+        }
+
+        return view('portal.reports.chatbot-detail', compact('student', 'messages', 'sessionDate'));
+    }
+
+    /* ══════════════════════════════════════════════════════
+     *  Private Helpers
+     * ══════════════════════════════════════════════════════ */
+
+    /**
+     * Rol bazlı kullanıcı ID filtreleme.
+     * school-admin → okulun tüm kullanıcıları
+     * teacher → sınıflarının öğrencileri
+     * student → sadece kendisi
+     */
     private function getScopedUserIds(User $user): \Illuminate\Support\Collection
     {
         if ($user->hasAnyRole(['school-admin', 'school-principal'])) {
@@ -420,5 +542,144 @@ class PortalReportController extends Controller
 
         // Student
         return collect([$user->id]);
+    }
+
+    /**
+     * MissionWay'den canlı simülasyon listesi çek.
+     */
+    private function getMissionWayLiveData(MissionWayConnector $connector, Application $app, $scopedUserIds): \Illuminate\Support\Collection
+    {
+        $missions = collect();
+        $simulations = $connector->getSimulations(['limit' => 50]);
+        $simList = is_array($simulations) ? ($simulations['data'] ?? $simulations) : [];
+
+        foreach ($simList as $sim) {
+            // Oturum bilgilerini al
+            $simId = $sim['id'] ?? null;
+            $sessionData = [];
+            if ($simId) {
+                $sessions = $connector->getSimulationSessions(['filter' => "simulationId||eq||{$simId}", 'limit' => 50]);
+                $sessionData = is_array($sessions) ? ($sessions['data'] ?? $sessions) : [];
+            }
+
+            // Bu simülasyona katılan kullanıcıları bul
+            $participants = collect();
+            $scopedUsers = User::whereIn('id', $scopedUserIds)->get();
+            foreach ($scopedUsers as $u) {
+                $comp = $connector->getUser($u);
+                if ($comp) {
+                    $participants->push($u);
+                }
+            }
+
+            $missions->push((object) [
+                'id'               => $simId,
+                'name'             => $sim['name'] ?? $sim['title'] ?? 'Simülasyon',
+                'students'         => $participants->take(5),
+                'assigned_date'    => isset($sim['createdAt']) ? \Carbon\Carbon::parse($sim['createdAt'])->format('m/d/Y') : '-',
+                'deadline'         => isset($sim['deadline']) ? \Carbon\Carbon::parse($sim['deadline'])->format('m/d/Y') : '-',
+                'health_point'     => $sim['healthMetric'] ?? $sim['health'] ?? null,
+                'resource_point'   => $sim['resourceMetric'] ?? $sim['resource'] ?? null,
+                'ethics_point'     => $sim['ethicsMetric'] ?? $sim['ethics'] ?? null,
+                'adaptation_point' => $sim['adaptationMetric'] ?? $sim['adaptation'] ?? null,
+                'health_trend'     => null,
+                'resource_trend'   => null,
+                'ethics_trend'     => null,
+                'adaptation_trend' => null,
+            ]);
+        }
+
+        return $missions;
+    }
+
+    /**
+     * WayStartup'dan canlı startup listesi çek.
+     */
+    private function getWayStartupLiveData(WayStartupConnector $connector, Application $app, $scopedUserIds): \Illuminate\Support\Collection
+    {
+        $startups = collect();
+        $simulations = $connector->getSimulationsWithProgress();
+        $simList = is_array($simulations) ? ($simulations['data'] ?? $simulations) : [];
+
+        if (empty($simList)) {
+            $simulations = $connector->getSimulations(['limit' => 50]);
+            $simList = is_array($simulations) ? ($simulations['data'] ?? $simulations) : [];
+        }
+
+        foreach ($simList as $sim) {
+            $simId = $sim['id'] ?? null;
+            $steps = $simId ? $connector->getSteps((int) $simId) : [];
+            $steps = is_array($steps) ? $steps : [];
+            $completedSteps = collect($steps)->where('status', 'completed')->count();
+            $totalSteps = count($steps);
+            $totalScore = collect($steps)->sum(fn($s) => $s['score'] ?? $s['point'] ?? 0);
+            $maxScore = collect($steps)->sum(fn($s) => $s['maxScore'] ?? $s['maxPoint'] ?? 150);
+
+            $participants = collect();
+            $scopedUsers = User::whereIn('id', $scopedUserIds)->get();
+            foreach ($scopedUsers as $u) {
+                $member = $connector->getUser($u);
+                if ($member) {
+                    $participants->push($u);
+                }
+            }
+
+            $startups->push((object) [
+                'id'             => $simId,
+                'name'           => $sim['name'] ?? 'Proje',
+                'type'           => $sim['type'] ?? $sim['category'] ?? '-',
+                'type_icon'      => $this->getTypeIcon($sim['type'] ?? ''),
+                'students'       => $participants->take(4),
+                'deadline'       => isset($sim['deadline']) ? \Carbon\Carbon::parse($sim['deadline'])->format('m/d/Y') : '-',
+                'deadline_overdue' => isset($sim['deadline']) && \Carbon\Carbon::parse($sim['deadline'])->isPast(),
+                'step_completed' => $completedSteps,
+                'step_total'     => $totalSteps,
+                'system_point'   => $totalScore,
+                'max_point'      => $maxScore ?: 1500,
+                'teacher_point'  => $sim['teacherScore'] ?? null,
+                'status'         => $this->formatStatusSlug($sim['status'] ?? ($completedSteps >= $totalSteps && $totalSteps > 0 ? 'completed' : 'in_progress')),
+            ]);
+        }
+
+        return $startups;
+    }
+
+    private function formatStatus(?string $raw): string
+    {
+        return match (strtolower($raw ?? '')) {
+            'completed', 'done', 'finished' => 'Tamamlandı',
+            'in_progress', 'active', 'started' => 'Devam Ediyor',
+            'not_started', 'pending' => 'Başlanmadı',
+            'cancelled', 'aborted' => 'İptal',
+            default => $raw ?? '-',
+        };
+    }
+
+    private function formatStatusSlug(?string $raw): string
+    {
+        return match (strtolower($raw ?? '')) {
+            'completed', 'done', 'finished' => 'completed',
+            'in_progress', 'active', 'started', 'playing' => 'in_progress',
+            'not_started', 'pending', 'created' => 'not_started',
+            default => $raw ?? 'not_started',
+        };
+    }
+
+    private function getTypeIcon(string $type): string
+    {
+        return match (strtolower($type)) {
+            'edtech' => '📚',
+            'healthcare tech', 'healthcare' => '🏥',
+            'fintech', 'finance' => '💰',
+            'e-commerce', 'ecommerce' => '🛒',
+            'robotics' => '🤖',
+            'virtual reality', 'vr' => '🎮',
+            'wearable tech', 'wearable' => '⌚',
+            'travel management', 'travel' => '✈️',
+            'cybersecurity', 'security' => '🔒',
+            'conversational ai', 'ai' => '💬',
+            'blockchain' => '🔗',
+            default => '📁',
+        };
     }
 }

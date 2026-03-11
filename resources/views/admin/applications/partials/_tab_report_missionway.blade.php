@@ -90,6 +90,29 @@
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-xs">
+                            @if(isset($sim['difficultyLevel']))
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Zorluk</span>
+                                    <span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-semibold
+                                        {{ $sim['difficultyLevel'] === 'easy' ? 'bg-emerald-100 text-emerald-700' : '' }}
+                                        {{ $sim['difficultyLevel'] === 'medium' ? 'bg-amber-100 text-amber-700' : '' }}
+                                        {{ $sim['difficultyLevel'] === 'hard' ? 'bg-red-100 text-red-700' : '' }}">
+                                        {{ match($sim['difficultyLevel']) { 'easy' => 'Kolay', 'medium' => 'Orta', 'hard' => 'Zor', default => ucfirst($sim['difficultyLevel']) } }}
+                                    </span>
+                                </div>
+                            @endif
+                            @if(isset($sim['estimatedDuration']))
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Süre</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">{{ $sim['estimatedDuration'] }} dk</span>
+                                </div>
+                            @endif
+                            @if(isset($sim['minPlayers']) || isset($sim['maxPlayers']))
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Oyuncu</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">{{ $sim['minPlayers'] ?? 1 }}-{{ $sim['maxPlayers'] ?? '∞' }}</span>
+                                </div>
+                            @endif
                             @if(isset($sim['totalSteps']))
                                 <div class="flex justify-between">
                                     <span class="text-gray-500">Adım</span>
@@ -123,6 +146,63 @@
                         <p class="text-[10px] text-gray-500">{{ ucfirst($status ?: 'Bilinmeyen') }}</p>
                     </div>
                 @endforeach
+            </div>
+        </div>
+    @endif
+
+    {{-- Oturum Listesi Tablosu --}}
+    @if(!empty($reportData['sessions'] ?? []))
+        <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+            <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">Son Oturumlar</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left border-b border-gray-100 dark:border-gray-700">
+                            <th class="pb-3 font-semibold text-gray-500 dark:text-gray-400">Oturum Kodu</th>
+                            <th class="pb-3 font-semibold text-gray-500 dark:text-gray-400">Simülasyon</th>
+                            <th class="pb-3 font-semibold text-gray-500 dark:text-gray-400 text-center">Oyuncu</th>
+                            <th class="pb-3 font-semibold text-gray-500 dark:text-gray-400 text-center">Final Skor</th>
+                            <th class="pb-3 font-semibold text-gray-500 dark:text-gray-400 text-center">Durum</th>
+                            <th class="pb-3 font-semibold text-gray-500 dark:text-gray-400 text-right">Tarih</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+                        @foreach(collect($reportData['sessions'])->take(15) as $session)
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition">
+                                <td class="py-3 text-xs font-mono text-gray-500">{{ $session['code'] ?? $session['session_code'] ?? Str::limit($session['id'] ?? '-', 8) }}</td>
+                                <td class="py-3 text-xs font-medium text-gray-900 dark:text-white">{{ $session['simulation_name'] ?? $session['simulationName'] ?? '-' }}</td>
+                                <td class="py-3 text-center">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                        {{ $session['player_count'] ?? $session['playerCount'] ?? '-' }}
+                                    </span>
+                                </td>
+                                <td class="py-3 text-center">
+                                    @php $finalScore = $session['final_score'] ?? $session['finalScore'] ?? null; @endphp
+                                    @if($finalScore !== null)
+                                        <span class="text-xs font-bold {{ $finalScore >= 70 ? 'text-emerald-600' : ($finalScore >= 40 ? 'text-amber-600' : 'text-red-600') }}">
+                                            {{ $finalScore }}
+                                        </span>
+                                    @else
+                                        <span class="text-xs text-gray-400">-</span>
+                                    @endif
+                                </td>
+                                <td class="py-3 text-center">
+                                    @php $sesStatus = $session['status'] ?? 'active'; @endphp
+                                    <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium
+                                        {{ $sesStatus === 'completed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : '' }}
+                                        {{ $sesStatus === 'active' || $sesStatus === 'in_progress' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : '' }}
+                                        {{ $sesStatus === 'abandoned' || $sesStatus === 'cancelled' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : '' }}">
+                                        {{ match($sesStatus) { 'completed' => 'Tamamlandı', 'active' => 'Aktif', 'in_progress' => 'Devam', 'abandoned' => 'Terk', 'cancelled' => 'İptal', default => ucfirst($sesStatus) } }}
+                                    </span>
+                                </td>
+                                <td class="py-3 text-right text-xs text-gray-400">
+                                    {{ isset($session['started_at']) ? \Carbon\Carbon::parse($session['started_at'])->format('d.m.Y H:i') : (isset($session['created_at']) ? \Carbon\Carbon::parse($session['created_at'])->format('d.m.Y H:i') : '-') }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     @endif

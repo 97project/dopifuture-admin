@@ -89,6 +89,14 @@
             {{-- ── VEGA RAPORU ── --}}
             @if($connectorType === 'vega')
 
+                @php
+                    // getUserReport() produces a flat sessions[] with 'module' field.
+                    // Derive per-slug arrays for the slug-specific sections below.
+                    $allSessions = collect($data['sessions'] ?? []);
+                    $data['simulator_sessions'] = $allSessions->where('module', 'simulator')->values()->toArray();
+                    $data['lecturer_sessions']  = $allSessions->where('module', 'lecturer')->values()->toArray();
+                    $data['chatbot_sessions']   = $allSessions->filter(fn($s) => !in_array($s['module'] ?? '', ['simulator', 'lecturer']))->values()->toArray();
+                @endphp
                 {{-- Vega Profil Kartı --}}
                 @if(!empty($data['profile']))
                     <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
@@ -136,23 +144,123 @@
                 @endif
 
                 {{-- Oturum İstatistikleri --}}
-                <div class="grid grid-cols-3 gap-4">
-                    <div
-                        class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5 text-center">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5 text-center">
                         <p class="text-2xl font-extrabold text-gray-900 dark:text-white">{{ $data['session_count'] ?? 0 }}</p>
                         <p class="text-xs text-gray-500 mt-1">Toplam Oturum</p>
                     </div>
-                    <div
-                        class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5 text-center">
+                    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5 text-center">
                         <p class="text-2xl font-extrabold text-purple-600">{{ $data['modules']['lecturer'] ?? 0 }}</p>
-                        <p class="text-xs text-gray-500 mt-1">Lecturer (AI Coach)</p>
+                        <p class="text-xs text-gray-500 mt-1">AI Coach</p>
                     </div>
-                    <div
-                        class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5 text-center">
+                    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5 text-center">
                         <p class="text-2xl font-extrabold text-indigo-600">{{ $data['modules']['simulator'] ?? 0 }}</p>
-                        <p class="text-xs text-gray-500 mt-1">Simulator (Role Galaxy)</p>
+                        <p class="text-xs text-gray-500 mt-1">Role Galaxy</p>
+                    </div>
+                    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5 text-center">
+                        <p class="text-2xl font-extrabold text-amber-600">{{ $data['modules']['chatbot'] ?? $data['modules']['all'] ?? 0 }}</p>
+                        <p class="text-xs text-gray-500 mt-1">Study Space</p>
                     </div>
                 </div>
+
+                {{-- Slug Bazlı Detay — Role Galaxy Simülasyonları --}}
+                @if(!empty($data['simulator_sessions']))
+                    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-lg bg-indigo-500 flex items-center justify-center text-white text-[10px]">🌌</span>
+                            Role Galaxy — Simülasyon Geçmişi
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="text-left border-b border-gray-100 dark:border-gray-700">
+                                        <th class="pb-2 font-semibold text-gray-500 text-xs">Senaryo</th>
+                                        <th class="pb-2 font-semibold text-gray-500 text-xs text-center">Skor</th>
+                                        <th class="pb-2 font-semibold text-gray-500 text-xs text-center">Seviye</th>
+                                        <th class="pb-2 font-semibold text-gray-500 text-xs text-right">Tarih</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+                                    @foreach(collect($data['simulator_sessions'])->take(15) as $simSes)
+                                        @php
+                                            $simScore = $simSes['score'] ?? $simSes['currentScore'] ?? 0;
+                                            if ($simScore >= 80) { $thBg = 'bg-emerald-100 text-emerald-700'; $thLabel = 'Refah'; }
+                                            elseif ($simScore >= 60) { $thBg = 'bg-blue-100 text-blue-700'; $thLabel = 'Denge'; }
+                                            elseif ($simScore >= 40) { $thBg = 'bg-amber-100 text-amber-700'; $thLabel = 'Kriz'; }
+                                            else { $thBg = 'bg-red-100 text-red-700'; $thLabel = 'Felaket'; }
+                                        @endphp
+                                        <tr>
+                                            <td class="py-2 text-xs text-gray-900 dark:text-white">{{ $simSes['scenario_name'] ?? $simSes['app_name'] ?? 'Simülasyon' }}</td>
+                                            <td class="py-2 text-center text-xs font-bold">{{ $simScore }}</td>
+                                            <td class="py-2 text-center">
+                                                <span class="text-[10px] px-2 py-0.5 rounded-full font-medium {{ $thBg }}">{{ $thLabel }}</span>
+                                            </td>
+                                            <td class="py-2 text-right text-[10px] text-gray-400">
+                                                {{ isset($simSes['created_at']) ? \Carbon\Carbon::parse($simSes['created_at'])->format('d.m.Y H:i') : '-' }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Slug Bazlı Detay — WAY AI Coach Mesajları --}}
+                @if(!empty($data['lecturer_sessions']))
+                    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-lg bg-purple-500 flex items-center justify-center text-white text-[10px]">🎓</span>
+                            WAY AI Coach — Oturum Detayı
+                        </h3>
+                        <div class="space-y-2">
+                            @foreach(collect($data['lecturer_sessions'])->take(10) as $lecSes)
+                                <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-medium text-gray-900 dark:text-white">{{ $lecSes['app_name'] ?? 'AI Coach Oturumu' }}</p>
+                                            <p class="text-[10px] text-gray-400">{{ $lecSes['message_count'] ?? 0 }} mesaj · {{ $lecSes['duration'] ?? '-' }} dk</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] text-gray-400">
+                                        {{ isset($lecSes['created_at']) ? \Carbon\Carbon::parse($lecSes['created_at'])->format('d.m.Y') : '-' }}
+                                    </span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Slug Bazlı Detay — Study Space Chatbot --}}
+                @if(!empty($data['chatbot_sessions']))
+                    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-lg bg-amber-500 flex items-center justify-center text-white text-[10px]">📖</span>
+                            Study Space — Chatbot Oturumları
+                        </h3>
+                        <div class="space-y-2">
+                            @foreach(collect($data['chatbot_sessions'])->take(10) as $cbSes)
+                                <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-medium text-gray-900 dark:text-white">{{ $cbSes['thread_name'] ?? 'Chatbot' }}</p>
+                                            <p class="text-[10px] text-gray-400">{{ $cbSes['message_count'] ?? 0 }} mesaj</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] text-gray-400">
+                                        {{ isset($cbSes['created_at']) ? \Carbon\Carbon::parse($cbSes['created_at'])->format('d.m.Y') : '-' }}
+                                    </span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
 
                 {{-- Oturum Listesi --}}
                 @if(!empty($data['sessions']))
@@ -339,13 +447,61 @@
                     </div>
                 @endif
 
-                {{-- İlerleme --}}
+                {{-- İlerleme — Görsel Metrik Kartları --}}
                 @if(!empty($data['progress']))
                     <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
                         <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">İlerleme Kayıtları</h3>
-                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
-                            <pre
-                                class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap overflow-auto max-h-60">{{ json_encode($data['progress'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                        <div class="space-y-4">
+                            @foreach(collect($data['progress'])->take(10) as $prog)
+                                <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                            Simülasyon {{ $prog['simulationVersionId'] ?? $prog['simulationSessionId'] ?? '-' }}
+                                        </p>
+                                        @php $curScore = $prog['currentScore'] ?? 0; @endphp
+                                        <span class="text-sm font-bold {{ $curScore >= 70 ? 'text-emerald-600' : ($curScore >= 40 ? 'text-amber-600' : 'text-red-600') }}">
+                                            {{ $curScore }} puan
+                                        </span>
+                                    </div>
+                                    @if(!empty($prog['currentMetrics']))
+                                        @php $m = $prog['currentMetrics']; @endphp
+                                        <div class="grid grid-cols-4 gap-3">
+                                            <div class="text-center">
+                                                <div class="w-12 h-12 mx-auto rounded-full border-3 border-red-400 flex items-center justify-center">
+                                                    <span class="text-xs font-bold text-red-600">{{ $m['health'] ?? 0 }}</span>
+                                                </div>
+                                                <p class="text-[9px] text-gray-500 mt-1">❤️ Sağlık</p>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="w-12 h-12 mx-auto rounded-full border-3 border-green-400 flex items-center justify-center">
+                                                    <span class="text-xs font-bold text-green-600">{{ $m['resource'] ?? 0 }}</span>
+                                                </div>
+                                                <p class="text-[9px] text-gray-500 mt-1">🌿 Kaynak</p>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="w-12 h-12 mx-auto rounded-full border-3 border-amber-400 flex items-center justify-center">
+                                                    <span class="text-xs font-bold text-amber-600">{{ $m['ethics'] ?? 0 }}</span>
+                                                </div>
+                                                <p class="text-[9px] text-gray-500 mt-1">🧡 Etik</p>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="w-12 h-12 mx-auto rounded-full border-3 border-blue-400 flex items-center justify-center">
+                                                    <span class="text-xs font-bold text-blue-600">{{ $m['adaptation'] ?? 0 }}</span>
+                                                </div>
+                                                <p class="text-[9px] text-gray-500 mt-1">✅ Adaptasyon</p>
+                                            </div>
+                                        </div>
+                                    @endif
+                                    <div class="flex items-center gap-2 mt-2 text-[10px] text-gray-400">
+                                        @if(isset($prog['startedAt']))
+                                            <span>Başlangıç: {{ \Carbon\Carbon::parse($prog['startedAt'])->format('d.m.Y H:i') }}</span>
+                                        @endif
+                                        @if(isset($prog['completedAt']))
+                                            <span>· Bitiş: {{ \Carbon\Carbon::parse($prog['completedAt'])->format('d.m.Y H:i') }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
                 @endif
@@ -450,6 +606,8 @@
                                     <tr class="text-left border-b border-gray-100 dark:border-gray-700">
                                         <th class="pb-2 font-semibold text-gray-500 text-xs">Adım</th>
                                         <th class="pb-2 font-semibold text-gray-500 text-xs text-center">Durum</th>
+                                        <th class="pb-2 font-semibold text-gray-500 text-xs text-center">Puan</th>
+                                        <th class="pb-2 font-semibold text-gray-500 text-xs text-center">Coin</th>
                                         <th class="pb-2 font-semibold text-gray-500 text-xs text-right">Tarih</th>
                                     </tr>
                                 </thead>
@@ -463,17 +621,34 @@
                                                 @php $spStatus = $sp['status'] ?? 'unknown'; @endphp
                                                 <span
                                                     class="text-[10px] px-2 py-0.5 rounded-full font-medium
-                                                                        {{ $spStatus === 'completed' ? 'bg-emerald-100 text-emerald-700' : '' }}
-                                                                        {{ $spStatus === 'in_progress' ? 'bg-blue-100 text-blue-700' : '' }}
-                                                                        {{ $spStatus === 'not_started' || $spStatus === 'unknown' ? 'bg-gray-100 text-gray-600' : '' }}">
-                                                    {{ ucfirst(str_replace('_', ' ', $spStatus)) }}
+                                                        {{ $spStatus === 'completed' ? 'bg-emerald-100 text-emerald-700' : '' }}
+                                                        {{ $spStatus === 'in_progress' ? 'bg-blue-100 text-blue-700' : '' }}
+                                                        {{ $spStatus === 'locked' ? 'bg-gray-100 text-gray-500' : '' }}
+                                                        {{ !in_array($spStatus, ['completed','in_progress','locked']) ? 'bg-gray-100 text-gray-600' : '' }}">
+                                                    {{ match($spStatus) { 'completed' => 'Tamamlandı', 'in_progress' => 'Devam', 'locked' => 'Kilitli', default => ucfirst(str_replace('_', ' ', $spStatus)) } }}
                                                 </span>
                                             </td>
+                                            <td class="py-2 text-center">
+                                                @if(isset($sp['earnedPoint']))
+                                                    <span class="text-xs font-bold text-indigo-600">{{ $sp['earnedPoint'] }}</span>
+                                                @else
+                                                    <span class="text-xs text-gray-300">-</span>
+                                                @endif
+                                            </td>
+                                            <td class="py-2 text-center">
+                                                @if(isset($sp['earnedCoin']) && $sp['earnedCoin'] > 0)
+                                                    <span class="text-xs font-semibold text-amber-600">🪙 {{ $sp['earnedCoin'] }}</span>
+                                                @else
+                                                    <span class="text-xs text-gray-300">-</span>
+                                                @endif
+                                            </td>
                                             <td class="py-2 text-right text-[10px] text-gray-400">
-                                                @if(isset($sp['updatedAt']))
+                                                @if(isset($sp['completedAt']))
+                                                    {{ \Carbon\Carbon::parse($sp['completedAt'])->format('d.m.Y H:i') }}
+                                                @elseif(isset($sp['startedAt']))
+                                                    {{ \Carbon\Carbon::parse($sp['startedAt'])->format('d.m.Y H:i') }}
+                                                @elseif(isset($sp['updatedAt']))
                                                     {{ \Carbon\Carbon::parse($sp['updatedAt'])->format('d.m.Y H:i') }}
-                                                @elseif(isset($sp['updated_at']))
-                                                    {{ \Carbon\Carbon::parse($sp['updated_at'])->format('d.m.Y H:i') }}
                                                 @else
                                                     -
                                                 @endif

@@ -6,11 +6,11 @@
 @section('content')
 
     {{-- ═══ HERO BANNER — Figma F-62: dark bg image with mission title ═══ --}}
-    <div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:24px;min-height:300px;background:url('{{ $mission->image ?? 'https://images.unsplash.com/photo-1573648952826-b4f5e09c7370?w=1200&h=400&fit=crop' }}') center/cover no-repeat;">
+    <div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:24px;min-height:300px;background:{{ $mission->image ? "url('" . $mission->image . "') center/cover no-repeat" : 'linear-gradient(135deg, #1e3a5f 0%, #0d1b2a 100%)' }};">
         <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.6) 100%);"></div>
         <div style="position:relative;z-index:1;padding:24px 28px;">
             {{-- Mission Title --}}
-            <h2 style="color:#fff;font-size:22px;font-weight:700;margin:0 0 20px 0;font-family:'Nunito',sans-serif;">{{ $mission->title ?? 'After the Earthquake' }}</h2>
+            <h2 style="color:#fff;font-size:22px;font-weight:700;margin:0 0 20px 0;font-family:'Nunito',sans-serif;">{{ $mission->title }}</h2>
 
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
                 {{-- Students Section --}}
@@ -31,7 +31,7 @@
                 {{-- Result Section --}}
                 <div style="background:rgba(255,255,255,0.9);border-radius:12px;padding:16px;">
                     <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">{{ $isTr ? 'Sonuç' : 'Result' }}</div>
-                    <p style="font-size:13px;line-height:1.7;color:#374151;margin:0;">{{ $mission->result ?? 'The people willingly carry stones and repair walls with the belief that "salvation is near." However, the difference between the reinforcement time (35 min) and the door endurance time determines the lifespan of the lie. If reinforcement does not arrive on time, the people will open the doors.' }}</p>
+                    <p style="font-size:13px;line-height:1.7;color:#374151;margin:0;">{{ $mission->result ?? '-' }}</p>
                 </div>
 
                 {{-- Overall Score Section --}}
@@ -40,19 +40,19 @@
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                         <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
                             <div style="font-size:10px;font-weight:600;color:#EF4444;text-transform:uppercase;margin-bottom:4px;">❤️ HEALTH POINT:</div>
-                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->health ?? 75 }}</div>
+                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->health ?? '-' }}</div>
                         </div>
                         <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
                             <div style="font-size:10px;font-weight:600;color:#3B82F6;text-transform:uppercase;margin-bottom:4px;">📦 RESOURCE POINT:</div>
-                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->resource ?? 40 }} <span style="font-size:16px;">👎</span></div>
+                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->resource ?? '-' }}</div>
                         </div>
                         <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
                             <div style="font-size:10px;font-weight:600;color:#22C55E;text-transform:uppercase;margin-bottom:4px;">⚖️ ETHICS POINT:</div>
-                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->ethics ?? 85 }} <span style="font-size:16px;">👍</span></div>
+                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->ethics ?? '-' }}</div>
                         </div>
                         <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
                             <div style="font-size:10px;font-weight:600;color:#8B5CF6;text-transform:uppercase;margin-bottom:4px;">✅ ADAPTATION POINT:</div>
-                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->adaptation ?? 100 }} <span style="font-size:16px;">👍</span></div>
+                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->adaptation ?? '-' }}</div>
                         </div>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
                     <span style="background:{{ $qi === 0 ? '#22C55E' : ($qi === 1 ? '#3B82F6' : '#EF4444') }};color:#fff;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;">
                         Question {{ $qi + 1 }}
                     </span>
-                    <span style="font-size:12px;color:#6B7280;">Unanimity Rate: <strong style="color:#111;">{{ $q->unanimity ?? '75' }}/100</strong></span>
+                    <span style="font-size:12px;color:#6B7280;">Unanimity Rate: <strong style="color:#111;">{{ $q->unanimity ?? '-' }}/100</strong></span>
                 </div>
 
                 {{-- Question Text --}}
@@ -96,24 +96,22 @@
                     <div style="background:linear-gradient(135deg,#FCA5A5,#EF4444);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">❤️</span>
                         <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Health<br>Point:</span>
-                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->health ?? 45 }}</span>
-                        <span style="font-size:12px;">👎</span>
+                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->health ?? '-' }}</span>
                     </div>
                     <div style="background:linear-gradient(135deg,#93C5FD,#3B82F6);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">📦</span>
                         <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Resource<br>Point:</span>
-                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->resource ?? 70 }}</span>
+                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->resource ?? '-' }}</span>
                     </div>
                     <div style="background:linear-gradient(135deg,#A7F3D0,#22C55E);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">⚖️</span>
                         <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Ethics<br>Point:</span>
-                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->ethics ?? 65 }}</span>
+                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->ethics ?? '-' }}</span>
                     </div>
                     <div style="background:linear-gradient(135deg,#C4B5FD,#8B5CF6);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">✅</span>
                         <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Adaptation<br>Point:</span>
-                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->adaptation ?? 100 }}</span>
-                        <span style="font-size:12px;">👍</span>
+                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->adaptation ?? '-' }}</span>
                     </div>
                 </div>
             </div>

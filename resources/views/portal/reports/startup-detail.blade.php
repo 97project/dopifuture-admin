@@ -120,7 +120,7 @@
         <div style="position:sticky;top:80px;">
             {{-- Project name + Team --}}
             <div class="dp-card" style="margin-bottom:16px;">
-                <div style="font-size:18px;font-weight:700;margin-bottom:16px;">{{ $project->name ?? 'StudyFund / Fintech' }}</div>
+                <div style="font-size:18px;font-weight:700;margin-bottom:16px;">{{ $project->name ?? '-' }}</div>
                 {{-- Team Summary --}}
                 <div style="font-weight:600;font-size:13px;margin-bottom:12px;">{{ $isTr ? 'Takım Özeti' : 'Team Summary' }}</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px;margin-bottom:4px;">
@@ -141,10 +141,11 @@
             {{-- Progress --}}
             <div class="dp-card" style="margin-bottom:16px;">
                 <div style="font-size:13px;font-weight:600;color:var(--color-primary);margin-bottom:6px;">
-                    {{ $project->steps_completed ?? '6' }}/{{ $project->total_steps ?? '12' }} {{ $isTr ? 'Adım Tamamlandı' : 'Step Completed' }}
+                    {{ $project->steps_completed ?? 0 }}/{{ $project->total_steps ?? 0 }} {{ $isTr ? 'Adım Tamamlandı' : 'Step Completed' }}
                 </div>
                 <div style="width:100%;height:8px;border-radius:4px;background:#e2e8f0;">
-                    <div style="width:{{ ($project->steps_completed ?? 6) / ($project->total_steps ?? 12) * 100 }}%;height:100%;border-radius:4px;background:var(--color-primary);"></div>
+                    @php $totalSteps = $project->total_steps ?? 1; @endphp
+                    <div style="width:{{ ($project->steps_completed ?? 0) / max($totalSteps, 1) * 100 }}%;height:100%;border-radius:4px;background:var(--color-primary);"></div></div>
                 </div>
             </div>
 
@@ -153,29 +154,80 @@
                 <div style="display:flex;justify-content:space-between;align-items:center;">
                     <div>
                         <div style="font-size:12px;color:var(--color-txt-muted);">{{ $isTr ? 'Toplam Ürün Puanı' : 'Total Product Score' }}</div>
-                        <div style="font-size:22px;font-weight:700;">{{ $project->product_score ?? '120' }} / {{ $project->max_score ?? '2500' }}</div>
+                        <div style="font-size:22px;font-weight:700;">{{ $project->product_score ?? 0 }} / {{ $project->max_score ?? 0 }}</div>
                     </div>
+                    @if($project->problem_step ?? false)
                     <span style="display:inline-flex;align-items:center;gap:4px;background:#FEE2E2;color:#DC2626;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;">
                         <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        {{ $isTr ? 'Sorun Var' : 'Problem in' }} Step 4
+                        {{ $isTr ? 'Sorun Var' : 'Problem in' }} Step {{ $project->problem_step }}
                     </span>
+                    @endif
                 </div>
             </div>
 
-            {{-- Submitted Files — Figma shows real file list --}}
+            {{-- AI Evaluation --}}
+            @if(!empty($project->ai_total_score) || !empty($project->ai_overall_feedback))
+            <div class="dp-card" style="margin-bottom:16px;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                    <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#8B5CF6,#6366F1);display:flex;align-items:center;justify-content:center;">
+                        <svg width="14" height="14" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                    </div>
+                    <span style="font-weight:600;font-size:13px;">{{ $isTr ? 'AI Değerlendirmesi' : 'AI Evaluation' }}</span>
+                </div>
+                @if(!empty($project->ai_total_score))
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                    <div style="font-size:28px;font-weight:800;color:#6366F1;">{{ $project->ai_total_score }}</div>
+                    <div style="font-size:11px;color:var(--color-txt-muted);">{{ $isTr ? 'AI Toplam Puan' : 'AI Total Score' }}</div>
+                </div>
+                @endif
+                @if(!empty($project->ai_overall_feedback))
+                <div style="font-size:12px;line-height:1.6;color:var(--color-txt-muted);background:var(--color-input-bg);border-radius:8px;padding:10px 12px;">
+                    {{ $project->ai_overall_feedback }}
+                </div>
+                @endif
+                @if(!empty($project->ai_coins))
+                <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
+                    <span style="font-size:16px;">🪙</span>
+                    <span style="font-size:13px;font-weight:600;color:#D97706;">{{ $project->ai_coins }} coin</span>
+                </div>
+                @endif
+            </div>
+            @endif
+
+            {{-- Step Tools --}}
+            @if(!empty($tools ?? []))
+            <div class="dp-card" style="margin-bottom:16px;">
+                <div style="font-weight:600;font-size:13px;margin-bottom:12px;">{{ $isTr ? 'Adım Araçları' : 'Step Tools' }}</div>
+                @foreach($tools as $tool)
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--color-row-border);">
+                    <div style="width:32px;height:32px;border-radius:8px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;">
+                        @if(!empty($tool['iconUrl']))
+                            <img src="{{ $tool['iconUrl'] }}" alt="" style="width:20px;height:20px;border-radius:4px;">
+                        @else
+                            <svg width="14" height="14" fill="none" stroke="#6366F1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        @endif
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $tool['name'] ?? '-' }}</div>
+                        @if(!empty($tool['category']))
+                            <span style="font-size:10px;color:var(--color-txt-muted);">{{ $tool['category'] }}</span>
+                        @endif
+                    </div>
+                    @if(!empty($tool['website']))
+                    <a href="{{ $tool['website'] }}" target="_blank" style="flex-shrink:0;color:var(--color-primary);font-size:11px;">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </a>
+                    @endif
+                </div>
+                @endforeach
+            </div>
+            @endif
             <div class="dp-card" style="margin-bottom:16px;">
                 <div style="font-weight:600;font-size:13px;margin-bottom:12px;">{{ $isTr ? 'Yüklenen Dosyalar' : 'Submitted Files' }}</div>
-                @php
-                    $mockFiles = [
-                        ['step' => 1, 'name' => 'prototype_demo.mp4', 'size' => '2.4 MB'],
-                        ['step' => 2, 'name' => 'prototype_demo.mp4', 'size' => '2.4 MB'],
-                        ['step' => 5, 'name' => 'prototype_demo.mp4', 'size' => '2.4 MB'],
-                    ];
-                @endphp
-                @foreach($mockFiles as $file)
+                @forelse($files ?? [] as $file)
                 <div style="margin-bottom:12px;">
                     <div style="display:inline-block;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:600;background:#DBEAFE;color:#2563EB;margin-bottom:6px;">
-                        Step {{ $file['step'] }}
+                        Step {{ $file['step'] ?? '-' }}
                     </div>
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--color-input-bg);border-radius:10px;">
                         <div style="display:flex;align-items:center;gap:10px;">
@@ -184,39 +236,39 @@
                             </div>
                             <div>
                                 <div style="font-size:13px;font-weight:500;">{{ $file['name'] }}</div>
-                                <div style="font-size:11px;color:var(--color-txt-muted);">{{ $file['size'] }}</div>
+                                <div style="font-size:11px;color:var(--color-txt-muted);">{{ $file['size'] ?? '' }}</div>
                             </div>
                         </div>
-                        <a href="#" style="color:var(--color-txt-muted);">
+                        @if(!empty($file['url']))
+                        <a href="{{ $file['url'] }}" target="_blank" style="color:var(--color-txt-muted);">
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         </a>
+                        @endif
                     </div>
                 </div>
-                @endforeach
+                @empty
+                <div style="text-align:center;padding:16px;color:var(--color-txt-muted);font-size:13px;">{{ $isTr ? 'Henüz dosya yüklenmemiş' : 'No files submitted yet' }}</div>
+                @endforelse
             </div>
 
             {{-- Submitted Links --}}
             <div class="dp-card">
                 <div style="font-weight:600;font-size:13px;margin-bottom:12px;">{{ $isTr ? 'Paylaşılan Bağlantılar' : 'Submitted Links' }}</div>
-                @php
-                    $mockLinks = [
-                        ['step' => 3, 'url' => 'https://drive.google.com/file/demo'],
-                        ['step' => 4, 'url' => 'https://drive.google.com/file/demo'],
-                    ];
-                @endphp
-                @foreach($mockLinks as $link)
+                @forelse($links ?? [] as $link)
                 <div style="margin-bottom:12px;">
                     <div style="display:inline-block;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:600;background:#FEF3C7;color:#D97706;margin-bottom:6px;">
-                        Step {{ $link['step'] }}
+                        Step {{ $link['step'] ?? '-' }}
                     </div>
                     <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--color-input-bg);border-radius:10px;">
                         <div style="width:36px;height:36px;border-radius:8px;background:#F59E0B;display:flex;align-items:center;justify-content:center;">
                             <svg width="16" height="16" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                         </div>
-                        <span style="font-size:12px;color:var(--color-primary);word-break:break-all;">{{ $link['url'] }}</span>
+                        <a href="{{ $link['url'] }}" target="_blank" style="font-size:12px;color:var(--color-primary);word-break:break-all;">{{ $link['url'] }}</a>
                     </div>
                 </div>
-                @endforeach
+                @empty
+                <div style="text-align:center;padding:16px;color:var(--color-txt-muted);font-size:13px;">{{ $isTr ? 'Henüz bağlantı paylaşılmamış' : 'No links submitted yet' }}</div>
+                @endforelse
             </div>
         </div>
     </div>

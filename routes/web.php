@@ -175,6 +175,10 @@ Route::prefix('admin')->name('admin.')->middleware(['web', \App\Http\Middleware\
         Route::post('applications/{application}/users/{user}/sync', [ApplicationController::class, 'syncUser'])->name('applications.sync-user');
         Route::get('applications/{application}/users/{user}/report', [ApplicationController::class, 'userReport'])->name('applications.user-report');
         Route::post('applications/{application}/sync-all', [ApplicationController::class, 'syncAll'])->name('applications.sync-all');
+        Route::post('applications/reconcile', [ApplicationController::class, 'reconcile'])->name('applications.reconcile');
+        Route::post('applications/harvest', [ApplicationController::class, 'triggerHarvest'])->name('applications.harvest');
+        Route::post('applications/{application}/harvest', [ApplicationController::class, 'triggerHarvest'])->name('applications.harvest-app');
+        Route::post('applications/{application}/discover', [ApplicationController::class, 'discoverRemote'])->name('applications.discover');
 
         // ── Location API (cascading combobox) ───────────────
 
@@ -267,6 +271,7 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     Route::get('reports/mission/{id}', [\App\Http\Controllers\PortalReportController::class, 'missionDetail'])->name('portal.reports.mission.detail');
     Route::get('reports/startup/{id}', [\App\Http\Controllers\PortalReportController::class, 'startupDetail'])->name('portal.reports.startup.detail');
     Route::get('reports/coach/{id}/questions', [\App\Http\Controllers\PortalReportController::class, 'coachQuestions'])->name('portal.reports.coach.questions');
+    Route::get('reports/chatbot/{id}', [\App\Http\Controllers\PortalReportController::class, 'chatbotDetail'])->name('portal.reports.chatbot.detail');
 
     // CRUD: Schools (with show/detail page)
     Route::resource('schools', \App\Http\Controllers\PortalSchoolController::class)

@@ -14,49 +14,53 @@ class PortalUserController extends Controller
 {
     public function index(Request $request)
     {
-        // Mock data matching Figma frame 1158-14034
         $currentRole = $request->get('role', 'student');
+        $authUser = auth()->user();
+        $schoolIds = $authUser?->schools()->pluck('schools.id') ?? collect();
 
-        $mockStudents = collect([
-            (object)['id'=>1, 'name'=>'Allison',      'surname'=>'Gouse',    'email'=>'emily.smith@test.com',       'grade'=>'4', 'branch'=>null],
-            (object)['id'=>2, 'name'=>'John',          'surname'=>'Doe',      'email'=>'john.doe@example.com',       'grade'=>'3', 'branch'=>null],
-            (object)['id'=>3, 'name'=>'Emerson',       'surname'=>'Rosser',   'email'=>'student01@example.com',      'grade'=>'4', 'branch'=>null],
-            (object)['id'=>4, 'name'=>'Maren',         'surname'=>'Dokidis',  'email'=>'license.admin@sample...',    'grade'=>'5', 'branch'=>null],
-            (object)['id'=>5, 'name'=>'Cristofer',     'surname'=>'Curtis',   'email'=>'info@demo-example.com',      'grade'=>'2', 'branch'=>null],
-            (object)['id'=>6, 'name'=>'Chance Rhiel',  'surname'=>'Madsen',   'email'=>'name@example.com',           'grade'=>'5', 'branch'=>null],
-            (object)['id'=>7, 'name'=>'Corey',         'surname'=>'Bergson',  'email'=>'olivia.johnson@example...',  'grade'=>'4', 'branch'=>null],
-            (object)['id'=>8, 'name'=>'Anika',         'surname'=>'Mango',    'email'=>'mason.thomas@exampl...',     'grade'=>'1', 'branch'=>null],
-            (object)['id'=>9, 'name'=>'Kadin',         'surname'=>'Septimus', 'email'=>'ethan.jackson@example..',    'grade'=>'5', 'branch'=>null],
-        ]);
+        // Gerçek kullanıcı sorgusu — okul + rol bazlı
+        $query = User::query()
+            ->whereHas('schools', fn($q) => $q->whereIn('schools.id', $schoolIds));
 
-        $mockTeachers = collect([
-            (object)['id'=>101, 'name'=>'Sarah',   'surname'=>'Johnson',  'email'=>'sarah.j@school.com',   'grade'=>null, 'branch'=>'Mathematics'],
-            (object)['id'=>102, 'name'=>'Michael', 'surname'=>'Chen',     'email'=>'m.chen@school.com',    'grade'=>null, 'branch'=>'Science'],
-            (object)['id'=>103, 'name'=>'Emily',   'surname'=>'Davis',    'email'=>'e.davis@school.com',   'grade'=>null, 'branch'=>'English'],
-            (object)['id'=>104, 'name'=>'Robert',  'surname'=>'Wilson',   'email'=>'r.wilson@school.com',  'grade'=>null, 'branch'=>'History'],
-            (object)['id'=>105, 'name'=>'Jessica', 'surname'=>'Brown',    'email'=>'j.brown@school.com',   'grade'=>null, 'branch'=>'Art'],
-        ]);
+        if ($currentRole === 'teacher') {
+            $query->role('teacher');
+        } else {
+            $query->role('student');
+        }
 
-        $items = $currentRole === 'teacher' ? $mockTeachers : $mockStudents;
-        $total = $currentRole === 'teacher' ? 24 : 47;
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('surname', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
 
-        $page = $request->get('page', 1);
-        $users = new \Illuminate\Pagination\LengthAwarePaginator(
-            $items->forPage($page, 10),
-            $total,
-            10,
-            $page,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
+        $users = $query->orderBy('name')->paginate(10)->withQueryString();
 
-        // License stats for stat cards (from Figma)
-        $licenseStats = (object)[
-            'totalLicence' => 52,
-            'usedLicence' => 47,
-            'licenceDuration' => '12/31/2026',
+        // Gerçek lisans istatistikleri — okulun aktif lisansından
+        $activeLicense = License::whereIn('school_id', $schoolIds)
+            ->where('is_active', true)
+            ->orderByDesc('expires_at')
+            ->first();
+
+        $totalSeats = License::whereIn('school_id', $schoolIds)
+            ->where('is_active', true)
+            ->sum('seats');
+
+        $usedSeats = User::whereHas('schools', fn($q) => $q->whereIn('schools.id', $schoolIds))
+            ->role('student')
+            ->count();
+
+        $licenseStats = (object) [
+            'totalLicence'    => $totalSeats ?: 0,
+            'usedLicence'     => $usedSeats ?: 0,
+            'licenceDuration' => $activeLicense?->expires_at
+                ? $activeLicense->expires_at->format('m/d/Y')
+                : '-',
         ];
 
-        $roles = [];
+        $roles = $this->getAllowedRoles();
         return view('portal.users.index', compact('users', 'roles', 'licenseStats'));
     }
 

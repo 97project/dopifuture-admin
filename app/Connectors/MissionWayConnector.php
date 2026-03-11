@@ -8,17 +8,38 @@ use Illuminate\Support\Facades\Log;
 /**
  * Mission Way — Full API Connector
  *
+ * Backend: https://way-backend.dopingtech.net
+ * Auth: Authorization: Bearer <API_KEY>
+ *
  * Player Compositions:
  *   POST   /v1/player-compositions              → Oyuncu oluştur
  *   GET    /v1/player-compositions/by-user/:id   → Oyuncu getir
  *   DELETE /v1/player-compositions/by-user/:id   → Oyuncu sil
  *
- * Simulations, Sessions, Players, Progress, Profiles:
- *   GET /v1/simulations, /v1/simulation-sessions, /v1/players,
- *       /v1/player-profiles, /v1/player-progresses, /v1/session-players
+ * Simulations (auth genişletme gerekli):
+ *   GET /v1/simulations                → Simülasyon listesi
+ *   GET /v1/simulations/{id}           → Simülasyon detayı
+ *
+ * Simulation Sessions (auth genişletme gerekli):
+ *   GET /v1/simulation-sessions        → Oturum listesi
+ *   GET /v1/simulation-sessions/{id}   → Oturum detayı
+ *
+ * Session Players (auth genişletme gerekli):
+ *   GET /v1/session-players/by-session/{sessionId}  → Oturumdaki oyuncular
+ *   GET /v1/session-players/by-player/{playerId}    → Oyuncunun oturumları
+ *
+ * Players (auth genişletme gerekli):
+ *   GET /v1/players                    → Oyuncu listesi
+ *   GET /v1/players/{id}               → Oyuncu detayı
+ *
+ * Player Profiles (auth genişletme gerekli):
+ *   GET /v1/player-profiles/by-player/{playerId}  → Profil istatistikleri
+ *
+ * Player Progress (auth genişletme gerekli):
+ *   GET /v1/player-progresses          → İlerleme kayıtları
  *
  * Health:
- *   GET /health/simple
+ *   GET /health/simple                 → Servis sağlığı
  */
 class MissionWayConnector extends BaseConnector implements AppConnectorInterface
 {
@@ -33,6 +54,15 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
 
     /**
      * POST /v1/player-compositions
+     *
+     * Request:
+     *   { "userId": 1, "username": "1-admin", "email": "x@y.com", "name": "Ahmet", "surname": "Yılmaz" }
+     *
+     * Response 201:
+     *   { "player": { "id": 8, "username": "1-admin", "email": "x@y.com", "userId": "1", ... } }
+     *
+     * Response 400 (duplicate):
+     *   { "message": "Username already exists: 1-admin", "error": "Bad Request", "statusCode": 400 }
      */
     public function syncUser(User $user): array
     {
@@ -97,6 +127,9 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
 
     /**
      * DELETE /v1/player-compositions/by-user/{userId}
+     *
+     * Response 204: (boş — başarılı silme)
+     * Response 404: (zaten yok)
      */
     public function removeUser(User $user): bool
     {
@@ -126,6 +159,22 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
 
     /**
      * GET /v1/player-compositions/by-user/{userId}
+     *
+     * Response 200:
+     *   {
+     *     "player": {
+     *       "id": 8,
+     *       "username": "1-admin",
+     *       "email": "admin@panel26.com",
+     *       "userId": "1",
+     *       "name": "Admin",
+     *       "surname": "User",
+     *       "avatarMediaId": null,
+     *       "preferredLanguageId": null,
+     *       "createdAt": "2026-02-23T11:03:41.812Z",
+     *       "updatedAt": "2026-03-05T23:09:27.000Z"
+     *     }
+     *   }
      */
     public function getUser(User $user): ?array
     {
@@ -159,7 +208,6 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
                 ];
             }
 
-            // Composition'dan player bilgilerini çek
             $playerId = $composition['player']['id'] ?? $composition['playerId'] ?? null;
 
             $profile = null;
@@ -197,68 +245,247 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
         }
     }
 
-    /* ─── Simulations ──────────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════
+     *  Simulations — GET /v1/simulations
+     * ═══════════════════════════════════════════════════════ */
 
+    /**
+     * GET /v1/simulations
+     *
+     * Query: ?limit=25&page=1&filter=difficultyLevel||eq||easy
+     *
+     * Response 200:
+     *   {
+     *     "data": [
+     *       {
+     *         "id": 1,
+     *         "difficultyLevel": "easy",      // easy|medium|hard
+     *         "estimatedDuration": 45,         // dakika
+     *         "minPlayers": 2,
+     *         "maxPlayers": 5,
+     *         "coverImageAssetId": 12,
+     *         "createdBy": "admin",
+     *         "updatedBy": "admin",
+     *         "deactivatedAt": null,
+     *         "createdAt": "2026-01-15T10:00:00.000Z",
+     *         "updatedAt": "2026-02-20T14:30:00.000Z"
+     *       }
+     *     ],
+     *     "count": 1,
+     *     "total": 10,
+     *     "page": 1,
+     *     "pageCount": 1
+     *   }
+     */
     public function getSimulations(array $params = []): ?array
     {
         return $this->apiGet('/v1/simulations', $params);
     }
 
+    /**
+     * GET /v1/simulations/{id}
+     *
+     * Response 200: SimulationEntity tek obje (data sarmalı yok)
+     */
     public function getSimulation(int $id, array $params = []): ?array
     {
         return $this->apiGet("/v1/simulations/{$id}", $params);
     }
 
-    /* ─── Simulation Sessions ──────────────────────────── */
+    /* ═══════════════════════════════════════════════════════
+     *  Simulation Sessions — GET /v1/simulation-sessions
+     * ═══════════════════════════════════════════════════════ */
 
+    /**
+     * GET /v1/simulation-sessions
+     *
+     * Query: ?limit=25&page=1&filter=simulationVersionId||eq||5
+     *
+     * Response 200:
+     *   {
+     *     "data": [
+     *       {
+     *         "id": 1,
+     *         "simulationVersionId": 5,
+     *         "sessionCode": "ABC123",
+     *         "status": "completed",       // waiting|active|completed|cancelled
+     *         "startedAt": "2026-02-10T09:00:00.000Z",
+     *         "completedAt": "2026-02-10T09:45:00.000Z",
+     *         "finalPathId": 3,
+     *         "finalScore": 85,
+     *         "finalMetrics": {
+     *           "health": 75,
+     *           "resource": 60,
+     *           "ethics": 90,
+     *           "adaptation": 80
+     *         },
+     *         "createdBy": "system",
+     *         "createdAt": "2026-02-10T09:00:00.000Z"
+     *       }
+     *     ],
+     *     "count": 1, "total": 50, "page": 1, "pageCount": 2
+     *   }
+     */
     public function getSimulationSessions(array $params = []): ?array
     {
         return $this->apiGet('/v1/simulation-sessions', $params);
     }
 
+    /**
+     * GET /v1/simulation-sessions/{id}
+     *
+     * Response 200: SimulationSessionEntity tek obje
+     */
     public function getSimulationSession(int $id, array $params = []): ?array
     {
         return $this->apiGet("/v1/simulation-sessions/{$id}", $params);
     }
 
-    /* ─── Session Players ──────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════
+     *  Session Players — GET /v1/session-players
+     * ═══════════════════════════════════════════════════════ */
 
+    /**
+     * GET /v1/session-players/by-session/{sessionId}
+     *
+     * Response 200:
+     *   [
+     *     {
+     *       "id": 1,
+     *       "simulationSessionId": 10,
+     *       "playerId": 8,
+     *       "roleId": 3,
+     *       "joinedAt": "2026-02-10T09:00:00.000Z",
+     *       "createdBy": "system",
+     *       "createdAt": "2026-02-10T09:00:00.000Z"
+     *     }
+     *   ]
+     */
     public function getSessionPlayers(int $sessionId): ?array
     {
         return $this->apiGet("/v1/session-players/by-session/{$sessionId}");
     }
 
+    /**
+     * GET /v1/session-players/by-player/{playerId}
+     *
+     * Response 200: SessionPlayerEntity[] — oyuncunun katıldığı tüm oturumlar
+     */
     public function getPlayerSessions(int $playerId): ?array
     {
         $result = $this->apiGet("/v1/session-players/by-player/{$playerId}");
         return is_array($result) ? $result : [];
     }
 
-    /* ─── Players ──────────────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════
+     *  Players — GET /v1/players
+     * ═══════════════════════════════════════════════════════ */
 
+    /**
+     * GET /v1/players
+     *
+     * Query: ?limit=25&page=1
+     *
+     * Response 200:
+     *   {
+     *     "data": [
+     *       {
+     *         "id": 8,
+     *         "username": "1-admin",
+     *         "email": "admin@panel26.com",
+     *         "name": "Admin",
+     *         "surname": "User",
+     *         "userId": 1,
+     *         "avatarMediaId": null,
+     *         "preferredLanguageId": null,
+     *         "createdAt": "2026-02-23T11:03:41.812Z"
+     *       }
+     *     ],
+     *     "count": 1, "total": 54, "page": 1, "pageCount": 3
+     *   }
+     */
     public function getPlayers(array $params = []): ?array
     {
         return $this->apiGet('/v1/players', $params);
     }
 
+    /**
+     * GET /v1/players/{id}
+     *
+     * Response 200: PlayerEntity tek obje
+     */
     public function getPlayer(int $id, array $params = []): ?array
     {
         return $this->apiGet("/v1/players/{$id}", $params);
     }
 
-    /* ─── Player Profiles ──────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════
+     *  Player Profiles — GET /v1/player-profiles
+     * ═══════════════════════════════════════════════════════ */
 
+    /**
+     * GET /v1/player-profiles/by-player/{playerId}
+     *
+     * Response 200:
+     *   {
+     *     "id": 1,
+     *     "playerId": 8,
+     *     "totalScore": 450,
+     *     "totalSimulationsCompleted": 5,
+     *     "totalPlayTimeMinutes": 230,
+     *     "lastCompletedSimulationId": 3,
+     *     "achievements": [ { "type": "first_sim", "earnedAt": "..." } ],
+     *     "statistics": {
+     *       "avgScore": 78.5,
+     *       "bestScore": 95,
+     *       "avgHealthMetric": 72,
+     *       "avgResourceMetric": 65,
+     *       "avgEthicsMetric": 80,
+     *       "avgAdaptationMetric": 70
+     *     },
+     *     "createdAt": "2026-02-23T11:03:41.812Z"
+     *   }
+     */
     public function getPlayerProfile(int $playerId): ?array
     {
         return $this->apiGet("/v1/player-profiles/by-player/{$playerId}");
     }
 
-    /* ─── Player Progress ──────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════
+     *  Player Progress — GET /v1/player-progresses
+     * ═══════════════════════════════════════════════════════ */
 
+    /**
+     * GET /v1/player-progresses
+     *
+     * Query: ?limit=25&page=1&filter=playerId||eq||8
+     *
+     * Response 200:
+     *   {
+     *     "data": [
+     *       {
+     *         "id": 1,
+     *         "playerId": 8,
+     *         "simulationSessionId": 10,
+     *         "simulationVersionId": 5,
+     *         "currentPathId": 3,
+     *         "currentScore": 85,
+     *         "currentMetrics": {
+     *           "health": 75,
+     *           "resource": 60,
+     *           "ethics": 90,
+     *           "adaptation": 80
+     *         },
+     *         "startedAt": "2026-02-10T09:00:00.000Z",
+     *         "completedAt": "2026-02-10T09:45:00.000Z"
+     *       }
+     *     ],
+     *     "count": 1, "total": 15, "page": 1, "pageCount": 1
+     *   }
+     */
     public function getPlayerProgressList(array $params = []): ?array
     {
         $result = $this->apiGet('/v1/player-progresses', $params);
-        // API bazen data[] wrapper kullanır
         if (isset($result['data'])) {
             return $result['data'];
         }

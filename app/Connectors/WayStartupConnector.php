@@ -8,18 +8,33 @@ use Illuminate\Support\Facades\Log;
 /**
  * Way Startup — Full API Connector
  *
+ * Backend: https://way-backend.dopingtech.net
+ * Auth: Authorization: Bearer <API_KEY>
+ *
  * Members:
  *   POST   /v1/startup/members                → Üye oluştur
  *   GET    /v1/startup/members/by-user/:id    → Üye getir
  *   PATCH  /v1/startup/members/:id            → Üye güncelle
  *   DELETE /v1/startup/members/:id            → Üye sil
  *
- * Simulations, Steps, Progress:
- *   GET /v1/startup/simulations, /v1/startup/steps,
- *       /v1/startup/userprogress, /v1/startup/userstepprogress
+ * Simulations (auth genişletme gerekli):
+ *   GET /v1/startup/simulations               → Simülasyon listesi
+ *   GET /v1/startup/simulations/{id}          → Simülasyon detayı
+ *   GET /v1/startup/simulations/with-progress → İlerleme ile birlikte
+ *
+ * Steps (auth genişletme gerekli):
+ *   GET /v1/startup/steps/simulation/{id}     → Simülasyon adımları
+ *
+ * User Progress (auth genişletme gerekli):
+ *   GET /v1/startup/userprogress/member/{memberId}                        → Simülasyon bazlı ilerleme
+ *   GET /v1/startup/userprogress/member/{memberId}/simulation/{simId}     → Tek simülasyon ilerlemesi
+ *
+ * User Step Progress (auth genişletme gerekli):
+ *   GET /v1/startup/userstepprogress/member/{memberId}                    → Adım bazlı ilerleme
+ *   GET /v1/startup/userstepprogress/member/{memberId}/step/{stepId}      → Tek adım ilerlemesi
  *
  * Health:
- *   GET /health/simple
+ *   GET /health/simple                        → Servis sağlığı
  */
 class WayStartupConnector extends BaseConnector implements AppConnectorInterface
 {
@@ -34,6 +49,25 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
 
     /**
      * POST /v1/startup/members
+     *
+     * Request:
+     *   { "userId": "1", "name": "Admin User", "email": "admin@x.com", "avatarUrl": "", "points": 0 }
+     *
+     * Response 201:
+     *   {
+     *     "id": 213,
+     *     "userId": "1",
+     *     "name": "Admin User",
+     *     "email": "admin@dopifuture.com",
+     *     "avatarUrl": "",
+     *     "points": 0,
+     *     "createdBy": "api",
+     *     "createdAt": "2026-02-23T11:03:41.812Z",
+     *     "updatedAt": "2026-03-10T12:07:17.000Z"
+     *   }
+     *
+     * Response 400 (duplicate):
+     *   { "message": "User already exists", "error": "Bad Request", "statusCode": 400 }
      */
     public function syncUser(User $user): array
     {
@@ -94,19 +128,21 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
     /* ─── Interface: removeUser ─────────────────────────── */
 
     /**
-     * DELETE /v1/startup/members/{id}
+     * DELETE /v1/startup/members/{memberId}
      * Önce by-user'dan member id bulunur, sonra silinir.
+     *
+     * Response 200/204: (başarılı silme)
+     * Response 404: (zaten yok)
      */
     public function removeUser(User $user): bool
     {
         try {
-            // Önce member bilgisini al
             $member = $this->getUser($user);
             $memberId = $member['id'] ?? null;
 
             if (!$memberId) {
                 Log::channel('daily')->info('[WayStartup] Silinecek üye bulunamadı', ['userId' => $user->id]);
-                return true; // zaten yok
+                return true;
             }
 
             $response = $this->apiDelete("/v1/startup/members/{$memberId}");
@@ -137,6 +173,19 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
 
     /**
      * GET /v1/startup/members/by-user/{userId}
+     *
+     * Response 200:
+     *   {
+     *     "id": 213,
+     *     "userId": "1",
+     *     "name": "Admin User",
+     *     "email": "admin@dopifuture.com",
+     *     "avatarUrl": "",
+     *     "points": 450,
+     *     "createdBy": "api",
+     *     "createdAt": "2026-02-23T11:03:41.812Z",
+     *     "updatedAt": "2026-03-10T12:07:17.000Z"
+     *   }
      */
     public function getUser(User $user): ?array
     {
@@ -205,54 +254,218 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
         }
     }
 
-    /* ─── Simulations ──────────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════
+     *  Simulations — GET /v1/startup/simulations
+     * ═══════════════════════════════════════════════════════ */
 
+    /**
+     * GET /v1/startup/simulations
+     *
+     * Query: ?limit=25&page=1
+     *
+     * Response 200:
+     *   {
+     *     "data": [
+     *       {
+     *         "id": 1,
+     *         "name": "SmartClass",
+     *         "description": "Eğitim teknolojisi girişimi simülasyonu",
+     *         "totalStep": 12,
+     *         "iconUrl": "https://way-backend.dopingtech.net/public/icons/edtech.png",
+     *         "backgroundColorCode": "#E3F2FD",
+     *         "colorCode": "#1565C0",
+     *         "createdBy": "admin",
+     *         "createdAt": "2026-01-10T08:00:00.000Z",
+     *         "updatedAt": "2026-02-15T12:00:00.000Z"
+     *       }
+     *     ],
+     *     "count": 1, "total": 15, "page": 1, "pageCount": 1
+     *   }
+     */
     public function getSimulations(array $params = []): ?array
     {
         return $this->apiGet('/v1/startup/simulations', $params);
     }
 
-    public function getSimulationsWithProgress(): ?array
+    /**
+     * GET /v1/startup/simulations/with-progress
+     *
+     * Response 200:
+     *   {
+     *     "data": [
+     *       {
+     *         "id": 1,
+     *         "name": "SmartClass",
+     *         "description": "...",
+     *         "totalStep": 12,
+     *         "iconUrl": "...",
+     *         "backgroundColorCode": "#E3F2FD",
+     *         "colorCode": "#1565C0",
+     *         "progress": {
+     *           "memberId": 213,
+     *           "currentStep": 6,
+     *           "completionPercentage": 50.00,
+     *           "status": "in_progress"
+     *         },
+     *         "createdAt": "2026-01-10T08:00:00.000Z"
+     *       }
+     *     ]
+     *   }
+     */
+    public function getSimulationsWithProgress(?int $userId = null): ?array
     {
-        return $this->apiGet('/v1/startup/simulations/with-progress');
+        $params = [];
+        if ($userId) {
+            $params['userId'] = $userId;
+        }
+        return $this->apiGet('/v1/startup/simulations/with-progress', $params);
     }
 
+    /**
+     * GET /v1/startup/simulations/{id}
+     *
+     * Response 200: StartupSimulationEntity tek obje
+     */
     public function getSimulation(int $id): ?array
     {
         return $this->apiGet("/v1/startup/simulations/{$id}");
     }
 
-    /* ─── Steps ────────────────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════
+     *  Steps — GET /v1/startup/steps
+     * ═══════════════════════════════════════════════════════ */
 
+    /**
+     * GET /v1/startup/steps/simulation/{simulationId}
+     *
+     * Response 200:
+     *   [
+     *     {
+     *       "id": 1,
+     *       "simulationId": 1,
+     *       "stepNumber": 1,
+     *       "name": "Team Formation & Roles",
+     *       "description": "Ekip oluşturma ve rol dağılımı",
+     *       "taskDescription": "Ekibinizi oluşturun ve her üyeye rol atayın...",
+     *       "suggestedDuration": 30,
+     *       "difficulty": "easy",            // easy|medium|hard
+     *       "sortOrder": 1,
+     *       "isLocked": false,
+     *       "iconUrl": "https://...",
+     *       "points": 150,
+     *       "hasFileUpload": false,
+     *       "skill": "Liderlik, İletişim",
+     *       "createdBy": "admin",
+     *       "createdAt": "2026-01-10T08:00:00.000Z"
+     *     }
+     *   ]
+     */
     public function getSteps(int $simulationId): ?array
     {
         $result = $this->apiGet("/v1/startup/steps/simulation/{$simulationId}");
         return is_array($result) ? $result : [];
     }
 
-    /* ─── User Progress ────────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════
+     *  User Progress — GET /v1/startup/userprogress
+     * ═══════════════════════════════════════════════════════ */
 
+    /**
+     * GET /v1/startup/userprogress/member/{memberId}
+     *
+     * Response 200:
+     *   [
+     *     {
+     *       "id": 1,
+     *       "memberId": 213,
+     *       "simulationId": 1,
+     *       "currentStep": 6,
+     *       "completionPercentage": 50.00,
+     *       "status": "in_progress",         // not_started|in_progress|completed
+     *       "createdBy": "system",
+     *       "createdAt": "2026-02-25T10:00:00.000Z",
+     *       "updatedAt": "2026-03-08T14:00:00.000Z"
+     *     }
+     *   ]
+     */
     public function getUserProgress(int $memberId): ?array
     {
         $result = $this->apiGet("/v1/startup/userprogress/member/{$memberId}");
         return is_array($result) ? $result : [];
     }
 
+    /**
+     * GET /v1/startup/userprogress/member/{memberId}/simulation/{simulationId}
+     *
+     * Response 200: UserProgressEntity tek obje
+     * Not: API key auth altında bazı sub-path'lerde 401 verilebilir.
+     */
     public function getUserProgressForSimulation(int $memberId, int $simulationId): ?array
     {
-        return $this->apiGet("/v1/startup/userprogress/member/{$memberId}/simulation/{$simulationId}");
+        $result = $this->apiGet("/v1/startup/userprogress/member/{$memberId}/simulation/{$simulationId}");
+        // Sub-path 401 ise parent path deneyelim ve filtreleyelim
+        if ($result === null) {
+            $all = $this->getUserProgress($memberId);
+            if (is_array($all)) {
+                foreach ($all as $p) {
+                    if (($p['simulationId'] ?? null) == $simulationId) {
+                        return $p;
+                    }
+                }
+            }
+        }
+        return $result;
     }
 
-    /* ─── User Step Progress ───────────────────────────── */
+    /* ═══════════════════════════════════════════════════════
+     *  User Step Progress — GET /v1/startup/userstepprogress
+     * ═══════════════════════════════════════════════════════ */
 
+    /**
+     * GET /v1/startup/userstepprogress/member/{memberId}
+     *
+     * Response 200:
+     *   [
+     *     {
+     *       "id": 1,
+     *       "memberId": 213,
+     *       "stepId": 1,
+     *       "status": "completed",           // locked|in_progress|completed
+     *       "startedAt": "2026-02-25T10:00:00.000Z",
+     *       "completedAt": "2026-02-25T10:30:00.000Z",
+     *       "earnedPoint": 150,
+     *       "earnedCoin": 50,
+     *       "createdBy": "system",
+     *       "createdAt": "2026-02-25T10:00:00.000Z"
+     *     }
+     *   ]
+     */
     public function getUserStepProgress(int $memberId): ?array
     {
         $result = $this->apiGet("/v1/startup/userstepprogress/member/{$memberId}");
         return is_array($result) ? $result : [];
     }
 
+    /**
+     * GET /v1/startup/userstepprogress/member/{memberId}/step/{stepId}
+     *
+     * Response 200: UserStepProgressEntity tek obje
+     * Not: API key auth altında bazı sub-path'lerde 401 verilebilir.
+     */
     public function getUserStepProgressForStep(int $memberId, int $stepId): ?array
     {
-        return $this->apiGet("/v1/startup/userstepprogress/member/{$memberId}/step/{$stepId}");
+        $result = $this->apiGet("/v1/startup/userstepprogress/member/{$memberId}/step/{$stepId}");
+        // Sub-path 401 fallback: parent endpoint'ten filtrele
+        if ($result === null) {
+            $all = $this->getUserStepProgress($memberId);
+            if (is_array($all)) {
+                foreach ($all as $sp) {
+                    if (($sp['stepId'] ?? null) == $stepId) {
+                        return $sp;
+                    }
+                }
+            }
+        }
+        return $result;
     }
 }

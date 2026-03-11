@@ -16,22 +16,19 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // Mock data matching Figma F-51 "Doping Admin - Lisans Yönetimi" exactly
+        $user = auth()->user();
+
+        // Rol bazlı lisans filtreleme
+        $licensesQuery = License::with('school')->orderByDesc('created_at');
+
+        if ($user->hasAnyRole(['school-admin', 'school-principal'])) {
+            $schoolIds = $user->schools()->pluck('schools.id');
+            $licensesQuery->whereIn('school_id', $schoolIds);
+        }
+
         $data = [
-            'user' => auth()->user(),
-            'licenses' => [
-                ['school' => 'Stuyvesant High School',     'location' => 'New York City/New York',       'total' => 4, 'status' => 'active',      'purchase_date' => '01/01/2026', 'duration' => '12/31/2026', 'email' => 'john.doe@example.com'],
-                ['school' => 'Lincoln High School',         'location' => 'San Diego/California',         'total' => 3, 'status' => 'not_started', 'purchase_date' => '03/01/2026', 'duration' => '02/31/2027', 'email' => 'emily.smith@test.com'],
-                ['school' => 'Beverly Hills High School',   'location' => 'Beverly Hills/California',     'total' => 4, 'status' => 'active',      'purchase_date' => '01/01/2026', 'duration' => '12/31/2026', 'email' => 'student01@example.com'],
-                ['school' => 'Phillips Academy Andover',    'location' => 'Andover/Massachusetts',        'total' => 5, 'status' => 'cancelled',   'purchase_date' => '01/01/2026', 'duration' => '12/31/2026', 'email' => 'license.admin@sample...'],
-                ['school' => 'Phillips Exeter Academy',     'location' => 'Exeter/New Hampshire',         'total' => 2, 'status' => 'active',      'purchase_date' => '03/16/2026', 'duration' => '12/31/2026', 'email' => 'info@demo-example.com'],
-                ['school' => 'Miami Senior High School',    'location' => 'Miami/Florida',                'total' => 5, 'status' => 'active',      'purchase_date' => '01/01/2026', 'duration' => '12/31/2026', 'email' => 'name@example.com'],
-                ['school' => 'Choate Rosemary Hall',        'location' => 'Wallingford/Connecticut',      'total' => 4, 'status' => 'not_started', 'purchase_date' => '04/01/2026', 'duration' => '03/31/2027', 'email' => 'olivia.johnson@example...'],
-                ['school' => 'The Hotchkiss School',        'location' => 'Lakeville/Connecticut',        'total' => 1, 'status' => 'cancelled',   'purchase_date' => '01/01/2026', 'duration' => '12/31/2026', 'email' => 'mason.thomas@exampl...'],
-                ['school' => 'Harvard-Westlake School',     'location' => 'Los Angeles/California',       'total' => 5, 'status' => 'active',      'purchase_date' => '01/01/2026', 'duration' => '12/31/2026', 'email' => 'ethan.jackson@example...'],
-                ['school' => 'Deerfield Academy',           'location' => 'Deerfield/Massachusetts',      'total' => 4, 'status' => 'expired',     'purchase_date' => '01/01/2025', 'duration' => '12/31/2025', 'email' => 'mia.harris@example.com'],
-                ['school' => 'Groton School',               'location' => 'Groton/Massachusetts',         'total' => 4, 'status' => 'active',      'purchase_date' => '01/01/2026', 'duration' => '12/31/2026', 'email' => 'james.clark@example...'],
-            ],
+            'user' => $user,
+            'licenses' => $licensesQuery->get(),
         ];
 
         return view('portal.dashboard', compact('data'));

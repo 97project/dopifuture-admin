@@ -4,9 +4,8 @@
 @php
     $isTr = app()->getLocale() === 'tr';
     $currentRole = request('role', 'student');
-    // Mock counts matching Figma (47 students, 24 teachers)
-    $studentCount = 47;
-    $teacherCount = 24;
+    $studentCount = $users->total();
+    $teacherCount = $users->total();
 @endphp
 
 @section('content')
@@ -21,7 +20,7 @@
                 </div>
                 <span style="font-size:13px;font-weight:500;opacity:0.9;">{{ $isTr ? 'Toplam Lisans' : 'Total Licence' }}</span>
             </div>
-            <span style="font-size:36px;font-weight:700;font-family:'Nunito',sans-serif;">{{ $licenseStats->totalLicence ?? 52 }}</span>
+            <span style="font-size:36px;font-weight:700;font-family:'Nunito',sans-serif;">{{ $licenseStats->totalLicence ?? 0 }}</span>
         </div>
         {{-- Used Licence — Blue --}}
         <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-radius:16px;background:linear-gradient(135deg,#0284C7,#38BDF8);color:#fff;">
@@ -31,7 +30,7 @@
                 </div>
                 <span style="font-size:13px;font-weight:500;opacity:0.9;">{{ $isTr ? 'Kullanılan Lisans' : 'Used Licence' }}</span>
             </div>
-            <span style="font-size:36px;font-weight:700;font-family:'Nunito',sans-serif;">{{ $licenseStats->usedLicence ?? 47 }}</span>
+            <span style="font-size:36px;font-weight:700;font-family:'Nunito',sans-serif;">{{ $licenseStats->usedLicence ?? 0 }}</span>
         </div>
         {{-- Licence Duration — Orange --}}
         <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-radius:16px;background:linear-gradient(135deg,#EA580C,#FB923C);color:#fff;">
@@ -41,7 +40,7 @@
                 </div>
                 <span style="font-size:13px;font-weight:500;opacity:0.9;">{{ $isTr ? 'Lisans Süresi' : 'Licence Duration' }}</span>
             </div>
-            <span style="font-size:28px;font-weight:700;font-family:'Nunito',sans-serif;">{{ $licenseStats->licenceDuration ?? '12/31/2026' }}</span>
+            <span style="font-size:28px;font-weight:700;font-family:'Nunito',sans-serif;">{{ $licenseStats->licenceDuration ?? '-' }}</span>
         </div>
     </div>
 

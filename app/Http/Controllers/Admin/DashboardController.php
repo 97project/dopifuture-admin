@@ -73,12 +73,20 @@ class DashboardController extends Controller
             ->take(6)
             ->get();
 
+        // Sync status
+        $syncStatus = [
+            'enabled'   => (bool) env('SYNC_ENABLED', false),
+            'interval'  => (int) env('SYNC_INTERVAL_MINUTES', 60),
+            'last_sync' => \App\Models\AppUserData::max('synced_at'),
+        ];
+
         return view('admin.dashboard', compact(
             'stats',
             'licenseUtilization',
             'recentActivity',
             'pendingRequests',
-            'appStats'
+            'appStats',
+            'syncStatus'
         ));
     }
 

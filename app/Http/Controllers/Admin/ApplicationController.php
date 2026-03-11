@@ -154,17 +154,56 @@ class ApplicationController extends Controller
             'synced_count' => $application->users()->wherePivot('sync_status', 'synced')->count(),
         ];
 
-        // Vega uygulamaları — modül bazlı genel bakış
-        if ($connector instanceof \App\Connectors\VegaConnector) {
-            $data['app_slug'] = $application->slug;
-            $data['module'] = match ($application->slug) {
-                'role-galaxy' => 'simulator',
-                'way-ai-coach' => 'lecturer',
-                'study-space' => 'all',
-                default => 'all',
-            };
+        // Vega uygulamaları — slug bazlı zengin veri
+    if ($connector instanceof \App\Connectors\VegaConnector) {
+        $data['app_slug'] = $application->slug;
+        $data['module'] = match ($application->slug) {
+            'role-galaxy' => 'simulator',
+            'way-ai-coach' => 'lecturer',
+            'study-space' => 'all',
+            default => 'all',
+        };
+
+        // Örnek kullanıcılardan oturum verisi çek
+        $sampleUsers = $application->users()->wherePivot('sync_status', 'synced')->limit(5)->get();
+        $allSessions = [];
+
+        foreach ($sampleUsers as $user) {
+            try {
+                $vegaUser = $connector->findByEmail($user->email);
+                if (!$vegaUser) continue;
+                $vegaId = $vegaUser['id'] ?? null;
+                if (!$vegaId) continue;
+
+                $sessionsResult = $connector->getUserSessions($vegaId, $data['module']);
+                $sessions = $sessionsResult['sessions'] ?? [];
+                foreach ($sessions as &$s) {
+                    $s['panel_user_id'] = $user->id;
+                    $s['panel_user_name'] = $user->full_name;
+                }
+                $allSessions = array_merge($allSessions, $sessions);
+            } catch (\Throwable $e) {
+                \Log::warning("Vega session fetch for user {$user->id}: " . $e->getMessage());
+            }
         }
 
+        // Tarihe göre sırala (yeniden eskiye)
+        usort($allSessions, fn($a, $b) => strcmp($b['created_at'] ?? '', $a['created_at'] ?? ''));
+        $data['sessions'] = array_slice($allSessions, 0, 20);
+        $data['session_count'] = count($allSessions);
+
+        // Slug bazlı istatistikler
+        if ($application->slug === 'role-galaxy') {
+            $scores = array_filter(array_column($allSessions, 'score'));
+            $data['avg_score'] = count($scores) > 0 ? round(array_sum($scores) / count($scores)) : 0;
+            $data['completed_count'] = count(array_filter($allSessions, fn($s) => ($s['status'] ?? '') === 'completed'));
+        } elseif ($application->slug === 'way-ai-coach') {
+            $data['total_messages'] = array_sum(array_column($allSessions, 'message_count'));
+        }
+
+        // API health
+        $data['api_health'] = $connector->getHealth();
+    };
         // MissionWay — simülasyonlar + oturumlar + player composition
         if ($connector instanceof \App\Connectors\MissionWayConnector) {
             // Simülasyon listesi
@@ -423,5 +462,64 @@ class ApplicationController extends Controller
         ActivityLog::log('sync_all', 'applications', $application, [], $results);
 
         return back()->with('success', "Toplu senkron: {$results['synced']}/{$results['total']} başarılı, {$results['failed']} başarısız.");
+    }
+
+    /**
+     * Cross-app reconcile — tüm kullanıcıların tüm app'lerdeki eksiklerini tamamla.
+     */
+    public function reconcile(Request $request)
+    {
+        $crossSync = app(\App\Services\CrossAppSyncService::class);
+        $results = $crossSync->reconcileAllUsers();
+
+        ActivityLog::log('reconcile_all', 'applications', null, [], $results);
+
+        return back()->with('success',
+            "Reconcile tamamlandı: {$results['exists']} mevcut, {$results['created']} oluşturuldu, {$results['failed']} başarısız."
+        );
+    }
+
+    /**
+     * Manuel veri toplama tetikle — tüm app'ler veya belirli uygulama.
+     */
+    public function triggerHarvest(Request $request, ?Application $application = null)
+    {
+        $dataSyncService = app(\App\Services\ConnectorSyncService::class);
+
+        if ($application) {
+            $results = $dataSyncService->syncAllUsersForApp($application);
+            $msg = "{$application->name}: {$results['success']}/{$results['total']} kullanıcı verisi güncellendi.";
+        } else {
+            $apps = Application::active()->whereNotNull('connector_class')->get();
+            $total = ['success' => 0, 'failed' => 0];
+            foreach ($apps as $app) {
+                $r = $dataSyncService->syncAllUsersForApp($app);
+                $total['success'] += $r['success'];
+                $total['failed'] += $r['failed'];
+            }
+            $msg = "Tüm uygulamalar: {$total['success']} başarılı, {$total['failed']} başarısız.";
+        }
+
+        ActivityLog::log('trigger_harvest', 'applications', $application);
+
+        return back()->with('success', "Veri toplama: {$msg}");
+    }
+
+    /**
+     * Remote discovery — uzak app'teki kullanıcıları panele çek.
+     */
+    public function discoverRemote(Request $request, Application $application)
+    {
+        $this->authorize('update', $application);
+
+        $crossSync = app(\App\Services\CrossAppSyncService::class);
+        $results = $crossSync->discoverRemoteUsers($application);
+
+        ActivityLog::log('discover_remote', 'applications', $application, [], $results);
+
+        $orphanCount = $results['orphaned'];
+        return back()->with('success',
+            "Discovery: {$results['matched']} eşleşti, {$orphanCount} orphan bulundu."
+        );
     }
 }

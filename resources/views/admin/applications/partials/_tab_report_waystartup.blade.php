@@ -86,21 +86,48 @@
                                 @endif
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 text-xs">
-                            @if(isset($sim['totalSteps']))
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">Toplam Adım</span>
-                                    <span
-                                        class="font-medium text-gray-900 dark:text-white">{{ $sim['totalSteps'] }}</span>
-                                </div>
-                            @endif
-                            @if(isset($sim['status']))
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">Durum</span>
-                                    <span
-                                        class="font-medium {{ ($sim['status'] ?? '') === 'active' ? 'text-emerald-600' : 'text-gray-400' }}">
-                                        {{ ucfirst($sim['status'] ?? '-') }}
-                                    </span>
+                        <div class="space-y-2">
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                @if(isset($sim['totalSteps']) || isset($sim['totalStep']))
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Toplam Adım</span>
+                                        <span class="font-medium text-gray-900 dark:text-white">{{ $sim['totalSteps'] ?? $sim['totalStep'] ?? 0 }}</span>
+                                    </div>
+                                @endif
+                                @if(isset($sim['difficulty']))
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Zorluk</span>
+                                        <span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-semibold
+                                            {{ $sim['difficulty'] === 'easy' ? 'bg-emerald-100 text-emerald-700' : '' }}
+                                            {{ $sim['difficulty'] === 'medium' ? 'bg-amber-100 text-amber-700' : '' }}
+                                            {{ $sim['difficulty'] === 'hard' ? 'bg-red-100 text-red-700' : '' }}">
+                                            {{ match($sim['difficulty']) { 'easy' => 'Kolay', 'medium' => 'Orta', 'hard' => 'Zor', default => ucfirst($sim['difficulty']) } }}
+                                        </span>
+                                    </div>
+                                @endif
+                                @if(isset($sim['status']))
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">Durum</span>
+                                        <span class="font-medium {{ ($sim['status'] ?? '') === 'active' ? 'text-emerald-600' : 'text-gray-400' }}">
+                                            {{ ucfirst($sim['status'] ?? '-') }}
+                                        </span>
+                                    </div>
+                                @endif
+                            </div>
+                            {{-- Progress bar (simulations_with_progress'ten gelir) --}}
+                            @php
+                                $progressData = collect($reportData['simulations_with_progress']['data'] ?? [])->firstWhere('id', $sim['id'] ?? null);
+                                $completion = $progressData['userProgress']['completionPercentage'] ?? null;
+                            @endphp
+                            @if($completion !== null)
+                                <div class="mt-2">
+                                    <div class="flex justify-between text-[10px] mb-1">
+                                        <span class="text-gray-500">İlerleme</span>
+                                        <span class="font-semibold text-indigo-600">{{ number_format($completion, 0) }}%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 h-1.5 rounded-full transition-all" style="width: {{ min($completion, 100) }}%"></div>
+                                    </div>
                                 </div>
                             @endif
                         </div>
@@ -144,6 +171,86 @@
                             </div>
                         @endif
                     </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    {{-- AI Değerlendirme Özeti --}}
+    @if(!empty($reportData['ai_evaluation'] ?? []))
+        @php $aiEval = $reportData['ai_evaluation']; @endphp
+        <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                </div>
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white">AI Değerlendirme Özeti</h3>
+            </div>
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 text-center">
+                    <p class="text-2xl font-bold text-purple-600">{{ $aiEval['total_score'] ?? 0 }}</p>
+                    <p class="text-[10px] text-gray-500">AI Toplam Puanı</p>
+                </div>
+                <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3 text-center">
+                    <p class="text-2xl font-bold text-amber-600">{{ $aiEval['total_coins'] ?? 0 }} 🪙</p>
+                    <p class="text-[10px] text-gray-500">Kazanılan Coin</p>
+                </div>
+                <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3 text-center">
+                    <p class="text-2xl font-bold text-emerald-600">{{ $aiEval['evaluated_steps'] ?? 0 }}</p>
+                    <p class="text-[10px] text-gray-500">Değerlendirilen Adım</p>
+                </div>
+            </div>
+            @if(!empty($aiEval['overall_feedback']))
+                <div class="bg-gray-50 dark:bg-gray-800/40 rounded-lg p-3 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                    <strong class="text-purple-600">Genel Değerlendirme:</strong> {{ $aiEval['overall_feedback'] }}
+                </div>
+            @endif
+        </div>
+    @endif
+
+    {{-- Adım Soru-Cevap Accordion --}}
+    @if(!empty($reportData['step_qna'] ?? []))
+        <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+            <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">Adım Soru-Cevap Detayı</h3>
+            <div class="space-y-3">
+                @foreach($reportData['step_qna'] as $stepIdx => $stepQna)
+                    <details class="group border border-gray-100 dark:border-gray-700 rounded-lg">
+                        <summary class="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/30 transition rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 text-xs font-bold">
+                                    {{ ($stepQna['step_number'] ?? $stepIdx + 1) }}
+                                </span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $stepQna['step_title'] ?? 'Adım ' . ($stepIdx + 1) }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                @if(isset($stepQna['ai_score']))
+                                    <span class="text-xs font-semibold text-purple-600 bg-purple-50 dark:bg-purple-900/20 px-2 py-0.5 rounded-full">{{ $stepQna['ai_score'] }} puan</span>
+                                @endif
+                                @if(isset($stepQna['ai_coins']))
+                                    <span class="text-xs font-semibold text-amber-600">🪙 {{ $stepQna['ai_coins'] }}</span>
+                                @endif
+                                <svg class="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </summary>
+                        <div class="px-3 pb-3 space-y-2 border-t border-gray-100 dark:border-gray-700 pt-3">
+                            @foreach($stepQna['questions'] ?? [] as $qna)
+                                <div class="bg-gray-50 dark:bg-gray-800/40 rounded-lg p-3">
+                                    <p class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                        <span class="text-indigo-500">Q:</span> {{ $qna['question'] ?? '-' }}
+                                    </p>
+                                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 italic">
+                                        <span class="text-emerald-500 not-italic">A:</span> {{ $qna['answer'] ?? '-' }}
+                                    </p>
+                                    @if(!empty($qna['ai_feedback']))
+                                        <div class="flex items-start gap-1.5 mt-1">
+                                            <svg class="w-3 h-3 text-purple-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                                            <p class="text-[10px] text-purple-600 dark:text-purple-400">{{ $qna['ai_feedback'] }}</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </details>
                 @endforeach
             </div>
         </div>

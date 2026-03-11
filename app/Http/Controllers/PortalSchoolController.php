@@ -10,26 +10,17 @@ class PortalSchoolController extends Controller
 {
     public function index(Request $request)
     {
-        // TODO: Reconnect real data after Figma visual verification
-        $mockSchools = collect([
-            (object)['id'=>1, 'name'=>'Bahçeşehir Koleji',       'city'=>'İstanbul',  'classes_count'=>24, 'users_count'=>580, 'licenses_count'=>500, 'is_active'=>true],
-            (object)['id'=>2, 'name'=>'TED Ankara Koleji',       'city'=>'Ankara',    'classes_count'=>18, 'users_count'=>420, 'licenses_count'=>350, 'is_active'=>true],
-            (object)['id'=>3, 'name'=>'Özel Doğa Koleji',        'city'=>'İstanbul',  'classes_count'=>22, 'users_count'=>510, 'licenses_count'=>420, 'is_active'=>true],
-            (object)['id'=>4, 'name'=>'Özel Enka Okulları',      'city'=>'İstanbul',  'classes_count'=>14, 'users_count'=>320, 'licenses_count'=>280, 'is_active'=>true],
-            (object)['id'=>5, 'name'=>'Özel FMV Işık Okulları',  'city'=>'İstanbul',  'classes_count'=>16, 'users_count'=>380, 'licenses_count'=>310, 'is_active'=>true],
-            (object)['id'=>6, 'name'=>'Özel Darüşşafaka Lisesi', 'city'=>'İstanbul',  'classes_count'=>10, 'users_count'=>240, 'licenses_count'=>200, 'is_active'=>true],
-            (object)['id'=>7, 'name'=>'Özel Bilfen Koleji',      'city'=>'İstanbul',  'classes_count'=>20, 'users_count'=>460, 'licenses_count'=>380, 'is_active'=>false],
-            (object)['id'=>8, 'name'=>'Özel Koç Okulu',          'city'=>'İstanbul',  'classes_count'=>12, 'users_count'=>290, 'licenses_count'=>250, 'is_active'=>true],
-        ]);
+        $authUser = auth()->user();
+        $schoolIds = $authUser?->schools()->pluck('schools.id') ?? collect();
 
-        $page = $request->get('page', 1);
-        $schools = new \Illuminate\Pagination\LengthAwarePaginator(
-            $mockSchools->forPage($page, 15),
-            $mockSchools->count(),
-            15,
-            $page,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
+        $query = School::withCount(['classes', 'users', 'licenses'])
+            ->whereIn('id', $schoolIds);
+
+        if ($search = $request->get('search')) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $schools = $query->orderBy('name')->paginate(15)->withQueryString();
 
         return view('portal.schools.index', compact('schools'));
     }

@@ -351,6 +351,70 @@
         </div>
 
         {{-- ═══════════════════════════════════════
+        Sync Status Card
+        ═══════════════════════════════════════ --}}
+        @if(isset($syncStatus))
+        <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5 animate-fade-in">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl {{ $syncStatus['enabled'] ? 'bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 dark:from-emerald-500/20 dark:to-emerald-600/20' : 'bg-gray-100 dark:bg-gray-800' }} flex items-center justify-center">
+                        <svg class="w-5 h-5 {{ $syncStatus['enabled'] ? 'text-emerald-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-sm font-bold text-gray-900 dark:text-white">Senkronizasyon</h3>
+                            @if($syncStatus['enabled'])
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse-subtle"></span>
+                                    AKTİF
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-400">
+                                    KAPALI
+                                </span>
+                            @endif
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-0.5">
+                            @if($syncStatus['last_sync'])
+                                Son sync: {{ \Carbon\Carbon::parse($syncStatus['last_sync'])->diffForHumans() }}
+                                <span class="mx-1">·</span>
+                            @endif
+                            Her {{ $syncStatus['interval'] }} dakikada bir
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <form method="POST" action="{{ route('admin.applications.reconcile') }}" class="inline">
+                        @csrf
+                        <button type="submit"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-[#1A3A5C] text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#0A1628] transition-colors"
+                            onclick="return confirm('Tüm kullanıcıları tüm uygulamalarda reconcile etmek istiyor musunuz?')">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Reconcile
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ route('admin.applications.harvest') }}" class="inline">
+                        @csrf
+                        <button type="submit"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#0B6AB2] text-white hover:bg-[#0958A0] transition-colors"
+                            onclick="return confirm('Tüm uygulamalardan veri toplamak istiyor musunuz? Bu işlem biraz sürebilir.')">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                            </svg>
+                            Veri Topla
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        {{-- ═══════════════════════════════════════
         Bottom Grid
         ═══════════════════════════════════════ --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">

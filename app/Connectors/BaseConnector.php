@@ -38,13 +38,27 @@ abstract class BaseConnector
     /* ─── HTTP helpers ──────────────────────────────── */
 
     /**
+     * Build standard auth headers.
+     * NestJS ApiKeyGuard expects Authorization: Bearer <token>,
+     * x-api-key is kept as fallback for backward compatibility.
+     */
+    protected function authHeaders(): array
+    {
+        return [
+            'x-api-key'      => $this->apiKey,
+            'Authorization'  => 'Bearer ' . $this->apiKey,
+            'Accept'         => 'application/json',
+        ];
+    }
+
+    /**
      * Generic authenticated GET request with error logging.
      */
     protected function apiGet(string $path, array $params = []): ?array
     {
         try {
             $response = Http::timeout($this->timeout)
-                ->withHeaders(['x-api-key' => $this->apiKey])
+                ->withHeaders($this->authHeaders())
                 ->get("{$this->baseUrl}{$path}", $params);
 
             if ($response->successful()) {
@@ -71,7 +85,7 @@ abstract class BaseConnector
     protected function apiPost(string $path, array $data = []): Response
     {
         return Http::timeout($this->timeout)
-            ->withHeaders(['x-api-key' => $this->apiKey])
+            ->withHeaders($this->authHeaders())
             ->post("{$this->baseUrl}{$path}", $data);
     }
 
@@ -81,7 +95,7 @@ abstract class BaseConnector
     protected function apiDelete(string $path): Response
     {
         return Http::timeout($this->timeout)
-            ->withHeaders(['x-api-key' => $this->apiKey])
+            ->withHeaders($this->authHeaders())
             ->delete("{$this->baseUrl}{$path}");
     }
 

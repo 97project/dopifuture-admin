@@ -88,4 +88,12 @@ class Application extends Model
 
         return app($this->connector_class);
     }
+
+    /**
+     * Alias for resolveConnector() — backward compatibility.
+     */
+    public function getConnector(): ?\App\Connectors\AppConnectorInterface
+    {
+        return $this->resolveConnector();
+    }
 }

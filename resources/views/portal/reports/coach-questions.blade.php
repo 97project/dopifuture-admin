@@ -16,7 +16,25 @@
             <span style="font-size:18px;font-weight:700;color:#111;font-family:'Nunito',sans-serif;">{{ $isTr ? 'AI Koç Geri Bildirimi' : 'AI Coach Feedback' }}</span>
         </div>
 
-        {{-- Questions timeline --}}
+        {{-- Session Info Bar --}}
+        <div style="display:flex;gap:16px;align-items:center;padding:12px 16px;background:#F3F0FF;border-radius:10px;margin-bottom:20px;">
+            @if(!empty($student))
+            <div style="display:flex;align-items:center;gap:8px;">
+                <img src="https://ui-avatars.com/api/?name={{ urlencode(($student->name ?? '') . ' ' . ($student->surname ?? '')) }}&size=32&background=8B5CF6&color=fff&rounded=true&bold=true&font-size=0.4" alt="" style="width:28px;height:28px;border-radius:50%;">
+                <span style="font-size:12px;font-weight:600;color:#111;">{{ $student->name ?? '' }} {{ $student->surname ?? '' }}</span>
+            </div>
+            @endif
+            @if(!empty($sessionDuration))
+            <div style="display:flex;align-items:center;gap:4px;">
+                <svg width="14" height="14" fill="none" stroke="#8B5CF6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span style="font-size:11px;color:#6B7280;">{{ $sessionDuration }}</span>
+            </div>
+            @endif
+            <div style="display:flex;align-items:center;gap:4px;">
+                <svg width="14" height="14" fill="none" stroke="#8B5CF6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span style="font-size:11px;color:#6B7280;">{{ count($questions) }} {{ $isTr ? 'Soru' : 'Questions' }}</span>
+            </div>
+        </div>
         <div style="position:relative;">
             {{-- Vertical connector line --}}
             <div style="position:absolute;left:18px;top:36px;bottom:36px;width:2px;background:#E5E7EB;"></div>
@@ -25,9 +43,9 @@
             @php
                 $colors = ['#22C55E', '#3B82F6', '#F59E0B', '#8B5CF6', '#EF4444'];
                 $color = $colors[$qi % count($colors)];
-                $score = $q->score ?? 18;
-                $maxScore = $q->max_score ?? 20;
-                $percent = ($score / $maxScore) * 100;
+                $score = $q->score ?? 0;
+                $maxScore = $q->max_score ?? 1;
+                $percent = $maxScore > 0 ? ($score / $maxScore) * 100 : 0;
             @endphp
             <div style="position:relative;padding-left:52px;margin-bottom:32px;">
                 {{-- Step number circle --}}
@@ -49,7 +67,7 @@
                 {{-- Your Answer --}}
                 <div style="margin-bottom:12px;">
                     <div style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">{{ $isTr ? 'CEVABINIZ' : 'YOUR ANSWER' }}</div>
-                    <p style="font-size:13px;color:#374151;line-height:1.6;margin:0;font-style:italic;background:#F8FAFC;border-radius:8px;padding:12px 14px;">{{ $q->answer ?? '"Users struggle to find reliable local plumbers because current directories lack verified reviews and transparent pricing."' }}</p>
+                    <p style="font-size:13px;color:#374151;line-height:1.6;margin:0;font-style:italic;background:#F8FAFC;border-radius:8px;padding:12px 14px;">{{ $q->answer ?? '-' }}</p>
                 </div>
 
                 {{-- Feedback --}}
@@ -58,7 +76,7 @@
                         <svg width="8" height="8" fill="white" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                     </div>
                     <p style="font-size:12px;color:#6B7280;line-height:1.6;margin:0;">
-                        <strong style="color:#8B5CF6;">Feedback:</strong> {{ $q->feedback ?? 'This is a clear and concise problem statement. It identifies the target (users looking for plumbers) and the specific pain points (lack of verification and price transparency). Well done.' }}
+                        <strong style="color:#8B5CF6;">Feedback:</strong> {{ $q->feedback ?? '-' }}
                     </p>
                 </div>
             </div>
