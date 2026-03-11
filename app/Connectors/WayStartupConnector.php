@@ -224,10 +224,16 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
             $memberId = $member['id'] ?? null;
             $progress = [];
             $stepProgress = [];
+            $simulationsWithProgress = [];
 
             if ($memberId) {
                 $progress = $this->getUserProgress($memberId);
                 $stepProgress = $this->getUserStepProgress($memberId);
+                // Per-user simulation completion percentages
+                $simulationsWithProgress = $this->getSimulationsWithProgress($user->id) ?? [];
+                if (isset($simulationsWithProgress['data'])) {
+                    $simulationsWithProgress = $simulationsWithProgress['data'];
+                }
             }
 
             return [
@@ -237,9 +243,11 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
                     'member_id' => $memberId,
                     'progress' => $progress,
                     'step_progress' => $stepProgress,
+                    'simulations_with_progress' => $simulationsWithProgress,
                     'progress_count' => count($progress),
                     'completed_steps' => collect($stepProgress)->where('status', 'completed')->count(),
                     'total_steps' => count($stepProgress),
+                    'simulations_count' => count($simulationsWithProgress),
                 ],
                 'error' => null,
             ];

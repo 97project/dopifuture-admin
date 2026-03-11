@@ -462,18 +462,35 @@ class VegaConnector implements AppConnectorInterface
 
             // 3. Oturum geçmişi (lecturer + simulator)
             $sessionsResult = $this->getUserSessions($vegaId, 'all');
+            $sessions = $sessionsResult['sessions'] ?? [];
+
+            // 4. Her oturumun detayını çek (feedback, transkript, skor)
+            $enrichedSessions = [];
+            foreach ($sessions as $session) {
+                $sessionId = $session['id'] ?? $session['sessionId'] ?? null;
+                $module = $session['module'] ?? 'lecturer';
+
+                if ($sessionId) {
+                    $detail = $this->getSessionDetail((string) $sessionId, $module);
+                    if ($detail) {
+                        $session['detail'] = $detail;
+                    }
+                }
+                $enrichedSessions[] = $session;
+            }
 
             return [
                 'success' => true,
                 'data' => [
                     'vega_id' => $vegaId,
                     'profile' => $profile ?? $vegaUser,
-                    'sessions' => $sessionsResult['sessions'] ?? [],
-                    'session_count' => count($sessionsResult['sessions'] ?? []),
+                    'sessions' => $enrichedSessions,
+                    'session_count' => count($enrichedSessions),
                     'modules' => [
-                        'lecturer' => collect($sessionsResult['sessions'] ?? [])->where('module', 'lecturer')->count(),
-                        'simulator' => collect($sessionsResult['sessions'] ?? [])->where('module', 'simulator')->count(),
+                        'lecturer' => collect($enrichedSessions)->where('module', 'lecturer')->count(),
+                        'simulator' => collect($enrichedSessions)->where('module', 'simulator')->count(),
                     ],
+                    'has_details' => collect($enrichedSessions)->whereNotNull('detail')->count(),
                 ],
                 'error' => null,
             ];

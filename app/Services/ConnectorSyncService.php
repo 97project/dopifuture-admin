@@ -208,6 +208,27 @@ class ConnectorSyncService
                 ]
             );
         }
+
+        // Simulations with per-user progress (completion %)
+        foreach (($data['simulations_with_progress'] ?? []) as $sim) {
+            $simProgress = $sim['progress'] ?? null;
+            AppUserProgress::updateOrCreate(
+                [
+                    'user_id'        => $user->id,
+                    'application_id' => $app->id,
+                    'module_type'    => 'simulation_overview',
+                    'module_id'      => $sim['id'] ?? null,
+                ],
+                [
+                    'module_name'      => $sim['name'] ?? null,
+                    'status'           => $this->normalizeStatus($simProgress['status'] ?? null),
+                    'score'            => $simProgress['completionPercentage'] ?? null,
+                    'max_score'        => 100,
+                    'attempts'         => $simProgress['currentStep'] ?? 0,
+                    'metadata'         => $sim,
+                ]
+            );
+        }
     }
 
     /**
