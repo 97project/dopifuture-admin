@@ -99,15 +99,15 @@ class CrossAppSyncService
      */
     public function reconcileAllUsers(?callable $onProgress = null): array
     {
-        // Sadece öğrenci rolündeki kullanıcıları al
+        // Sadece öğrenci rolündeki kullanıcıları al (Spatie: 'name' kolonu)
         $users = User::whereHas('roles', function ($q) {
-            $q->whereIn('slug', ['student', 'ogrenci']);
+            $q->whereIn('name', ['student', 'ogrenci']);
         })->get();
 
         // Eğer student role yoksa tüm non-admin kullanıcıları al
         if ($users->isEmpty()) {
             $users = User::whereDoesntHave('roles', function ($q) {
-                $q->where('slug', 'admin');
+                $q->where('name', 'admin');
             })->get();
         }
 

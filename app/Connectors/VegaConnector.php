@@ -63,9 +63,11 @@ class VegaConnector implements AppConnectorInterface
 
             // 2) Yoksa register ile oluştur
             $password = 'Vg' . bin2hex(random_bytes(4)) . '!9';
+            $name = trim($user->name ?? '') ?: 'Öğrenci';
+            $surname = trim($user->surname ?? '') ?: 'Öğrenci';
             $payload = [
-                'name' => $user->name ?? 'User',
-                'surname' => $user->surname ?? '',
+                'name' => $name,
+                'surname' => $surname,
                 'email' => $user->email,
                 'password' => $password,
                 'password_confirmation' => $password,

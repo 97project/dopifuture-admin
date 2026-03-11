@@ -69,6 +69,10 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
         $name = is_array($user->name) ? ($user->name[app()->getLocale()] ?? reset($user->name) ?: 'User') : ($user->name ?? 'User');
         $surname = is_array($user->surname) ? ($user->surname[app()->getLocale()] ?? reset($user->surname) ?: '') : ($user->surname ?? '');
 
+        // Boş name/surname API 400 hatası verir — fallback koy
+        $name = trim($name) ?: 'Öğrenci';
+        $surname = trim($surname) ?: 'Öğrenci';
+
         $payload = [
             'userId' => $user->id,
             'username' => $user->id . '-' . $this->slugify($name),

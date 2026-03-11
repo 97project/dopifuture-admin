@@ -71,9 +71,11 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
      */
     public function syncUser(User $user): array
     {
+        $fullName = trim($user->full_name ?? '') ?: 'Öğrenci';
+
         $payload = [
             'userId' => (string) $user->id,
-            'name' => $user->full_name,
+            'name' => $fullName,
             'email' => $user->email,
             'avatarUrl' => $user->avatar_url ?? '',
             'points' => 0,
