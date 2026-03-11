@@ -66,6 +66,12 @@ class CrossAppSyncService
                 } else {
                     // Yok — oluştur
                     $syncResult = $this->appSync->syncUserToApp($user, $app);
+
+                    // Başarılı sync sonrası pivot'ı garanti et
+                    if ($syncResult['success']) {
+                        $this->ensurePivot($user, $app, 'synced');
+                    }
+
                     $results[$app->slug] = [
                         'status' => $syncResult['success'] ? 'created' : 'failed',
                         'error'  => $syncResult['error'] ?? null,
