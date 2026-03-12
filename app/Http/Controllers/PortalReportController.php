@@ -665,6 +665,11 @@ class PortalReportController extends Controller
                         'skill'       => $step['skill'] ?? '',
                         'completed'   => $isCompleted,
                         'tools'       => $stepToolsList,
+                        // Per-step tarih bilgisi (4.5)
+                        'started_at'  => $progress['startedAt'] ?? $progress['started_at'] ?? $progress['createdAt'] ?? null,
+                        'completed_at' => $progress['completedAt'] ?? $progress['completed_at'] ?? null,
+                        // AI soru detayları (4.3) — lazy: sadece step id sakla, blade'de render
+                        'questions'   => $stepId ? $this->getStepQuestionsData($connector, $stepId) : [],
                     ]);
                 }
 
@@ -808,6 +813,56 @@ class PortalReportController extends Controller
         }
 
         return view('portal.reports.coach-questions', compact('student', 'questions', 'sessionDuration'));
+    }
+
+    /**
+     * Role Galaxy — Simulator Session Detail (Turn-by-turn)
+     * Canlı veri: VegaConnector'dan simülatör oturum detayı.
+     */
+    public function simulatorDetail($id)
+    {
+        $vegaApp = Application::where('slug', 'like', '%vega%')
+            ->orWhere('slug', 'like', '%coach%')
+            ->orWhere('slug', 'like', '%role-galaxy%')
+            ->active()
+            ->first();
+
+        if (!$vegaApp) {
+            abort(404, 'Vega/Coach application not found');
+        }
+
+        $connector = $vegaApp->resolveConnector();
+        if (!$connector) {
+            abort(404, 'Connector not available');
+        }
+
+        $detail = $connector->getSessionDetail($id, 'simulator');
+
+        if (!$detail || !($detail['success'] ?? false)) {
+            abort(404, 'Simulator session not found');
+        }
+
+        $sessionData = $detail['data'] ?? [];
+        $turns = $sessionData['turns'] ?? $sessionData['steps'] ?? [];
+        $summary = $sessionData['summary'] ?? $sessionData;
+
+        // Öğrenci bilgisi
+        $student = null;
+        $vegaId = $sessionData['user_id'] ?? $sessionData['vega_id'] ?? null;
+        if ($vegaId) {
+            $student = \App\Models\User::whereHas('applications', function ($q) use ($vegaApp, $vegaId) {
+                $q->where('application_id', $vegaApp->id)
+                  ->where('external_user_id', $vegaId);
+            })->first();
+        }
+
+        return view('portal.reports.simulator-detail', [
+            'sessionData' => $sessionData,
+            'turns' => $turns,
+            'summary' => $summary,
+            'student' => $student,
+            'sessionId' => $id,
+        ]);
     }
 
     /**
@@ -1048,5 +1103,29 @@ class PortalReportController extends Controller
             'blockchain' => '🔗',
             default => '📁',
         };
+    }
+
+    /**
+     * Step bazlı AI soru detaylarını çek.
+     */
+    private function getStepQuestionsData($connector, int $stepId): array
+    {
+        if (!method_exists($connector, 'getStepQuestions')) {
+            return [];
+        }
+
+        try {
+            $questions = $connector->getStepQuestions($stepId);
+            if (!is_array($questions)) return [];
+
+            return array_map(fn($q) => [
+                'text'       => $q['question'] ?? $q['questionText'] ?? $q['question_text'] ?? '-',
+                'max_score'  => $q['maxScore'] ?? $q['max_score'] ?? $q['aiMaxScore'] ?? 0,
+                'score'      => $q['score'] ?? $q['aiScore'] ?? null,
+                'feedback'   => $q['feedback'] ?? $q['aiFeedback'] ?? $q['ai_feedback'] ?? null,
+            ], $questions);
+        } catch (\Throwable $e) {
+            return [];
+        }
     }
 }

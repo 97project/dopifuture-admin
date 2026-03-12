@@ -272,6 +272,10 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     Route::get('reports/startup/{id}', [\App\Http\Controllers\PortalReportController::class, 'startupDetail'])->name('portal.reports.startup.detail');
     Route::get('reports/coach/{id}/questions', [\App\Http\Controllers\PortalReportController::class, 'coachQuestions'])->name('portal.reports.coach.questions');
     Route::get('reports/chatbot/{id}', [\App\Http\Controllers\PortalReportController::class, 'chatbotDetail'])->name('portal.reports.chatbot.detail');
+    Route::get('reports/simulator/{id}', [\App\Http\Controllers\PortalReportController::class, 'simulatorDetail'])->name('portal.reports.simulator.detail');
+
+    // Portal: Application status (read-only)
+    Route::get('applications', [\App\Http\Controllers\PortalApplicationController::class, 'index'])->name('portal.applications.index');
 
     // CRUD: Schools (with show/detail page)
     Route::resource('schools', \App\Http\Controllers\PortalSchoolController::class)

@@ -116,6 +116,19 @@
             @endforeach
         </div>
         @endif
+        {{-- MissionWay: achievements badges --}}
+        @if($slug === 'mission-way' && !empty($profile['achievements']))
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--color-row-border,#eee);">
+            <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">🏆 {{ $isTr ? 'Başarı Rozetleri' : 'Achievements' }}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                @foreach($profile['achievements'] as $ach)
+                <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:linear-gradient(135deg,rgba(67,100,247,0.08),rgba(139,92,246,0.08));border-radius:999px;font-size:11px;font-weight:500;color:#4364F7;">
+                    🏅 {{ is_array($ach) ? ($ach['name'] ?? $ach['title'] ?? json_encode($ach)) : $ach }}
+                </span>
+                @endforeach
+            </div>
+        </div>
+        @endif
     </div>
     @endforeach
 </div>
