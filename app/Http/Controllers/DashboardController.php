@@ -12,24 +12,44 @@ use Illuminate\Support\Facades\Hash;
 class DashboardController extends Controller
 {
     /**
-     * Lisans Yönetimi — Figma F-51 node-id: 1117-25324
+     * Lisans Yönetimi — 1:1 model: her okul = 1 lisans + kredi geçmişi
      */
     public function index()
     {
         $user = auth()->user();
+        $isSchoolRole = $user->hasAnyRole(['school-admin', 'school-principal']);
 
-        // Rol bazlı lisans filtreleme
-        $licensesQuery = License::with('school')->orderByDesc('created_at');
-
-        if ($user->hasAnyRole(['school-admin', 'school-principal'])) {
+        if ($isSchoolRole) {
+            // School admin → tek lisans kartı + kredi geçmişi
             $schoolIds = $user->schools()->pluck('schools.id');
-            $licensesQuery->whereIn('school_id', $schoolIds);
-        }
+            $school = School::whereIn('id', $schoolIds)
+                ->withCount(['users', 'classes'])
+                ->withCount(['users as students_count' => fn($q) => $q->whereHas('roles', fn($r) => $r->where('name', 'student'))])
+                ->withCount(['users as teachers_count' => fn($q) => $q->whereHas('roles', fn($r) => $r->where('name', 'teacher'))])
+                ->first();
 
-        $data = [
-            'user' => $user,
-            'licenses' => $licensesQuery->paginate(15),
-        ];
+            $license = License::where('school_id', $school?->id)
+                ->with(['purchases' => fn($q) => $q->orderByDesc('purchased_at'), 'school'])
+                ->first();
+
+            $data = [
+                'user'    => $user,
+                'school'  => $school,
+                'license' => $license,
+                'mode'    => 'school',
+            ];
+        } else {
+            // Super admin → tüm lisanslar tablosu
+            $licenses = License::with('school')
+                ->orderByDesc('created_at')
+                ->paginate(15);
+
+            $data = [
+                'user'     => $user,
+                'licenses' => $licenses,
+                'mode'     => 'admin',
+            ];
+        }
 
         return view('portal.dashboard', compact('data'));
     }

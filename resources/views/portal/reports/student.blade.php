@@ -38,6 +38,55 @@
     </div>
 </div>
 
+{{-- Connector API Profile Cards (MissionWay, WayStartup) --}}
+@if(!empty($connectorProfiles))
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:20px;">
+    @foreach($connectorProfiles as $slug => $profile)
+    <div class="dp-card" style="padding:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:{{ $slug === 'mission-way' ? 'linear-gradient(135deg,#4364F7,#6C63FF)' : 'linear-gradient(135deg,#10B981,#059669)' }};display:flex;align-items:center;justify-content:center;">
+                @if($slug === 'mission-way')
+                    <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                @else
+                    <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                @endif
+            </div>
+            <div style="font-weight:700;font-size:15px;color:#030719;">{{ $slug === 'mission-way' ? 'Mission Way' : 'Way Startup' }}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center;">
+            @if($slug === 'mission-way')
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#4364F7;">{{ number_format($profile['total_score'] ?? 0) }}</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Toplam Puan' : 'Total Score' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#10B981;">{{ $profile['simulations_completed'] ?? 0 }}</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Tamamlanan' : 'Completed' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#8B5CF6;">{{ $profile['play_time_minutes'] ?? 0 }}<span style="font-size:12px;">dk</span></div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Oyun Süresi' : 'Play Time' }}</div>
+                </div>
+            @else
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#10B981;">{{ number_format($profile['points'] ?? 0) }}</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Puan' : 'Points' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#4364F7;">{{ $profile['completed_steps'] ?? 0 }}<span style="font-size:14px;color:var(--text-muted);">/{{ $profile['total_steps'] ?? 0 }}</span></div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Adım' : 'Steps' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#F59E0B;">{{ $profile['simulations_count'] ?? 0 }}</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Simülasyon' : 'Simulations' }}</div>
+                </div>
+            @endif
+        </div>
+    </div>
+    @endforeach
+</div>
+@endif
+
 {{-- App Tabs --}}
 <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
     @foreach($apps as $a)

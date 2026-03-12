@@ -167,10 +167,47 @@ class PortalReportController extends Controller
         // Sonra ReportService ile normalize edilmiş raporu getir
         $reportData = $this->reportService->getStudentReport($student);
 
+        // Connector-level enrichment: API'den direkt profil verileri
+        $connectorProfiles = [];
+        $apps = Application::active()->ordered()->get();
+        foreach ($apps as $a) {
+            $conn = $a->resolveConnector();
+            if (!$conn) continue;
+
+            if ($conn instanceof MissionWayConnector) {
+                $report = $conn->getUserReport($student);
+                if ($report && ($report['success'] ?? false)) {
+                    $d = $report['data'] ?? [];
+                    $connectorProfiles[$a->slug] = [
+                        'player_id'       => $d['player_id'] ?? null,
+                        'total_score'     => $d['profile']['totalScore'] ?? 0,
+                        'simulations_completed' => $d['profile']['totalSimulationsCompleted'] ?? 0,
+                        'play_time_minutes' => $d['profile']['totalPlayTimeMinutes'] ?? 0,
+                        'session_count'   => $d['session_count'] ?? 0,
+                        'achievements'    => $d['profile']['achievements'] ?? null,
+                    ];
+                }
+            } elseif ($conn instanceof WayStartupConnector) {
+                $report = $conn->getUserReport($student);
+                if ($report && ($report['success'] ?? false)) {
+                    $d = $report['data'] ?? [];
+                    $connectorProfiles[$a->slug] = [
+                        'member_id'       => $d['member_id'] ?? null,
+                        'points'          => $d['member']['points'] ?? 0,
+                        'completed_steps' => $d['completed_steps'] ?? 0,
+                        'total_steps'     => $d['total_steps'] ?? 0,
+                        'simulations_count' => $d['simulations_count'] ?? 0,
+                        'simulations_with_progress' => $d['simulations_with_progress'] ?? [],
+                    ];
+                }
+            }
+        }
+
         return view('portal.reports.student', [
-            'student' => $student,
-            'reportData' => $reportData,
-            'apps' => Application::active()->ordered()->get(),
+            'student'     => $student,
+            'reportData'  => $reportData,
+            'apps'        => $apps,
+            'connectorProfiles' => $connectorProfiles,
         ]);
     }
 
