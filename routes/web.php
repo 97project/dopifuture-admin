@@ -292,6 +292,11 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     // CRUD: Users (with show/detail page)
     Route::resource('users', \App\Http\Controllers\PortalUserController::class)
         ->names('portal.users');
+    Route::get('users-import', [\App\Http\Controllers\PortalUserController::class, 'importForm'])->name('portal.users.import.form');
+    Route::post('users-import', [\App\Http\Controllers\PortalUserController::class, 'import'])->name('portal.users.import');
+
+    // Tools catalog
+    Route::get('reports/tools', [\App\Http\Controllers\PortalReportController::class, 'toolsCatalog'])->name('portal.reports.tools');
 
     // CRUD: Licenses (with show/detail page)
     Route::resource('licenses', \App\Http\Controllers\PortalLicenseController::class)

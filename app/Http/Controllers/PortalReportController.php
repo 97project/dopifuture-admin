@@ -1106,6 +1106,38 @@ class PortalReportController extends Controller
     }
 
     /**
+     * 5.3 — Tools Catalog (WayStartup getTools())
+     */
+    public function toolsCatalog()
+    {
+        $app = Application::where('slug', 'way-startup')->active()->first();
+        $tools = collect();
+
+        if ($app) {
+            $connector = $app->resolveConnector();
+            if ($connector && method_exists($connector, 'getTools')) {
+                try {
+                    $rawTools = $connector->getTools();
+                    if (is_array($rawTools)) {
+                        $tools = collect($rawTools)->map(fn($t) => (object) [
+                            'name'        => $t['name'] ?? '-',
+                            'description' => $t['description'] ?? '',
+                            'icon_url'    => $t['iconUrl'] ?? $t['icon_url'] ?? '',
+                            'website_url' => $t['websiteUrl'] ?? $t['website_url'] ?? '',
+                            'category'    => $t['category'] ?? $t['type'] ?? 'Genel',
+                        ]);
+                    }
+                } catch (\Throwable $e) {
+                    // silently fail
+                }
+            }
+        }
+
+        $grouped = $tools->groupBy('category');
+        return view('portal.reports.tools', compact('tools', 'grouped'));
+    }
+
+    /**
      * Step bazlı AI soru detaylarını çek.
      */
     private function getStepQuestionsData($connector, int $stepId): array

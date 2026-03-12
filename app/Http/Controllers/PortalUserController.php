@@ -281,4 +281,105 @@ class PortalUserController extends Controller
     {
         return auth()->user()->schools()->get();
     }
+
+    /* ─── 5.1 Toplu Öğrenci Import (CSV) ─────────────────── */
+
+    public function importForm()
+    {
+        $this->guardManageRoles();
+        $schools = $this->getAvailableSchools();
+        return view('portal.users.import', compact('schools'));
+    }
+
+    public function import(Request $request)
+    {
+        $this->guardManageRoles();
+
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:2048',
+            'school_id' => 'required|exists:schools,id',
+        ]);
+
+        $schoolId = $request->input('school_id');
+        $file = $request->file('csv_file');
+        $rows = array_map('str_getcsv', file($file->getRealPath()));
+        $header = array_map('strtolower', array_map('trim', array_shift($rows)));
+
+        $nameIdx    = array_search('name', $header) ?? array_search('ad', $header);
+        $surnameIdx = array_search('surname', $header) ?? array_search('soyad', $header);
+        $emailIdx   = array_search('email', $header) ?? array_search('e-posta', $header);
+
+        if ($nameIdx === false || $emailIdx === false) {
+            return back()->withErrors(['csv_file' => 'CSV dosyasında name/ad ve email/e-posta sütunları gereklidir.'])->withInput();
+        }
+
+        // Lisans kontrolü
+        $license = License::where('school_id', $schoolId)->where('is_active', true)->first();
+        $availableSeats = $license ? $license->availableSeats() : 0;
+
+        $created = 0;
+        $skipped = 0;
+        $errors = [];
+
+        foreach ($rows as $idx => $row) {
+            if (empty(array_filter($row))) continue; // boş satır
+
+            $name    = trim($row[$nameIdx] ?? '');
+            $surname = $surnameIdx !== false ? trim($row[$surnameIdx] ?? '') : '';
+            $email   = trim($row[$emailIdx] ?? '');
+
+            if (!$name || !$email) {
+                $errors[] = "Satır " . ($idx + 2) . ": Ad veya e-posta eksik.";
+                $skipped++;
+                continue;
+            }
+
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = "Satır " . ($idx + 2) . ": Geçersiz e-posta: $email";
+                $skipped++;
+                continue;
+            }
+
+            if (User::where('email', $email)->exists()) {
+                $errors[] = "Satır " . ($idx + 2) . ": Zaten kayıtlı: $email";
+                $skipped++;
+                continue;
+            }
+
+            // Koltuk kontrolü
+            if ($license && $availableSeats <= 0) {
+                $errors[] = "Satır " . ($idx + 2) . ": Lisans kotası doldu.";
+                $skipped++;
+                continue;
+            }
+
+            $newUser = User::create([
+                'name'     => $name,
+                'surname'  => $surname,
+                'email'    => $email,
+                'password' => bcrypt('Dopi' . rand(1000, 9999) . '!'),
+                'status'   => 'active',
+            ]);
+
+            $newUser->assignRole('student');
+            $newUser->schools()->syncWithoutDetaching([$schoolId]);
+
+            if ($license) {
+                $license->increment('used_seats');
+                $availableSeats--;
+            }
+
+            \App\Jobs\SyncUserToAppsJob::dispatch($newUser);
+            $created++;
+        }
+
+        $isTr = app()->getLocale() === 'tr';
+        $msg = $isTr
+            ? "{$created} öğrenci oluşturuldu, {$skipped} satır atlandı."
+            : "{$created} students created, {$skipped} rows skipped.";
+
+        return redirect()->route('portal.users.index')
+            ->with('success', $msg)
+            ->with('import_errors', $errors);
+    }
 }
