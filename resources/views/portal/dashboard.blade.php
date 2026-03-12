@@ -48,6 +48,38 @@
         </div>
     </div>
 
+    {{-- License Expiry Warning --}}
+    @if(($data['licenseWarning'] ?? null) === 'critical')
+    <div style="padding:14px 20px;border-radius:12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#DC2626;font-size:14px;font-weight:500;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+        🔴 {{ $isTr ? 'Lisans süreniz 7 gün içinde dolacak!' : 'License expires within 7 days!' }}
+        <span style="font-weight:400;margin-left:auto;">{{ $license->expires_at?->format('d.m.Y') }}</span>
+    </div>
+    @elseif(($data['licenseWarning'] ?? null) === 'warning')
+    <div style="padding:14px 20px;border-radius:12px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);color:#D97706;font-size:14px;font-weight:500;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+        🟡 {{ $isTr ? 'Lisans süreniz 30 gün içinde dolacak.' : 'License expires within 30 days.' }}
+        <span style="font-weight:400;margin-left:auto;">{{ $license->expires_at?->format('d.m.Y') }}</span>
+    </div>
+    @endif
+
+    {{-- App Widgets --}}
+    @if(($data['appWidgets'] ?? collect())->count())
+    <div class="dp-card" style="margin-bottom:24px;padding:20px 24px;">
+        <div style="font-size:15px;font-weight:600;color:#030719;margin-bottom:16px;">{{ $isTr ? 'Uygulama Durumu' : 'Application Status' }}</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;">
+            @foreach($data['appWidgets'] as $widget)
+            <div style="padding:16px;border-radius:12px;border:1px solid var(--color-row-border);text-align:center;">
+                <div style="font-size:14px;font-weight:600;color:#030719;margin-bottom:8px;">{{ $widget->name }}</div>
+                <div style="font-size:22px;font-weight:800;color:{{ $widget->color ?? '#4364F7' }};">{{ $widget->synced }}<span style="font-size:13px;font-weight:400;color:var(--color-txt-muted);">/{{ $widget->total }}</span></div>
+                <div style="font-size:11px;color:var(--color-txt-muted);margin-top:4px;">{{ $isTr ? 'senkron' : 'synced' }}</div>
+                @if($widget->failed > 0)
+                <div style="font-size:11px;color:#EF4444;margin-top:4px;">{{ $widget->failed }} {{ $isTr ? 'başarısız' : 'failed' }}</div>
+                @endif
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     @if($license)
     {{-- ── License Info Card ── --}}
     <div class="dp-card" style="margin-bottom:24px;">
