@@ -39,7 +39,22 @@ class PortalClassController extends Controller
     {
         $this->authorizeSchool($class->school_id);
         $class->load(['school', 'students', 'teachers']);
-        return view('portal.classes.show', compact('class'));
+
+        $availableStudents = collect();
+        $availableTeachers = collect();
+        $user = auth()->user();
+
+        if ($user->hasAnyRole(['school-admin', 'school-principal'])) {
+            $assignedIds = $class->users()->pluck('user_id')->toArray();
+            $schoolUserQuery = \App\Models\User::whereHas('schools', fn($q) => $q->where('schools.id', $class->school_id))
+                ->whereNotIn('id', $assignedIds);
+
+            $availableStudents = (clone $schoolUserQuery)->role('student')->orderBy('name')->get(['id', 'name', 'surname', 'email']);
+            $availableTeachers = (clone $schoolUserQuery)->role('teacher')->orderBy('name')->get(['id', 'name', 'surname', 'email']);
+        }
+
+        $canManage = $user->hasAnyRole(['school-admin', 'school-principal']);
+        return view('portal.classes.show', compact('class', 'availableStudents', 'availableTeachers', 'canManage'));
     }
 
     public function create()
@@ -102,6 +117,66 @@ class PortalClassController extends Controller
         $class->delete();
         return redirect()->route('portal.classes.index')
             ->with('success', __('admin.class_deleted'));
+    }
+
+    /* ─── Öğrenci/Öğretmen Atama ─────────────────────── */
+
+    public function addStudent(Request $request, SchoolClass $class)
+    {
+        $this->guardClassManagement();
+        $this->authorizeSchool($class->school_id);
+
+        $request->validate(['user_id' => 'required|exists:users,id']);
+        $userId = $request->input('user_id');
+
+        if (!$class->students()->where('user_id', $userId)->exists()) {
+            $class->users()->attach($userId, [
+                'role' => 'student',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return back()->with('success', __('admin.student_added'));
+    }
+
+    public function removeStudent(Request $request, SchoolClass $class, \App\Models\User $user)
+    {
+        $this->guardClassManagement();
+        $this->authorizeSchool($class->school_id);
+
+        $class->users()->wherePivot('role', 'student')->detach($user->id);
+
+        return back()->with('success', __('admin.student_removed'));
+    }
+
+    public function addTeacher(Request $request, SchoolClass $class)
+    {
+        $this->guardClassManagement();
+        $this->authorizeSchool($class->school_id);
+
+        $request->validate(['user_id' => 'required|exists:users,id']);
+        $userId = $request->input('user_id');
+
+        if (!$class->teachers()->where('user_id', $userId)->exists()) {
+            $class->users()->attach($userId, [
+                'role' => 'teacher',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return back()->with('success', __('admin.teacher_added'));
+    }
+
+    public function removeTeacher(Request $request, SchoolClass $class, \App\Models\User $user)
+    {
+        $this->guardClassManagement();
+        $this->authorizeSchool($class->school_id);
+
+        $class->users()->wherePivot('role', 'teacher')->detach($user->id);
+
+        return back()->with('success', __('admin.teacher_removed'));
     }
 
     private function getAvailableSchools()

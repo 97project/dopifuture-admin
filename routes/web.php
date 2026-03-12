@@ -280,6 +280,10 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     // CRUD: Classes (with show/detail page)
     Route::resource('classes', \App\Http\Controllers\PortalClassController::class)
         ->names('portal.classes');
+    Route::post('classes/{class}/add-student', [\App\Http\Controllers\PortalClassController::class, 'addStudent'])->name('portal.classes.add-student');
+    Route::delete('classes/{class}/remove-student/{user}', [\App\Http\Controllers\PortalClassController::class, 'removeStudent'])->name('portal.classes.remove-student');
+    Route::post('classes/{class}/add-teacher', [\App\Http\Controllers\PortalClassController::class, 'addTeacher'])->name('portal.classes.add-teacher');
+    Route::delete('classes/{class}/remove-teacher/{user}', [\App\Http\Controllers\PortalClassController::class, 'removeTeacher'])->name('portal.classes.remove-teacher');
 
     // CRUD: Users (with show/detail page)
     Route::resource('users', \App\Http\Controllers\PortalUserController::class)

@@ -58,13 +58,52 @@
                 @if(!$editUser->exists && isset($schools) && $schools->count())
                 <div class="dp-form-group">
                     <label class="dp-form-label">{{ $isTr ? 'Okula Ata' : 'Assign to School' }}</label>
-                    <select name="school_id" class="dp-form-select">
+                    <select name="school_id" class="dp-form-select" id="school-select">
                         <option value="">{{ $isTr ? 'Seçiniz (opsiyonel)' : 'Select (optional)' }}</option>
                         @foreach($schools as $school)
                             <option value="{{ $school->id }}">{{ $school->name }}</option>
                         @endforeach
                     </select>
                 </div>
+                @if(isset($classes) && $classes->count())
+                <div class="dp-form-group" id="class-group" style="display:none;">
+                    <label class="dp-form-label">{{ $isTr ? 'Sınıfa Ata' : 'Assign to Class' }}</label>
+                    <select name="class_id" class="dp-form-select" id="class-select">
+                        <option value="">{{ $isTr ? 'Seçiniz (opsiyonel)' : 'Select (optional)' }}</option>
+                        @foreach($classes as $cls)
+                            <option value="{{ $cls->id }}" data-school="{{ $cls->school_id }}">{{ $cls->name }} ({{ $cls->school?->name }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const roleSelect = document.querySelector('[name="role"]');
+                        const classGroup = document.getElementById('class-group');
+                        const schoolSelect = document.getElementById('school-select');
+                        const classSelect = document.getElementById('class-select');
+
+                        function toggleClassGroup() {
+                            if (roleSelect && classGroup) {
+                                classGroup.style.display = roleSelect.value === 'student' ? 'block' : 'none';
+                            }
+                        }
+
+                        function filterClasses() {
+                            if (!classSelect || !schoolSelect) return;
+                            const selectedSchool = schoolSelect.value;
+                            Array.from(classSelect.options).forEach(opt => {
+                                if (!opt.value) return;
+                                opt.style.display = (!selectedSchool || opt.dataset.school === selectedSchool) ? '' : 'none';
+                            });
+                        }
+
+                        if (roleSelect) roleSelect.addEventListener('change', toggleClassGroup);
+                        if (schoolSelect) schoolSelect.addEventListener('change', filterClasses);
+                        toggleClassGroup();
+                        filterClasses();
+                    });
+                </script>
+                @endif
                 @endif
             </div>
 

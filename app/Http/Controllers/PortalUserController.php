@@ -96,7 +96,9 @@ class PortalUserController extends Controller
         $this->guardManageRoles();
         $roles = $this->getAllowedRoles();
         $schools = $this->getAvailableSchools();
-        return view('portal.users.form', ['editUser' => new User, 'roles' => $roles, 'schools' => $schools]);
+        $schoolIds = auth()->user()->schools()->pluck('schools.id');
+        $classes = \App\Models\SchoolClass::with('school')->whereIn('school_id', $schoolIds)->where('is_active', true)->orderBy('name')->get();
+        return view('portal.users.form', ['editUser' => new User, 'roles' => $roles, 'schools' => $schools, 'classes' => $classes]);
     }
 
     public function store(Request $request)
@@ -154,6 +156,18 @@ class PortalUserController extends Controller
                     ->where('is_active', true)
                     ->increment('used_seats');
             }
+        }
+
+        // Sınıfa ata (opsiyonel)
+        if ($data['role'] === 'student' && $request->filled('class_id')) {
+            $classId = $request->input('class_id');
+            \DB::table('class_user')->insertOrIgnore([
+                'class_id' => $classId,
+                'user_id' => $newUser->id,
+                'role' => 'student',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
 
         // Auto-sync to connector applications
