@@ -28,7 +28,7 @@ class DashboardController extends Controller
 
         $data = [
             'user' => $user,
-            'licenses' => $licensesQuery->get(),
+            'licenses' => $licensesQuery->paginate(15),
         ];
 
         return view('portal.dashboard', compact('data'));
