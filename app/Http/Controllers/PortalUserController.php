@@ -46,7 +46,7 @@ class PortalUserController extends Controller
 
         $totalSeats = License::whereIn('school_id', $schoolIds)
             ->where('is_active', true)
-            ->sum('seats');
+            ->sum('seat_count');
 
         $usedSeats = User::whereHas('schools', fn($q) => $q->whereIn('schools.id', $schoolIds))
             ->role('student')
@@ -208,6 +208,17 @@ class PortalUserController extends Controller
     {
         $this->guardManageRoles();
         $this->guardPrincipalCannotEditAdmin($user);
+
+        // Öğrenci siliniyorsa used_seats azalt
+        if ($user->hasRole('student')) {
+            $schoolIds = $user->schools()->pluck('schools.id');
+            if ($schoolIds->isNotEmpty()) {
+                License::whereIn('school_id', $schoolIds)
+                    ->where('is_active', true)
+                    ->where('used_seats', '>', 0)
+                    ->decrement('used_seats');
+            }
+        }
 
         $user->delete();
         return redirect()->route('portal.users.index')

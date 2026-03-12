@@ -73,6 +73,10 @@ class LicenseController extends Controller
 
     public function store(\App\Http\Requests\LicenseStoreRequest $request)
     {
+        // Tek lisans kuralı — portal ile tutarlı
+        if (License::where('school_id', $request->input('school_id'))->exists()) {
+            return back()->withErrors(['school_id' => __('admin.license_already_exists')])->withInput();
+        }
 
         $license = License::create([
             'school_id' => $request->input('school_id'),
