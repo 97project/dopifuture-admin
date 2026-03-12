@@ -496,6 +496,83 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
         return is_array($result) ? $result : [];
     }
 
+    /* ═══════════════════════════════════════════════════════
+     *  Simulation Paths — GET /v1/simulation-paths
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/simulation-paths?filter=simulationVersionId||eq||{versionId}
+     *
+     * Response 200:
+     *   {
+     *     "data": [
+     *       {
+     *         "id": 1,
+     *         "simulationVersionId": 5,
+     *         "parentPathId": null,
+     *         "mediaAssetId": null,
+     *         "orderIndex": 1,
+     *         "points": 10,
+     *         "metrics": { "health": 5, "resource": -3, "ethics": 8, "adaptation": 2 },
+     *         "pathType": "decision",
+     *         "maxWaitTime": 60,
+     *         "pathPoints": 10,
+     *         "isEnded": false,
+     *         "translations": { "narrative": "...", "question": "...", "optionText": "..." }
+     *       }
+     *     ]
+     *   }
+     */
+    public function getSimulationPaths(int $simulationVersionId): array
+    {
+        $result = $this->apiGet('/v1/simulation-paths', [
+            'filter' => "simulationVersionId||eq||{$simulationVersionId}",
+            'limit' => 200,
+        ]);
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Player Choices — GET /v1/player-choices
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/player-choices?filter=simulationSessionId||eq||{sessionId}
+     *
+     * Response 200:
+     *   {
+     *     "data": [
+     *       {
+     *         "id": 1,
+     *         "playerId": 8,
+     *         "simulationSessionId": 10,
+     *         "simulationPathId": 3,
+     *         "selectedPathId": 5,
+     *         "previousPathId": 2,
+     *         "isCorrect": true,
+     *         "pointsEarned": 10,
+     *         "responseTimeSeconds": 15,
+     *         "metricsBefore": { "health": 70, "resource": 55, "ethics": 80, "adaptation": 65 },
+     *         "metricsAfter": { "health": 75, "resource": 52, "ethics": 88, "adaptation": 67 }
+     *       }
+     *     ]
+     *   }
+     */
+    public function getPlayerChoices(int $sessionId): array
+    {
+        $result = $this->apiGet('/v1/player-choices', [
+            'filter' => "simulationSessionId||eq||{$sessionId}",
+            'limit' => 200,
+        ]);
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
     /* ─── Helpers ──────────────────────────────────────── */
 
     private function slugify(mixed $name): string

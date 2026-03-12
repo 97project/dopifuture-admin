@@ -478,4 +478,203 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
         }
         return $result;
     }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Step Submissions — GET /v1/startup/step-submissions
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/startup/step-submissions/simulation/{simulationId}
+     *
+     * Response 200:
+     *   [
+     *     {
+     *       "id": 1,
+     *       "memberId": 213,
+     *       "stepId": 3,
+     *       "fileName": "business_plan.pdf",
+     *       "fileUrl": "https://...",
+     *       "fileType": "application/pdf",
+     *       "fileSize": 245000,
+     *       "linkUrl": "https://canva.com/design/abc",
+     *       "linkTitle": "Sunum Tasarımı",
+     *       "linkPlatform": "canva",
+     *       "textContent": null,
+     *       "status": "approved",
+     *       "feedback": "İyi bir iş planı hazırlanmış.",
+     *       "pointsEarned": 120,
+     *       "submittedAt": "2026-02-25T10:00:00.000Z"
+     *     }
+     *   ]
+     */
+    public function getStepSubmissions(int $simulationId): array
+    {
+        // Önce simulation-bazlı endpoint dene
+        $result = $this->apiGet("/v1/startup/step-submissions/simulation/{$simulationId}");
+        if (is_array($result) && !empty($result)) {
+            return $result;
+        }
+        // Fallback: genel endpoint ile filtrele
+        $result = $this->apiGet('/v1/startup/step-submissions', [
+            'filter' => "step.simulationId||eq||{$simulationId}",
+            'limit' => 200,
+        ]);
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Step Question Evaluations — AI Değerlendirme
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/startup/step-question-evaluations?filter=memberId||eq||{mid}
+     *
+     * Response 200:
+     *   [
+     *     {
+     *       "id": 1,
+     *       "stepId": 3,
+     *       "memberId": 213,
+     *       "attempt": 1,
+     *       "aiTotalScore": 85,
+     *       "aiMaxScore": 100,
+     *       "aiCoins": 50,
+     *       "aiOverallFeedback": "Harika bir çalışma...",
+     *       "status": "EVALUATED"
+     *     }
+     *   ]
+     */
+    public function getStepQuestionEvaluations(int $memberId, ?int $stepId = null): array
+    {
+        $filter = "memberId||eq||{$memberId}";
+        if ($stepId) {
+            $filter .= "&filter=stepId||eq||{$stepId}";
+        }
+        $result = $this->apiGet('/v1/startup/step-question-evaluations', [
+            'filter' => $filter,
+            'limit' => 200,
+        ]);
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Step Questions — Soru Metni + Max Skor
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/startup/step-questions?filter=stepId||eq||{stepId}
+     *
+     * Response 200:
+     *   [
+     *     {
+     *       "id": 1,
+     *       "stepId": 3,
+     *       "questionText": "İş modelinizi açıklayın...",
+     *       "maxScore": 20,
+     *       "sortOrder": 1,
+     *       "isRequired": true
+     *     }
+     *   ]
+     */
+    public function getStepQuestions(int $stepId): array
+    {
+        $result = $this->apiGet('/v1/startup/step-questions', [
+            'filter' => "stepId||eq||{$stepId}",
+            'limit' => 50,
+        ]);
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Step Tools + Tools — Araç Tavsiyeleri
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/startup/step-tools?filter=stepId||eq||{stepId}
+     *
+     * Response 200:
+     *   [
+     *     {
+     *       "id": 1,
+     *       "stepId": 3,
+     *       "toolId": 5,
+     *       "isRecommended": true,
+     *       "customNote": "Sunum için kullanın",
+     *       "tool": {
+     *         "id": 5,
+     *         "name": "Canva",
+     *         "description": "Grafik tasarım aracı",
+     *         "iconUrl": "https://...",
+     *         "websiteUrl": "https://canva.com",
+     *         "category": "design",
+     *         "toolType": "web"
+     *       }
+     *     }
+     *   ]
+     */
+    public function getStepTools(int $stepId): array
+    {
+        $result = $this->apiGet('/v1/startup/step-tools', [
+            'filter' => "stepId||eq||{$stepId}",
+            'limit' => 50,
+        ]);
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /**
+     * GET /v1/startup/tools
+     *
+     * Tüm araçlar listesi (tool reference table).
+     */
+    public function getTools(): array
+    {
+        $result = $this->apiGet('/v1/startup/tools', ['limit' => 100]);
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Members — GET /v1/startup/members
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/startup/members/by-user/{userId}
+     *
+     * Response 200:
+     *   {
+     *     "id": 213,
+     *     "userId": "42",
+     *     "name": "Ali",
+     *     "email": "ali@okul.com",
+     *     "avatarUrl": null,
+     *     "points": 450
+     *   }
+     */
+    public function getMemberByUserId(string $userId): ?array
+    {
+        $result = $this->apiGet("/v1/startup/members/by-user/{$userId}");
+        return is_array($result) ? $result : null;
+    }
+
+    /**
+     * GET /v1/startup/members/{id}
+     */
+    public function getMember(int $memberId): ?array
+    {
+        return $this->apiGet("/v1/startup/members/{$memberId}");
+    }
 }

@@ -38,20 +38,24 @@
     </div>
 </div>
 
-{{-- Connector API Profile Cards (MissionWay, WayStartup) --}}
+{{-- Connector API Profile Cards (MissionWay, WayStartup, Vega) --}}
 @if(!empty($connectorProfiles))
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:20px;">
     @foreach($connectorProfiles as $slug => $profile)
     <div class="dp-card" style="padding:20px;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-            <div style="width:36px;height:36px;border-radius:10px;background:{{ $slug === 'mission-way' ? 'linear-gradient(135deg,#4364F7,#6C63FF)' : 'linear-gradient(135deg,#10B981,#059669)' }};display:flex;align-items:center;justify-content:center;">
+            <div style="width:36px;height:36px;border-radius:10px;background:{{ $slug === 'mission-way' ? 'linear-gradient(135deg,#4364F7,#6C63FF)' : ($slug === 'way-startup' ? 'linear-gradient(135deg,#10B981,#059669)' : 'linear-gradient(135deg,#8B5CF6,#6366F1)') }};display:flex;align-items:center;justify-content:center;">
                 @if($slug === 'mission-way')
                     <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                @else
+                @elseif($slug === 'way-startup')
                     <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                @else
+                    <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
                 @endif
             </div>
-            <div style="font-weight:700;font-size:15px;color:#030719;">{{ $slug === 'mission-way' ? 'Mission Way' : 'Way Startup' }}</div>
+            <div style="font-weight:700;font-size:15px;color:#030719;">
+                {{ $slug === 'mission-way' ? 'Mission Way' : ($slug === 'way-startup' ? 'Way Startup' : 'Way AI Coach') }}
+            </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center;">
             @if($slug === 'mission-way')
@@ -67,7 +71,7 @@
                     <div style="font-size:22px;font-weight:800;color:#8B5CF6;">{{ $profile['play_time_minutes'] ?? 0 }}<span style="font-size:12px;">dk</span></div>
                     <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Oyun Süresi' : 'Play Time' }}</div>
                 </div>
-            @else
+            @elseif($slug === 'way-startup')
                 <div>
                     <div style="font-size:22px;font-weight:800;color:#10B981;">{{ number_format($profile['points'] ?? 0) }}</div>
                     <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Puan' : 'Points' }}</div>
@@ -77,11 +81,41 @@
                     <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Adım' : 'Steps' }}</div>
                 </div>
                 <div>
-                    <div style="font-size:22px;font-weight:800;color:#F59E0B;">{{ $profile['simulations_count'] ?? 0 }}</div>
-                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Simülasyon' : 'Simulations' }}</div>
+                    <div style="font-size:22px;font-weight:800;color:#F59E0B;">{{ $profile['tasks_remaining'] ?? 0 }}</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Kalan Görev' : 'Remaining' }}</div>
+                </div>
+            @else
+                {{-- Vega / Way AI Coach --}}
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#8B5CF6;">{{ $profile['session_count'] ?? 0 }}</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Toplam Oturum' : 'Sessions' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#F59E0B;">{{ $profile['simulator_count'] ?? 0 }}</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Simülatör' : 'Simulator' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#10B981;">{{ $profile['lecturer_count'] ?? 0 }}</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Öğretmen' : 'Lecturer' }}</div>
                 </div>
             @endif
         </div>
+        {{-- MissionWay: avg metric bars --}}
+        @if($slug === 'mission-way' && ($profile['avg_health'] ?? $profile['avg_resource'] ?? $profile['avg_ethics'] ?? $profile['avg_adaptation'] ?? null) !== null)
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--color-row-border,#eee);">
+            <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">{{ $isTr ? 'Ortalama Metrikler' : 'Avg Metrics' }}</div>
+            @php $metrics = [['key'=>'avg_health','label'=>$isTr?'Sağlık':'Health','color'=>'#EF4444'],['key'=>'avg_resource','label'=>$isTr?'Kaynak':'Resource','color'=>'#3B82F6'],['key'=>'avg_ethics','label'=>$isTr?'Etik':'Ethics','color'=>'#8B5CF6'],['key'=>'avg_adaptation','label'=>$isTr?'Adaptasyon':'Adapt.','color'=>'#F59E0B']]; @endphp
+            @foreach($metrics as $m)
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <div style="width:65px;font-size:10px;color:var(--text-muted);">{{ $m['label'] }}</div>
+                <div style="flex:1;height:6px;background:#f1f1f1;border-radius:3px;overflow:hidden;">
+                    <div style="height:100%;width:{{ min(100, $profile[$m['key']] ?? 0) }}%;background:{{ $m['color'] }};border-radius:3px;"></div>
+                </div>
+                <div style="width:28px;font-size:10px;font-weight:600;text-align:right;">{{ $profile[$m['key']] ?? 0 }}</div>
+            </div>
+            @endforeach
+        </div>
+        @endif
     </div>
     @endforeach
 </div>

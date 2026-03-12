@@ -174,25 +174,26 @@
                     </div>
                     <span style="font-weight:600;font-size:13px;">{{ $isTr ? 'AI Değerlendirmesi' : 'AI Evaluation' }}</span>
                 </div>
-                @if(!empty($project->ai_total_score))
+                @if(!empty($aiEvaluation))
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-                    <div style="font-size:28px;font-weight:800;color:#6366F1;">{{ $project->ai_total_score }}</div>
+                    <div style="font-size:28px;font-weight:800;color:#6366F1;">{{ $aiEvaluation->total_score }}/{{ $aiEvaluation->max_score }}</div>
                     <div style="font-size:11px;color:var(--color-txt-muted);">{{ $isTr ? 'AI Toplam Puan' : 'AI Total Score' }}</div>
                 </div>
-                @endif
-                @if(!empty($project->ai_overall_feedback))
+                @if(!empty($aiEvaluation->overall_feedback))
                 <div style="font-size:12px;line-height:1.6;color:var(--color-txt-muted);background:var(--color-input-bg);border-radius:8px;padding:10px 12px;">
-                    {{ $project->ai_overall_feedback }}
+                    {{ $aiEvaluation->overall_feedback }}
                 </div>
                 @endif
-                @if(!empty($project->ai_coins))
+                @if($aiEvaluation->coins > 0)
                 <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
                     <span style="font-size:16px;">🪙</span>
-                    <span style="font-size:13px;font-weight:600;color:#D97706;">{{ $project->ai_coins }} coin</span>
+                    <span style="font-size:13px;font-weight:600;color:#D97706;">{{ $aiEvaluation->coins }} coin</span>
                 </div>
                 @endif
+                @else
+                <div style="text-align:center;padding:16px;color:var(--color-txt-muted);font-size:13px;">{{ $isTr ? 'Henüz AI değerlendirmesi yok' : 'No AI evaluation yet' }}</div>
+                @endif
             </div>
-            @endif
 
             {{-- Step Tools --}}
             @if(!empty($tools ?? []))
@@ -201,8 +202,8 @@
                 @foreach($tools as $tool)
                 <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--color-row-border);">
                     <div style="width:32px;height:32px;border-radius:8px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;">
-                        @if(!empty($tool['iconUrl']))
-                            <img src="{{ $tool['iconUrl'] }}" alt="" style="width:20px;height:20px;border-radius:4px;">
+                        @if(!empty($tool['icon_url']))
+                            <img src="{{ $tool['icon_url'] }}" alt="" style="width:20px;height:20px;border-radius:4px;">
                         @else
                             <svg width="14" height="14" fill="none" stroke="#6366F1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         @endif
@@ -213,8 +214,8 @@
                             <span style="font-size:10px;color:var(--color-txt-muted);">{{ $tool['category'] }}</span>
                         @endif
                     </div>
-                    @if(!empty($tool['website']))
-                    <a href="{{ $tool['website'] }}" target="_blank" style="flex-shrink:0;color:var(--color-primary);font-size:11px;">
+                    @if(!empty($tool['website_url']))
+                    <a href="{{ $tool['website_url'] }}" target="_blank" style="flex-shrink:0;color:var(--color-primary);font-size:11px;">
                         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     </a>
                     @endif

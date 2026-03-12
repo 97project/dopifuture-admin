@@ -178,26 +178,51 @@ class PortalReportController extends Controller
                 $report = $conn->getUserReport($student);
                 if ($report && ($report['success'] ?? false)) {
                     $d = $report['data'] ?? [];
+                    $profile = $d['profile'] ?? [];
+                    $stats = $profile['statistics'] ?? [];
                     $connectorProfiles[$a->slug] = [
                         'player_id'       => $d['player_id'] ?? null,
-                        'total_score'     => $d['profile']['totalScore'] ?? 0,
-                        'simulations_completed' => $d['profile']['totalSimulationsCompleted'] ?? 0,
-                        'play_time_minutes' => $d['profile']['totalPlayTimeMinutes'] ?? 0,
+                        'total_score'     => $profile['totalScore'] ?? 0,
+                        'simulations_completed' => $profile['totalSimulationsCompleted'] ?? 0,
+                        'play_time_minutes' => $profile['totalPlayTimeMinutes'] ?? 0,
                         'session_count'   => $d['session_count'] ?? 0,
-                        'achievements'    => $d['profile']['achievements'] ?? null,
+                        'achievements'    => $profile['achievements'] ?? null,
+                        // Statistics JSONB fields
+                        'avg_score'       => $stats['avgScore'] ?? null,
+                        'best_score'      => $stats['bestScore'] ?? null,
+                        'avg_health'      => $stats['avgHealth'] ?? $stats['averageHealth'] ?? null,
+                        'avg_resource'    => $stats['avgResource'] ?? $stats['averageResource'] ?? null,
+                        'avg_ethics'      => $stats['avgEthics'] ?? $stats['averageEthics'] ?? null,
+                        'avg_adaptation'  => $stats['avgAdaptation'] ?? $stats['averageAdaptation'] ?? null,
                     ];
                 }
             } elseif ($conn instanceof WayStartupConnector) {
                 $report = $conn->getUserReport($student);
                 if ($report && ($report['success'] ?? false)) {
                     $d = $report['data'] ?? [];
+                    $totalSteps = $d['total_steps'] ?? 0;
+                    $completedSteps = $d['completed_steps'] ?? 0;
                     $connectorProfiles[$a->slug] = [
                         'member_id'       => $d['member_id'] ?? null,
                         'points'          => $d['member']['points'] ?? 0,
-                        'completed_steps' => $d['completed_steps'] ?? 0,
-                        'total_steps'     => $d['total_steps'] ?? 0,
+                        'completed_steps' => $completedSteps,
+                        'total_steps'     => $totalSteps,
+                        'tasks_remaining' => max(0, $totalSteps - $completedSteps),
                         'simulations_count' => $d['simulations_count'] ?? 0,
                         'simulations_with_progress' => $d['simulations_with_progress'] ?? [],
+                    ];
+                }
+            } elseif ($conn instanceof VegaConnector) {
+                $report = $conn->getUserReport($student);
+                if ($report && ($report['success'] ?? false)) {
+                    $d = $report['data'] ?? [];
+                    $connectorProfiles[$a->slug] = [
+                        'vega_id'         => $d['vega_id'] ?? null,
+                        'session_count'   => $d['session_count'] ?? 0,
+                        'lecturer_count'  => $d['modules']['lecturer'] ?? 0,
+                        'simulator_count' => $d['modules']['simulator'] ?? 0,
+                        'has_details'     => $d['has_details'] ?? 0,
+                        'profile'         => $d['profile'] ?? [],
                     ];
                 }
             }
@@ -253,10 +278,219 @@ class PortalReportController extends Controller
         $questions = collect();
 
         if ($connector instanceof MissionWayConnector) {
-            // Simülasyon detayını API'den çek
             $simData = $connector->getSimulation((int) $id);
 
             if ($simData) {
+                // ── Oturumları çek → finalScore/finalMetrics ve versionId tespit et ──
+                $sessions = $connector->getSimulationSessions(['filter' => "simulationId||eq||{$id}"]);
+                $sessionList = is_array($sessions) ? ($sessions['data'] ?? $sessions) : [];
+
+                $bestSession = null;
+                $aggregatedMetrics = ['health' => 0, 'resource' => 0, 'ethics' => 0, 'adaptation' => 0];
+                $completedCount = 0;
+                $totalScore = 0;
+                $versionId = null;
+
+                // Player ID → Player Name cache
+                $playerNameCache = [];
+                $choicesByPath = [];
+
+                foreach ($sessionList as $session) {
+                    $sessionId = $session['id'] ?? null;
+                    if (!$sessionId) continue;
+
+                    // SimulationVersionId'yi ilk session'dan al
+                    if (!$versionId && !empty($session['simulationVersionId'])) {
+                        $versionId = (int) $session['simulationVersionId'];
+                    }
+
+                    // finalMetrics varsa topla
+                    $fm = $session['finalMetrics'] ?? null;
+                    $fs = $session['finalScore'] ?? null;
+                    if ($fm || $fs) {
+                        $completedCount++;
+                        $totalScore += (int) ($fs ?? 0);
+                        if (is_array($fm)) {
+                            $aggregatedMetrics['health'] += (int) ($fm['health'] ?? 0);
+                            $aggregatedMetrics['resource'] += (int) ($fm['resource'] ?? 0);
+                            $aggregatedMetrics['ethics'] += (int) ($fm['ethics'] ?? 0);
+                            $aggregatedMetrics['adaptation'] += (int) ($fm['adaptation'] ?? 0);
+                        }
+                    }
+                    if (!$bestSession || ($fs ?? 0) > ($bestSession['finalScore'] ?? 0)) {
+                        $bestSession = $session;
+                    }
+
+                    // ── Session Players → Öğrenci listesi (isim eşleştirmesiyle) ──
+                    $players = $connector->getSessionPlayers($sessionId);
+                    if (is_array($players)) {
+                        foreach ($players as $sp) {
+                            $playerId = $sp['playerId'] ?? null;
+                            $playerName = 'Oyuncu';
+                            $playerSurname = '';
+
+                            // Player ID ile isim çöz (cache'le)
+                            if ($playerId && !isset($playerNameCache[$playerId])) {
+                                $playerData = $connector->getPlayer($playerId);
+                                if ($playerData) {
+                                    $playerNameCache[$playerId] = [
+                                        'name' => $playerData['name'] ?? 'Oyuncu',
+                                        'surname' => $playerData['surname'] ?? '',
+                                    ];
+                                }
+                            }
+                            if ($playerId && isset($playerNameCache[$playerId])) {
+                                $playerName = $playerNameCache[$playerId]['name'];
+                                $playerSurname = $playerNameCache[$playerId]['surname'];
+                            }
+
+                            $students->push((object) [
+                                'name'           => $sp['name'] ?? $playerName,
+                                'surname'        => $sp['surname'] ?? $playerSurname,
+                                'role'           => $sp['role'] ?? $sp['roleName'] ?? '-',
+                                'grade'          => $sp['grade'] ?? '-',
+                                'completed'      => $sp['completedDecisions'] ?? $sp['completed'] ?? 0,
+                                'total_missions' => $sp['totalDecisions'] ?? $sp['total'] ?? 0,
+                                'health'         => $sp['healthMetric'] ?? $sp['health'] ?? 0,
+                                'resource'       => $sp['resourceMetric'] ?? $sp['resource'] ?? 0,
+                                'ethics'         => $sp['ethicsMetric'] ?? $sp['ethics'] ?? 0,
+                                'adaptation'     => $sp['adaptationMetric'] ?? $sp['adaptation'] ?? 0,
+                            ]);
+                        }
+                    }
+
+                    // ── PlayerChoices → soru/cevap eşleştirme verisi ──
+                    $choices = $connector->getPlayerChoices($sessionId);
+                    foreach ($choices as $choice) {
+                        $choicesByPath[$choice['simulationPathId'] ?? 0][] = $choice;
+                    }
+                }
+
+                // ── SimulationPaths → Group Flow question cards (blade uyumlu) ──
+                // Blade expects: $q->question, $q->options[], $q->unanimity, $q->health/resource/ethics/adaptation
+
+                if ($versionId) {
+                    $paths = $connector->getSimulationPaths($versionId);
+                } else {
+                    $paths = [];
+                }
+
+                // Path'leri tree olarak organize et: parentPathId => children
+                $pathsById = [];
+                $childrenOf = [];
+                foreach ($paths as $path) {
+                    $pid = $path['id'] ?? null;
+                    $parentId = $path['parentPathId'] ?? $path['parent_path_id'] ?? null;
+                    if ($pid) {
+                        $pathsById[$pid] = $path;
+                        $childrenOf[$parentId ?? 0][] = $path;
+                    }
+                }
+
+                // Decision type path'leri question olarak al
+                foreach ($paths as $path) {
+                    $pathType = $path['pathType'] ?? $path['path_type'] ?? '';
+                    if (!in_array($pathType, ['decision', 'question'])) continue;
+
+                    $pathId = $path['id'] ?? null;
+                    $translations = $path['translations'] ?? [];
+                    $metrics = $path['metrics'] ?? [];
+                    $questionText = $translations['question'] ?? $translations['narrative'] ?? $path['narrative'] ?? "Soru #{$pathId}";
+
+                    // Alt path'ler (child options)
+                    $childPaths = $childrenOf[$pathId] ?? [];
+                    $options = [];
+                    $totalPlayers = 0;
+                    $selectedCount = 0;
+
+                    foreach ($childPaths as $ci => $child) {
+                        $childId = $child['id'] ?? null;
+                        $childTr = $child['translations'] ?? [];
+                        $optionText = $childTr['optionText'] ?? $childTr['narrative'] ?? $child['narrative'] ?? "Seçenek " . chr(65 + $ci);
+
+                        // Bu option'ı kaç oyuncu seçmiş?
+                        $isSelected = false;
+                        if ($pathId && !empty($choicesByPath[$pathId])) {
+                            foreach ($choicesByPath[$pathId] as $ch) {
+                                $totalPlayers++;
+                                if (($ch['selectedPathId'] ?? null) == $childId) {
+                                    $isSelected = true;
+                                    $selectedCount++;
+                                }
+                            }
+                        }
+
+                        $options[] = (object) [
+                            'text'     => $optionText,
+                            'selected' => $isSelected,
+                            'path_id'  => $childId,
+                        ];
+                    }
+
+                    // Eğer option yoksa ama playerChoice varsa, raw choice'tan option oluştur
+                    if (empty($options) && !empty($choicesByPath[$pathId])) {
+                        foreach ($choicesByPath[$pathId] as $ch) {
+                            $options[] = (object) [
+                                'text'     => $playerNameCache[$ch['playerId'] ?? 0]['name'] ?? 'Seçim',
+                                'selected' => true,
+                                'path_id'  => $ch['selectedPathId'] ?? null,
+                            ];
+                        }
+                    }
+
+                    // Unanimity: seçenlerin yüzdesi
+                    $unanimity = $totalPlayers > 0 ? round(($selectedCount / $totalPlayers) * 100) : 0;
+
+                    $questions->push((object) [
+                        'question'   => $questionText,
+                        'options'    => $options,
+                        'unanimity'  => $unanimity,
+                        'health'     => $metrics['health'] ?? 0,
+                        'resource'   => $metrics['resource'] ?? 0,
+                        'ethics'     => $metrics['ethics'] ?? 0,
+                        'adaptation' => $metrics['adaptation'] ?? 0,
+                        'path_id'    => $pathId,
+                        'points'     => $path['points'] ?? $path['pathPoints'] ?? 0,
+                    ]);
+                }
+
+                // Eğer SimulationPaths boşsa, playerChoices'tan en azından temel question card oluştur
+                if ($questions->isEmpty() && !empty($choicesByPath)) {
+                    $qi = 0;
+                    foreach ($choicesByPath as $pId => $choices) {
+                        $qi++;
+                        $ch = $choices[0] ?? [];
+                        $mAfter = $ch['metricsAfter'] ?? [];
+                        $questions->push((object) [
+                            'question'   => "Karar #{$qi}",
+                            'options'    => collect($choices)->map(fn($c) => (object) [
+                                'text' => ($playerNameCache[$c['playerId'] ?? 0]['name'] ?? 'Oyuncu') .
+                                          ($c['isCorrect'] ? ' ✓' : ' ✗') .
+                                          ' (' . ($c['pointsEarned'] ?? 0) . ' puan)',
+                                'selected' => $c['isCorrect'] ?? false,
+                            ])->all(),
+                            'unanimity'  => 0,
+                            'health'     => $mAfter['health'] ?? 0,
+                            'resource'   => $mAfter['resource'] ?? 0,
+                            'ethics'     => $mAfter['ethics'] ?? 0,
+                            'adaptation' => $mAfter['adaptation'] ?? 0,
+                            'path_id'    => $pId,
+                            'points'     => $ch['pointsEarned'] ?? 0,
+                        ]);
+                    }
+                }
+
+                // Metrikleri ortala (completed > 0 ise)
+                if ($completedCount > 0) {
+                    $aggregatedMetrics['health'] = round($aggregatedMetrics['health'] / $completedCount);
+                    $aggregatedMetrics['resource'] = round($aggregatedMetrics['resource'] / $completedCount);
+                    $aggregatedMetrics['ethics'] = round($aggregatedMetrics['ethics'] / $completedCount);
+                    $aggregatedMetrics['adaptation'] = round($aggregatedMetrics['adaptation'] / $completedCount);
+                }
+
+                // Best session'dan veya aggregated'dan metrik al
+                $bfm = $bestSession['finalMetrics'] ?? null;
+
                 $mission = (object) [
                     'id'              => $simData['id'] ?? $id,
                     'title'           => $simData['name'] ?? $simData['title'] ?? 'Simülasyon #' . $id,
@@ -265,45 +499,20 @@ class PortalReportController extends Controller
                     'created'         => isset($simData['createdAt']) ? \Carbon\Carbon::parse($simData['createdAt'])->format('d.m.Y') : '-',
                     'description'     => $simData['description'] ?? '',
                     'result'          => $simData['result'] ?? $simData['summary'] ?? '',
-                    'completion_rate' => $simData['completionRate'] ?? 0,
-                    'avg_score'       => $simData['avgScore'] ?? 0,
-                    'health'          => $simData['healthMetric'] ?? $simData['health'] ?? 0,
-                    'resource'        => $simData['resourceMetric'] ?? $simData['resource'] ?? 0,
-                    'ethics'          => $simData['ethicsMetric'] ?? $simData['ethics'] ?? 0,
-                    'adaptation'      => $simData['adaptationMetric'] ?? $simData['adaptation'] ?? 0,
+                    'completion_rate' => $completedCount > 0 ? round(($completedCount / max(count($sessionList), 1)) * 100) : 0,
+                    'avg_score'       => $completedCount > 0 ? round($totalScore / $completedCount) : 0,
+                    'health'          => (is_array($bfm) ? ($bfm['health'] ?? 0) : 0) ?: $aggregatedMetrics['health'],
+                    'resource'        => (is_array($bfm) ? ($bfm['resource'] ?? 0) : 0) ?: $aggregatedMetrics['resource'],
+                    'ethics'          => (is_array($bfm) ? ($bfm['ethics'] ?? 0) : 0) ?: $aggregatedMetrics['ethics'],
+                    'adaptation'      => (is_array($bfm) ? ($bfm['adaptation'] ?? 0) : 0) ?: $aggregatedMetrics['adaptation'],
                     'image'           => $simData['coverImage'] ?? $simData['image'] ?? null,
+                    'final_score'     => $bestSession['finalScore'] ?? 0,
+                    'session_count'   => count($sessionList),
+                    'completed_count' => $completedCount,
                 ];
-
-                // Oturum oyuncularını çek
-                $sessions = $connector->getSimulationSessions(['filter' => "simulationId||eq||{$id}"]);
-                $sessionList = is_array($sessions) ? ($sessions['data'] ?? $sessions) : [];
-
-                foreach ($sessionList as $session) {
-                    $sessionId = $session['id'] ?? null;
-                    if (!$sessionId) continue;
-
-                    $players = $connector->getSessionPlayers($sessionId);
-                    if (is_array($players)) {
-                        foreach ($players as $player) {
-                            $students->push((object) [
-                                'name'           => $player['name'] ?? $player['playerName'] ?? 'Oyuncu',
-                                'surname'        => $player['surname'] ?? '',
-                                'role'           => $player['role'] ?? $player['roleName'] ?? '-',
-                                'grade'          => $player['grade'] ?? '-',
-                                'completed'      => $player['completedDecisions'] ?? $player['completed'] ?? 0,
-                                'total_missions' => $player['totalDecisions'] ?? $player['total'] ?? 0,
-                                'health'         => $player['healthMetric'] ?? $player['health'] ?? 0,
-                                'resource'       => $player['resourceMetric'] ?? $player['resource'] ?? 0,
-                                'ethics'         => $player['ethicsMetric'] ?? $player['ethics'] ?? 0,
-                                'adaptation'     => $player['adaptationMetric'] ?? $player['adaptation'] ?? 0,
-                            ]);
-                        }
-                    }
-                }
             }
         }
 
-        // Simülasyon bulunamadıysa 404
         if (!$mission) {
             abort(404, 'Simülasyon bulunamadı veya API erişilemez.');
         }
@@ -323,42 +532,151 @@ class PortalReportController extends Controller
         $project = null;
         $steps = collect();
         $team = collect();
+        $files = [];
+        $links = [];
+        $tools = [];
+        $aiEvaluation = null;
 
         if ($connector instanceof WayStartupConnector) {
             $simData = $connector->getSimulation((int) $id);
 
             if ($simData) {
-                // Adımları çek
+                // ── Adımları çek ──
                 $stepsData = $connector->getSteps((int) $id);
                 $stepsData = is_array($stepsData) ? $stepsData : [];
 
+                // ── İlk üyeyi bul (memberId için) ──
+                $memberId = null;
+                if ($app) {
+                    $firstUser = $app->users()->first();
+                    if ($firstUser) {
+                        $memberData = $connector->getMemberByUserId((string) $firstUser->id);
+                        $memberId = $memberData['id'] ?? null;
+                    }
+                }
+
+                // ── UserStepProgress: step bazlı earnedPoint/earnedCoin ──
+                $stepProgressMap = [];
+                if ($memberId) {
+                    $allStepProgress = $connector->getUserStepProgress($memberId);
+                    if (is_array($allStepProgress)) {
+                        foreach ($allStepProgress as $sp) {
+                            $spStepId = $sp['stepId'] ?? $sp['step_id'] ?? null;
+                            if ($spStepId) {
+                                $stepProgressMap[$spStepId] = $sp;
+                            }
+                        }
+                    }
+                }
+
+                // ── Step Submissions → files + links ──
+                $submissions = $connector->getStepSubmissions((int) $id);
+                foreach ($submissions as $sub) {
+                    // File submission
+                    if (!empty($sub['fileName'] ?? $sub['file_name'] ?? null)) {
+                        $files[] = [
+                            'step'   => $sub['stepId'] ?? $sub['step_id'] ?? '-',
+                            'name'   => $sub['fileName'] ?? $sub['file_name'] ?? '-',
+                            'size'   => $sub['fileSize'] ?? $sub['file_size'] ?? '',
+                            'url'    => $sub['fileUrl'] ?? $sub['file_url'] ?? '',
+                            'type'   => $sub['fileType'] ?? $sub['file_type'] ?? '',
+                            'status' => $sub['status'] ?? '',
+                        ];
+                    }
+                    // Link submission
+                    if (!empty($sub['linkUrl'] ?? $sub['link_url'] ?? null)) {
+                        $links[] = [
+                            'step'     => $sub['stepId'] ?? $sub['step_id'] ?? '-',
+                            'url'      => $sub['linkUrl'] ?? $sub['link_url'] ?? '',
+                            'title'    => $sub['linkTitle'] ?? $sub['link_title'] ?? '',
+                            'platform' => $sub['linkPlatform'] ?? $sub['link_platform'] ?? '',
+                        ];
+                    }
+                }
+
+                // ── AI Evaluation (toplam değerlendirme) ──
+                if ($memberId) {
+                    $evaluations = $connector->getStepQuestionEvaluations($memberId);
+                    if (!empty($evaluations)) {
+                        // En son veya en yüksek değerlendirmeyi al
+                        $bestEval = collect($evaluations)->sortByDesc('aiTotalScore')->first();
+                        $aiEvaluation = (object) [
+                            'total_score'      => $bestEval['aiTotalScore'] ?? $bestEval['ai_total_score'] ?? 0,
+                            'max_score'        => $bestEval['aiMaxScore'] ?? $bestEval['ai_max_score'] ?? 100,
+                            'coins'            => $bestEval['aiCoins'] ?? $bestEval['ai_coins'] ?? 0,
+                            'overall_feedback' => $bestEval['aiOverallFeedback'] ?? $bestEval['ai_overall_feedback'] ?? '',
+                            'status'           => $bestEval['status'] ?? 'pending',
+                            'step_id'          => $bestEval['stepId'] ?? $bestEval['step_id'] ?? null,
+                        ];
+                    }
+                }
+
+                // ── Adımları build et (step tools + gerçek skorlar) ──
                 $completedSteps = 0;
                 $totalScore = 0;
                 $maxScore = 0;
+                $allTools = [];
 
                 foreach ($stepsData as $step) {
-                    $isCompleted = ($step['status'] ?? '') === 'completed';
+                    $stepId = $step['id'] ?? null;
+                    $progress = $stepProgressMap[$stepId] ?? null;
+
+                    // Gerçek skor: UserStepProgress.earnedPoint > step.score
+                    $earnedPoint = $progress['earnedPoint'] ?? $progress['earned_point'] ?? null;
+                    $earnedCoin = $progress['earnedCoin'] ?? $progress['earned_coin'] ?? 0;
+                    $stepScore = $earnedPoint ?? $step['score'] ?? $step['point'] ?? $step['points'] ?? 0;
+                    $stepMax = $step['maxScore'] ?? $step['maxPoint'] ?? $step['points'] ?? 150;
+                    $isCompleted = ($progress['status'] ?? $step['status'] ?? '') === 'completed'
+                                || ($progress['status'] ?? '') === 'COMPLETED';
+
                     if ($isCompleted) $completedSteps++;
-                    $stepScore = $step['score'] ?? $step['point'] ?? 0;
-                    $stepMax = $step['maxScore'] ?? $step['maxPoint'] ?? 150;
-                    $totalScore += $stepScore;
-                    $maxScore += $stepMax;
+                    $totalScore += (int) $stepScore;
+                    $maxScore += (int) $stepMax;
+
+                    // Step tools çek
+                    $stepToolsList = [];
+                    if ($stepId) {
+                        $rawTools = $connector->getStepTools((int) $stepId);
+                        foreach ($rawTools as $st) {
+                            $tool = $st['tool'] ?? [];
+                            $toolItem = [
+                                'name'           => $tool['name'] ?? $st['toolName'] ?? '-',
+                                'description'    => $tool['description'] ?? '',
+                                'icon_url'       => $tool['iconUrl'] ?? $tool['icon_url'] ?? '',
+                                'website_url'    => $tool['websiteUrl'] ?? $tool['website_url'] ?? '',
+                                'category'       => $tool['category'] ?? '',
+                                'is_recommended' => $st['isRecommended'] ?? $st['is_recommended'] ?? false,
+                                'custom_note'    => $st['customNote'] ?? $st['custom_note'] ?? '',
+                            ];
+                            $stepToolsList[] = $toolItem;
+                            $allTools[] = $toolItem;
+                        }
+                    }
 
                     $steps->push((object) [
+                        'id'          => $stepId,
                         'title'       => $step['name'] ?? $step['title'] ?? 'Adım',
                         'responsible' => $step['responsibleName'] ?? $step['assignee'] ?? '-',
                         'ai_score'    => $step['aiScore'] ?? $stepMax,
-                        'score'       => $stepScore,
+                        'score'       => (int) $stepScore,
+                        'max_score'   => (int) $stepMax,
+                        'earned_coin' => (int) $earnedCoin,
                         'difficulty'  => $step['difficulty'] ?? $step['difficultyLevel'] ?? '-',
+                        'skill'       => $step['skill'] ?? '',
                         'completed'   => $isCompleted,
+                        'tools'       => $stepToolsList,
                     ]);
                 }
 
-                // Sorunlu adımı bul (puan < %30 ise)
+                $tools = $allTools;
+
+                // Sorunlu adımı bul (puan < %30)
                 $problemStep = null;
                 foreach ($stepsData as $si => $step) {
-                    $ss = $step['score'] ?? $step['point'] ?? 0;
-                    $sm = $step['maxScore'] ?? $step['maxPoint'] ?? 150;
+                    $stepId = $step['id'] ?? null;
+                    $progress = $stepProgressMap[$stepId] ?? null;
+                    $ss = $progress['earnedPoint'] ?? $progress['earned_point'] ?? $step['score'] ?? $step['point'] ?? 0;
+                    $sm = $step['maxScore'] ?? $step['maxPoint'] ?? $step['points'] ?? 150;
                     if ($sm > 0 && ($ss / $sm) < 0.3) {
                         $problemStep = $si + 1;
                         break;
@@ -375,24 +693,7 @@ class PortalReportController extends Controller
                     'problem_step'    => $problemStep,
                 ];
 
-                // Dosyaları ve linkleri çek
-                $files = collect($simData['files'] ?? $simData['attachments'] ?? $simData['submissions'] ?? [])
-                    ->filter(fn($f) => !empty($f['name'] ?? $f['fileName'] ?? null))
-                    ->map(fn($f) => [
-                        'step' => $f['stepId'] ?? $f['step'] ?? '-',
-                        'name' => $f['name'] ?? $f['fileName'] ?? '-',
-                        'size' => $f['size'] ?? $f['fileSize'] ?? '',
-                        'url'  => $f['url'] ?? $f['fileUrl'] ?? '',
-                    ])->values()->all();
-
-                $links = collect($simData['links'] ?? $simData['submittedLinks'] ?? [])
-                    ->filter(fn($l) => !empty($l['url'] ?? null))
-                    ->map(fn($l) => [
-                        'step' => $l['stepId'] ?? $l['step'] ?? '-',
-                        'url'  => $l['url'] ?? '',
-                    ])->values()->all();
-
-                // Üyeleri çek (simülasyona atanmış kullanıcılar)
+                // ── Üyeleri çek ──
                 if ($app) {
                     $appUsers = $app->users()->limit(20)->get();
                     foreach ($appUsers as $appUser) {
@@ -409,14 +710,11 @@ class PortalReportController extends Controller
             }
         }
 
-        $files = $files ?? [];
-        $links = $links ?? [];
-
         if (!$project) {
             abort(404, 'Startup projesi bulunamadı veya API erişilemez.');
         }
 
-        return view('portal.reports.startup-detail', compact('project', 'steps', 'team', 'files', 'links'));
+        return view('portal.reports.startup-detail', compact('project', 'steps', 'team', 'files', 'links', 'tools', 'aiEvaluation'));
     }
 
     /**
@@ -609,20 +907,52 @@ class PortalReportController extends Controller
                 }
             }
 
+            // Session finalMetrics'ten metrikleri hesapla (sim-level metric alanları genellikle boş)
+                $sessionHealth = 0; $sessionResource = 0; $sessionEthics = 0; $sessionAdaptation = 0;
+                $completedSessions = 0;
+                $lastSessionMetrics = null;
+                foreach ($sessionData as $sess) {
+                    $fm = $sess['finalMetrics'] ?? null;
+                    if (is_array($fm)) {
+                        $completedSessions++;
+                        $sessionHealth += (int) ($fm['health'] ?? 0);
+                        $sessionResource += (int) ($fm['resource'] ?? 0);
+                        $sessionEthics += (int) ($fm['ethics'] ?? 0);
+                        $sessionAdaptation += (int) ($fm['adaptation'] ?? 0);
+                        $lastSessionMetrics = $fm;
+                    }
+                }
+                $avgH = $completedSessions > 0 ? round($sessionHealth / $completedSessions) : null;
+                $avgR = $completedSessions > 0 ? round($sessionResource / $completedSessions) : null;
+                $avgE = $completedSessions > 0 ? round($sessionEthics / $completedSessions) : null;
+                $avgA = $completedSessions > 0 ? round($sessionAdaptation / $completedSessions) : null;
+
+                // Fallback: sim-level alanlardan oku
+                $hp = $avgH ?? ($sim['healthMetric'] ?? $sim['health'] ?? null);
+                $rp = $avgR ?? ($sim['resourceMetric'] ?? $sim['resource'] ?? null);
+                $ep = $avgE ?? ($sim['ethicsMetric'] ?? $sim['ethics'] ?? null);
+                $ap = $avgA ?? ($sim['adaptationMetric'] ?? $sim['adaptation'] ?? null);
+
+                // Trend: son session metriği ortalamadan yüksekse up
+                $trendH = ($lastSessionMetrics && $avgH) ? (($lastSessionMetrics['health'] ?? 0) >= $avgH ? 'up' : 'down') : null;
+                $trendR = ($lastSessionMetrics && $avgR) ? (($lastSessionMetrics['resource'] ?? 0) >= $avgR ? 'up' : 'down') : null;
+                $trendE = ($lastSessionMetrics && $avgE) ? (($lastSessionMetrics['ethics'] ?? 0) >= $avgE ? 'up' : 'down') : null;
+                $trendA = ($lastSessionMetrics && $avgA) ? (($lastSessionMetrics['adaptation'] ?? 0) >= $avgA ? 'up' : 'down') : null;
+
             $missions->push((object) [
                 'id'               => $simId,
                 'name'             => $sim['name'] ?? $sim['title'] ?? 'Simülasyon',
                 'students'         => $participants->take(5),
                 'assigned_date'    => isset($sim['createdAt']) ? \Carbon\Carbon::parse($sim['createdAt'])->format('m/d/Y') : '-',
                 'deadline'         => isset($sim['deadline']) ? \Carbon\Carbon::parse($sim['deadline'])->format('m/d/Y') : '-',
-                'health_point'     => $sim['healthMetric'] ?? $sim['health'] ?? null,
-                'resource_point'   => $sim['resourceMetric'] ?? $sim['resource'] ?? null,
-                'ethics_point'     => $sim['ethicsMetric'] ?? $sim['ethics'] ?? null,
-                'adaptation_point' => $sim['adaptationMetric'] ?? $sim['adaptation'] ?? null,
-                'health_trend'     => null,
-                'resource_trend'   => null,
-                'ethics_trend'     => null,
-                'adaptation_trend' => null,
+                'health_point'     => $hp,
+                'resource_point'   => $rp,
+                'ethics_point'     => $ep,
+                'adaptation_point' => $ap,
+                'health_trend'     => $trendH,
+                'resource_trend'   => $trendR,
+                'ethics_trend'     => $trendE,
+                'adaptation_trend' => $trendA,
             ]);
         }
 

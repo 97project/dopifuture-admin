@@ -507,6 +507,39 @@ class VegaConnector implements AppConnectorInterface
         }
     }
 
+    /**
+     * Kullanıcının tüm modüllerdeki oturum özetini getir.
+     * GET /api/v1/sessions/overview?user_id={userId}
+     *
+     * @return array{total_sessions: int, simulator_count: int, lecturer_count: int, chatbot_count: int}
+     */
+    public function getSessionsOverview(int $vegaUserId): array
+    {
+        try {
+            $response = $this->request('GET', '/api/v1/sessions/overview', [
+                'user_id' => $vegaUserId,
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json('data', $response->json());
+                return [
+                    'total_sessions'  => $data['total_sessions'] ?? 0,
+                    'simulator_count' => $data['simulator_count'] ?? 0,
+                    'lecturer_count'  => $data['lecturer_count'] ?? 0,
+                    'chatbot_count'   => $data['chatbot_count'] ?? 0,
+                ];
+            }
+
+            return ['total_sessions' => 0, 'simulator_count' => 0, 'lecturer_count' => 0, 'chatbot_count' => 0];
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[Vega] getSessionsOverview hatası', [
+                'vegaUserId' => $vegaUserId,
+                'message' => $e->getMessage(),
+            ]);
+            return ['total_sessions' => 0, 'simulator_count' => 0, 'lecturer_count' => 0, 'chatbot_count' => 0];
+        }
+    }
+
     /* ═══════════════════════════════════════════════════
      *  Internal Helpers
      * ═══════════════════════════════════════════════════ */
