@@ -237,11 +237,24 @@ class PortalReportController extends Controller
                 $report = $conn->getUserReport($student);
                 if ($report && ($report['success'] ?? false)) {
                     $d = $report['data'] ?? [];
+                    $vegaId = $d['vega_id'] ?? null;
+
+                    // Sessions overview — adds chatbot count breakdown
+                    $overview = ['total_sessions' => 0, 'simulator_count' => 0, 'lecturer_count' => 0, 'chatbot_count' => 0];
+                    if ($vegaId) {
+                        try {
+                            $overview = $conn->getSessionsOverview($vegaId);
+                        } catch (\Throwable $e) {
+                            // Failsafe — use module counts from report
+                        }
+                    }
+
                     $connectorProfiles[$a->slug] = [
-                        'vega_id'         => $d['vega_id'] ?? null,
-                        'session_count'   => $d['session_count'] ?? 0,
-                        'lecturer_count'  => $d['modules']['lecturer'] ?? 0,
-                        'simulator_count' => $d['modules']['simulator'] ?? 0,
+                        'vega_id'         => $vegaId,
+                        'session_count'   => $d['session_count'] ?? $overview['total_sessions'] ?? 0,
+                        'lecturer_count'  => $d['modules']['lecturer'] ?? $overview['lecturer_count'] ?? 0,
+                        'simulator_count' => $d['modules']['simulator'] ?? $overview['simulator_count'] ?? 0,
+                        'chatbot_count'   => $overview['chatbot_count'] ?? 0,
                         'has_details'     => $d['has_details'] ?? 0,
                         'profile'         => $d['profile'] ?? [],
                     ];
@@ -1180,5 +1193,139 @@ class PortalReportController extends Controller
         } catch (\Throwable $e) {
             return [];
         }
+    }
+
+    /**
+     * MissionWay — School-wide Progress Matrix
+     * Okul genelinde tüm oyuncuların simülasyon ilerlemelerini matris olarak gösterir.
+     */
+    public function missionwayProgress()
+    {
+        $user = auth()->user();
+        $scopedUserIds = $this->getScopedUserIds($user);
+
+        $app = Application::where('slug', 'mission-way')->first();
+        if (!$app) {
+            abort(404, 'Mission Way uygulaması bulunamadı');
+        }
+
+        $connector = $app->resolveConnector();
+        if (!$connector instanceof MissionWayConnector) {
+            abort(404, 'MissionWay connector bulunamadı');
+        }
+
+        // Simülasyonlar listesi
+        $simulations = [];
+        try {
+            $simData = $connector->getSimulations(['limit' => 50]);
+            $simulations = $simData['data'] ?? $simData ?? [];
+        } catch (\Throwable $e) {
+            $simulations = [];
+        }
+
+        // Scoped öğrenciler (max 30 for performance)
+        $students = \App\Models\User::whereIn('id', $scopedUserIds)
+            ->whereHas('roles', fn($q) => $q->where('name', 'student'))
+            ->select('id', 'name', 'surname', 'email')
+            ->take(30)
+            ->get();
+
+        // Her öğrenci için player_id bul + progress listesi çek
+        $progressMatrix = [];
+        foreach ($students as $student) {
+            try {
+                $composition = $connector->getUser($student);
+                $playerId = $composition['player']['id'] ?? $composition['playerId'] ?? null;
+
+                if (!$playerId) {
+                    $progressMatrix[$student->id] = ['student' => $student, 'progress' => []];
+                    continue;
+                }
+
+                $progressList = $connector->getPlayerProgressList([
+                    'filter' => "playerId||eq||{$playerId}",
+                    'limit' => 100,
+                ]);
+
+                // Progress'i simulationVersionId'ye göre index'le
+                $bySimVersion = [];
+                if (is_array($progressList)) {
+                    foreach ($progressList as $p) {
+                        $svId = $p['simulationVersionId'] ?? null;
+                        if ($svId) {
+                            $bySimVersion[$svId] = $p;
+                        }
+                    }
+                }
+
+                $progressMatrix[$student->id] = [
+                    'student' => $student,
+                    'player_id' => $playerId,
+                    'progress' => $bySimVersion,
+                ];
+            } catch (\Throwable $e) {
+                $progressMatrix[$student->id] = ['student' => $student, 'progress' => []];
+            }
+        }
+
+        return view('portal.reports.missionway-progress', [
+            'simulations' => $simulations,
+            'progressMatrix' => $progressMatrix,
+            'students' => $students,
+        ]);
+    }
+
+    /**
+     * Class Comparison — Sınıf performans karşılaştırma matrisi
+     * Tüm sınıfların uygulama bazlı performansını matris olarak gösterir.
+     */
+    public function classComparison()
+    {
+        $user = auth()->user();
+        $classes = \App\Models\SchoolClass::whereHas('users')
+            ->withCount(['users as student_count' => fn($q) => $q->whereHas('roles', fn($r) => $r->where('name', 'student'))])
+            ->orderBy('name')
+            ->get();
+
+        $apps = Application::active()->orderBy('name')->get();
+
+        // Her sınıf × uygulama için stats hesapla
+        $matrix = [];
+        foreach ($classes as $class) {
+            $classStudentIds = $class->users()
+                ->whereHas('roles', fn($q) => $q->where('name', 'student'))
+                ->pluck('users.id');
+
+            $row = ['class' => $class, 'apps' => []];
+
+            foreach ($apps as $app) {
+                $appStats = DB::table('application_user_progress')
+                    ->where('application_id', $app->id)
+                    ->whereIn('user_id', $classStudentIds)
+                    ->selectRaw('
+                        COUNT(*) as total,
+                        SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed,
+                        AVG(score) as avg_score,
+                        SUM(attempts) as total_attempts
+                    ')
+                    ->first();
+
+                $total = $appStats->total ?? 0;
+                $completed = $appStats->completed ?? 0;
+                $row['apps'][$app->slug] = [
+                    'total' => $total,
+                    'completed' => $completed,
+                    'completion_rate' => $total > 0 ? round(($completed / $total) * 100) : 0,
+                    'avg_score' => $appStats->avg_score ? round($appStats->avg_score, 1) : null,
+                ];
+            }
+
+            $matrix[] = $row;
+        }
+
+        return view('portal.reports.class-comparison', [
+            'matrix' => $matrix,
+            'apps' => $apps,
+        ]);
     }
 }

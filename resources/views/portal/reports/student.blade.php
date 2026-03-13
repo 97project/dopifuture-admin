@@ -98,8 +98,57 @@
                     <div style="font-size:22px;font-weight:800;color:#10B981;">{{ $profile['lecturer_count'] ?? 0 }}</div>
                     <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Öğretmen' : 'Lecturer' }}</div>
                 </div>
+                @if(($profile['chatbot_count'] ?? 0) > 0)
+                <div>
+                    <div style="font-size:22px;font-weight:800;color:#3B82F6;">{{ $profile['chatbot_count'] }}</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Sohbet' : 'Chatbot' }}</div>
+                </div>
+                @endif
             @endif
         </div>
+        {{-- WayStartup: per-simulation progress cards --}}
+        @if($slug === 'way-startup' && !empty($profile['simulations_with_progress']))
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--color-row-border,#eee);">
+            <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">🚀 {{ $isTr ? 'Simülasyon İlerlemesi' : 'Simulation Progress' }}</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                @foreach($profile['simulations_with_progress'] as $simProg)
+                @php
+                    $simName = $simProg['name'] ?? $simProg['title'] ?? 'Simülasyon';
+                    $prog = $simProg['progress'] ?? [];
+                    $pct = $prog['completionPercentage'] ?? $prog['completion_percentage'] ?? 0;
+                    $status = $prog['status'] ?? 'not_started';
+                    $currentStep = $prog['currentStep'] ?? $prog['current_step'] ?? 0;
+                    $totalStep = $simProg['totalStep'] ?? $simProg['total_step'] ?? 0;
+                    $statusColor = match($status) {
+                        'completed' => '#10B981',
+                        'in_progress' => '#F59E0B',
+                        default => '#94A3B8',
+                    };
+                    $statusLabel = match($status) {
+                        'completed' => $isTr ? 'Tamamlandı' : 'Completed',
+                        'in_progress' => $isTr ? 'Devam Ediyor' : 'In Progress',
+                        default => $isTr ? 'Başlanmadı' : 'Not Started',
+                    };
+                @endphp
+                <div style="padding:8px 10px;background:rgba(16,185,129,0.04);border-radius:8px;border:1px solid rgba(16,185,129,0.1);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                        <span style="font-size:12px;font-weight:600;">{{ $simName }}</span>
+                        <span style="font-size:10px;padding:2px 6px;border-radius:999px;background:{{ $statusColor }};color:#fff;">{{ $statusLabel }}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div style="flex:1;height:4px;background:#f1f1f1;border-radius:2px;overflow:hidden;">
+                            <div style="height:100%;width:{{ min(100, $pct) }}%;background:{{ $statusColor }};border-radius:2px;transition:width 0.3s;"></div>
+                        </div>
+                        <span style="font-size:10px;font-weight:600;color:{{ $statusColor }};min-width:30px;">%{{ round($pct) }}</span>
+                    </div>
+                    @if($currentStep > 0 && $totalStep > 0)
+                    <div style="font-size:9px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Adım' : 'Step' }} {{ $currentStep }}/{{ $totalStep }}</div>
+                    @endif
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
         {{-- MissionWay: avg metric bars --}}
         @if($slug === 'mission-way' && ($profile['avg_health'] ?? $profile['avg_resource'] ?? $profile['avg_ethics'] ?? $profile['avg_adaptation'] ?? null) !== null)
         <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--color-row-border,#eee);">
@@ -119,12 +168,30 @@
         {{-- MissionWay: achievements badges --}}
         @if($slug === 'mission-way' && !empty($profile['achievements']))
         <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--color-row-border,#eee);">
-            <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">🏆 {{ $isTr ? 'Başarı Rozetleri' : 'Achievements' }}</div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">🏆 {{ $isTr ? 'Başarı Rozetleri' : 'Achievements' }} ({{ count($profile['achievements']) }})</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 @foreach($profile['achievements'] as $ach)
-                <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:linear-gradient(135deg,rgba(67,100,247,0.08),rgba(139,92,246,0.08));border-radius:999px;font-size:11px;font-weight:500;color:#4364F7;">
-                    🏅 {{ is_array($ach) ? ($ach['name'] ?? $ach['title'] ?? json_encode($ach)) : $ach }}
-                </span>
+                @php
+                    $achName = is_array($ach) ? ($ach['name'] ?? $ach['title'] ?? $ach['type'] ?? '') : $ach;
+                    $achType = is_array($ach) ? ($ach['type'] ?? '') : '';
+                    $achDate = is_array($ach) ? ($ach['earnedAt'] ?? $ach['earned_at'] ?? null) : null;
+                    $achIcon = match(strtolower($achType)) {
+                        'first_sim', 'first_simulation' => '🎮',
+                        'first_win', 'winner' => '🥇',
+                        'streak', 'hot_streak' => '🔥',
+                        'perfect', 'perfect_score' => '💎',
+                        'team', 'teamwork' => '🤝',
+                        'speed', 'fast' => '⚡',
+                        'ethics', 'ethical' => '⚖️',
+                        default => '🏅',
+                    };
+                @endphp
+                <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:linear-gradient(135deg,rgba(67,100,247,0.08),rgba(139,92,246,0.08));border-radius:999px;font-size:11px;font-weight:500;color:#4364F7;" title="{{ $achDate ? ($isTr ? 'Kazanıldı: ' : 'Earned: ') . \Carbon\Carbon::parse($achDate)->format('d.m.Y') : '' }}">
+                    {{ $achIcon }} {{ $achName }}
+                    @if($achDate)
+                    <span style="font-size:9px;color:var(--text-muted);font-weight:400;">{{ \Carbon\Carbon::parse($achDate)->format('d.m.Y') }}</span>
+                    @endif
+                </div>
                 @endforeach
             </div>
         </div>

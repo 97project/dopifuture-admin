@@ -127,19 +127,65 @@ class ApplicationController extends Controller
         $report = $connector->getUserReport($user);
 
         $connectorType = 'generic';
+        $extraData = [];
+
         if ($connector instanceof \App\Connectors\VegaConnector) {
             $connectorType = 'vega';
+            // Enrich with sessionsOverview
+            try {
+                $vegaId = $report['data']['vega_id'] ?? null;
+                if ($vegaId) {
+                    $extraData['sessions_overview'] = $connector->getSessionsOverview($vegaId);
+                }
+            } catch (\Throwable $e) {}
+
         } elseif ($connector instanceof \App\Connectors\MissionWayConnector) {
             $connectorType = 'missionway';
+            // Enrich with player profile (achievements, scores, play time)
+            try {
+                $composition = $connector->getUser($user);
+                if ($composition) {
+                    $player = $composition['player'] ?? $composition;
+                    $extraData['player_profile'] = [
+                        'level'        => $player['level'] ?? $player['currentLevel'] ?? null,
+                        'total_score'  => $player['totalScore'] ?? $player['total_score'] ?? 0,
+                        'play_time'    => $player['totalPlayTime'] ?? $player['total_play_time'] ?? 0,
+                        'achievements' => $player['achievements'] ?? [],
+                    ];
+                }
+                // Recent sessions
+                $playerId = $composition['player']['id'] ?? $composition['playerId'] ?? null;
+                if ($playerId) {
+                    $sessions = $connector->getPlayerSessions([
+                        'filter' => "playerId||eq||{$playerId}",
+                        'limit' => 10,
+                    ]);
+                    $extraData['recent_sessions'] = is_array($sessions) ? $sessions : [];
+                }
+            } catch (\Throwable $e) {}
+
         } elseif ($connector instanceof \App\Connectors\WayStartupConnector) {
             $connectorType = 'waystartup';
+            // Enrich with member detail + step progress
+            try {
+                $member = $connector->getUser($user);
+                if ($member) {
+                    $memberId = $member['id'] ?? null;
+                    $extraData['member'] = $member;
+                    if ($memberId) {
+                        $extraData['step_progress'] = $connector->getUserStepProgress($memberId) ?? [];
+                        $extraData['simulations_with_progress'] = $connector->getSimulationsWithProgress($user->id) ?? [];
+                    }
+                }
+            } catch (\Throwable $e) {}
         }
 
         return view('admin.applications.user-report', compact(
             'application',
             'user',
             'report',
-            'connectorType'
+            'connectorType',
+            'extraData'
         ));
     }
 
