@@ -103,12 +103,28 @@
             @endforelse
         </div>
 
-        {{-- Back button --}}
-        <div style="text-align:center;margin-top:24px;">
+        {{-- Prev/Next navigation + Back button --}}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:24px;gap:12px;">
+            @if(!empty($prevSessionId))
+            <a href="{{ route('portal.reports.chatbot.detail', $prevSessionId) }}" style="display:inline-flex;align-items:center;gap:4px;text-decoration:none;color:var(--color-txt-muted);font-size:12px;font-weight:500;padding:8px 16px;border:1px solid #E5E7EB;border-radius:8px;">
+                ← {{ $isTr ? 'Önceki' : 'Previous' }}
+            </a>
+            @else
+            <div></div>
+            @endif
+
             <a href="{{ route('portal.reports.app', 'study-space') }}" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--color-txt-muted);font-size:13px;font-weight:500;padding:10px 24px;border:1px solid #E5E7EB;border-radius:8px;">
                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 {{ $isTr ? 'Geri Dön' : 'Back' }}
             </a>
+
+            @if(!empty($nextSessionId))
+            <a href="{{ route('portal.reports.chatbot.detail', $nextSessionId) }}" style="display:inline-flex;align-items:center;gap:4px;text-decoration:none;color:var(--color-txt-muted);font-size:12px;font-weight:500;padding:8px 16px;border:1px solid #E5E7EB;border-radius:8px;">
+                {{ $isTr ? 'Sonraki' : 'Next' }} →
+            </a>
+            @else
+            <div></div>
+            @endif
         </div>
     </div>
 

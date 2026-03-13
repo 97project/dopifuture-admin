@@ -568,4 +568,37 @@ class ApplicationController extends Controller
             "Discovery: {$results['matched']} eşleşti, {$orphanCount} orphan bulundu."
         );
     }
+
+    /**
+     * Admin Session Detail — Bireysel oturum detayı.
+     * Vega connector üzerinden simulator/lecturer/chatbot oturum verisi.
+     */
+    public function sessionDetail(Request $request, Application $application, string $sessionId)
+    {
+        $this->authorize('view', $application);
+
+        $connector = $application->resolveConnector();
+        if (!$connector || !($connector instanceof \App\Connectors\VegaConnector)) {
+            return back()->with('error', 'Bu uygulama için oturum detayı desteklenmiyor.');
+        }
+
+        $module = match ($application->slug) {
+            'role-galaxy' => 'simulator',
+            'way-ai-coach' => 'lecturer',
+            default => 'all',
+        };
+
+        $sessionData = $connector->getSessionDetail($sessionId, $module);
+
+        if (!$sessionData) {
+            abort(404, 'Oturum bulunamadı veya API erişilemez.');
+        }
+
+        return view('admin.applications.session-detail', [
+            'application' => $application,
+            'sessionData' => $sessionData,
+            'sessionId' => $sessionId,
+            'module' => $module,
+        ]);
+    }
 }

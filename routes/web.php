@@ -179,6 +179,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web', \App\Http\Middleware\
         Route::post('applications/harvest', [ApplicationController::class, 'triggerHarvest'])->name('applications.harvest');
         Route::post('applications/{application}/harvest', [ApplicationController::class, 'triggerHarvest'])->name('applications.harvest-app');
         Route::post('applications/{application}/discover', [ApplicationController::class, 'discoverRemote'])->name('applications.discover');
+        Route::get('applications/{application}/sessions/{sessionId}', [ApplicationController::class, 'sessionDetail'])->name('applications.session-detail');
 
         // ── Location API (cascading combobox) ───────────────
 
@@ -275,6 +276,7 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     Route::get('reports/simulator/{id}', [\App\Http\Controllers\PortalReportController::class, 'simulatorDetail'])->name('portal.reports.simulator.detail');
     Route::get('reports/missionway-progress', [\App\Http\Controllers\PortalReportController::class, 'missionwayProgress'])->name('portal.reports.missionway.progress');
     Route::get('reports/class-comparison', [\App\Http\Controllers\PortalReportController::class, 'classComparison'])->name('portal.reports.class.comparison');
+    Route::get('hierarchy', fn() => view('portal.hierarchy'))->name('portal.hierarchy');
 
     // Portal: Application status (read-only)
     Route::get('applications', [\App\Http\Controllers\PortalApplicationController::class, 'index'])->name('portal.applications.index');

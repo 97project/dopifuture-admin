@@ -104,7 +104,25 @@
                     <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Sohbet' : 'Chatbot' }}</div>
                 </div>
                 @endif
-            @endif
+                {{-- Vega: detail links per sub-app --}}
+                @php
+                    $vegaSlugs = ['role-galaxy','way-ai-coach','study-space'];
+                    $vegaRoutes = [
+                        'role-galaxy' => ['route' => 'portal.reports.simulator.detail', 'label' => '🎭 Role Galaxy', 'icon' => 'Simülatör'],
+                        'way-ai-coach' => ['route' => 'portal.reports.coach.questions', 'label' => '🤖 AI Coach', 'icon' => 'Coach'],
+                        'study-space' => ['route' => 'portal.reports.chatbot.detail', 'label' => '💬 Study Space', 'icon' => 'Chatbot'],
+                    ];
+                @endphp
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+                @foreach($vegaRoutes as $vs => $vr)
+                @if(Route::has($vr['route']))
+                <a href="{{ route($vr['route'], ['id' => $student->id]) }}" style="font-size:10px;padding:4px 10px;background:#f3f4f6;border-radius:999px;text-decoration:none;color:#4364F7;font-weight:600;">
+                    {{ $vr['label'] }} → {{ $isTr ? 'Detay' : 'Detail' }}
+                </a>
+                @endif
+                @endforeach
+            </div>
         </div>
         {{-- WayStartup: per-simulation progress cards --}}
         @if($slug === 'way-startup' && !empty($profile['simulations_with_progress']))
