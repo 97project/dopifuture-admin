@@ -172,6 +172,32 @@ class ReportController extends Controller
 
                 if ($connector instanceof \App\Connectors\MissionWayConnector) {
                     $player = $d['player'] ?? $d;
+                    $profile = $d['profile'] ?? $player;
+                    $sessions = $d['sessions'] ?? [];
+                    // Scenario breakdown
+                    $scenarioMap = [
+                        'village_life' => ['name' => 'Köy Hayatı', 'icon' => '🏠', 'color' => '#4364F7'],
+                        'world_traveler' => ['name' => 'Dünya Gezgini', 'icon' => '🌍', 'color' => '#8B5CF6'],
+                        'novaris' => ['name' => 'Novaris', 'icon' => '🏢', 'color' => '#F59E0B'],
+                        'biolab' => ['name' => 'BioLab', 'icon' => '🧪', 'color' => '#10B981'],
+                        'what_if' => ['name' => 'Ya Olsaydı?', 'icon' => '💡', 'color' => '#EF4444'],
+                        'lost_egg' => ['name' => 'Kayıp Yumurta', 'icon' => '🔍', 'color' => '#06B6D4'],
+                    ];
+                    $scenarioBreakdown = [];
+                    foreach ($sessions as $sess) {
+                        $simName = $sess['simulation_name'] ?? $sess['simulationName'] ?? $sess['scenario'] ?? '';
+                        $simSlug = strtolower(str_replace([' ', '-'], '_', preg_replace('/[^a-zA-Z0-9_\- ]/', '', $simName)));
+                        $mk = 'other';
+                        foreach (array_keys($scenarioMap) as $k) { if (str_contains($simSlug, $k)) { $mk = $k; break; } }
+                        if (!isset($scenarioBreakdown[$mk])) {
+                            $m = $scenarioMap[$mk] ?? ['name' => $simName ?: 'Diğer', 'icon' => '🎮', 'color' => '#6B7280'];
+                            $scenarioBreakdown[$mk] = array_merge($m, ['sessions' => 0, 'total_score' => 0, 'total_time' => 0]);
+                        }
+                        $scenarioBreakdown[$mk]['sessions']++;
+                        $scenarioBreakdown[$mk]['total_score'] += $sess['score'] ?? $sess['totalScore'] ?? 0;
+                        $scenarioBreakdown[$mk]['total_time'] += $sess['playTimeMinutes'] ?? $sess['play_time_minutes'] ?? 0;
+                    }
+                    foreach ($scenarioBreakdown as &$sb) { $sb['avg_score'] = $sb['sessions'] > 0 ? round($sb['total_score'] / $sb['sessions']) : 0; }
                     $connectorProfiles[$app->slug] = [
                         'type' => 'missionway',
                         'total_score' => $player['totalScore'] ?? $player['total_score'] ?? 0,
@@ -179,6 +205,7 @@ class ReportController extends Controller
                         'play_time_minutes' => round(($player['totalPlayTime'] ?? $player['total_play_time'] ?? 0) / 60),
                         'achievements' => $player['achievements'] ?? [],
                         'level' => $player['level'] ?? $player['currentLevel'] ?? null,
+                        'scenario_breakdown' => $scenarioBreakdown,
                     ];
                 } elseif ($connector instanceof \App\Connectors\WayStartupConnector) {
                     $connectorProfiles[$app->slug] = [
@@ -189,11 +216,16 @@ class ReportController extends Controller
                         'simulations_with_progress' => $d['simulations_with_progress'] ?? [],
                     ];
                 } elseif ($connector instanceof \App\Connectors\VegaConnector) {
+                    $allSessions = $d['sessions'] ?? [];
                     $connectorProfiles[$app->slug] = [
                         'type' => 'vega',
                         'session_count' => $d['session_count'] ?? 0,
                         'lecturer_count' => $d['modules']['lecturer'] ?? 0,
                         'simulator_count' => $d['modules']['simulator'] ?? 0,
+                        'chatbot_count' => $d['modules']['chatbot'] ?? $d['modules']['all'] ?? 0,
+                        'profile' => $d['profile'] ?? [],
+                        'lecturer_sessions' => array_values(array_filter($allSessions, fn($s) => ($s['module'] ?? '') === 'lecturer')),
+                        'chatbot_sessions' => array_values(array_filter($allSessions, fn($s) => !in_array($s['module'] ?? '', ['simulator', 'lecturer']))),
                     ];
                 }
             } catch (\Throwable $e) {
