@@ -1316,24 +1316,29 @@ class PortalReportController extends Controller
             $row = ['class' => $class, 'apps' => []];
 
             foreach ($apps as $app) {
-                $appStats = DB::table('application_user_progress')
-                    ->where('application_id', $app->id)
-                    ->whereIn('user_id', $classStudentIds)
-                    ->selectRaw('
-                        COUNT(*) as total,
-                        SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed,
-                        AVG(score) as avg_score,
-                        SUM(attempts) as total_attempts
-                    ')
-                    ->first();
+                $appStats = null;
+                try {
+                    $appStats = DB::table('report_data')
+                        ->where('application_id', $app->id)
+                        ->whereIn('user_id', $classStudentIds)
+                        ->selectRaw('
+                            COUNT(DISTINCT user_id) as total,
+                            SUM(CASE WHEN JSON_EXTRACT(data, "$.completed") = true THEN 1 ELSE 0 END) as completed,
+                            AVG(JSON_EXTRACT(data, "$.score")) as avg_score,
+                            COUNT(*) as total_attempts
+                        ')
+                        ->first();
+                } catch (\Throwable $e) {
+                    // Table might not exist or have different schema
+                }
 
-                $total = $appStats->total ?? 0;
-                $completed = $appStats->completed ?? 0;
+                $total = $appStats?->total ?? 0;
+                $completed = $appStats?->completed ?? 0;
                 $row['apps'][$app->slug] = [
                     'total' => $total,
                     'completed' => $completed,
                     'completion_rate' => $total > 0 ? round(($completed / $total) * 100) : 0,
-                    'avg_score' => $appStats->avg_score ? round($appStats->avg_score, 1) : null,
+                    'avg_score' => ($appStats?->avg_score ?? null) ? round($appStats->avg_score, 1) : null,
                 ];
             }
 

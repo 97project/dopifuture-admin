@@ -902,7 +902,7 @@
                 🏫 {{ $isTr ? 'Hiyerarşi' : 'Hierarchy' }}
             </a>
 
-            <a href="{{ route('portal.reports.competency.atlas', ['student' => auth()->id()]) }}" class="dp-nav-item {{ $cr === 'portal.reports.competency.atlas' ? 'active' : '' }}" style="padding-left:36px;font-size:12px;">
+            <a href="{{ url('reports/competency-atlas/' . auth()->id()) }}" class="dp-nav-item {{ $cr === 'portal.reports.competency.atlas' ? 'active' : '' }}" style="padding-left:36px;font-size:12px;">
                 🧠 {{ $isTr ? 'Yetkinlik Atlası' : 'Competency Atlas' }}
             </a>
 

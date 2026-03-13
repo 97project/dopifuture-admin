@@ -265,7 +265,7 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     Route::get('profile', [\App\Http\Controllers\DashboardController::class, 'profile'])->name('portal.profile');
     Route::put('profile', [\App\Http\Controllers\DashboardController::class, 'profileUpdate'])->name('portal.profile.update');
     Route::get('reports', [\App\Http\Controllers\PortalReportController::class, 'index'])->name('portal.reports');
-    Route::get('reports/{app:slug}', [\App\Http\Controllers\PortalReportController::class, 'appReport'])->name('portal.reports.app');
+    // Static report routes MUST come before {app:slug} wildcard
     Route::get('reports/student/{user}', [\App\Http\Controllers\PortalReportController::class, 'studentReport'])->name('portal.reports.student');
     Route::get('reports/class/{class}', [\App\Http\Controllers\PortalReportController::class, 'classReport'])->name('portal.reports.class');
     Route::get('reports/class/{class}/{app:slug}', [\App\Http\Controllers\PortalReportController::class, 'classReport'])->name('portal.reports.class.app');
@@ -277,6 +277,9 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     Route::get('reports/missionway-progress', [\App\Http\Controllers\PortalReportController::class, 'missionwayProgress'])->name('portal.reports.missionway.progress');
     Route::get('reports/class-comparison', [\App\Http\Controllers\PortalReportController::class, 'classComparison'])->name('portal.reports.class.comparison');
     Route::get('reports/competency-atlas/{student}', [\App\Http\Controllers\PortalReportController::class, 'competencyAtlas'])->name('portal.reports.competency.atlas');
+    Route::get('reports/tools', [\App\Http\Controllers\PortalReportController::class, 'toolsCatalog'])->name('portal.reports.tools');
+    // Wildcard route MUST be last — catches app slugs like mission-way, way-startup, etc.
+    Route::get('reports/{app:slug}', [\App\Http\Controllers\PortalReportController::class, 'appReport'])->name('portal.reports.app');
     Route::get('hierarchy', fn() => view('portal.hierarchy'))->name('portal.hierarchy');
 
     // Portal: Application status (read-only)
@@ -300,8 +303,7 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     Route::get('users-import', [\App\Http\Controllers\PortalUserController::class, 'importForm'])->name('portal.users.import.form');
     Route::post('users-import', [\App\Http\Controllers\PortalUserController::class, 'import'])->name('portal.users.import');
 
-    // Tools catalog
-    Route::get('reports/tools', [\App\Http\Controllers\PortalReportController::class, 'toolsCatalog'])->name('portal.reports.tools');
+    // Tools catalog — moved above to before {app:slug} wildcard
 
     // CRUD: Licenses (with show/detail page)
     Route::resource('licenses', \App\Http\Controllers\PortalLicenseController::class)
