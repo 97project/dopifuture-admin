@@ -161,6 +161,36 @@ class ApplicationController extends Controller
                         'limit' => 10,
                     ]);
                     $extraData['recent_sessions'] = is_array($sessions) ? $sessions : [];
+
+                    // Scenario breakdown (6 senaryo: village_life, world_traveler, novaris, biolab, what_if, lost_egg)
+                    $scenarioMap = [
+                        'village_life' => ['name' => 'Köy Hayatı', 'icon' => '🏠', 'color' => '#4364F7'],
+                        'world_traveler' => ['name' => 'Dünya Gezgini', 'icon' => '🌍', 'color' => '#8B5CF6'],
+                        'novaris' => ['name' => 'Novaris', 'icon' => '🏢', 'color' => '#F59E0B'],
+                        'biolab' => ['name' => 'BioLab', 'icon' => '🧪', 'color' => '#10B981'],
+                        'what_if' => ['name' => 'Ya Olsaydı?', 'icon' => '💡', 'color' => '#EF4444'],
+                        'lost_egg' => ['name' => 'Kayıp Yumurta', 'icon' => '🔍', 'color' => '#06B6D4'],
+                    ];
+                    $scenarioBreakdown = [];
+                    foreach ($extraData['recent_sessions'] as $sess) {
+                        $simName = $sess['simulation_name'] ?? $sess['simulationName'] ?? $sess['scenario'] ?? '';
+                        $simSlug = strtolower(str_replace([' ', '-'], '_', preg_replace('/[^a-zA-Z0-9_\- ]/', '', $simName)));
+                        $matchedKey = 'other';
+                        foreach (array_keys($scenarioMap) as $k) {
+                            if (str_contains($simSlug, $k)) { $matchedKey = $k; break; }
+                        }
+                        if (!isset($scenarioBreakdown[$matchedKey])) {
+                            $m = $scenarioMap[$matchedKey] ?? ['name' => $simName ?: 'Diğer', 'icon' => '🎮', 'color' => '#6B7280'];
+                            $scenarioBreakdown[$matchedKey] = array_merge($m, ['sessions' => 0, 'total_score' => 0, 'total_time' => 0]);
+                        }
+                        $scenarioBreakdown[$matchedKey]['sessions']++;
+                        $scenarioBreakdown[$matchedKey]['total_score'] += $sess['score'] ?? $sess['totalScore'] ?? 0;
+                        $scenarioBreakdown[$matchedKey]['total_time'] += $sess['playTimeMinutes'] ?? $sess['play_time_minutes'] ?? 0;
+                    }
+                    foreach ($scenarioBreakdown as &$sb) {
+                        $sb['avg_score'] = $sb['sessions'] > 0 ? round($sb['total_score'] / $sb['sessions']) : 0;
+                    }
+                    $extraData['scenario_breakdown'] = $scenarioBreakdown;
                 }
             } catch (\Throwable $e) {}
 

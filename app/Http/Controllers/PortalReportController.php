@@ -215,6 +215,8 @@ class PortalReportController extends Controller
                         'avg_resource'    => $stats['avgResource'] ?? $stats['averageResource'] ?? null,
                         'avg_ethics'      => $stats['avgEthics'] ?? $stats['averageEthics'] ?? null,
                         'avg_adaptation'  => $stats['avgAdaptation'] ?? $stats['averageAdaptation'] ?? null,
+                        // Scenario-based breakdown (Referans: 6 senaryo)
+                        'scenario_breakdown' => $this->buildScenarioBreakdown($d),
                     ];
                 }
             } elseif ($conn instanceof WayStartupConnector) {
@@ -1327,5 +1329,68 @@ class PortalReportController extends Controller
             'matrix' => $matrix,
             'apps' => $apps,
         ]);
+    }
+
+    /**
+     * Senaryo bazlı breakdown (Referans: 6 senaryo).
+     * MissionWay session/simulation verilerinden senaryo gruplama.
+     */
+    private function buildScenarioBreakdown(array $reportData): array
+    {
+        $scenarioMap = [
+            'village_life'    => ['name' => 'Köy Hayatı',      'icon' => '🏠', 'color' => '#4364F7'],
+            'world_traveler'  => ['name' => 'Dünya Gezgini',   'icon' => '🌍', 'color' => '#8B5CF6'],
+            'novaris'         => ['name' => 'Novaris',          'icon' => '🏢', 'color' => '#F59E0B'],
+            'biolab'          => ['name' => 'BioLab',           'icon' => '🧪', 'color' => '#10B981'],
+            'what_if'         => ['name' => 'Ya Olsaydı?',     'icon' => '💡', 'color' => '#EF4444'],
+            'lost_egg'        => ['name' => 'Kayıp Yumurta',   'icon' => '🔍', 'color' => '#06B6D4'],
+        ];
+
+        $scenarios = [];
+        $sessions = $reportData['sessions'] ?? $reportData['recent_sessions'] ?? [];
+
+        foreach ($sessions as $session) {
+            $simName = $session['simulation_name'] ?? $session['simulationName'] ?? $session['scenario'] ?? '';
+            $simSlug = strtolower(str_replace([' ', '-'], '_', preg_replace('/[^a-zA-Z0-9_\- ]/', '', $simName)));
+
+            // Match slug to scenario map
+            $matchedKey = null;
+            foreach (array_keys($scenarioMap) as $key) {
+                if (str_contains($simSlug, $key)) {
+                    $matchedKey = $key;
+                    break;
+                }
+            }
+            $matchedKey = $matchedKey ?? 'other';
+
+            if (!isset($scenarios[$matchedKey])) {
+                $mapEntry = $scenarioMap[$matchedKey] ?? ['name' => $simName ?: 'Diğer', 'icon' => '🎮', 'color' => '#6B7280'];
+                $scenarios[$matchedKey] = [
+                    'name' => $mapEntry['name'],
+                    'icon' => $mapEntry['icon'],
+                    'color' => $mapEntry['color'],
+                    'sessions' => 0,
+                    'total_score' => 0,
+                    'total_time' => 0,
+                    'last_played' => null,
+                ];
+            }
+
+            $scenarios[$matchedKey]['sessions']++;
+            $scenarios[$matchedKey]['total_score'] += $session['score'] ?? $session['totalScore'] ?? 0;
+            $scenarios[$matchedKey]['total_time'] += $session['playTimeMinutes'] ?? $session['play_time_minutes'] ?? 0;
+
+            $sessionDate = $session['created_at'] ?? $session['date'] ?? $session['startedAt'] ?? null;
+            if ($sessionDate && (!$scenarios[$matchedKey]['last_played'] || $sessionDate > $scenarios[$matchedKey]['last_played'])) {
+                $scenarios[$matchedKey]['last_played'] = $sessionDate;
+            }
+        }
+
+        // avg score hesapla
+        foreach ($scenarios as &$s) {
+            $s['avg_score'] = $s['sessions'] > 0 ? round($s['total_score'] / $s['sessions']) : 0;
+        }
+
+        return $scenarios;
     }
 }

@@ -406,6 +406,40 @@
                     </div>
                 @endif
 
+                {{-- Senaryo Bazlı Performans --}}
+                @if(!empty($extraData['scenario_breakdown']))
+                    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                            🎭 Senaryo Performansı
+                            <span class="text-[10px] font-normal text-gray-400">{{ count($extraData['scenario_breakdown']) }} senaryo</span>
+                        </h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            @foreach($extraData['scenario_breakdown'] as $sKey => $sc)
+                            <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3" style="border-left:3px solid {{ $sc['color'] }}">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-lg">{{ $sc['icon'] }}</span>
+                                    <span class="text-xs font-bold text-gray-900 dark:text-white">{{ $sc['name'] }}</span>
+                                </div>
+                                <div class="grid grid-cols-3 gap-2 text-center">
+                                    <div>
+                                        <p class="text-base font-extrabold" style="color:{{ $sc['color'] }}">{{ $sc['sessions'] }}</p>
+                                        <p class="text-[9px] text-gray-400">Oturum</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-base font-extrabold" style="color:{{ $sc['color'] }}">{{ $sc['avg_score'] }}</p>
+                                        <p class="text-[9px] text-gray-400">Ort. Skor</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-base font-extrabold text-gray-500">{{ $sc['total_time'] }}<span class="text-[8px]">dk</span></p>
+                                        <p class="text-[9px] text-gray-400">Süre</p>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 {{-- Oturum Listesi --}}
                 @if(!empty($data['sessions']))
                     <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">

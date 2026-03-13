@@ -219,6 +219,50 @@
 </div>
 @endif
 
+{{-- MissionWay: Senaryo Bazlı Rapor Kartları --}}
+@php $mwScenarios = ($connectorProfiles['mission-way']['scenario_breakdown'] ?? []); @endphp
+@if(count($mwScenarios) > 0)
+<div style="margin-bottom:20px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:16px;">🎭</span>
+        <span style="font-size:15px;font-weight:700;">{{ $isTr ? 'Senaryo Performansı' : 'Scenario Performance' }}</span>
+        <span style="font-size:11px;color:var(--text-muted);background:var(--bg-subtle,#f5f5f5);padding:2px 8px;border-radius:999px;">{{ count($mwScenarios) }} {{ $isTr ? 'senaryo' : 'scenarios' }}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;">
+        @foreach($mwScenarios as $sKey => $sc)
+        <div class="dp-card" style="padding:16px;border-left:3px solid {{ $sc['color'] }};">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                <span style="font-size:20px;">{{ $sc['icon'] }}</span>
+                <span style="font-size:13px;font-weight:700;color:#111;">{{ $sc['name'] }}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <div>
+                    <div style="font-size:18px;font-weight:800;color:{{ $sc['color'] }};">{{ $sc['sessions'] }}</div>
+                    <div style="font-size:10px;color:var(--text-muted);">{{ $isTr ? 'Oturum' : 'Sessions' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:18px;font-weight:800;color:{{ $sc['color'] }};">{{ $sc['avg_score'] }}</div>
+                    <div style="font-size:10px;color:var(--text-muted);">{{ $isTr ? 'Ort. Skor' : 'Avg Score' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:14px;font-weight:700;color:#6B7280;">{{ $sc['total_time'] }}<span style="font-size:10px;">dk</span></div>
+                    <div style="font-size:10px;color:var(--text-muted);">{{ $isTr ? 'Süre' : 'Time' }}</div>
+                </div>
+                <div>
+                    @if($sc['last_played'])
+                    <div style="font-size:11px;font-weight:600;color:#6B7280;">{{ \Carbon\Carbon::parse($sc['last_played'])->format('d.m') }}</div>
+                    <div style="font-size:10px;color:var(--text-muted);">{{ $isTr ? 'Son' : 'Last' }}</div>
+                    @else
+                    <div style="font-size:11px;color:var(--text-muted);">—</div>
+                    @endif
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
 {{-- App Tabs --}}
 <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
     @foreach($apps as $a)
