@@ -163,6 +163,7 @@
                 @endif
                 @endforeach
             </div>
+            @endif
         </div>
         {{-- WayStartup: per-simulation progress cards --}}
         @if($slug === 'way-startup' && !empty($profile['simulations_with_progress']))

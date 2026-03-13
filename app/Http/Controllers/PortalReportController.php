@@ -192,6 +192,7 @@ class PortalReportController extends Controller
         $connectorProfiles = [];
         $apps = Application::active()->ordered()->get();
         foreach ($apps as $a) {
+            try {
             $conn = $a->resolveConnector();
             if (!$conn) continue;
 
@@ -271,6 +272,10 @@ class PortalReportController extends Controller
                         'simulator_sessions' => array_values(array_slice($simulatorSessions, 0, 15)),
                     ];
                 }
+            }
+            } catch (\Throwable $e) {
+                // Connector API timeout or error — skip silently, don't crash the page
+                \Log::warning("Connector {$a->slug} failed for student {$student->id}: " . $e->getMessage());
             }
         }
 
