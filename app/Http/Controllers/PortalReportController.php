@@ -9,7 +9,6 @@ use App\Models\Application;
 use App\Models\AppUserData;
 use App\Models\SchoolClass;
 use App\Models\User;
-use App\Services\ConnectorSyncService;
 use App\Services\ReportService;
 use Illuminate\Support\Facades\DB;
 
@@ -26,7 +25,6 @@ class PortalReportController extends Controller
 {
     public function __construct(
         private ReportService $reportService,
-        private ConnectorSyncService $syncService,
     ) {
     }
 
