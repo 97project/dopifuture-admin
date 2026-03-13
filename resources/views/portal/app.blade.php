@@ -902,6 +902,10 @@
                 🏫 {{ $isTr ? 'Hiyerarşi' : 'Hierarchy' }}
             </a>
 
+            <a href="{{ route('portal.reports.competency.atlas', ['student' => auth()->id()]) }}" class="dp-nav-item {{ $cr === 'portal.reports.competency.atlas' ? 'active' : '' }}" style="padding-left:36px;font-size:12px;">
+                🧠 {{ $isTr ? 'Yetkinlik Atlası' : 'Competency Atlas' }}
+            </a>
+
             @if($user && $user->hasAnyRole(['super-admin','admin','school-admin','school-principal']))
             <a href="{{ route('portal.applications.index') }}" class="dp-nav-item {{ str_starts_with($cr, 'portal.applications') ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
