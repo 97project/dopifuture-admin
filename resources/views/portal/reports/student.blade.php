@@ -5,11 +5,33 @@
 @section('content')
 @php $isTr = app()->getLocale() === 'tr'; @endphp
 
+@php
+    $vegaProfile = $connectorProfiles['vega'] ?? $connectorProfiles['way-ai-coach'] ?? [];
+    $photoUrl = $vegaProfile['profile']['photo_url'] ?? $vegaProfile['profile']['profilePhoto'] ?? null;
+    $grade = $vegaProfile['profile']['grade'] ?? $vegaProfile['profile']['level'] ?? null;
+    $premiumStatus = $vegaProfile['profile']['premium_status'] ?? $vegaProfile['profile']['isPremium'] ?? null;
+    $onboardingDone = $vegaProfile['profile']['onboarding_completed'] ?? $vegaProfile['profile']['onboardingCompleted'] ?? null;
+@endphp
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
     <div style="display:flex;align-items:center;gap:12px;">
+        @if($photoUrl)
+        <img src="{{ $photoUrl }}" alt="{{ $student->name }}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--primary);">
+        @else
         <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;">{{ strtoupper(substr($student->name,0,1).substr($student->surname??'',0,1)) }}</div>
+        @endif
         <div>
-            <div style="font-size:18px;font-weight:600;">{{ $student->name }} {{ $student->surname }}</div>
+            <div style="font-size:18px;font-weight:600;display:flex;align-items:center;gap:8px;">
+                {{ $student->name }} {{ $student->surname }}
+                @if($premiumStatus)
+                <span style="font-size:10px;padding:2px 8px;background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;border-radius:999px;font-weight:700;">💎 Premium</span>
+                @endif
+                @if($grade)
+                <span style="font-size:10px;padding:2px 8px;background:#EEF2FF;color:#4364F7;border-radius:999px;font-weight:600;">{{ $isTr ? 'Seviye' : 'Grade' }}: {{ $grade }}</span>
+                @endif
+                @if($onboardingDone)
+                <span style="font-size:10px;padding:2px 8px;background:#ECFDF5;color:#10B981;border-radius:999px;">✅ Onboarding</span>
+                @endif
+            </div>
             <p style="font-size:13px;color:var(--text-muted);margin:2px 0 0;">{{ $student->email }} — {{ $isTr ? 'Detaylı öğrenci raporu' : 'Detailed student report' }}</p>
         </div>
     </div>
@@ -94,6 +116,24 @@
                     <div style="font-size:22px;font-weight:800;color:#F59E0B;">{{ $profile['simulator_count'] ?? 0 }}</div>
                     <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Simülatör' : 'Simulator' }}</div>
                 </div>
+                {{-- Mini Donut Chart (Faz 4 — Sessions Overview) --}}
+                @php
+                    $simC = $profile['simulator_count'] ?? 0;
+                    $lecC = $profile['lecturer_count'] ?? 0;
+                    $chatC = $profile['chatbot_count'] ?? 0;
+                    $donutTotal = max(1, $simC + $lecC + $chatC);
+                    $simPct = round(($simC / $donutTotal) * 100);
+                    $lecPct = round(($lecC / $donutTotal) * 100);
+                    $chatPct = 100 - $simPct - $lecPct;
+                @endphp
+                @if($donutTotal > 1)
+                <div style="text-align:center;">
+                    <div style="width:44px;height:44px;border-radius:50%;background:conic-gradient(#F59E0B 0% {{ $simPct }}%, #10B981 {{ $simPct }}% {{ $simPct + $lecPct }}%, #3B82F6 {{ $simPct + $lecPct }}% 100%);display:inline-flex;align-items:center;justify-content:center;">
+                        <div style="width:26px;height:26px;border-radius:50%;background:var(--bg-card,#fff);"></div>
+                    </div>
+                    <div style="font-size:9px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Dağılım' : 'Split' }}</div>
+                </div>
+                @endif
                 <div>
                     <div style="font-size:22px;font-weight:800;color:#10B981;">{{ $profile['lecturer_count'] ?? 0 }}</div>
                     <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ $isTr ? 'Öğretmen' : 'Lecturer' }}</div>

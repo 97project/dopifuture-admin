@@ -929,6 +929,10 @@
 
         {{-- Footer --}}
         <div class="dp-sidebar-footer">
+            {{-- Feedback Button (Faz 7) --}}
+            <button type="button" class="dp-nav-item" style="width:100%;color:rgba(255,255,255,0.55);border:none;cursor:pointer;font-family:inherit;background:transparent;" onclick="document.getElementById('feedbackModal').style.display='flex'">
+                📝 {{ $isTr ? 'Geri Bildirim' : 'Feedback' }}
+            </button>
             <form action="{{ route('portal.logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="dp-nav-item" style="width:100%; color: rgba(255,255,255,0.45); border:none; cursor:pointer; font-family:inherit; background:transparent;">
@@ -1015,6 +1019,22 @@
             if(un) un.style.display = 'inline';
         }
     </script>
+
+    {{-- Feedback Modal (Faz 7) --}}
+    <div id="feedbackModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+        <div style="background:#fff;border-radius:16px;padding:24px;width:90%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <h3 style="font-size:16px;font-weight:700;margin:0;">📝 {{ $isTr ? 'Geri Bildirim' : 'Feedback' }}</h3>
+                <button onclick="document.getElementById('feedbackModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6B7280;">✕</button>
+            </div>
+            <p style="font-size:13px;color:#6B7280;margin:0 0 12px;">{{ $isTr ? 'Düşüncelerinizi bizimle paylaşın' : 'Share your thoughts with us' }}</p>
+            <textarea id="feedbackText" placeholder="{{ $isTr ? 'Mesajınızı yazın...' : 'Type your message...' }}" style="width:100%;height:120px;border:1px solid #E5E7EB;border-radius:10px;padding:12px;font-size:14px;resize:none;font-family:inherit;box-sizing:border-box;"></textarea>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
+                <button onclick="document.getElementById('feedbackModal').style.display='none'" style="padding:8px 16px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;">{{ $isTr ? 'İptal' : 'Cancel' }}</button>
+                <button onclick="var t=document.getElementById('feedbackText');if(t.value.trim()){alert('{{ $isTr ? 'Teşekkürler! Geri bildiriminiz alındı.' : 'Thank you! Your feedback has been received.' }}');t.value='';document.getElementById('feedbackModal').style.display='none'}" style="padding:8px 16px;border:none;border-radius:8px;background:linear-gradient(135deg,#4364F7,#6FB1FC);color:#fff;cursor:pointer;font-size:13px;font-weight:600;">{{ $isTr ? 'Gönder' : 'Submit' }}</button>
+            </div>
+        </div>
+    </div>
 
     @yield('scripts')
 </body>

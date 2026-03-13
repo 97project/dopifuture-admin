@@ -54,6 +54,63 @@
     </div>
 </div>
 
+{{-- Metric Evolution Chart (Faz 6 — SVG inline line chart) --}}
+@if(count($turns) > 1)
+@php
+    $metricKeys = ['health' => '#EF4444', 'resource' => '#10B981', 'ethics' => '#F59E0B', 'adaptation' => '#3B82F6'];
+    $turnCount = count($turns);
+    $chartW = 620;
+    $chartH = 140;
+    $padX = 30;
+    $padY = 10;
+    $usableW = $chartW - $padX * 2;
+    $usableH = $chartH - $padY * 2;
+    $polylines = [];
+    foreach ($metricKeys as $mk => $mc) {
+        $points = [];
+        foreach ($turns as $ti => $t) {
+            $mv = $t['metrics'][$mk] ?? $t['metrics_after'][$mk] ?? $t['delta'][$mk] ?? null;
+            if ($mv === null && isset($t['score_after'])) $mv = $t['score_after'];
+            $mv = $mv ?? 50;
+            $x = $padX + ($ti / max(1, $turnCount - 1)) * $usableW;
+            $y = $padY + (1 - min(100, max(0, $mv)) / 100) * $usableH;
+            $points[] = round($x, 1) . ',' . round($y, 1);
+        }
+        $polylines[$mk] = ['color' => $mc, 'points' => implode(' ', $points)];
+    }
+@endphp
+<div class="dp-card" style="margin-bottom:20px;">
+    <div class="dp-card-title" style="margin-bottom:12px;">📈 {{ $isTr ? 'Metrik Evrimi (Turn Bazlı)' : 'Metric Evolution (Per Turn)' }}</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
+        @foreach($metricKeys as $mk => $mc)
+        <span style="font-size:10px;display:flex;align-items:center;gap:4px;">
+            <span style="width:10px;height:3px;background:{{ $mc }};border-radius:2px;"></span>
+            {{ ucfirst($mk) }}
+        </span>
+        @endforeach
+    </div>
+    <div style="overflow-x:auto;">
+        <svg viewBox="0 0 {{ $chartW }} {{ $chartH }}" style="width:100%;max-width:{{ $chartW }}px;height:auto;">
+            {{-- Grid lines --}}
+            @for($gi = 0; $gi <= 4; $gi++)
+            <line x1="{{ $padX }}" y1="{{ $padY + ($gi / 4) * $usableH }}" x2="{{ $chartW - $padX }}" y2="{{ $padY + ($gi / 4) * $usableH }}" stroke="#E5E7EB" stroke-width="0.5" />
+            <text x="{{ $padX - 4 }}" y="{{ $padY + ($gi / 4) * $usableH + 3 }}" font-size="8" fill="#9CA3AF" text-anchor="end">{{ 100 - $gi * 25 }}</text>
+            @endfor
+            {{-- Polylines --}}
+            @foreach($polylines as $pk => $pl)
+            <polyline points="{{ $pl['points'] }}" fill="none" stroke="{{ $pl['color'] }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            @endforeach
+            {{-- Turn labels --}}
+            @foreach($turns as $ti => $t)
+            @if($turnCount <= 20 || $ti % max(1, intval($turnCount / 10)) === 0)
+            <text x="{{ $padX + ($ti / max(1, $turnCount - 1)) * $usableW }}" y="{{ $chartH - 2 }}" font-size="7" fill="#9CA3AF" text-anchor="middle">T{{ $ti + 1 }}</text>
+            @endif
+            @endforeach
+        </svg>
+    </div>
+</div>
+@endif
+
 {{-- Turns Timeline --}}
 @if(count($turns) > 0)
 <div class="dp-card">
