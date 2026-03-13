@@ -101,6 +101,32 @@
                         @endif
                         {{ $step->completed ? ($isTr ? 'Tamamlandı' : 'Completed') : ($isTr ? 'Devam Ediyor' : 'In Progress') }}
                     </div>
+
+                    {{-- Per-step dates (4.5) --}}
+                    @if($step->started_at || $step->completed_at)
+                    <div style="font-size:10px;color:var(--color-txt-muted,#999);margin-top:4px;">
+                        @if($step->started_at)
+                        📅 {{ \Carbon\Carbon::parse($step->started_at)->format('d.m.Y') }}
+                        @endif
+                        @if($step->completed_at)
+                        → {{ \Carbon\Carbon::parse($step->completed_at)->format('d.m.Y') }}
+                        @endif
+                    </div>
+                    @endif
+
+                    {{-- AI Questions (4.3) --}}
+                    @if(!empty($step->questions))
+                    <div style="margin-top:6px;font-size:10px;">
+                        @foreach(array_slice($step->questions, 0, 3) as $qi => $q)
+                        <div style="color:var(--color-txt-muted,#999);margin-bottom:2px;line-height:1.3;">
+                            <span style="color:#4364F7;font-weight:600;">Q{{ $qi+1 }}.</span> {{ Str::limit($q['text'] ?? '-', 40) }}
+                            @if(($q['score'] ?? null) !== null)
+                            <span style="font-weight:600;color:{{ ($q['score'] ?? 0) >= ($q['max_score'] ?? 100) / 2 ? '#10B981' : '#F59E0B' }};">{{ $q['score'] }}/{{ $q['max_score'] ?? '?' }}</span>
+                            @endif
+                        </div>
+                        @endforeach
+                    </div>
+                    @endif
                 </div>
             </div>
 
