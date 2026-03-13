@@ -39,9 +39,32 @@
             @endif
         </div>
 
-        {{-- Chat Messages --}}
-        <div style="display:flex;flex-direction:column;gap:16px;">
-            @forelse($messages ?? [] as $msg)
+        {{-- Chat Messages — Thread Grouped by Date --}}
+        @php
+            // 5.5: Group messages into threads by date
+            $threads = collect($messages ?? [])->groupBy(function ($msg) {
+                $ts = $msg['created_at'] ?? $msg['timestamp'] ?? null;
+                return $ts ? \Carbon\Carbon::parse($ts)->format('Y-m-d') : 'unknown';
+            });
+        @endphp
+
+        <div style="display:flex;flex-direction:column;gap:8px;">
+            @forelse($threads as $dateKey => $threadMessages)
+                {{-- Thread Date Separator --}}
+                <div style="display:flex;align-items:center;gap:12px;margin:12px 0 4px;">
+                    <div style="flex:1;height:1px;background:#E5E7EB;"></div>
+                    <span style="padding:4px 12px;border-radius:999px;background:#F5F3FF;color:#8B5CF6;font-size:10px;font-weight:600;white-space:nowrap;">
+                        @if($dateKey === 'unknown')
+                            {{ $isTr ? 'Tarih Bilinmiyor' : 'Unknown Date' }}
+                        @else
+                            📅 {{ \Carbon\Carbon::parse($dateKey)->format('d.m.Y') }}
+                        @endif
+                        · {{ $threadMessages->count() }} {{ $isTr ? 'mesaj' : 'msg' }}
+                    </span>
+                    <div style="flex:1;height:1px;background:#E5E7EB;"></div>
+                </div>
+
+                @foreach($threadMessages as $msg)
                 @php
                     $isUser = ($msg['role'] ?? 'user') === 'user';
                 @endphp
@@ -68,6 +91,7 @@
                         {{ $msg['content'] ?? $msg['text'] ?? '-' }}
                     </div>
                 </div>
+                @endforeach
             @empty
                 <div style="text-align:center;padding:40px 20px;color:var(--color-txt-muted);">
                     <div style="width:48px;height:48px;margin:0 auto 12px;border-radius:50%;background:#F5F3FF;display:flex;align-items:center;justify-content:center;">

@@ -11,20 +11,33 @@
 
 {{-- ═══ TAB BAR — Figma F-38: Assignments [24] | Performance ═══ --}}
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-    <div class="dp-tabs" style="border-bottom:none;margin-bottom:0;">
-        <a href="{{ route('portal.reports.app', $app->slug) }}?tab=assignment"
-           class="dp-tab {{ $tab === 'assignment' ? 'active' : '' }}">
-            {{ $isTr ? 'Görevler' : 'Assignments' }}
-            @if($slug === 'mission-way')
-                <span class="tab-count">{{ $total_missions ?? 0 }}</span>
-            @else
-                <span class="tab-count">{{ $total_progress ?? 0 }}</span>
-            @endif
-        </a>
-        <a href="{{ route('portal.reports.app', $app->slug) }}?tab=performance"
-           class="dp-tab {{ $tab === 'performance' ? 'active' : '' }}">
-            {{ $isTr ? 'Performans' : 'Performance' }}
-        </a>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div class="dp-tabs" style="border-bottom:none;margin-bottom:0;">
+            <a href="{{ route('portal.reports.app', $app->slug) }}?tab=assignment{{ request('class_id') ? '&class_id='.request('class_id') : '' }}"
+               class="dp-tab {{ $tab === 'assignment' ? 'active' : '' }}">
+                {{ $isTr ? 'Görevler' : 'Assignments' }}
+                @if($slug === 'mission-way')
+                    <span class="tab-count">{{ $total_missions ?? 0 }}</span>
+                @else
+                    <span class="tab-count">{{ $total_progress ?? 0 }}</span>
+                @endif
+            </a>
+            <a href="{{ route('portal.reports.app', $app->slug) }}?tab=performance{{ request('class_id') ? '&class_id='.request('class_id') : '' }}"
+               class="dp-tab {{ $tab === 'performance' ? 'active' : '' }}">
+                {{ $isTr ? 'Performans' : 'Performance' }}
+            </a>
+        </div>
+
+        {{-- 5.2: Class filter dropdown --}}
+        @if(isset($classes) && $classes->count())
+        <select onchange="window.location='{{ route('portal.reports.app', $app->slug) }}?tab={{ $tab }}&class_id='+this.value"
+                style="padding:6px 12px;border-radius:8px;border:1px solid var(--color-row-border,#e5e7eb);font-size:12px;font-family:inherit;background:#fff;cursor:pointer;color:var(--color-txt,#030719);">
+            <option value="">{{ $isTr ? 'Tüm Sınıflar' : 'All Classes' }}</option>
+            @foreach($classes as $cls)
+            <option value="{{ $cls->id }}" {{ request('class_id') == $cls->id ? 'selected' : '' }}>{{ $cls->name }}</option>
+            @endforeach
+        </select>
+        @endif
     </div>
 
     <button type="button" class="dp-btn" onclick="document.getElementById('addAssignmentModal')?.classList.add('show')">

@@ -65,6 +65,16 @@ class PortalReportController extends Controller
         $user = auth()->user();
         $scopedUserIds = $this->getScopedUserIds($user);
 
+        // 5.2: Class filter — if class_id is provided, narrow scoped users to that class
+        $classId = request('class_id');
+        $schoolIds = $user->schools()->pluck('schools.id');
+        $classes = \App\Models\SchoolClass::whereIn('school_id', $schoolIds)->ordered()->get();
+
+        if ($classId) {
+            $classUserIds = \DB::table('class_user')->where('class_id', $classId)->pluck('user_id');
+            $scopedUserIds = $scopedUserIds->intersect($classUserIds);
+        }
+
         // ── ReportService ile DB'deki normalize edilmiş veriler ──
         $reportData = $this->reportService->getAppReport($app, $scopedUserIds);
 
@@ -123,6 +133,7 @@ class PortalReportController extends Controller
         $data = [
             'app'              => $app,
             'user'             => $user,
+            'classes'          => $classes,
             'missions'         => $missions,
             'startups'         => $startups,
             'total_missions'   => $reportData['total_progress'] ?? 0,
