@@ -85,4 +85,52 @@
     <p class="text-gray-400">{{ app()->getLocale() === 'tr' ? 'Henüz rapor verisi yok.' : 'No report data yet.' }}</p>
 </div>
 @endif
+
+{{-- Connector Profiles (Portal Parity) --}}
+@if(!empty($connectorProfiles))
+<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">🔌 {{ app()->getLocale() === 'tr' ? 'Connector Canlı Verileri' : 'Live Connector Data' }}</h2>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+    @foreach($connectorProfiles as $slug => $cp)
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+        <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            {{ ucfirst(str_replace('-', ' ', $slug)) }}
+        </h3>
+
+        @if(($cp['type'] ?? '') === 'missionway')
+        <div class="grid grid-cols-3 gap-3 text-center mb-3">
+            <div><div class="text-lg font-bold text-blue-500">{{ number_format($cp['total_score'] ?? 0) }}</div><div class="text-[10px] text-gray-500">{{ app()->getLocale() === 'tr' ? 'Puan' : 'Score' }}</div></div>
+            <div><div class="text-lg font-bold text-emerald-500">{{ $cp['simulations_completed'] ?? 0 }}</div><div class="text-[10px] text-gray-500">{{ app()->getLocale() === 'tr' ? 'Tamamlanan' : 'Completed' }}</div></div>
+            <div><div class="text-lg font-bold text-purple-500">{{ $cp['play_time_minutes'] ?? 0 }}dk</div><div class="text-[10px] text-gray-500">{{ app()->getLocale() === 'tr' ? 'Süre' : 'Time' }}</div></div>
+        </div>
+        @if(!empty($cp['achievements']))
+        <div class="flex flex-wrap gap-1 mt-2">
+            @foreach(array_slice($cp['achievements'], 0, 6) as $ach)
+            <span class="px-1.5 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-[10px] rounded">🏆 {{ $ach['name'] ?? 'Achievement' }}</span>
+            @endforeach
+        </div>
+        @endif
+
+        @elseif(($cp['type'] ?? '') === 'waystartup')
+        <div class="grid grid-cols-3 gap-3 text-center mb-3">
+            <div><div class="text-lg font-bold text-emerald-500">{{ number_format($cp['points'] ?? 0) }}</div><div class="text-[10px] text-gray-500">{{ app()->getLocale() === 'tr' ? 'Puan' : 'Points' }}</div></div>
+            <div><div class="text-lg font-bold text-blue-500">{{ $cp['completed_steps'] ?? 0 }}/{{ $cp['total_steps'] ?? 0 }}</div><div class="text-[10px] text-gray-500">{{ app()->getLocale() === 'tr' ? 'Adım' : 'Steps' }}</div></div>
+            <div>
+                @php $pct = ($cp['total_steps'] ?? 0) > 0 ? round(($cp['completed_steps'] ?? 0) / $cp['total_steps'] * 100) : 0; @endphp
+                <div class="text-lg font-bold text-amber-500">%{{ $pct }}</div>
+                <div class="text-[10px] text-gray-500">{{ app()->getLocale() === 'tr' ? 'İlerleme' : 'Progress' }}</div>
+            </div>
+        </div>
+
+        @elseif(($cp['type'] ?? '') === 'vega')
+        <div class="grid grid-cols-3 gap-3 text-center">
+            <div><div class="text-lg font-bold text-purple-500">{{ $cp['session_count'] ?? 0 }}</div><div class="text-[10px] text-gray-500">{{ app()->getLocale() === 'tr' ? 'Oturum' : 'Sessions' }}</div></div>
+            <div><div class="text-lg font-bold text-amber-500">{{ $cp['simulator_count'] ?? 0 }}</div><div class="text-[10px] text-gray-500">Simulator</div></div>
+            <div><div class="text-lg font-bold text-emerald-500">{{ $cp['lecturer_count'] ?? 0 }}</div><div class="text-[10px] text-gray-500">Lecturer</div></div>
+        </div>
+        @endif
+    </div>
+    @endforeach
+</div>
+@endif
 @endsection

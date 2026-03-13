@@ -49,7 +49,11 @@
     @foreach($overview['app_stats'] as $stat)
     <a href="{{ route('admin.reports.app', $stat['app']->slug) }}" class="block bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:border-blue-400 dark:hover:border-blue-600 transition-all group">
         <div class="flex justify-between items-center mb-3">
-            <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-blue-500 transition-colors">{{ $stat['app']->name }}</h3>
+            <div class="flex items-center gap-2">
+                @php $health = $connectorHealth[$stat['app']->slug] ?? ['ok' => false]; @endphp
+                <span class="w-2 h-2 rounded-full {{ ($health['ok'] ?? false) ? 'bg-emerald-400' : 'bg-red-400' }}" title="{{ ($health['ok'] ?? false) ? 'API OK' : 'API Down: '.($health['error'] ?? 'unknown') }}"></span>
+                <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-blue-500 transition-colors">{{ $stat['app']->name }}</h3>
+            </div>
             <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-md">{{ $stat['total_users'] }} {{ app()->getLocale() === 'tr' ? 'kullanıcı' : 'users' }}</span>
         </div>
         <div class="grid grid-cols-3 gap-3 text-center">

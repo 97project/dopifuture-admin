@@ -35,7 +35,16 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
     @foreach($overview['app_stats'] as $stat)
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
-        <h3 class="font-semibold text-gray-900 dark:text-white mb-3">{{ $stat['app']->name }}</h3>
+        <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+                @php $appCD = $appConnectorData[$stat['app']->slug] ?? ['health' => ['ok' => false], 'synced_count' => 0]; @endphp
+                <span class="w-2 h-2 rounded-full {{ ($appCD['health']['ok'] ?? false) ? 'bg-emerald-400' : 'bg-red-400' }}" title="{{ ($appCD['health']['ok'] ?? false) ? 'API OK' : 'API Down' }}"></span>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ $stat['app']->name }}</h3>
+            </div>
+            @if(($appCD['synced_count'] ?? 0) > 0)
+            <span class="text-[10px] text-gray-400">{{ $appCD['synced_count'] }}/{{ $appCD['total_in_app'] ?? 0 }} sync</span>
+            @endif
+        </div>
         <div class="grid grid-cols-3 gap-3 text-center">
             <div>
                 <div class="text-lg font-bold text-emerald-500">{{ $stat['completed'] }}</div>
