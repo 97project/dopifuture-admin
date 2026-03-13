@@ -101,7 +101,7 @@ class PortalReportController extends Controller
             $enriched = 0;
             $userStats = $userStats->map(function ($stat) use ($connector, $app, &$enriched) {
                 $u = $stat['user'] ?? null;
-                if (!$u || $enriched >= 10) return $stat;
+                if (!$u || $enriched >= 3) return $stat;
 
                 try {
                     if ($connector instanceof MissionWayConnector) {
