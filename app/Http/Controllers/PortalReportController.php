@@ -6,6 +6,7 @@ use App\Connectors\MissionWayConnector;
 use App\Connectors\VegaConnector;
 use App\Connectors\WayStartupConnector;
 use App\Models\Application;
+use App\Models\AppUserData;
 use App\Models\SchoolClass;
 use App\Models\User;
 use App\Services\ConnectorSyncService;
@@ -58,7 +59,7 @@ class PortalReportController extends Controller
      * Per-application detailed report.
      * Figma F-38 (Assignments tab) + F-63 (Performance tab)
      *
-     * Canlı veri: ReportService (DB) + Connector (API) birleşimi.
+     * Veri SADECE yerel DB'den okunur — API çağrısı yapılmaz.
      */
     public function appReport(Application $app)
     {
@@ -78,67 +79,45 @@ class PortalReportController extends Controller
         // ── ReportService ile DB'deki normalize edilmiş veriler ──
         $reportData = $this->reportService->getAppReport($app, $scopedUserIds);
 
-        // ── Connector'dan uygulama bazlı canlı veriler (failsafe) ──
-        $connector = $app->resolveConnector();
+        // ── Missions/Startups: app_user_data'dan DB-based (API çağrısı YOK) ──
         $missions = collect();
         $startups = collect();
-
-        try {
-            if ($connector instanceof MissionWayConnector) {
-                $missions = $this->getMissionWayLiveData($connector, $app, $scopedUserIds);
-            } elseif ($connector instanceof WayStartupConnector) {
-                $startups = $this->getWayStartupLiveData($connector, $app, $scopedUserIds);
-            }
-        } catch (\Throwable $e) {
-            \Log::warning("Connector live data failed for {$app->slug}: " . $e->getMessage());
-        }
 
         // ── Per-user stats from DB ──
         $userStats = collect($reportData['user_stats'] ?? []);
 
-        // Connector-specific user enrichment (limit to 10 to prevent 504 timeout)
-        if ($connector) {
-            $enriched = 0;
-            $userStats = $userStats->map(function ($stat) use ($connector, $app, &$enriched) {
-                $u = $stat['user'] ?? null;
-                if (!$u || $enriched >= 3) return $stat;
+        // Per-user enrichment: app_user_data.external_data'dan oku (API çağrısı YOK)
+        $userStats = $userStats->map(function ($stat) use ($app) {
+            $u = $stat['user'] ?? null;
+            if (!$u) return $stat;
 
-                try {
-                    if ($connector instanceof MissionWayConnector) {
-                        $report = $connector->getUserReport($u);
-                        if ($report && ($report['success'] ?? false)) {
-                            $d = $report['data'] ?? [];
-                            $stat['health_point'] = $d['composition']['player']['healthMetric'] ?? null;
-                            $stat['resource_point'] = $d['composition']['player']['resourceMetric'] ?? null;
-                            $stat['ethics_point'] = $d['composition']['player']['ethicsMetric'] ?? null;
-                            $stat['adaptation_point'] = $d['composition']['player']['adaptationMetric'] ?? null;
-                        }
-                    } elseif ($connector instanceof WayStartupConnector) {
-                        $report = $connector->getUserReport($u);
-                        if ($report && ($report['success'] ?? false)) {
-                            $d = $report['data'] ?? [];
-                            $stat['startup_type'] = $d['member']['type'] ?? null;
-                            $stat['teacher_score'] = $d['member']['teacherScore'] ?? null;
-                            $stat['completed_steps'] = $d['completed_steps'] ?? 0;
-                            $stat['total_steps'] = $d['total_steps'] ?? 0;
-                        }
-                    } elseif ($connector instanceof VegaConnector) {
-                        $report = $connector->getUserReport($u);
-                        if ($report && ($report['success'] ?? false)) {
-                            $d = $report['data'] ?? [];
-                            $stat['session_count'] = $d['session_count'] ?? 0;
-                            $stat['lecturer_count'] = $d['modules']['lecturer'] ?? 0;
-                            $stat['simulator_count'] = $d['modules']['simulator'] ?? 0;
-                        }
-                    }
-                    $enriched++;
-                } catch (\Throwable $e) {
-                    \Log::warning("Connector enrichment failed for user {$u->id}: " . $e->getMessage());
-                }
+            $cached = AppUserData::where('user_id', $u->id)
+                ->where('application_id', $app->id)
+                ->first();
+            if (!$cached) return $stat;
 
-                return $stat;
-            })->values();
-        }
+            $d = $cached->external_data ?? [];
+            $connType = $cached->connector_type ?? '';
+
+            if ($connType === 'MissionWayConnector') {
+                $comp = $d['composition']['player'] ?? $d['profile'] ?? [];
+                $stat['health_point'] = $comp['healthMetric'] ?? null;
+                $stat['resource_point'] = $comp['resourceMetric'] ?? null;
+                $stat['ethics_point'] = $comp['ethicsMetric'] ?? null;
+                $stat['adaptation_point'] = $comp['adaptationMetric'] ?? null;
+            } elseif ($connType === 'WayStartupConnector') {
+                $stat['startup_type'] = $d['member']['type'] ?? null;
+                $stat['teacher_score'] = $d['member']['teacherScore'] ?? null;
+                $stat['completed_steps'] = $d['completed_steps'] ?? 0;
+                $stat['total_steps'] = $d['total_steps'] ?? 0;
+            } elseif ($connType === 'VegaConnector') {
+                $stat['session_count'] = $d['session_count'] ?? 0;
+                $stat['lecturer_count'] = $d['modules']['lecturer'] ?? 0;
+                $stat['simulator_count'] = $d['modules']['simulator'] ?? 0;
+            }
+
+            return $stat;
+        })->values();
 
         $data = [
             'app'              => $app,
@@ -163,6 +142,8 @@ class PortalReportController extends Controller
 
     /**
      * Student detailed report (all apps).
+     * Veri SADECE yerel DB'den okunur — API çağrısı yapılmaz.
+     * Veriler saatlik cronjob (harvest:user-data) ile güncellenir.
      */
     public function studentReport(User $student)
     {
@@ -182,102 +163,12 @@ class PortalReportController extends Controller
 
         $student->load(['roles', 'schools', 'classes.school', 'applications']);
 
-        // Önce connector data sync et (güncel veri için)
-        $this->syncService->syncAllAppsForUser($student);
-
-        // Sonra ReportService ile normalize edilmiş raporu getir
+        // ReportService ile DB'deki normalize edilmiş rapor
         $reportData = $this->reportService->getStudentReport($student);
 
-        // Connector-level enrichment: API'den direkt profil verileri
-        $connectorProfiles = [];
+        // Connector profilleri DB'deki app_user_data.external_data'dan build et (API çağrısı YOK)
         $apps = Application::active()->ordered()->get();
-        foreach ($apps as $a) {
-            try {
-            $conn = $a->resolveConnector();
-            if (!$conn) continue;
-
-            if ($conn instanceof MissionWayConnector) {
-                $report = $conn->getUserReport($student);
-                if ($report && ($report['success'] ?? false)) {
-                    $d = $report['data'] ?? [];
-                    $profile = $d['profile'] ?? [];
-                    $stats = $profile['statistics'] ?? [];
-                    $connectorProfiles[$a->slug] = [
-                        'player_id'       => $d['player_id'] ?? null,
-                        'total_score'     => $profile['totalScore'] ?? 0,
-                        'simulations_completed' => $profile['totalSimulationsCompleted'] ?? 0,
-                        'play_time_minutes' => $profile['totalPlayTimeMinutes'] ?? 0,
-                        'session_count'   => $d['session_count'] ?? 0,
-                        'achievements'    => $profile['achievements'] ?? null,
-                        // Statistics JSONB fields
-                        'avg_score'       => $stats['avgScore'] ?? null,
-                        'best_score'      => $stats['bestScore'] ?? null,
-                        'avg_health'      => $stats['avgHealth'] ?? $stats['averageHealth'] ?? null,
-                        'avg_resource'    => $stats['avgResource'] ?? $stats['averageResource'] ?? null,
-                        'avg_ethics'      => $stats['avgEthics'] ?? $stats['averageEthics'] ?? null,
-                        'avg_adaptation'  => $stats['avgAdaptation'] ?? $stats['averageAdaptation'] ?? null,
-                        // Scenario-based breakdown (Referans: 6 senaryo)
-                        'scenario_breakdown' => $this->buildScenarioBreakdown($d),
-                    ];
-                }
-            } elseif ($conn instanceof WayStartupConnector) {
-                $report = $conn->getUserReport($student);
-                if ($report && ($report['success'] ?? false)) {
-                    $d = $report['data'] ?? [];
-                    $totalSteps = $d['total_steps'] ?? 0;
-                    $completedSteps = $d['completed_steps'] ?? 0;
-                    $connectorProfiles[$a->slug] = [
-                        'member_id'       => $d['member_id'] ?? null,
-                        'points'          => $d['member']['points'] ?? 0,
-                        'completed_steps' => $completedSteps,
-                        'total_steps'     => $totalSteps,
-                        'tasks_remaining' => max(0, $totalSteps - $completedSteps),
-                        'simulations_count' => $d['simulations_count'] ?? 0,
-                        'simulations_with_progress' => $d['simulations_with_progress'] ?? [],
-                    ];
-                }
-            } elseif ($conn instanceof VegaConnector) {
-                $report = $conn->getUserReport($student);
-                if ($report && ($report['success'] ?? false)) {
-                    $d = $report['data'] ?? [];
-                    $vegaId = $d['vega_id'] ?? null;
-
-                    // Sessions overview — adds chatbot count breakdown
-                    $overview = ['total_sessions' => 0, 'simulator_count' => 0, 'lecturer_count' => 0, 'chatbot_count' => 0];
-                    if ($vegaId) {
-                        try {
-                            $overview = $conn->getSessionsOverview($vegaId);
-                        } catch (\Throwable $e) {
-                            // Failsafe — use module counts from report
-                        }
-                    }
-
-                    // Session list for Faz 4 oturum listeleri
-                    $allSessions = $d['sessions'] ?? [];
-                    $lecturerSessions = array_filter($allSessions, fn($s) => ($s['module'] ?? '') === 'lecturer');
-                    $chatbotSessions = array_filter($allSessions, fn($s) => !in_array($s['module'] ?? '', ['simulator', 'lecturer']));
-                    $simulatorSessions = array_filter($allSessions, fn($s) => ($s['module'] ?? '') === 'simulator');
-
-                    $connectorProfiles[$a->slug] = [
-                        'vega_id'         => $vegaId,
-                        'session_count'   => $d['session_count'] ?? $overview['total_sessions'] ?? 0,
-                        'lecturer_count'  => $d['modules']['lecturer'] ?? $overview['lecturer_count'] ?? 0,
-                        'simulator_count' => $d['modules']['simulator'] ?? $overview['simulator_count'] ?? 0,
-                        'chatbot_count'   => $overview['chatbot_count'] ?? 0,
-                        'has_details'     => $d['has_details'] ?? 0,
-                        'profile'         => $d['profile'] ?? [],
-                        // Session lists for #5 and #6
-                        'lecturer_sessions'  => array_values(array_slice($lecturerSessions, 0, 15)),
-                        'chatbot_sessions'   => array_values(array_slice($chatbotSessions, 0, 15)),
-                        'simulator_sessions' => array_values(array_slice($simulatorSessions, 0, 15)),
-                    ];
-                }
-            }
-            } catch (\Throwable $e) {
-                // Connector API timeout or error — skip silently, don't crash the page
-                \Log::warning("Connector {$a->slug} failed for student {$student->id}: " . $e->getMessage());
-            }
-        }
+        $connectorProfiles = $this->buildConnectorProfilesFromDb($student, $apps);
 
         return view('portal.reports.student', [
             'student'     => $student,
@@ -1389,6 +1280,84 @@ class PortalReportController extends Controller
             break;
         }
         return view('portal.reports.competency-atlas', ['student' => $student, 'competencyScores' => $competencyScores]);
+    }
+
+    /**
+     * Connector profil verilerini DB'deki app_user_data.external_data'dan build et.
+     * API çağrısı YAPMAZ — sadece DB okur.
+     * Blade'e gönderilen $connectorProfiles array yapısı birebir korunur.
+     */
+    private function buildConnectorProfilesFromDb(User $student, $apps): array
+    {
+        $connectorProfiles = [];
+
+        // Öğrencinin tüm app_user_data kayıtlarını tek sorguda çek
+        $cachedData = AppUserData::where('user_id', $student->id)
+            ->get()
+            ->keyBy('application_id');
+
+        foreach ($apps as $a) {
+            $cached = $cachedData->get($a->id);
+            if (!$cached) continue;
+
+            $d = $cached->external_data ?? [];
+            $connType = $cached->connector_type ?? '';
+
+            if ($connType === 'MissionWayConnector') {
+                $profile = $d['profile'] ?? [];
+                $stats = $profile['statistics'] ?? [];
+                $connectorProfiles[$a->slug] = [
+                    'player_id'       => $d['player_id'] ?? null,
+                    'total_score'     => $profile['totalScore'] ?? 0,
+                    'simulations_completed' => $profile['totalSimulationsCompleted'] ?? 0,
+                    'play_time_minutes' => $profile['totalPlayTimeMinutes'] ?? 0,
+                    'session_count'   => $d['session_count'] ?? 0,
+                    'achievements'    => $profile['achievements'] ?? null,
+                    // Statistics JSONB fields
+                    'avg_score'       => $stats['avgScore'] ?? null,
+                    'best_score'      => $stats['bestScore'] ?? null,
+                    'avg_health'      => $stats['avgHealth'] ?? $stats['averageHealth'] ?? null,
+                    'avg_resource'    => $stats['avgResource'] ?? $stats['averageResource'] ?? null,
+                    'avg_ethics'      => $stats['avgEthics'] ?? $stats['averageEthics'] ?? null,
+                    'avg_adaptation'  => $stats['avgAdaptation'] ?? $stats['averageAdaptation'] ?? null,
+                    // Scenario-based breakdown
+                    'scenario_breakdown' => $this->buildScenarioBreakdown($d),
+                ];
+            } elseif ($connType === 'WayStartupConnector') {
+                $totalSteps = $d['total_steps'] ?? 0;
+                $completedSteps = $d['completed_steps'] ?? 0;
+                $connectorProfiles[$a->slug] = [
+                    'member_id'       => $d['member_id'] ?? null,
+                    'points'          => $d['member']['points'] ?? 0,
+                    'completed_steps' => $completedSteps,
+                    'total_steps'     => $totalSteps,
+                    'tasks_remaining' => max(0, $totalSteps - $completedSteps),
+                    'simulations_count' => $d['simulations_count'] ?? 0,
+                    'simulations_with_progress' => $d['simulations_with_progress'] ?? [],
+                ];
+            } elseif ($connType === 'VegaConnector') {
+                $allSessions = $d['sessions'] ?? [];
+                $lecturerSessions = array_filter($allSessions, fn($s) => ($s['module'] ?? '') === 'lecturer');
+                $chatbotSessions = array_filter($allSessions, fn($s) => !in_array($s['module'] ?? '', ['simulator', 'lecturer']));
+                $simulatorSessions = array_filter($allSessions, fn($s) => ($s['module'] ?? '') === 'simulator');
+
+                $connectorProfiles[$a->slug] = [
+                    'vega_id'         => $d['vega_id'] ?? null,
+                    'session_count'   => $d['session_count'] ?? 0,
+                    'lecturer_count'  => $d['modules']['lecturer'] ?? 0,
+                    'simulator_count' => $d['modules']['simulator'] ?? 0,
+                    'chatbot_count'   => count($chatbotSessions),
+                    'has_details'     => $d['has_details'] ?? 0,
+                    'profile'         => $d['profile'] ?? [],
+                    // Session lists
+                    'lecturer_sessions'  => array_values(array_slice($lecturerSessions, 0, 15)),
+                    'chatbot_sessions'   => array_values(array_slice($chatbotSessions, 0, 15)),
+                    'simulator_sessions' => array_values(array_slice($simulatorSessions, 0, 15)),
+                ];
+            }
+        }
+
+        return $connectorProfiles;
     }
 
     /**

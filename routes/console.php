@@ -16,7 +16,7 @@ Artisan::command('inspire', function () {
 $syncInterval = (int) env('SYNC_INTERVAL_MINUTES', 60);
 Schedule::command('harvest:user-data')
     ->cron("*/{$syncInterval} * * * *")
-    ->when(fn () => (bool) env('SYNC_ENABLED', false))
+    ->when(fn () => (bool) env('SYNC_ENABLED', true))
     ->withoutOverlapping()
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/harvest.log'));
@@ -24,6 +24,6 @@ Schedule::command('harvest:user-data')
 // Günlük cross-app reconciliation — 03:00'te
 Schedule::command('sync:reconcile')
     ->dailyAt('03:00')
-    ->when(fn () => (bool) env('SYNC_ENABLED', false))
+    ->when(fn () => (bool) env('SYNC_ENABLED', true))
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/reconcile.log'));
