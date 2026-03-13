@@ -263,6 +263,13 @@
 </div>
 @endif
 
+{{-- Yetkinlik Atlası Linki --}}
+<div style="margin-bottom:20px;">
+    <a href="{{ route('portal.reports.competency.atlas', $student->id) }}" class="dp-btn" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;">
+        🧠 {{ $isTr ? 'Yetkinlik Atlası (12 Alan)' : 'Competency Atlas (12 Areas)' }} →
+    </a>
+</div>
+
 {{-- App Tabs --}}
 <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
     @foreach($apps as $a)

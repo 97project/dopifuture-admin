@@ -1332,6 +1332,46 @@ class PortalReportController extends Controller
     }
 
     /**
+     * Yetkinlik Atlası — 12 alan, MissionWay metrikleri ile.
+     */
+    public function competencyAtlas(User $student)
+    {
+        $student->load(['roles', 'schools', 'classes', 'applications']);
+        $competencyScores = [];
+        $apps = Application::active()->ordered()->get();
+        foreach ($apps as $a) {
+            $conn = $a->resolveConnector();
+            if (!$conn || !($conn instanceof MissionWayConnector)) continue;
+            $report = $conn->getUserReport($student);
+            if (!$report || !($report['success'] ?? false)) continue;
+            $d = $report['data'] ?? [];
+            $profile = $d['profile'] ?? [];
+            $stats = $profile['statistics'] ?? [];
+            $h = $stats['avgHealth'] ?? $stats['averageHealth'] ?? 50;
+            $r = $stats['avgResource'] ?? $stats['averageResource'] ?? 50;
+            $e = $stats['avgEthics'] ?? $stats['averageEthics'] ?? 50;
+            $ad = $stats['avgAdaptation'] ?? $stats['averageAdaptation'] ?? 50;
+            $n = fn($v) => min(100, max(0, round($v)));
+            $competencyScores = [
+                'emotional'  => ['score' => $n($h*0.5+$e*0.5), 'icon' => '❤️', 'name' => 'Duygusal Zeka', 'color' => '#EF4444'],
+                'community'  => ['score' => $n($e*0.6+$ad*0.4), 'icon' => '👥', 'name' => 'Topluluk', 'color' => '#3B82F6'],
+                'nature'     => ['score' => $n($r*0.7+$h*0.3), 'icon' => '🌿', 'name' => 'Doğa & Tarım', 'color' => '#10B981'],
+                'art'        => ['score' => $n($ad*0.5+$e*0.3+$h*0.2), 'icon' => '🎨', 'name' => 'Sanat', 'color' => '#8B5CF6'],
+                'technology' => ['score' => $n($ad*0.6+$r*0.4), 'icon' => '🤖', 'name' => 'Teknoloji & AI', 'color' => '#6366F1'],
+                'science'    => ['score' => $n($r*0.4+$ad*0.4+$e*0.2), 'icon' => '🪐', 'name' => 'Bilim', 'color' => '#0EA5E9'],
+                'language'   => ['score' => $n($e*0.5+$h*0.3+$ad*0.2), 'icon' => '💬', 'name' => 'Dil & Kültür', 'color' => '#F59E0B'],
+                'critical'   => ['score' => $n($ad*0.5+$e*0.3+$r*0.2), 'icon' => '💡', 'name' => 'Eleştirel Düşünme', 'color' => '#F97316'],
+                'philosophy' => ['score' => $n($e*0.6+$h*0.2+$ad*0.2), 'icon' => '📖', 'name' => 'Felsefe', 'color' => '#EC4899'],
+                'body'       => ['score' => $n($h*0.6+$ad*0.4), 'icon' => '🚶', 'name' => 'Beden & Hareket', 'color' => '#14B8A6'],
+                'wellbeing'  => ['score' => $n($h*0.7+$e*0.3), 'icon' => '🌸', 'name' => 'İyi Oluş', 'color' => '#D946EF'],
+                'future'     => ['score' => $n($ad*0.7+$r*0.3), 'icon' => '🚀', 'name' => 'Gelecek', 'color' => '#4364F7'],
+            ];
+            break;
+        }
+        return view('portal.reports.competency-atlas', ['student' => $student, 'competencyScores' => $competencyScores]);
+    }
+
+    /**
      * Senaryo bazlı breakdown (Referans: 6 senaryo).
      * MissionWay session/simulation verilerinden senaryo gruplama.
      */
