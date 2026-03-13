@@ -68,7 +68,7 @@ class PortalReportController extends Controller
         // 5.2: Class filter — if class_id is provided, narrow scoped users to that class
         $classId = request('class_id');
         $schoolIds = $user->schools()->pluck('schools.id');
-        $classes = \App\Models\SchoolClass::whereIn('school_id', $schoolIds)->ordered()->get();
+        $classes = \App\Models\SchoolClass::whereIn('school_id', $schoolIds)->orderBy('name')->get();
 
         if ($classId) {
             $classUserIds = \DB::table('class_user')->where('class_id', $classId)->pluck('user_id');
@@ -78,52 +78,62 @@ class PortalReportController extends Controller
         // ── ReportService ile DB'deki normalize edilmiş veriler ──
         $reportData = $this->reportService->getAppReport($app, $scopedUserIds);
 
-        // ── Connector'dan uygulama bazlı canlı veriler ──
+        // ── Connector'dan uygulama bazlı canlı veriler (failsafe) ──
         $connector = $app->resolveConnector();
         $missions = collect();
         $startups = collect();
 
-        if ($connector instanceof MissionWayConnector) {
-            $missions = $this->getMissionWayLiveData($connector, $app, $scopedUserIds);
-        } elseif ($connector instanceof WayStartupConnector) {
-            $startups = $this->getWayStartupLiveData($connector, $app, $scopedUserIds);
+        try {
+            if ($connector instanceof MissionWayConnector) {
+                $missions = $this->getMissionWayLiveData($connector, $app, $scopedUserIds);
+            } elseif ($connector instanceof WayStartupConnector) {
+                $startups = $this->getWayStartupLiveData($connector, $app, $scopedUserIds);
+            }
+        } catch (\Throwable $e) {
+            \Log::warning("Connector live data failed for {$app->slug}: " . $e->getMessage());
         }
 
         // ── Per-user stats from DB ──
         $userStats = collect($reportData['user_stats'] ?? []);
 
-        // Connector-specific user enrichment
+        // Connector-specific user enrichment (limit to 10 to prevent 504 timeout)
         if ($connector) {
-            $userStats = $userStats->map(function ($stat) use ($connector, $app) {
+            $enriched = 0;
+            $userStats = $userStats->map(function ($stat) use ($connector, $app, &$enriched) {
                 $u = $stat['user'] ?? null;
-                if (!$u) return $stat;
+                if (!$u || $enriched >= 10) return $stat;
 
-                if ($connector instanceof MissionWayConnector) {
-                    $report = $connector->getUserReport($u);
-                    if ($report && ($report['success'] ?? false)) {
-                        $d = $report['data'] ?? [];
-                        $stat['health_point'] = $d['composition']['player']['healthMetric'] ?? null;
-                        $stat['resource_point'] = $d['composition']['player']['resourceMetric'] ?? null;
-                        $stat['ethics_point'] = $d['composition']['player']['ethicsMetric'] ?? null;
-                        $stat['adaptation_point'] = $d['composition']['player']['adaptationMetric'] ?? null;
+                try {
+                    if ($connector instanceof MissionWayConnector) {
+                        $report = $connector->getUserReport($u);
+                        if ($report && ($report['success'] ?? false)) {
+                            $d = $report['data'] ?? [];
+                            $stat['health_point'] = $d['composition']['player']['healthMetric'] ?? null;
+                            $stat['resource_point'] = $d['composition']['player']['resourceMetric'] ?? null;
+                            $stat['ethics_point'] = $d['composition']['player']['ethicsMetric'] ?? null;
+                            $stat['adaptation_point'] = $d['composition']['player']['adaptationMetric'] ?? null;
+                        }
+                    } elseif ($connector instanceof WayStartupConnector) {
+                        $report = $connector->getUserReport($u);
+                        if ($report && ($report['success'] ?? false)) {
+                            $d = $report['data'] ?? [];
+                            $stat['startup_type'] = $d['member']['type'] ?? null;
+                            $stat['teacher_score'] = $d['member']['teacherScore'] ?? null;
+                            $stat['completed_steps'] = $d['completed_steps'] ?? 0;
+                            $stat['total_steps'] = $d['total_steps'] ?? 0;
+                        }
+                    } elseif ($connector instanceof VegaConnector) {
+                        $report = $connector->getUserReport($u);
+                        if ($report && ($report['success'] ?? false)) {
+                            $d = $report['data'] ?? [];
+                            $stat['session_count'] = $d['session_count'] ?? 0;
+                            $stat['lecturer_count'] = $d['modules']['lecturer'] ?? 0;
+                            $stat['simulator_count'] = $d['modules']['simulator'] ?? 0;
+                        }
                     }
-                } elseif ($connector instanceof WayStartupConnector) {
-                    $report = $connector->getUserReport($u);
-                    if ($report && ($report['success'] ?? false)) {
-                        $d = $report['data'] ?? [];
-                        $stat['startup_type'] = $d['member']['type'] ?? null;
-                        $stat['teacher_score'] = $d['member']['teacherScore'] ?? null;
-                        $stat['completed_steps'] = $d['completed_steps'] ?? 0;
-                        $stat['total_steps'] = $d['total_steps'] ?? 0;
-                    }
-                } elseif ($connector instanceof VegaConnector) {
-                    $report = $connector->getUserReport($u);
-                    if ($report && ($report['success'] ?? false)) {
-                        $d = $report['data'] ?? [];
-                        $stat['session_count'] = $d['session_count'] ?? 0;
-                        $stat['lecturer_count'] = $d['modules']['lecturer'] ?? 0;
-                        $stat['simulator_count'] = $d['modules']['simulator'] ?? 0;
-                    }
+                    $enriched++;
+                } catch (\Throwable $e) {
+                    \Log::warning("Connector enrichment failed for user {$u->id}: " . $e->getMessage());
                 }
 
                 return $stat;
