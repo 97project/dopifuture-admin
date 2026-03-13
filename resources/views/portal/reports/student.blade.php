@@ -310,6 +310,105 @@
     </a>
 </div>
 
+{{-- ═══ Eksik #6: Lecturer (AI Coach) Oturum Listesi ═══ --}}
+@php $lecSessions = []; foreach($connectorProfiles as $cp) { $lecSessions = $cp['lecturer_sessions'] ?? []; if(!empty($lecSessions)) break; } @endphp
+@if(count($lecSessions) > 0)
+<div class="dp-card" style="margin-bottom:20px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:16px;">🤖</span>
+        <span style="font-size:14px;font-weight:700;">{{ $isTr ? 'AI Coach Oturum Geçmişi' : 'AI Coach Session History' }}</span>
+        <span style="font-size:10px;color:var(--text-muted);background:#f5f5f5;padding:2px 8px;border-radius:999px;">{{ count($lecSessions) }} {{ $isTr ? 'oturum' : 'sessions' }}</span>
+    </div>
+    <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead>
+                <tr style="border-bottom:2px solid #E5E7EB;">
+                    <th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-weight:600;">{{ $isTr ? 'Konu' : 'Topic' }}</th>
+                    <th style="text-align:center;padding:6px 8px;color:var(--text-muted);font-weight:600;">{{ $isTr ? 'Mesaj' : 'Messages' }}</th>
+                    <th style="text-align:center;padding:6px 8px;color:var(--text-muted);font-weight:600;">{{ $isTr ? 'Süre' : 'Duration' }}</th>
+                    <th style="text-align:right;padding:6px 8px;color:var(--text-muted);font-weight:600;">{{ $isTr ? 'Tarih' : 'Date' }}</th>
+                    <th style="text-align:right;padding:6px 8px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($lecSessions as $ls)
+                <tr style="border-bottom:1px solid #F3F4F6;">
+                    <td style="padding:8px;font-weight:500;color:#111;">{{ $ls['app_name'] ?? $ls['scenario_name'] ?? ($isTr ? 'AI Coach Oturumu' : 'AI Coach Session') }}</td>
+                    <td style="padding:8px;text-align:center;color:#6B7280;">{{ $ls['message_count'] ?? $ls['messageCount'] ?? '-' }}</td>
+                    <td style="padding:8px;text-align:center;color:#6B7280;">{{ $ls['duration'] ?? '-' }} {{ $isTr ? 'dk' : 'min' }}</td>
+                    <td style="padding:8px;text-align:right;color:#9CA3AF;font-size:11px;">{{ isset($ls['created_at']) ? \Carbon\Carbon::parse($ls['created_at'])->format('d.m.Y H:i') : '-' }}</td>
+                    <td style="padding:8px;text-align:right;">
+                        @if(Route::has('portal.reports.coach.questions'))
+                        <a href="{{ route('portal.reports.coach.questions', ['id' => $ls['id'] ?? $ls['session_id'] ?? '']) }}" style="font-size:10px;color:#4364F7;text-decoration:none;font-weight:600;">{{ $isTr ? 'Detay →' : 'Detail →' }}</a>
+                        @endif
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
+
+{{-- ═══ Eksik #5: Chat (Study Space) Oturum Listesi ═══ --}}
+@php $chatSessions = []; foreach($connectorProfiles as $cp) { $chatSessions = $cp['chatbot_sessions'] ?? []; if(!empty($chatSessions)) break; } @endphp
+@if(count($chatSessions) > 0)
+<div class="dp-card" style="margin-bottom:20px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:16px;">💬</span>
+        <span style="font-size:14px;font-weight:700;">{{ $isTr ? 'Study Space Sohbet Geçmişi' : 'Study Space Chat History' }}</span>
+        <span style="font-size:10px;color:var(--text-muted);background:#f5f5f5;padding:2px 8px;border-radius:999px;">{{ count($chatSessions) }}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+        @foreach($chatSessions as $cs)
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#F8FAFC;border-radius:10px;border:1px solid #E5E7EB;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:32px;height:32px;border-radius:8px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:14px;">📖</div>
+                <div>
+                    <div style="font-size:12px;font-weight:600;color:#111;">{{ $cs['thread_name'] ?? $cs['app_name'] ?? ($isTr ? 'Sohbet' : 'Chat') }}</div>
+                    <div style="font-size:10px;color:#9CA3AF;">{{ $cs['message_count'] ?? $cs['messageCount'] ?? '?' }} {{ $isTr ? 'mesaj' : 'messages' }} · {{ isset($cs['created_at']) ? \Carbon\Carbon::parse($cs['created_at'])->format('d.m.Y') : '' }}</div>
+                </div>
+            </div>
+            @if(Route::has('portal.reports.chatbot.detail'))
+            <a href="{{ route('portal.reports.chatbot.detail', ['id' => $cs['id'] ?? $cs['session_id'] ?? '']) }}" style="font-size:10px;color:#3B82F6;text-decoration:none;font-weight:600;">{{ $isTr ? 'Detay →' : 'Detail →' }}</a>
+            @endif
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
+{{-- ═══ Eksik #13: MissionWay Senaryo Seçim Geçmişi ═══ --}}
+@php
+    $mwProfile = $connectorProfiles['mission-way'] ?? [];
+    $mwSessions = $mwProfile['sessions'] ?? [];
+    $scenarioHistory = [];
+    foreach ($mwScenarios ?? [] as $sKey => $sc) {
+        if ($sc['sessions'] > 0) {
+            $scenarioHistory[] = array_merge($sc, ['key' => $sKey, 'last' => $sc['last_played']]);
+        }
+    }
+@endphp
+@if(count($scenarioHistory) > 0)
+<div class="dp-card" style="margin-bottom:20px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:16px;">🏠</span>
+        <span style="font-size:14px;font-weight:700;">{{ $isTr ? 'Oynanan Senaryolar' : 'Played Scenarios' }}</span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        @foreach($scenarioHistory as $sh)
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:{{ $sh['color'] }}08;border:1px solid {{ $sh['color'] }}30;border-radius:10px;">
+            <span style="font-size:20px;">{{ $sh['icon'] }}</span>
+            <div>
+                <div style="font-size:12px;font-weight:700;color:{{ $sh['color'] }};">{{ $sh['name'] }}</div>
+                <div style="font-size:10px;color:#6B7280;">{{ $sh['sessions'] }} {{ $isTr ? 'kez oynandı' : 'times played' }} · {{ $sh['last'] ? \Carbon\Carbon::parse($sh['last'])->format('d.m.Y') : '' }}</div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
 {{-- App Tabs --}}
 <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
     @foreach($apps as $a)

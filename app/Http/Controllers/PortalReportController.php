@@ -251,6 +251,12 @@ class PortalReportController extends Controller
                         }
                     }
 
+                    // Session list for Faz 4 oturum listeleri
+                    $allSessions = $d['sessions'] ?? [];
+                    $lecturerSessions = array_filter($allSessions, fn($s) => ($s['module'] ?? '') === 'lecturer');
+                    $chatbotSessions = array_filter($allSessions, fn($s) => !in_array($s['module'] ?? '', ['simulator', 'lecturer']));
+                    $simulatorSessions = array_filter($allSessions, fn($s) => ($s['module'] ?? '') === 'simulator');
+
                     $connectorProfiles[$a->slug] = [
                         'vega_id'         => $vegaId,
                         'session_count'   => $d['session_count'] ?? $overview['total_sessions'] ?? 0,
@@ -259,6 +265,10 @@ class PortalReportController extends Controller
                         'chatbot_count'   => $overview['chatbot_count'] ?? 0,
                         'has_details'     => $d['has_details'] ?? 0,
                         'profile'         => $d['profile'] ?? [],
+                        // Session lists for #5 and #6
+                        'lecturer_sessions'  => array_values(array_slice($lecturerSessions, 0, 15)),
+                        'chatbot_sessions'   => array_values(array_slice($chatbotSessions, 0, 15)),
+                        'simulator_sessions' => array_values(array_slice($simulatorSessions, 0, 15)),
                     ];
                 }
             }
