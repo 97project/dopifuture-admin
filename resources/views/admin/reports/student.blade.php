@@ -110,6 +110,23 @@
             @endforeach
         </div>
         @endif
+        {{-- Scenario Breakdown --}}
+        @if(!empty($cp['scenario_breakdown']))
+        <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+            <div class="text-[10px] font-semibold text-gray-400 mb-2">🎭 {{ app()->getLocale() === 'tr' ? 'Senaryo Performansı' : 'Scenario Performance' }}</div>
+            <div class="grid grid-cols-2 gap-2">
+                @foreach($cp['scenario_breakdown'] as $sKey => $sc)
+                <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50" style="border-left:2px solid {{ $sc['color'] }}">
+                    <span class="text-sm">{{ $sc['icon'] }}</span>
+                    <div class="min-w-0">
+                        <div class="text-[10px] font-bold text-gray-900 dark:text-white truncate">{{ $sc['name'] }}</div>
+                        <div class="text-[9px] text-gray-400">{{ $sc['sessions'] }} oturum · ort {{ $sc['avg_score'] }}</div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
 
         @elseif(($cp['type'] ?? '') === 'waystartup')
         <div class="grid grid-cols-3 gap-3 text-center mb-3">
@@ -123,11 +140,50 @@
         </div>
 
         @elseif(($cp['type'] ?? '') === 'vega')
-        <div class="grid grid-cols-3 gap-3 text-center">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center mb-3">
             <div><div class="text-lg font-bold text-purple-500">{{ $cp['session_count'] ?? 0 }}</div><div class="text-[10px] text-gray-500">{{ app()->getLocale() === 'tr' ? 'Oturum' : 'Sessions' }}</div></div>
             <div><div class="text-lg font-bold text-amber-500">{{ $cp['simulator_count'] ?? 0 }}</div><div class="text-[10px] text-gray-500">Simulator</div></div>
             <div><div class="text-lg font-bold text-emerald-500">{{ $cp['lecturer_count'] ?? 0 }}</div><div class="text-[10px] text-gray-500">Lecturer</div></div>
+            <div><div class="text-lg font-bold text-blue-500">{{ $cp['chatbot_count'] ?? 0 }}</div><div class="text-[10px] text-gray-500">Chatbot</div></div>
         </div>
+        {{-- Profile badges --}}
+        @if(!empty($cp['profile']))
+        <div class="flex flex-wrap gap-1.5 mb-2">
+            @if($cp['profile']['grade'] ?? $cp['profile']['level'] ?? null)
+            <span class="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 text-[10px] rounded-full font-medium">Grade: {{ $cp['profile']['grade'] ?? $cp['profile']['level'] }}</span>
+            @endif
+            @if($cp['profile']['isPremium'] ?? $cp['profile']['premium_status'] ?? false)
+            <span class="px-2 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 text-[10px] rounded-full font-medium">💎 Premium</span>
+            @endif
+            @if($cp['profile']['onboardingCompleted'] ?? $cp['profile']['onboarding_completed'] ?? false)
+            <span class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 text-[10px] rounded-full font-medium">✅ Onboarding</span>
+            @endif
+        </div>
+        @endif
+        {{-- Lecturer Sessions --}}
+        @if(!empty($cp['lecturer_sessions']))
+        <div class="mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+            <div class="text-[10px] font-semibold text-gray-400 mb-1">🤖 AI Coach ({{ count($cp['lecturer_sessions']) }})</div>
+            @foreach(array_slice($cp['lecturer_sessions'], 0, 5) as $ls)
+            <div class="flex items-center justify-between py-1 text-[10px]">
+                <span class="text-gray-700 dark:text-gray-300">{{ $ls['app_name'] ?? 'Session' }}</span>
+                <span class="text-gray-400">{{ isset($ls['created_at']) ? \Carbon\Carbon::parse($ls['created_at'])->format('d.m') : '' }}</span>
+            </div>
+            @endforeach
+        </div>
+        @endif
+        {{-- Chatbot Sessions --}}
+        @if(!empty($cp['chatbot_sessions']))
+        <div class="mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+            <div class="text-[10px] font-semibold text-gray-400 mb-1">💬 Study Space ({{ count($cp['chatbot_sessions']) }})</div>
+            @foreach(array_slice($cp['chatbot_sessions'], 0, 5) as $cs)
+            <div class="flex items-center justify-between py-1 text-[10px]">
+                <span class="text-gray-700 dark:text-gray-300">{{ $cs['thread_name'] ?? $cs['app_name'] ?? 'Chat' }}</span>
+                <span class="text-gray-400">{{ isset($cs['created_at']) ? \Carbon\Carbon::parse($cs['created_at'])->format('d.m') : '' }}</span>
+            </div>
+            @endforeach
+        </div>
+        @endif
         @endif
     </div>
     @endforeach
