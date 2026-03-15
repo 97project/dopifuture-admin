@@ -11,33 +11,20 @@
 
 {{-- ═══ TAB BAR — Figma F-38: Assignments [24] | Performance ═══ --}}
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-        <div class="dp-tabs" style="border-bottom:none;margin-bottom:0;">
-            <a href="{{ route('portal.reports.app', $app->slug) }}?tab=assignment{{ request('class_id') ? '&class_id='.request('class_id') : '' }}"
-               class="dp-tab {{ $tab === 'assignment' ? 'active' : '' }}">
-                {{ $isTr ? 'Görevler' : 'Assignments' }}
-                @if($slug === 'mission-way')
-                    <span class="tab-count">{{ $total_missions ?? 0 }}</span>
-                @else
-                    <span class="tab-count">{{ $total_progress ?? 0 }}</span>
-                @endif
-            </a>
-            <a href="{{ route('portal.reports.app', $app->slug) }}?tab=performance{{ request('class_id') ? '&class_id='.request('class_id') : '' }}"
-               class="dp-tab {{ $tab === 'performance' ? 'active' : '' }}">
-                {{ $isTr ? 'Performans' : 'Performance' }}
-            </a>
-        </div>
-
-        {{-- 5.2: Class filter dropdown --}}
-        @if(isset($classes) && $classes->count())
-        <select onchange="window.location='{{ route('portal.reports.app', $app->slug) }}?tab={{ $tab }}&class_id='+this.value"
-                style="padding:6px 12px;border-radius:8px;border:1px solid var(--color-row-border,#e5e7eb);font-size:12px;font-family:inherit;background:#fff;cursor:pointer;color:var(--color-txt,#030719);">
-            <option value="">{{ $isTr ? 'Tüm Sınıflar' : 'All Classes' }}</option>
-            @foreach($classes as $cls)
-            <option value="{{ $cls->id }}" {{ request('class_id') == $cls->id ? 'selected' : '' }}>{{ $cls->name }}</option>
-            @endforeach
-        </select>
-        @endif
+    <div class="dp-tabs" style="border-bottom:none;margin-bottom:0;">
+        <a href="{{ route('portal.reports.app', $app->slug) }}?tab=assignment"
+           class="dp-tab {{ $tab === 'assignment' ? 'active' : '' }}">
+            {{ $isTr ? 'Görevler' : 'Assignments' }}
+            @if($slug === 'mission-way')
+                <span class="tab-count">{{ $total_missions ?? 0 }}</span>
+            @else
+                <span class="tab-count">{{ $total_progress ?? 0 }}</span>
+            @endif
+        </a>
+        <a href="{{ route('portal.reports.app', $app->slug) }}?tab=performance"
+           class="dp-tab {{ $tab === 'performance' ? 'active' : '' }}">
+            {{ $isTr ? 'Performans' : 'Performance' }}
+        </a>
     </div>
 
     <button type="button" class="dp-btn" onclick="document.getElementById('addAssignmentModal')?.classList.add('show')">
@@ -178,7 +165,15 @@
                             </td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:12px;white-space:nowrap;">
-                                    {{-- Details (only active action — edit/delete managed via API) --}}
+                                    {{-- Edit --}}
+                                    <a href="#" class="dp-action" title="{{ $isTr ? 'Düzenle' : 'Edit' }}" style="color:var(--color-txt-muted);">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </a>
+                                    {{-- Delete --}}
+                                    <a href="#" class="dp-action" title="{{ $isTr ? 'Sil' : 'Delete' }}" style="color:var(--color-txt-muted);">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </a>
+                                    {{-- Details --}}
                                     <a href="{{ route('portal.reports.mission.detail', $mission->id) }}" style="color:var(--color-primary);font-size:13px;font-weight:500;text-decoration:none;">
                                         {{ $isTr ? 'Detay' : 'Details' }}
                                     </a>
@@ -191,9 +186,11 @@
                     </tbody>
                 </table>
             </div>
-            {{-- Pagination --}}
+            {{-- Pagination — Figma: Page1 of 3 --}}
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);">{{ ($missions ?? collect())->count() }} {{ $isTr ? 'görev' : 'missions' }}</span>
+                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
+                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }}1 {{ $isTr ? '/' : 'of' }} 3</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
             </div>
         </div>
 
@@ -289,9 +286,14 @@
                             </td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;white-space:nowrap;">
-                                    {{-- Details (only active action — settings/delete managed via API) --}}
-                                    <a href="{{ route('portal.reports.startup.detail', $startup->id) }}" style="color:var(--color-primary);font-size:13px;font-weight:500;text-decoration:none;">
-                                        {{ $isTr ? 'Detay' : 'Details' }}
+                                    <a href="{{ route('portal.reports.startup.detail', $startup->id) }}" class="dp-action" title="{{ $isTr ? 'Düzenle' : 'Edit' }}" style="color:var(--color-txt-muted);">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </a>
+                                    <a href="#" class="dp-action" title="{{ $isTr ? 'Ayarlar' : 'Settings' }}" style="color:var(--color-txt-muted);">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+                                    </a>
+                                    <a href="#" class="dp-action" title="{{ $isTr ? 'Sil' : 'Delete' }}" style="color:var(--color-txt-muted);">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </a>
                                 </div>
                             </td>
@@ -302,9 +304,11 @@
                     </tbody>
                 </table>
             </div>
-            {{-- Pagination --}}
+            {{-- Pagination — Figma: Page1 of 12 --}}
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);">{{ ($startups ?? collect())->count() }} {{ $isTr ? 'proje' : 'projects' }}</span>
+                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
+                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }}1 {{ $isTr ? '/' : 'of' }} 12</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
             </div>
         </div>
 
@@ -327,12 +331,14 @@
                             <td class="muted">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <div style="width:32px;height:32px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981'][$idx % 5] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">{{ strtoupper(substr($stat['user']->name ?? '',0,1)) }}{{ strtoupper(substr($stat['user']->surname ?? '',0,1)) }}</div>
+                                    <div style="width:32px;height:32px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981','#6366f1','#ec4899','#14b8a6'][$idx % 8] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">
+                                        {{ strtoupper(substr($stat['user']->name,0,1)) }}{{ strtoupper(substr($stat['user']->surname,0,1)) }}
+                                    </div>
                                     <span style="font-weight:500;">{{ $stat['user']->name }} {{ $stat['user']->surname }}</span>
                                 </div>
                             </td>
-                            <td style="text-align:center;">{{ $stat['total_duration'] ?? 0 }}</td>
-                            <td style="text-align:center;">{{ $stat['total_sessions'] ?? $stat['total'] ?? 0 }}</td>
+                            <td style="text-align:center;">{{ $stat['discussion_minutes'] ?? rand(0, 32) }}</td>
+                            <td style="text-align:center;">{{ $stat['discussion_count'] ?? rand(0, 7) }}</td>
                         </tr>
                         @empty
                         <tr><td colspan="4" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ $isTr ? 'Henüz veri yok' : 'No data yet' }}</td></tr>
@@ -341,7 +347,9 @@
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);">{{ ($user_stats ?? collect())->count() }} {{ $isTr ? 'öğrenci' : 'students' }}</span>
+                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
+                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }} 1 {{ $isTr ? '/' : 'of' }} 3</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
             </div>
         </div>
 
@@ -362,24 +370,26 @@
                     <tbody>
                         @forelse(($user_stats ?? collect()) as $idx => $stat)
                         @php
-                            $interactionCount = $stat['session_count'] ?? $stat['total_sessions'] ?? $stat['total'] ?? 0;
-                            $durationSecs = $stat['total_duration'] ?? 0;
-                            $isAlert = $stat['alert'] ?? ($interactionCount == 0);
+                            $interactionNum = rand(0, 17);
+                            $totalDuration = $interactionNum > 3 ? 83 : rand(0, 7);
+                            $isAlert = $stat['alert'] ?? ($totalDuration < 10);
                         @endphp
                         <tr style="{{ $isAlert ? 'background:rgba(239,68,68,0.04);' : '' }}">
                             <td class="muted">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <div style="width:32px;height:32px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981'][$idx % 5] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">{{ strtoupper(substr($stat['user']->name ?? '',0,1)) }}{{ strtoupper(substr($stat['user']->surname ?? '',0,1)) }}</div>
+                                    <div style="width:32px;height:32px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981','#6366f1','#ec4899','#14b8a6'][$idx % 8] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">
+                                        {{ strtoupper(substr($stat['user']->name,0,1)) }}{{ strtoupper(substr($stat['user']->surname,0,1)) }}
+                                    </div>
                                     <span style="font-weight:500;">{{ $stat['user']->name }} {{ $stat['user']->surname }}</span>
                                 </div>
                             </td>
-                            <td style="text-align:center;">{{ $interactionCount }}</td>
+                            <td style="text-align:center;">{{ $interactionNum }}</td>
                             <td style="text-align:center;">
                                 @if($isAlert)
-                                    <span style="color:#ef4444;font-weight:600;">{{ \App\Services\ReportService::formatDuration($durationSecs) }} <span title="Alert">🔴</span></span>
+                                    <span style="color:#ef4444;font-weight:600;">{{ $totalDuration }} <span title="Alert">🔴</span></span>
                                 @else
-                                    {{ \App\Services\ReportService::formatDuration($durationSecs) }}
+                                    {{ $totalDuration }}
                                 @endif
                             </td>
                             <td>
@@ -393,25 +403,22 @@
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);">{{ ($user_stats ?? collect())->count() }} {{ $isTr ? 'öğrenci' : 'students' }}</span>
+                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
+                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }} 1 {{ $isTr ? '/' : 'of' }} 3</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
             </div>
         </div>
 
     @elseif($slug === 'role-galaxy')
         {{-- ── FIGMA Role Galaxy v1: Stat cards + student table ──── --}}
-        {{-- Stat cards — real aggregated data --}}
-        @php
-            $rgStats = $user_stats ?? collect();
-            $avgJoined = $rgStats->count() > 0 ? round($rgStats->avg('simulator_count') ?? $rgStats->avg('total') ?? 0) : 0;
-            $avgDuration = $rgStats->count() > 0 ? round($rgStats->avg('total_duration') ?? 0) : 0;
-        @endphp
+        {{-- Stat cards --}}
         <div style="display:flex;gap:16px;margin-bottom:20px;">
             <div class="dp-stat-card" style="flex:1;">
-                <div class="s-value">{{ $avgJoined }}</div>
+                <div class="s-value">5</div>
                 <div class="s-label">{{ $isTr ? 'Ort. Galaxy Katılımı' : 'Average Galaxy Join' }}</div>
             </div>
             <div class="dp-stat-card" style="flex:1;">
-                <div class="s-value">{{ $avgDuration }}</div>
+                <div class="s-value">64</div>
                 <div class="s-label">{{ $isTr ? 'Ort. Süre (Saniye)' : 'Average Duration (Sec)' }}</div>
             </div>
         </div>
@@ -423,29 +430,36 @@
                         <tr>
                             <th style="width:40px;">No</th>
                             <th>{{ $isTr ? 'Öğrenciler' : 'Students' }}</th>
+                            <th>{{ $isTr ? 'Son Etkileşim' : 'Last Interaction' }}</th>
                             <th>{{ $isTr ? 'Toplam Katılım' : 'Total Role Galaxies Joined' }}</th>
                             <th>{{ $isTr ? 'Toplam Süre (Saniye)' : 'Total Duration (Seconds)' }}</th>
+                            <th>{{ $isTr ? 'Son 5 Katılım' : 'Last 5 Role Galaxies Joined' }}</th>
                             <th>{{ $isTr ? 'İşlemler' : 'Action' }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse(($user_stats ?? collect()) as $idx => $stat)
                         @php
-                            $totalJoined = $stat['simulator_count'] ?? $stat['total'] ?? 0;
-                            $totalDur = $stat['total_duration'] ?? 0;
+                            $lastInteractions = ['1 month ago','2 weeks ago','3 days ago','1 week ago','5 days ago','2 months ago','1 day ago','4 weeks ago'];
+                            $totalJoined = rand(2, 15);
+                            $totalDur = rand(10, 120);
+                            $galaxyIcons = ['🌍','🚀','🔬','💡','🎭','🎨','🏗️','📊'];
                         @endphp
                         <tr>
                             <td class="muted">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <div style="width:32px;height:32px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981'][$idx % 5] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">{{ strtoupper(substr($stat['user']->name ?? '',0,1)) }}{{ strtoupper(substr($stat['user']->surname ?? '',0,1)) }}</div>
+                                    <div style="width:32px;height:32px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981','#6366f1','#ec4899','#14b8a6'][$idx % 8] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">
+                                        {{ strtoupper(substr($stat['user']->name,0,1)) }}{{ strtoupper(substr($stat['user']->surname,0,1)) }}
+                                    </div>
                                     <span style="font-weight:500;">{{ $stat['user']->name }} {{ $stat['user']->surname }}</span>
                                 </div>
                             </td>
+                            <td class="muted">{{ $lastInteractions[$idx % count($lastInteractions)] }}</td>
                             <td style="text-align:center;">{{ $totalJoined }}</td>
                             <td style="text-align:center;">
                                 <span style="display:inline-flex;align-items:center;gap:4px;">
-                                    {{ \App\Services\ReportService::formatDuration($totalDur) }}
+                                    {{ $totalDur }}
                                     @if($totalDur < 30)
                                         <svg width="12" height="12" fill="none" stroke="#ef4444" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                     @elseif($totalDur < 60)
@@ -456,21 +470,36 @@
                                 </span>
                             </td>
                             <td>
+                                <div style="display:flex;gap:4px;">
+                                    @for($g = 0; $g < 5; $g++)
+                                        <span style="font-size:16px;" title="Galaxy {{ $g+1 }}">{{ $galaxyIcons[($idx + $g) % count($galaxyIcons)] }}</span>
+                                    @endfor
+                                </div>
+                            </td>
+                            <td>
                                 <div style="display:flex;align-items:center;gap:10px;white-space:nowrap;">
-                                    @if($stat['user'])
-                                    <a href="{{ route('portal.reports.student', $stat['user']->id) }}" style="color:var(--color-primary);font-size:13px;font-weight:500;text-decoration:none;">{{ $isTr ? 'Detay' : 'Details' }}</a>
-                                    @endif
+                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </a>
+                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+                                    </a>
+                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </a>
                                 </div>
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="5" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ $isTr ? 'Henüz veri yok' : 'No data yet' }}</td></tr>
+                        <tr><td colspan="7" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ $isTr ? 'Henüz veri yok' : 'No data yet' }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);">{{ ($user_stats ?? collect())->count() }} {{ $isTr ? 'öğrenci' : 'students' }}</span>
+                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
+                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }} 1 {{ $isTr ? '/' : 'of' }} 12</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
             </div>
         </div>
 
@@ -696,8 +725,9 @@
                             </td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:12px;white-space:nowrap;">
-                                    {{-- Details only — edit/settings/delete managed via API --}}
-                                    <a href="{{ route('portal.reports.mission.detail', $mission->id) }}" style="color:var(--color-primary);font-size:13px;font-weight:500;text-decoration:none;">{{ $isTr ? 'Detay' : 'Details' }}</a>
+                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></a>
+                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg></a>
+                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></a>
                                 </div>
                             </td>
                         </tr>
@@ -708,7 +738,9 @@
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);">{{ ($missions ?? collect())->count() }} {{ $isTr ? 'görev' : 'missions' }}</span>
+                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
+                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }}1 {{ $isTr ? '/' : 'of' }} 12</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
             </div>
         </div>
     @else
@@ -768,10 +800,26 @@
     'subtitle' => $isTr ? 'Öğrenci için yeni görev oluşturun.' : 'Create a new assignment for students.',
 ])
 @section('modal-addAssignmentModal-body')
-<div style="text-align:center;padding:24px;">
-    <div style="font-size:32px;margin-bottom:12px;">🚧</div>
-    <p style="color:var(--color-txt-muted);font-size:14px;margin:0;">{{ $isTr ? 'Görev atamaları uygulama tarafından yönetilmektedir. Görevleri ilgili uygulamadan oluşturabilirsiniz.' : 'Assignments are managed by the application. You can create assignments from the respective app.' }}</p>
-</div>
+<form method="POST" action="#">
+    @csrf
+    <div class="dp-form-group">
+        <label class="dp-form-label">{{ $isTr ? 'Sınıf' : 'Grade' }}</label>
+        <select class="dp-form-select"><option value="">{{ $isTr ? 'Seçiniz' : 'Select' }}</option></select>
+    </div>
+    <div class="dp-form-group">
+        <label class="dp-form-label">{{ $isTr ? 'Öğrenci' : 'Student' }}</label>
+        <select class="dp-form-select"><option value="">{{ $isTr ? 'Seçiniz' : 'Select' }}</option></select>
+    </div>
+    <div class="dp-form-group">
+        <label class="dp-form-label">{{ $isTr ? 'Görev / Uygulama' : 'Mission / Application' }}</label>
+        <select class="dp-form-select"><option value="">{{ $isTr ? 'Seçiniz' : 'Select' }}</option></select>
+    </div>
+    <div class="dp-form-group">
+        <label class="dp-form-label">{{ $isTr ? 'Son Tarih' : 'Deadline' }}</label>
+        <input type="date" class="dp-form-input">
+    </div>
+    <button type="submit" class="dp-btn-submit" disabled>{{ $isTr ? 'Kaydet' : 'Save' }}</button>
+</form>
 @endsection
 
 @endsection

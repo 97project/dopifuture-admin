@@ -113,6 +113,29 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        /*
+         * Vega (Way AI Coach) DB — aynı MySQL sunucusunda.
+         * Oturum verilerini doğrudan harvest etmek için kullanılır.
+         */
+        'vega_db' => [
+            'driver' => 'mysql',
+            'host' => env('VEGA_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('VEGA_DB_PORT', env('DB_PORT', '3306')),
+            'database' => env('VEGA_DB_DATABASE', 'vega_dopi_db'),
+            'username' => env('VEGA_DB_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('VEGA_DB_PASSWORD', env('DB_PASSWORD', '')),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
     ],
 
     /*

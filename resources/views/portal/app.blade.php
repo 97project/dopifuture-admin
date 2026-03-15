@@ -319,15 +319,14 @@
         }
 
         .dp-table thead th {
-            background: transparent;
+            background: var(--color-table-header);
             padding: 14px 20px;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             color: var(--color-txt-sec);
             text-align: left;
             border-bottom: 1px solid var(--color-row-border);
-            height: 52px;
-            font-family: 'Nunito', sans-serif;
+            height: 56px;
         }
 
         .dp-table tbody td {
@@ -343,53 +342,6 @@
         .dp-table tbody tr:hover { background: #fafbfc; }
 
         .dp-table .muted { color: var(--color-txt-light); }
-
-        /* Cancelled row — red left border like Figma */
-        .dp-table tbody tr.dp-row-cancelled { position: relative; }
-        .dp-table tbody tr.dp-row-cancelled td:first-child::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: #EF4444;
-            border-radius: 0 2px 2px 0;
-        }
-
-        /* Action icon buttons — outlined circles like Figma */
-        .dp-action-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 1px solid var(--color-row-border);
-            background: transparent;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: var(--color-txt-muted);
-            padding: 0;
-        }
-        .dp-action-icon:hover {
-            background: #f3f4f6;
-            border-color: #d1d5db;
-        }
-        .dp-action-icon.dp-action-delete {
-            color: var(--color-error-red);
-            border-color: rgba(239,68,68,0.3);
-        }
-        .dp-action-icon.dp-action-delete:hover {
-            background: rgba(239,68,68,0.08);
-        }
-        .dp-action-icon.dp-action-primary {
-            color: var(--color-primary);
-            border-color: rgba(40,68,225,0.3);
-        }
-        .dp-action-icon.dp-action-primary:hover {
-            background: rgba(40,68,225,0.08);
-        }
 
         /* Avatar in table */
         .dp-td-avatar {
@@ -885,37 +837,9 @@
 
             {{-- Figma F-28: no section headers — flat list --}}
 
-            <a href="{{ route('portal.reports') }}" class="dp-nav-item {{ $cr === 'portal.reports' || str_starts_with($cr, 'portal.reports.') ? 'active' : '' }}">
+            <a href="{{ route('portal.reports') }}" class="dp-nav-item {{ $cr === 'portal.reports' ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 {{ $isTr ? 'Raporlar' : 'Reports' }}
-            </a>
-
-            <a href="{{ route('portal.reports.class.comparison') }}" class="dp-nav-item {{ $cr === 'portal.reports.class.comparison' ? 'active' : '' }}" style="padding-left:36px;font-size:12px;">
-                📊 {{ $isTr ? 'Sınıf Karşılaştırma' : 'Class Comparison' }}
-            </a>
-
-            <a href="{{ route('portal.reports.missionway.progress') }}" class="dp-nav-item {{ $cr === 'portal.reports.missionway.progress' ? 'active' : '' }}" style="padding-left:36px;font-size:12px;">
-                🎯 {{ $isTr ? 'MW İlerleme' : 'MW Progress' }}
-            </a>
-
-            <a href="{{ route('portal.hierarchy') }}" class="dp-nav-item {{ $cr === 'portal.hierarchy' ? 'active' : '' }}" style="padding-left:36px;font-size:12px;">
-                🏫 {{ $isTr ? 'Hiyerarşi' : 'Hierarchy' }}
-            </a>
-
-            <a href="{{ url('reports/competency-atlas/' . auth()->id()) }}" class="dp-nav-item {{ $cr === 'portal.reports.competency.atlas' ? 'active' : '' }}" style="padding-left:36px;font-size:12px;">
-                🧠 {{ $isTr ? 'Yetkinlik Atlası' : 'Competency Atlas' }}
-            </a>
-
-            @if($user && $user->hasAnyRole(['super-admin','admin','school-admin','school-principal']))
-            <a href="{{ route('portal.applications.index') }}" class="dp-nav-item {{ str_starts_with($cr, 'portal.applications') ? 'active' : '' }}">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                {{ $isTr ? 'Uygulamalar' : 'Applications' }}
-            </a>
-            @endif
-
-            <a href="{{ route('portal.reports.tools') }}" class="dp-nav-item {{ $cr === 'portal.reports.tools' ? 'active' : '' }}">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                {{ $isTr ? 'Araçlar' : 'Tools' }}
             </a>
 
             <a href="{{ route('portal.profile') }}" class="dp-nav-item {{ str_starts_with($cr, 'portal.profile') ? 'active' : '' }}">
@@ -923,7 +847,7 @@
                 {{ $isTr ? 'Profil' : 'Profile' }}
             </a>
 
-            @if($user && $user->hasAnyRole(['super-admin','admin']))
+            @if($user->hasAnyRole(['super-admin','admin']))
             <a href="{{ route('admin.dashboard') }}" class="dp-nav-item">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 Admin Panel
@@ -933,10 +857,6 @@
 
         {{-- Footer --}}
         <div class="dp-sidebar-footer">
-            {{-- Feedback Button (Faz 7) --}}
-            <button type="button" class="dp-nav-item" style="width:100%;color:rgba(255,255,255,0.55);border:none;cursor:pointer;font-family:inherit;background:transparent;" onclick="document.getElementById('feedbackModal').style.display='flex'">
-                📝 {{ $isTr ? 'Geri Bildirim' : 'Feedback' }}
-            </button>
             <form action="{{ route('portal.logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="dp-nav-item" style="width:100%; color: rgba(255,255,255,0.45); border:none; cursor:pointer; font-family:inherit; background:transparent;">
@@ -980,8 +900,8 @@
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                 </button>
                 <a href="{{ route('portal.profile') }}" class="dp-user-link">
-                    <div class="dp-avatar">{{ strtoupper(substr($user?->name ?? 'U',0,1).substr($user?->surname ?? '',0,1)) }}</div>
-                    <span class="dp-username" style="display:none;">{{ $user?->name ?? '' }}</span>
+                    <div class="dp-avatar">{{ strtoupper(substr($user->name??'U',0,1).substr($user->surname??'',0,1)) }}</div>
+                    <span class="dp-username" style="display:none;">{{ $user->name }}</span>
                 </a>
             </div>
         </header>
@@ -1023,22 +943,6 @@
             if(un) un.style.display = 'inline';
         }
     </script>
-
-    {{-- Feedback Modal (Faz 7) --}}
-    <div id="feedbackModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
-        <div style="background:#fff;border-radius:16px;padding:24px;width:90%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                <h3 style="font-size:16px;font-weight:700;margin:0;">📝 {{ $isTr ? 'Geri Bildirim' : 'Feedback' }}</h3>
-                <button onclick="document.getElementById('feedbackModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6B7280;">✕</button>
-            </div>
-            <p style="font-size:13px;color:#6B7280;margin:0 0 12px;">{{ $isTr ? 'Düşüncelerinizi bizimle paylaşın' : 'Share your thoughts with us' }}</p>
-            <textarea id="feedbackText" placeholder="{{ $isTr ? 'Mesajınızı yazın...' : 'Type your message...' }}" style="width:100%;height:120px;border:1px solid #E5E7EB;border-radius:10px;padding:12px;font-size:14px;resize:none;font-family:inherit;box-sizing:border-box;"></textarea>
-            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
-                <button onclick="document.getElementById('feedbackModal').style.display='none'" style="padding:8px 16px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;">{{ $isTr ? 'İptal' : 'Cancel' }}</button>
-                <button onclick="var t=document.getElementById('feedbackText');if(t.value.trim()){alert('{{ $isTr ? 'Teşekkürler! Geri bildiriminiz alındı.' : 'Thank you! Your feedback has been received.' }}');t.value='';document.getElementById('feedbackModal').style.display='none'}" style="padding:8px 16px;border:none;border-radius:8px;background:linear-gradient(135deg,#4364F7,#6FB1FC);color:#fff;cursor:pointer;font-size:13px;font-weight:600;">{{ $isTr ? 'Gönder' : 'Submit' }}</button>
-            </div>
-        </div>
-    </div>
 
     @yield('scripts')
 </body>

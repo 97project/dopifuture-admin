@@ -21,6 +21,14 @@ Schedule::command('harvest:user-data')
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/harvest.log'));
 
+// Uygulama düzeyi veri toplama — günde 2×: 02:00 ve 14:00
+Schedule::command('harvest:app-data')
+    ->twiceDaily(2, 14)
+    ->when(fn () => (bool) env('SYNC_ENABLED', true))
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/harvest-app.log'));
+
 // Günlük cross-app reconciliation — 03:00'te
 Schedule::command('sync:reconcile')
     ->dailyAt('03:00')

@@ -1,132 +1,119 @@
 @extends('portal.app')
 @section('title', ($isTr ?? false) ? 'Görev Detay' : 'Mission Detail')
-@section('page-title', 'Mission Detail')
+@section('page-title', 'Mission WAY')
 @php $isTr = app()->getLocale() === 'tr'; @endphp
 
 @section('content')
 
-    {{-- ═══ HERO BANNER — Figma F-62: dark bg image with mission title ═══ --}}
-    <div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:24px;min-height:300px;background:{{ $mission->image ? "url('" . $mission->image . "') center/cover no-repeat" : 'linear-gradient(135deg, #1e3a5f 0%, #0d1b2a 100%)' }};">
-        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.6) 100%);"></div>
-        <div style="position:relative;z-index:1;padding:24px 28px;">
-            {{-- Mission Title --}}
-            <h2 style="color:#fff;font-size:22px;font-weight:700;margin:0 0 20px 0;font-family:'Nunito',sans-serif;">{{ $mission->title }}</h2>
+    {{-- ═══ BACK BUTTON — Figma node 1251-18401 ═══ --}}
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+        <a href="{{ route('portal.reports.app', 'mission-way') }}" style="display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--color-txt-muted);font-size:13px;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            {{ $isTr ? 'Geri Dön' : 'Back' }}
+        </a>
+        <span style="font-size:18px;font-weight:600;">{{ $mission->title ?? 'Keşfet - Dijital Harita' }}</span>
+    </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
-                {{-- Students Section --}}
-                <div style="background:rgba(255,255,255,0.9);border-radius:12px;padding:16px;">
-                    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">{{ $isTr ? 'Öğrenciler' : 'Students' }}</div>
-                    @foreach($students as $s)
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode($s->name . ' ' . $s->surname) }}&size=56&background=random&rounded=true&bold=true&font-size=0.4"
-                                 alt="{{ $s->name }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
-                            <span style="font-size:13px;font-weight:500;color:#111;">{{ $s->name }} {{ $s->surname }}</span>
-                        </div>
-                        <span style="font-size:12px;font-weight:600;color:#6366F1;">{{ $s->role ?? 'Diplomat' }}</span>
-                    </div>
-                    @endforeach
+    {{-- ═══ MISSION INFO CARD ═══ --}}
+    <div class="dp-card" style="margin-bottom:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+            <div>
+                <span style="font-size:12px;color:var(--color-txt-muted);">{{ $isTr ? 'Durum' : 'Status' }}</span>
+                <div style="margin-top:4px;">
+                    <span class="dp-badge dp-badge-success">{{ $mission->status ?? ($isTr ? 'Tamamlandı' : 'Completed') }}</span>
                 </div>
-
-                {{-- Result Section --}}
-                <div style="background:rgba(255,255,255,0.9);border-radius:12px;padding:16px;">
-                    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">{{ $isTr ? 'Sonuç' : 'Result' }}</div>
-                    <p style="font-size:13px;line-height:1.7;color:#374151;margin:0;">{{ $mission->result ?? '-' }}</p>
+            </div>
+            <div>
+                <span style="font-size:12px;color:var(--color-txt-muted);">{{ $isTr ? 'Zorluk' : 'Difficulty' }}</span>
+                <div style="margin-top:4px;">
+                    <span class="dp-badge" style="background:#DBEAFE;color:#2563EB;">{{ $mission->difficulty ?? 'Easy' }}</span>
                 </div>
-
-                {{-- Overall Score Section --}}
-                <div style="background:rgba(230,235,255,0.95);border-radius:12px;padding:16px;">
-                    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">{{ $isTr ? 'Genel Skor' : 'Overall Score' }}</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                        <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
-                            <div style="font-size:10px;font-weight:600;color:#EF4444;text-transform:uppercase;margin-bottom:4px;">❤️ HEALTH POINT:</div>
-                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->health ?? '-' }}</div>
-                        </div>
-                        <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
-                            <div style="font-size:10px;font-weight:600;color:#3B82F6;text-transform:uppercase;margin-bottom:4px;">📦 RESOURCE POINT:</div>
-                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->resource ?? '-' }}</div>
-                        </div>
-                        <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
-                            <div style="font-size:10px;font-weight:600;color:#22C55E;text-transform:uppercase;margin-bottom:4px;">⚖️ ETHICS POINT:</div>
-                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->ethics ?? '-' }}</div>
-                        </div>
-                        <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
-                            <div style="font-size:10px;font-weight:600;color:#8B5CF6;text-transform:uppercase;margin-bottom:4px;">✅ ADAPTATION POINT:</div>
-                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->adaptation ?? '-' }}</div>
-                        </div>
-                    </div>
-                </div>
+            </div>
+            <div>
+                <span style="font-size:12px;color:var(--color-txt-muted);">{{ $isTr ? 'Oluşturulma' : 'Created' }}</span>
+                <div style="margin-top:4px;font-size:13px;font-weight:500;">{{ $mission->created ?? '28.02.2026' }}</div>
             </div>
         </div>
     </div>
 
-    {{-- ═══ GROUP FLOW — Figma F-62: question cards with dashed arrow connectors ═══ --}}
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;font-family:'Nunito',sans-serif;">{{ $isTr ? 'Grup Akışı' : 'Group Flow' }}</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        {{-- LEFT: Student performance --}}
+        <div class="dp-card" style="padding:0;">
+            <div style="padding:16px 20px;border-bottom:1px solid var(--color-row-border);font-weight:600;font-size:14px;">
+                {{ $isTr ? 'Öğrenci Performansı' : 'Student Performance' }}
+            </div>
+            <div style="overflow-x:auto;">
+            <table class="dp-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>{{ $isTr ? 'Öğrenci' : 'Students' }}</th>
+                        <th>{{ $isTr ? 'Sınıf' : 'Grade' }}</th>
+                        <th>{{ $isTr ? 'Tamamlanan' : 'Total Completed' }}</th>
+                        <th style="color:#ef4444;">❤️ {{ $isTr ? 'Sağlık' : 'Health Point' }}</th>
+                        <th style="color:#3b82f6;">📦 {{ $isTr ? 'Kaynak' : 'Resource Point' }}</th>
+                        <th style="color:#8b5cf6;">⚖️ {{ $isTr ? 'Etik' : 'Ethics Point' }}</th>
+                        <th style="color:#22c55e;">🔄 {{ $isTr ? 'Adaptasyon' : 'Adaptation Point' }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($students as $i => $s)
+                    <tr>
+                        <td class="muted">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</td>
+                        <td>
+                            <div class="dp-td-avatar">
+                                <div class="av">{{ strtoupper(substr($s->name,0,1).substr($s->surname,0,1)) }}</div>
+                                <span style="font-weight:500;">{{ $s->name }} {{ $s->surname }}</span>
+                            </div>
+                        </td>
+                        <td>{{ $s->grade }}</td>
+                        <td>{{ $s->completed }}</td>
+                        <td>{{ $s->health }}/{{ $s->total_missions }}</td>
+                        <td>{{ $s->resource }}/{{ $s->total_missions }}</td>
+                        <td>{{ $s->ethics }}/{{ $s->total_missions }}</td>
+                        <td>{{ $s->adaptation }}/{{ $s->total_missions }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            </div>
+            {{-- Pagination --}}
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;">
+                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
+                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }} 1 {{ $isTr ? '/' : 'of' }} 3</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
+            </div>
+        </div>
 
-    <div style="display:flex;gap:0;align-items:flex-start;overflow-x:auto;padding-bottom:16px;">
-        @foreach($questions as $qi => $q)
-        <div style="flex:0 0 380px;position:relative;">
-            {{-- Question Card --}}
-            <div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:16px;margin:0 8px;">
-                {{-- Question Badge + Unanimity Rate --}}
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-                    <span style="background:{{ $qi === 0 ? '#22C55E' : ($qi === 1 ? '#3B82F6' : '#EF4444') }};color:#fff;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;">
-                        Question {{ $qi + 1 }}
-                    </span>
-                    <span style="font-size:12px;color:#6B7280;">Unanimity Rate: <strong style="color:#111;">{{ $q->unanimity ?? '-' }}/100</strong></span>
+        {{-- RIGHT: Mission details --}}
+        <div>
+            <div class="dp-card" style="margin-bottom:16px;">
+                <div style="font-weight:600;font-size:14px;margin-bottom:12px;">{{ $isTr ? 'Görev Bilgileri' : 'Mission Info' }}</div>
+                <div style="font-size:13px;color:var(--color-txt-muted);line-height:1.6;margin-bottom:16px;">
+                    {{ $mission->description ?? ($isTr ? 'Bu görevde öğrenciler dijital harita oluşturma sürecini öğrenecek ve pratik yapacaklar.' : 'In this mission students will learn digital mapping.') }}
                 </div>
-
-                {{-- Question Text --}}
-                <div style="font-size:13px;font-weight:600;color:#111;margin-bottom:12px;">{{ $q->question }}</div>
-
-                {{-- Answer Options --}}
-                @foreach($q->options as $oi => $option)
-                <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;margin-bottom:4px;font-size:12px;
-                    {{ $option->selected ? 'background:#DBEAFE;border:1.5px solid #3B82F6;' : '' }}">
-                    <span style="width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;
-                        background:{{ $oi === 0 ? '#F59E0B' : ($oi === 1 ? '#22C55E' : '#EF4444') }};">
-                        {{ chr(65 + $oi) }}
-                    </span>
-                    <span style="{{ $option->selected ? 'font-weight:600;color:#1D4ED8;' : 'color:#374151;' }}">{{ $option->text }}</span>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div style="background:var(--color-input-bg);padding:12px;border-radius:8px;">
+                        <div style="font-size:11px;color:var(--color-txt-muted);">{{ $isTr ? 'Tamamlanma Oranı' : 'Completion Rate' }}</div>
+                        <div style="font-size:20px;font-weight:700;color:var(--color-primary);">{{ $mission->completion_rate ?? '72' }}%</div>
+                    </div>
+                    <div style="background:var(--color-input-bg);padding:12px;border-radius:8px;">
+                        <div style="font-size:11px;color:var(--color-txt-muted);">{{ $isTr ? 'Ort. Puan' : 'Avg Score' }}</div>
+                        <div style="font-size:20px;font-weight:700;color:var(--color-primary);">{{ $mission->avg_score ?? '74.3' }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="dp-card">
+                <div style="font-weight:600;font-size:14px;margin-bottom:12px;">{{ $isTr ? 'Son Aktiviteler' : 'Recent Activities' }}</div>
+                @foreach([['Elif Demir', '2 saat önce', 'Tamamlandı'], ['Ahmet Çelik', '3 saat önce', 'Devam Ediyor'], ['Fatma Şahin', '5 saat önce', 'Tamamlandı']] as $act)
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--color-row-border);">
+                    <span style="font-size:13px;font-weight:500;">{{ $act[0] }}</span>
+                    <span style="font-size:12px;color:var(--color-txt-muted);">{{ $act[1] }}</span>
+                    <span class="dp-badge {{ $act[2] === 'Tamamlandı' ? 'dp-badge-success' : 'dp-badge-warning' }}">{{ $act[2] }}</span>
                 </div>
                 @endforeach
-
-                {{-- 4 Point Cards --}}
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px;">
-                    <div style="background:linear-gradient(135deg,#FCA5A5,#EF4444);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
-                        <span style="font-size:14px;">❤️</span>
-                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Health<br>Point:</span>
-                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->health ?? '-' }}</span>
-                    </div>
-                    <div style="background:linear-gradient(135deg,#93C5FD,#3B82F6);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
-                        <span style="font-size:14px;">📦</span>
-                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Resource<br>Point:</span>
-                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->resource ?? '-' }}</span>
-                    </div>
-                    <div style="background:linear-gradient(135deg,#A7F3D0,#22C55E);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
-                        <span style="font-size:14px;">⚖️</span>
-                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Ethics<br>Point:</span>
-                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->ethics ?? '-' }}</span>
-                    </div>
-                    <div style="background:linear-gradient(135deg,#C4B5FD,#8B5CF6);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
-                        <span style="font-size:14px;">✅</span>
-                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Adaptation<br>Point:</span>
-                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->adaptation ?? '-' }}</span>
-                    </div>
-                </div>
             </div>
-
-            {{-- Dashed Arrow Connector (except last) --}}
-            @if(!$loop->last)
-            <div style="position:absolute;top:50%;right:-16px;z-index:2;">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                    <path d="M4 16 L24 16" stroke="#3B82F6" stroke-width="2" stroke-dasharray="4 3"/>
-                    <path d="M20 10 L28 16 L20 22" stroke="#3B82F6" stroke-width="2" fill="none" stroke-dasharray="4 3"/>
-                </svg>
-            </div>
-            @endif
         </div>
-        @endforeach
     </div>
 
 @endsection

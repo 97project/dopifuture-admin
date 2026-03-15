@@ -123,7 +123,68 @@ class ReportService
     {
         $apps = $user->applications()->active()->ordered()->get();
 
-        return $apps->map(function ($app) use ($user) {
+        // VegaConnector uygulamaları için direkt atanmış olamayabilir — tüm aktif uygulamalardan kontrol et
+        $allApps = Application::active()->ordered()->get();
+
+        return $allApps->map(function ($app) use ($user) {
+            $isVega = $app->connector_class === 'App\\Connectors\\VegaConnector';
+
+            if ($isVega) {
+                // VegaConnector: vega_sessions tablosundan oku
+                $vegaSessions = \App\Models\VegaSession::where('application_id', $app->id)
+                    ->where('user_id', $user->id)
+                    ->orderByDesc('started_at')
+                    ->get();
+
+                if ($vegaSessions->isEmpty()) return null;
+
+                $messages = \App\Models\VegaSessionMessage::whereIn('session_id', $vegaSessions->pluck('id'))->get();
+
+                // Module bazında progress simüle et
+                $moduleGroups = $vegaSessions->groupBy('module');
+                $progress = $moduleGroups->map(function ($items, $module) use ($app) {
+                    return (object) [
+                        'module_name'  => ucfirst($module),
+                        'module_id'    => $module,
+                        'module_type'  => $module,
+                        'status'       => 'completed',
+                        'score'        => $items->whereNotNull('score')->avg('score'),
+                        'max_score'    => 100,
+                        'attempts'     => $items->count(),
+                        'started_at'   => $items->min('started_at'),
+                        'completed_at' => $items->max('ended_at'),
+                    ];
+                })->values();
+
+                // Session'ları AppUserSession formatında dön
+                $sessions = $vegaSessions->map(function ($s) {
+                    return (object) [
+                        'session_name'        => $s->user_name . ' — ' . ucfirst($s->module),
+                        'external_session_id' => $s->external_id,
+                        'session_type'        => $s->module,
+                        'started_at'          => $s->started_at,
+                        'duration_seconds'    => min(($s->duration_minutes ?? 0), 120) * 60,
+                        'score'               => $s->score,
+                    ];
+                });
+
+                return [
+                    'app' => $app,
+                    'progress' => $progress,
+                    'sessions' => $sessions,
+                    'stats' => [
+                        'total_modules'   => $moduleGroups->count(),
+                        'completed'       => $moduleGroups->count(),
+                        'in_progress'     => 0,
+                        'completion_rate' => 100,
+                        'avg_score'       => $vegaSessions->whereNotNull('score')->avg('score'),
+                        'total_sessions'  => $vegaSessions->count(),
+                        'total_duration'  => $vegaSessions->sum(fn($s) => min($s->duration_minutes ?? 0, 120)) * 60,
+                    ],
+                ];
+            }
+
+            // Non-Vega: mevcut AppUserProgress/AppUserSession mantığı
             $progress = AppUserProgress::where('user_id', $user->id)
                 ->where('application_id', $app->id)
                 ->orderBy('module_type')
@@ -133,6 +194,8 @@ class ReportService
                 ->where('application_id', $app->id)
                 ->orderByDesc('started_at')
                 ->get();
+
+            if ($progress->isEmpty() && $sessions->isEmpty()) return null;
 
             return [
                 'app' => $app,
@@ -150,7 +213,7 @@ class ReportService
                     'total_duration' => $sessions->sum('duration_seconds'),
                 ],
             ];
-        })->keyBy(fn($item) => $item['app']->slug)->toArray();
+        })->filter()->keyBy(fn($item) => $item['app']->slug)->toArray();
     }
 
     /**
