@@ -279,24 +279,50 @@ class PortalReportController extends Controller
     public function missionDetail($id)
     {
         $mission = (object)[
-            'id' => $id, 'title' => 'Keşfet - Dijital Harita',
+            'id' => $id, 'title' => 'After the Earthquake',
             'status' => 'Tamamlandı', 'difficulty' => 'Easy', 'created' => '28.02.2026',
             'description' => 'Bu görevde öğrenciler dijital harita oluşturma sürecini öğrenecek ve pratik yapacaklar.',
+            'result' => 'The people willingly carry stones and repair walls with the belief that "salvation is near." However, the difference between the reinforcement time (35 min) and the door endurance time determines the lifespan of the lie. If reinforcement does not arrive on time, the people will open the doors.',
             'completion_rate' => 72, 'avg_score' => 74.3,
+            'health' => 75, 'resource' => 40, 'ethics' => 85, 'adaptation' => 100,
+            'image' => 'https://images.unsplash.com/photo-1573648952826-b4f5e09c7370?w=1200&h=400&fit=crop',
         ];
         $students = collect([
-            (object)['name'=>'Allison','surname'=>'Gouse','grade'=>11,'completed'=>3,'total_missions'=>3,'health'=>1,'resource'=>3,'ethics'=>3,'adaptation'=>1],
-            (object)['name'=>'John','surname'=>'Doe','grade'=>8,'completed'=>7,'total_missions'=>7,'health'=>4,'resource'=>6,'ethics'=>7,'adaptation'=>5],
-            (object)['name'=>'Emerson','surname'=>'Rosser','grade'=>12,'completed'=>12,'total_missions'=>12,'health'=>9,'resource'=>12,'ethics'=>8,'adaptation'=>3],
-            (object)['name'=>'Maren','surname'=>'Dokidis','grade'=>9,'completed'=>8,'total_missions'=>8,'health'=>8,'resource'=>4,'ethics'=>6,'adaptation'=>7],
-            (object)['name'=>'Cristofer','surname'=>'Curtis','grade'=>9,'completed'=>5,'total_missions'=>5,'health'=>4,'resource'=>5,'ethics'=>5,'adaptation'=>4],
-            (object)['name'=>'Chance','surname'=>'Rhiel','grade'=>11,'completed'=>8,'total_missions'=>8,'health'=>7,'resource'=>8,'ethics'=>5,'adaptation'=>6],
-            (object)['name'=>'Corey','surname'=>'Bergson','grade'=>9,'completed'=>10,'total_missions'=>10,'health'=>5,'resource'=>6,'ethics'=>7,'adaptation'=>5],
-            (object)['name'=>'Anika','surname'=>'Mango','grade'=>12,'completed'=>7,'total_missions'=>7,'health'=>4,'resource'=>6,'ethics'=>7,'adaptation'=>5],
-            (object)['name'=>'Kadin','surname'=>'Septimus','grade'=>10,'completed'=>5,'total_missions'=>5,'health'=>3,'resource'=>5,'ethics'=>2,'adaptation'=>5],
-            (object)['name'=>'Jordyn','surname'=>'Geidt','grade'=>10,'completed'=>2,'total_missions'=>2,'health'=>0,'resource'=>1,'ethics'=>2,'adaptation'=>0],
+            (object)['name'=>'Chance','surname'=>'Rhiel Madsen','role'=>'Diplomat','grade'=>11,'completed'=>8,'total_missions'=>8,'health'=>7,'resource'=>8,'ethics'=>5,'adaptation'=>6],
+            (object)['name'=>'Emery','surname'=>'Dorwart','role'=>'Safety','grade'=>12,'completed'=>12,'total_missions'=>12,'health'=>9,'resource'=>12,'ethics'=>8,'adaptation'=>3],
+            (object)['name'=>'Kadin','surname'=>'Septimus','role'=>'Logistics','grade'=>10,'completed'=>5,'total_missions'=>5,'health'=>3,'resource'=>5,'ethics'=>2,'adaptation'=>5],
+            (object)['name'=>'Alena','surname'=>'Rosser','role'=>'Medic','grade'=>9,'completed'=>7,'total_missions'=>7,'health'=>4,'resource'=>6,'ethics'=>7,'adaptation'=>5],
         ]);
-        return view('portal.reports.mission-detail', compact('mission', 'students'));
+        $questions = collect([
+            (object)[
+                'question' => 'The earthquake has started! What should you do?',
+                'unanimity' => 75, 'health' => 45, 'resource' => 70, 'ethics' => 65, 'adaptation' => 100,
+                'options' => collect([
+                    (object)['text' => 'Get under the table (DUCK-COVER-HOLD ON)', 'correct' => true, 'selected' => true],
+                    (object)['text' => 'Run Outside', 'correct' => false, 'selected' => false],
+                    (object)['text' => 'Take the elevator down', 'correct' => false, 'selected' => false],
+                ]),
+            ],
+            (object)[
+                'question' => 'The earthquake has started! What should you do?',
+                'unanimity' => 100, 'health' => 45, 'resource' => 70, 'ethics' => 65, 'adaptation' => 100,
+                'options' => collect([
+                    (object)['text' => 'Get under the table (DUCK-COVER-HOLD ON)', 'correct' => true, 'selected' => false],
+                    (object)['text' => 'Run Outside', 'correct' => false, 'selected' => false],
+                    (object)['text' => 'Take the elevator down', 'correct' => false, 'selected' => true],
+                ]),
+            ],
+            (object)[
+                'question' => 'The earthquake has started! What should you do?',
+                'unanimity' => 75, 'health' => 45, 'resource' => 70, 'ethics' => 65, 'adaptation' => 100,
+                'options' => collect([
+                    (object)['text' => 'Get under the table (DUCK-COVER-HOLD ON)', 'correct' => true, 'selected' => false],
+                    (object)['text' => 'Run Outside', 'correct' => false, 'selected' => true],
+                    (object)['text' => 'Take the elevator down', 'correct' => false, 'selected' => false],
+                ]),
+            ],
+        ]);
+        return view('portal.reports.mission-detail', compact('mission', 'students', 'questions'));
     }
 
     /**
@@ -329,22 +355,44 @@ class PortalReportController extends Controller
         $student = (object)['name' => 'Ahmet Çelik'];
         $questions = collect([
             (object)[
-                'question' => 'The earthquake has started! What should you do?',
+                'question' => 'Define the problem you want to solve in 2–3 precise sentences. Avoid general statements.',
+                'score' => 18, 'max_score' => 20,
+                'answer' => '"Users struggle to find reliable local plumbers because current directories lack verified reviews and transparent pricing."',
+                'feedback' => 'This is a clear and concise problem statement. It identifies the target (users looking for plumbers) and the specific pain points (lack of verification and price transparency). Well done.',
                 'health' => 65, 'resource' => 70, 'ethics' => 80, 'adaptation' => 60,
-                'options' => collect([
-                    (object)['text' => 'Get under the table (DUCK-COVER-HOLD ON)', 'correct' => true, 'selected' => false],
-                    (object)['text' => 'Run Outside', 'correct' => false, 'selected' => false],
-                    (object)['text' => 'Take the elevator down', 'correct' => false, 'selected' => true],
-                ]),
+                'options' => collect([]),
             ],
             (object)[
-                'question' => 'The earthquake has started! What should you do?',
-                'health' => 45, 'resource' => 70, 'ethics' => 95, 'adaptation' => 75,
-                'options' => collect([
-                    (object)['text' => 'Get under the table (DUCK-COVER-HOLD ON)', 'correct' => true, 'selected' => false],
-                    (object)['text' => 'Run Outside', 'correct' => false, 'selected' => true],
-                    (object)['text' => 'Take the elevator down', 'correct' => false, 'selected' => false],
-                ]),
+                'question' => 'Identify your primary target user. Describe them using age range, context, and specific need.',
+                'score' => 18, 'max_score' => 20,
+                'answer' => '"Homeowners aged 30-50 living in urban areas who need emergency repair services but don\'t have a trusted network."',
+                'feedback' => 'Good specificity on age and context. You could narrow down \'urban areas\' to a specific region for an MVP, but this is a solid start.',
+                'health' => 70, 'resource' => 65, 'ethics' => 75, 'adaptation' => 55,
+                'options' => collect([]),
+            ],
+            (object)[
+                'question' => 'Explain why this problem is worth solving. Support your answer with a real-life example or observation.',
+                'score' => 18, 'max_score' => 20,
+                'answer' => '"It\'s worth solving because emergency repairs are high-stress. I saw my neighbor pay triple the standard rate for a leak because they couldn\'t verify quotes quickly."',
+                'feedback' => 'Excellent use of a real-life observation. It validates the emotional urgency and financial impact of the problem.',
+                'health' => 80, 'resource' => 60, 'ethics' => 85, 'adaptation' => 70,
+                'options' => collect([]),
+            ],
+            (object)[
+                'question' => 'List three different solution ideas.',
+                'score' => 19, 'max_score' => 20,
+                'answer' => '"1. An \'Uber for Plumbers\' app. 2. A community-vetted WhatsApp group. 3. A certification board website."',
+                'feedback' => 'Excellent use of a real-life observation. It validates the emotional urgency and financial impact of the problem.',
+                'health' => 75, 'resource' => 80, 'ethics' => 70, 'adaptation' => 65,
+                'options' => collect([]),
+            ],
+            (object)[
+                'question' => 'Select one idea and justify your choice using at least two logical reasons.',
+                'score' => 18, 'max_score' => 20,
+                'answer' => '"I choose the \'Uber for Plumbers\' app because it allows for real-time tracking and instant payments, which addresses the trust and speed issues directly."',
+                'feedback' => 'Strong justification linking back to the core problems of trust and speed. Ensure you consider the supply-side acquisition costs.',
+                'health' => 85, 'resource' => 75, 'ethics' => 80, 'adaptation' => 90,
+                'options' => collect([]),
             ],
         ]);
         return view('portal.reports.coach-questions', compact('student', 'questions'));
