@@ -1,75 +1,77 @@
 @extends('portal.app')
-@section('title', ($isTr ?? false) ? 'Soru Detayı' : 'Question Detail')
-@section('page-title', 'WAY AI Coach — Questions')
+@section('title', ($isTr ?? false) ? 'AI Koç Geri Bildirimi' : 'AI Coach Feedback')
+@section('page-title', 'WAY AI Coach')
 @php $isTr = app()->getLocale() === 'tr'; @endphp
 
 @section('content')
 
-    {{-- ═══ BACK BUTTON — Figma node 1285-16888 ═══ --}}
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-        <a href="{{ route('portal.reports.app', 'way-ai-coach') }}" style="display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--color-txt-muted);font-size:13px;">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-            {{ $isTr ? 'Geri Dön' : 'Back' }}
-        </a>
-        <span style="font-size:18px;font-weight:600;">{{ $student->name ?? 'Ahmet Çelik' }} — {{ $isTr ? 'Soru Cevapları' : 'Question Answers' }}</span>
-    </div>
+    {{-- ═══ Figma F-73: AI Coach Feedback — vertical timeline ═══ --}}
+    <div style="max-width:640px;margin:0 auto;">
 
-    {{-- ═══ QUESTIONS GRID ═══ --}}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-        @foreach($questions as $qi => $q)
-        <div style="background:#E9EEFF;border-radius:12px;padding:12px;position:relative;">
-            {{-- Question badge --}}
-            <div style="display:inline-flex;align-items:center;gap:6px;background:var(--color-primary);color:white;border-radius:20px;padding:6px 16px;font-size:13px;font-weight:600;margin-bottom:12px;">
-                Question {{ $qi + 1 }}
+        {{-- Header --}}
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px;">
+            <div style="width:32px;height:32px;border-radius:8px;background:#8B5CF6;display:flex;align-items:center;justify-content:center;">
+                <svg width="18" height="18" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
             </div>
+            <span style="font-size:18px;font-weight:700;color:#111;font-family:'Nunito',sans-serif;">{{ $isTr ? 'AI Koç Geri Bildirimi' : 'AI Coach Feedback' }}</span>
+        </div>
 
-            {{-- Question text --}}
-            <div style="font-size:14px;font-weight:600;margin-bottom:12px;">{{ $q->question }}</div>
+        {{-- Questions timeline --}}
+        <div style="position:relative;">
+            {{-- Vertical connector line --}}
+            <div style="position:absolute;left:18px;top:36px;bottom:36px;width:2px;background:#E5E7EB;"></div>
 
-            {{-- Answer options --}}
-            @foreach($q->options as $oi => $option)
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;margin-bottom:6px;font-size:13px;
-                {{ $option->selected ? 'background:#dcfce7;border:1px solid #22c55e;' : 'background:transparent;' }}">
-                @if($option->correct)
-                    <div style="width:22px;height:22px;border-radius:50%;background:#f59e0b;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <svg width="12" height="12" fill="white" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4l6.93 12H5.07L12 6z"/></svg>
+            @foreach($questions as $qi => $q)
+            @php
+                $colors = ['#22C55E', '#3B82F6', '#F59E0B', '#8B5CF6', '#EF4444'];
+                $color = $colors[$qi % count($colors)];
+                $score = $q->score ?? 18;
+                $maxScore = $q->max_score ?? 20;
+                $percent = ($score / $maxScore) * 100;
+            @endphp
+            <div style="position:relative;padding-left:52px;margin-bottom:32px;">
+                {{-- Step number circle --}}
+                <div style="position:absolute;left:6px;top:0;width:24px;height:24px;border-radius:50%;background:{{ $color }};color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:1;">
+                    {{ $qi + 1 }}
+                </div>
+
+                {{-- Question text --}}
+                <div style="font-size:14px;font-weight:600;color:#111;line-height:1.5;margin-bottom:10px;">{{ $q->question }}</div>
+
+                {{-- Progress bar + Score --}}
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+                    <div style="flex:1;height:8px;background:#E5E7EB;border-radius:4px;overflow:hidden;">
+                        <div style="height:100%;width:{{ $percent }}%;background:linear-gradient(90deg,#22C55E,#84CC16);border-radius:4px;"></div>
                     </div>
-                @elseif($option->selected)
-                    <div style="width:22px;height:22px;border-radius:50%;background:#22c55e;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <svg width="12" height="12" fill="white" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                    <span style="font-size:13px;font-weight:700;color:#111;">{{ $score }}/{{ $maxScore }}</span>
+                </div>
+
+                {{-- Your Answer --}}
+                <div style="margin-bottom:12px;">
+                    <div style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">{{ $isTr ? 'CEVABINIZ' : 'YOUR ANSWER' }}</div>
+                    <p style="font-size:13px;color:#374151;line-height:1.6;margin:0;font-style:italic;background:#F8FAFC;border-radius:8px;padding:12px 14px;">{{ $q->answer ?? '"Users struggle to find reliable local plumbers because current directories lack verified reviews and transparent pricing."' }}</p>
+                </div>
+
+                {{-- Feedback --}}
+                <div style="display:flex;gap:8px;align-items:flex-start;">
+                    <div style="width:16px;height:16px;border-radius:50%;background:#8B5CF6;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
+                        <svg width="8" height="8" fill="white" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                     </div>
-                @else
-                    <div style="width:22px;height:22px;border-radius:50%;background:#d1d5db;flex-shrink:0;"></div>
-                @endif
-                <span style="{{ $option->selected ? 'font-weight:600;color:#16a34a;' : '' }}">{{ $option->text }}</span>
+                    <p style="font-size:12px;color:#6B7280;line-height:1.6;margin:0;">
+                        <strong style="color:#8B5CF6;">Feedback:</strong> {{ $q->feedback ?? 'This is a clear and concise problem statement. It identifies the target (users looking for plumbers) and the specific pain points (lack of verification and price transparency). Well done.' }}
+                    </p>
+                </div>
             </div>
             @endforeach
-
-            {{-- Point Cards --}}
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;">
-                <div style="background:#ef4444;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:8px;">
-                    <span style="font-size:18px;">❤️</span>
-                    <span style="color:white;font-size:11px;font-weight:600;text-transform:uppercase;">Health Point:</span>
-                    <span style="color:white;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->health }}</span>
-                </div>
-                <div style="background:#3b82f6;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:8px;">
-                    <span style="font-size:18px;">📦</span>
-                    <span style="color:white;font-size:11px;font-weight:600;text-transform:uppercase;">Resource Point:</span>
-                    <span style="color:white;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->resource }}</span>
-                </div>
-                <div style="background:#8b5cf6;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:8px;">
-                    <span style="font-size:18px;">⚖️</span>
-                    <span style="color:white;font-size:11px;font-weight:600;text-transform:uppercase;">Ethics Point:</span>
-                    <span style="color:white;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->ethics }}</span>
-                </div>
-                <div style="background:#22c55e;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:8px;">
-                    <span style="font-size:18px;">🔄</span>
-                    <span style="color:white;font-size:11px;font-weight:600;text-transform:uppercase;">Adaptation Point:</span>
-                    <span style="color:white;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->adaptation }}</span>
-                </div>
-            </div>
         </div>
-        @endforeach
+
+        {{-- Back button --}}
+        <div style="text-align:center;margin-top:16px;">
+            <a href="{{ route('portal.reports.app', 'way-ai-coach') }}" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--color-txt-muted);font-size:13px;font-weight:500;padding:10px 24px;border:1px solid #E5E7EB;border-radius:8px;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                {{ $isTr ? 'Geri Dön' : 'Back' }}
+            </a>
+        </div>
     </div>
 
 @endsection

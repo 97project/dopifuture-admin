@@ -89,27 +89,12 @@
     <div class="dp-card">
         <div class="dp-card-title">{{ $isTr ? 'Uygulamalar' : 'Applications' }}</div>
         <table class="dp-table">
-            <thead><tr>
-                <th>{{ $isTr ? 'Uygulama' : 'Application' }}</th>
-                <th>{{ $isTr ? 'Sync Durumu' : 'Sync Status' }}</th>
-                <th>{{ $isTr ? 'Erişim Tarihi' : 'Granted At' }}</th>
-                <th>{{ $isTr ? 'Son Senkronizasyon' : 'Last Sync' }}</th>
-            </tr></thead>
+            <thead><tr><th>{{ $isTr ? 'Uygulama' : 'Application' }}</th><th>{{ $isTr ? 'Erişim Tarihi' : 'Granted At' }}</th></tr></thead>
             <tbody>
                 @foreach($user->applications as $app)
-                @php
-                    $syncStatus = $app->pivot->sync_status ?? 'pending';
-                    $syncBadge = match($syncStatus) {
-                        'synced' => ['dp-badge-active', '✅ ' . ($isTr ? 'Senkron' : 'Synced')],
-                        'failed' => ['dp-badge-error', '❌ ' . ($isTr ? 'Başarısız' : 'Failed')],
-                        default  => ['dp-badge-pending', '⏳ ' . ($isTr ? 'Bekleyen' : 'Pending')],
-                    };
-                @endphp
                 <tr>
                     <td style="font-weight:500;">{{ $app->getTranslation('name') }}</td>
-                    <td><span class="dp-badge {{ $syncBadge[0] }}">{{ $syncBadge[1] }}</span></td>
                     <td class="muted">{{ $app->pivot->granted_at ? \Carbon\Carbon::parse($app->pivot->granted_at)->format('d.m.Y') : '—' }}</td>
-                    <td class="muted">{{ $app->pivot->synced_at ? \Carbon\Carbon::parse($app->pivot->synced_at)->format('d.m.Y H:i') : '—' }}</td>
                 </tr>
                 @endforeach
             </tbody>

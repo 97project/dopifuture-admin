@@ -34,21 +34,7 @@
 
     {{-- Students --}}
     <div class="dp-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:0 0 12px;">
-            <div class="dp-card-title" style="margin-bottom:0;">{{ $isTr ? 'Öğrenciler' : 'Students' }} <span style="font-weight:400;color:var(--text-muted);font-size:14px;">({{ $class->students->count() }})</span></div>
-            @if($canManage && $availableStudents->count())
-            <form action="{{ route('portal.classes.add-student', $class) }}" method="POST" style="display:flex;gap:8px;align-items:center;">
-                @csrf
-                <select name="user_id" class="dp-input" style="min-width:220px;padding:6px 10px;font-size:13px;" required>
-                    <option value="">{{ $isTr ? 'Öğrenci seç...' : 'Select student...' }}</option>
-                    @foreach($availableStudents as $s)
-                    <option value="{{ $s->id }}">{{ $s->name }} {{ $s->surname }} ({{ $s->email }})</option>
-                    @endforeach
-                </select>
-                <button type="submit" class="dp-btn" style="padding:6px 14px;font-size:13px;">+</button>
-            </form>
-            @endif
-        </div>
+        <div class="dp-card-title">{{ $isTr ? 'Öğrenciler' : 'Students' }} <span style="font-weight:400;color:var(--text-muted);font-size:14px;">({{ $class->students->count() }})</span></div>
         @if($class->students->count())
         <table class="dp-table">
             <thead><tr>
@@ -68,17 +54,7 @@
                     </td>
                     <td class="muted">{{ $student->email }}</td>
                     <td><span class="dp-badge {{ $student->status === 'active' ? 'dp-badge-active' : 'dp-badge-inactive' }}">{{ $student->status === 'active' ? ($isTr ? 'Aktif' : 'Active') : ($isTr ? 'Pasif' : 'Inactive') }}</span></td>
-                    <td style="text-align:right;">
-                        <div style="display:flex;gap:6px;justify-content:flex-end;">
-                            <a href="{{ route('portal.users.show', $student) }}" class="dp-action dp-action-view"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a>
-                            @if($canManage)
-                            <form action="{{ route('portal.classes.remove-student', [$class, $student]) }}" method="POST" onsubmit="return confirm('{{ $isTr ? 'Çıkarmak istediğinize emin misiniz?' : 'Are you sure?' }}')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="dp-action" style="color:var(--color-danger);border:none;background:none;cursor:pointer;padding:4px;" title="{{ $isTr ? 'Sınıftan çıkar' : 'Remove' }}"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
-                            </form>
-                            @endif
-                        </div>
-                    </td>
+                    <td style="text-align:right;"><a href="{{ route('portal.users.show', $student) }}" class="dp-action dp-action-view"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a></td>
                 </tr>
                 @endforeach
             </tbody>
@@ -90,21 +66,7 @@
 
     {{-- Teachers --}}
     <div class="dp-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:0 0 12px;">
-            <div class="dp-card-title" style="margin-bottom:0;">{{ $isTr ? 'Öğretmenler' : 'Teachers' }} <span style="font-weight:400;color:var(--text-muted);font-size:14px;">({{ $class->teachers->count() }})</span></div>
-            @if($canManage && $availableTeachers->count())
-            <form action="{{ route('portal.classes.add-teacher', $class) }}" method="POST" style="display:flex;gap:8px;align-items:center;">
-                @csrf
-                <select name="user_id" class="dp-input" style="min-width:220px;padding:6px 10px;font-size:13px;" required>
-                    <option value="">{{ $isTr ? 'Öğretmen seç...' : 'Select teacher...' }}</option>
-                    @foreach($availableTeachers as $t)
-                    <option value="{{ $t->id }}">{{ $t->name }} {{ $t->surname }} ({{ $t->email }})</option>
-                    @endforeach
-                </select>
-                <button type="submit" class="dp-btn" style="padding:6px 14px;font-size:13px;">+</button>
-            </form>
-            @endif
-        </div>
+        <div class="dp-card-title">{{ $isTr ? 'Öğretmenler' : 'Teachers' }} <span style="font-weight:400;color:var(--text-muted);font-size:14px;">({{ $class->teachers->count() }})</span></div>
         @if($class->teachers->count())
         <table class="dp-table">
             <thead><tr>
@@ -122,17 +84,7 @@
                         </div>
                     </td>
                     <td class="muted">{{ $teacher->email }}</td>
-                    <td style="text-align:right;">
-                        <div style="display:flex;gap:6px;justify-content:flex-end;">
-                            <a href="{{ route('portal.users.show', $teacher) }}" class="dp-action dp-action-view"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a>
-                            @if($canManage)
-                            <form action="{{ route('portal.classes.remove-teacher', [$class, $teacher]) }}" method="POST" onsubmit="return confirm('{{ $isTr ? 'Çıkarmak istediğinize emin misiniz?' : 'Are you sure?' }}')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="dp-action" style="color:var(--color-danger);border:none;background:none;cursor:pointer;padding:4px;" title="{{ $isTr ? 'Sınıftan çıkar' : 'Remove' }}"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
-                            </form>
-                            @endif
-                        </div>
-                    </td>
+                    <td style="text-align:right;"><a href="{{ route('portal.users.show', $teacher) }}" class="dp-action dp-action-view"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a></td>
                 </tr>
                 @endforeach
             </tbody>

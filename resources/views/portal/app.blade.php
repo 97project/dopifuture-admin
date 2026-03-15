@@ -319,14 +319,15 @@
         }
 
         .dp-table thead th {
-            background: var(--color-table-header);
+            background: transparent;
             padding: 14px 20px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 500;
             color: var(--color-txt-sec);
             text-align: left;
             border-bottom: 1px solid var(--color-row-border);
-            height: 56px;
+            height: 52px;
+            font-family: 'Nunito', sans-serif;
         }
 
         .dp-table tbody td {
@@ -342,6 +343,53 @@
         .dp-table tbody tr:hover { background: #fafbfc; }
 
         .dp-table .muted { color: var(--color-txt-light); }
+
+        /* Cancelled row — red left border like Figma */
+        .dp-table tbody tr.dp-row-cancelled { position: relative; }
+        .dp-table tbody tr.dp-row-cancelled td:first-child::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #EF4444;
+            border-radius: 0 2px 2px 0;
+        }
+
+        /* Action icon buttons — outlined circles like Figma */
+        .dp-action-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid var(--color-row-border);
+            background: transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--color-txt-muted);
+            padding: 0;
+        }
+        .dp-action-icon:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        .dp-action-icon.dp-action-delete {
+            color: var(--color-error-red);
+            border-color: rgba(239,68,68,0.3);
+        }
+        .dp-action-icon.dp-action-delete:hover {
+            background: rgba(239,68,68,0.08);
+        }
+        .dp-action-icon.dp-action-primary {
+            color: var(--color-primary);
+            border-color: rgba(40,68,225,0.3);
+        }
+        .dp-action-icon.dp-action-primary:hover {
+            background: rgba(40,68,225,0.08);
+        }
 
         /* Avatar in table */
         .dp-td-avatar {
