@@ -1,14 +1,12 @@
 @extends('portal.app')
-@section('title', app()->getLocale() === 'tr' ? 'Öğretmen Paneli' : 'Teacher Dashboard')
-@php $isTr = app()->getLocale() === 'tr'; @endphp
-
+@section('title', 'Teacher Dashboard')
 @section('content')
     <div style="margin-bottom:24px;">
         <h2 style="font-size:24px;font-weight:700;color:#030719;margin:0 0 4px;font-family:'Nunito',sans-serif;">
-            {{ $isTr ? 'Hoş geldiniz' : 'Welcome' }}, {{ $user->name }}
+            Welcome, {{ $user->name }}
         </h2>
         <p style="font-size:14px;color:var(--color-txt-muted);margin:0;">
-            {{ $isTr ? 'Sınıflarınız ve öğrencilerinizin durumu' : 'Your classes and students overview' }}
+            Your classes and students overview
         </p>
     </div>
 
@@ -16,27 +14,27 @@
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
         <div class="dp-card" style="padding:20px;text-align:center;">
             <div style="font-size:28px;font-weight:800;color:#4364F7;">{{ $classes->count() }}</div>
-            <div style="font-size:13px;color:var(--color-txt-muted);margin-top:4px;">{{ $isTr ? 'Sınıf' : 'Classes' }}</div>
+            <div style="font-size:13px;color:var(--color-txt-muted);margin-top:4px;">Classes</div>
         </div>
         <div class="dp-card" style="padding:20px;text-align:center;">
             <div style="font-size:28px;font-weight:800;color:#8B5CF6;">{{ $classes->sum('students_count') }}</div>
-            <div style="font-size:13px;color:var(--color-txt-muted);margin-top:4px;">{{ $isTr ? 'Toplam Öğrenci' : 'Total Students' }}</div>
+            <div style="font-size:13px;color:var(--color-txt-muted);margin-top:4px;">Total Students</div>
         </div>
         <div class="dp-card" style="padding:20px;text-align:center;">
             <div style="font-size:28px;font-weight:800;color:#10B981;">{{ $recentStudents->count() }}</div>
-            <div style="font-size:13px;color:var(--color-txt-muted);margin-top:4px;">{{ $isTr ? 'Son Eklenenler' : 'Recent' }}</div>
+            <div style="font-size:13px;color:var(--color-txt-muted);margin-top:4px;">Recent</div>
         </div>
     </div>
 
     {{-- Classes --}}
     <div class="dp-card" style="margin-bottom:24px;">
-        <div class="dp-card-title" style="padding:20px 24px 12px;">{{ $isTr ? 'Sınıflarım' : 'My Classes' }}</div>
+        <div class="dp-card-title" style="padding:20px 24px 12px;">My Classes</div>
         @if($classes->count())
         <table class="dp-table">
             <thead><tr>
-                <th>{{ $isTr ? 'Sınıf Adı' : 'Class Name' }}</th>
-                <th>{{ $isTr ? 'Okul' : 'School' }}</th>
-                <th>{{ $isTr ? 'Öğrenci' : 'Students' }}</th>
+                <th>Class Name</th>
+                <th>School</th>
+                <th>Students</th>
                 <th style="text-align:right;"></th>
             </tr></thead>
             <tbody>
@@ -60,18 +58,18 @@
             </tbody>
         </table>
         @else
-        <div style="padding:32px;text-align:center;color:var(--text-muted);">{{ $isTr ? 'Henüz sınıf atanmamış.' : 'No classes assigned yet.' }}</div>
+        <div style="padding:32px;text-align:center;color:var(--text-muted);">No classes assigned yet.</div>
         @endif
     </div>
 
     {{-- Recent Students --}}
     <div class="dp-card">
-        <div class="dp-card-title" style="padding:20px 24px 12px;">{{ $isTr ? 'Son Eklenen Öğrenciler' : 'Recent Students' }}</div>
+        <div class="dp-card-title" style="padding:20px 24px 12px;">Recent Students</div>
         @if($recentStudents->count())
         <table class="dp-table">
             <thead><tr>
-                <th>{{ $isTr ? 'Ad Soyad' : 'Name' }}</th>
-                <th>E-posta</th>
+                <th>Name</th>
+                <th>E-mail</th>
                 <th style="text-align:right;"></th>
             </tr></thead>
             <tbody>
@@ -85,7 +83,7 @@
                     </td>
                     <td class="muted">{{ $student->email }}</td>
                     <td style="text-align:right;">
-                        <a href="{{ route('portal.reports.student', $student) }}" class="dp-action" style="color:#4364F7;" title="{{ $isTr ? 'Rapor' : 'Report' }}">
+                        <a href="{{ route('portal.reports.student', $student) }}" class="dp-action" style="color:#4364F7;" title="Report">
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                         </a>
                     </td>
@@ -94,7 +92,7 @@
             </tbody>
         </table>
         @else
-        <div style="padding:32px;text-align:center;color:var(--text-muted);">{{ $isTr ? 'Henüz öğrenci yok.' : 'No students yet.' }}</div>
+        <div style="padding:32px;text-align:center;color:var(--text-muted);">No students yet.</div>
         @endif
     </div>
 @endsection

@@ -881,7 +881,6 @@
 <body>
     @include('portal.partials._toast')
     @php
-        $isTr = app()->getLocale() === 'tr';
         $user = auth()->user();
         $cr = request()->route()?->getName() ?? '';
     @endphp
@@ -902,7 +901,7 @@
             {{-- Figma sidebar: flat list, no section headers --}}
             <a href="{{ route('portal.dashboard') }}" class="dp-nav-item {{ str_starts_with($cr, 'portal.dashboard') || str_starts_with($cr, 'portal.schools') || str_starts_with($cr, 'portal.classes') || str_starts_with($cr, 'portal.users') || str_starts_with($cr, 'portal.licenses') ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                {{ $isTr ? 'Genel Bakış' : 'Administration' }}
+                Administration
             </a>
 
             <a href="{{ route('portal.home') }}" class="dp-nav-item {{ $cr === 'portal.home' ? 'active' : '' }}">
@@ -939,7 +938,7 @@
 
             <a href="{{ route('portal.reports') }}" class="dp-nav-item {{ $cr === 'portal.reports' ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                {{ $isTr ? 'Raporlar' : 'Reports' }}
+                Reports
             </a>
 
             {{-- ═══ OKUL İŞLEMLERİ — Collapsible ═══ --}}
@@ -947,41 +946,41 @@
                 $schoolMenuOpen = str_starts_with($cr, 'portal.users') || str_starts_with($cr, 'portal.classes');
             @endphp
             <div class="dp-nav-parent {{ $schoolMenuOpen ? 'open' : '' }}" onclick="toggleSchoolMenu(this)">
-                {{ $isTr ? 'Okul İşlemleri' : 'School Operations' }}
+                School Operations
                 <svg class="chevron" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </div>
             <div class="dp-nav-children {{ $schoolMenuOpen ? 'open' : '' }}" id="schoolMenu">
                 {{-- Öğrenci İşlemleri --}}
-                <div class="dp-nav-sub-label">{{ $isTr ? 'Öğrenci İşlemleri' : 'Student Operations' }}</div>
+                <div class="dp-nav-sub-label">Student Operations</div>
                 <a href="{{ route('portal.users.index', ['role' => 'student']) }}" class="dp-nav-item {{ $cr === 'portal.users.index' && request('role') === 'student' ? 'active' : '' }}">
-                    {{ $isTr ? 'Listele' : 'List' }}
+                    List
                 </a>
                 <a href="{{ route('portal.users.create', ['role' => 'student']) }}" class="dp-nav-item {{ $cr === 'portal.users.create' && request('role') === 'student' ? 'active' : '' }}">
-                    {{ $isTr ? 'Ekle' : 'Add' }}
+                    Add
                 </a>
 
                 {{-- Öğretmen İşlemleri --}}
-                <div class="dp-nav-sub-label">{{ $isTr ? 'Öğretmen İşlemleri' : 'Teacher Operations' }}</div>
+                <div class="dp-nav-sub-label">Teacher Operations</div>
                 <a href="{{ route('portal.users.index', ['role' => 'teacher']) }}" class="dp-nav-item {{ $cr === 'portal.users.index' && request('role') === 'teacher' ? 'active' : '' }}">
-                    {{ $isTr ? 'Listele' : 'List' }}
+                    List
                 </a>
                 <a href="{{ route('portal.users.create', ['role' => 'teacher']) }}" class="dp-nav-item {{ $cr === 'portal.users.create' && request('role') === 'teacher' ? 'active' : '' }}">
-                    {{ $isTr ? 'Ekle' : 'Add' }}
+                    Add
                 </a>
 
                 {{-- Sınıf İşlemleri --}}
-                <div class="dp-nav-sub-label">{{ $isTr ? 'Sınıf İşlemleri' : 'Class Operations' }}</div>
+                <div class="dp-nav-sub-label">Class Operations</div>
                 <a href="{{ route('portal.classes.index') }}" class="dp-nav-item {{ $cr === 'portal.classes.index' ? 'active' : '' }}">
-                    {{ $isTr ? 'Listele' : 'List' }}
+                    List
                 </a>
                 <a href="{{ route('portal.classes.create') }}" class="dp-nav-item {{ $cr === 'portal.classes.create' ? 'active' : '' }}">
-                    {{ $isTr ? 'Ekle' : 'Add' }}
+                    Add
                 </a>
             </div>
 
             <a href="{{ route('portal.profile') }}" class="dp-nav-item {{ str_starts_with($cr, 'portal.profile') ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                {{ $isTr ? 'Profil' : 'Profile' }}
+                Profile
             </a>
 
             @if($user->hasAnyRole(['super-admin','admin']))
@@ -998,19 +997,10 @@
                 @csrf
                 <button type="submit" class="dp-nav-item" style="width:100%; color: rgba(255,255,255,0.45); border:none; cursor:pointer; font-family:inherit; background:transparent;">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                    {{ $isTr ? 'Çıkış Yap' : 'Log Out' }}
+                    Log Out
                 </button>
             </form>
-            <div class="dp-lang-btns">
-                <form action="{{ route('portal.switch-locale') }}" method="POST">
-                    @csrf <input type="hidden" name="locale" value="tr">
-                    <button type="submit" style="background: {{ app()->getLocale()==='tr' ? 'rgba(40,68,225,0.3)' : 'rgba(255,255,255,0.05)' }}; color: {{ app()->getLocale()==='tr' ? '#fff' : 'rgba(255,255,255,0.4)' }};">TR</button>
-                </form>
-                <form action="{{ route('portal.switch-locale') }}" method="POST">
-                    @csrf <input type="hidden" name="locale" value="en">
-                    <button type="submit" style="background: {{ app()->getLocale()==='en' ? 'rgba(40,68,225,0.3)' : 'rgba(255,255,255,0.05)' }}; color: {{ app()->getLocale()==='en' ? '#fff' : 'rgba(255,255,255,0.4)' }};">EN</button>
-                </form>
-            </div>
+
         </div>
     </aside>
 
@@ -1021,12 +1011,12 @@
                 <button class="dp-hamburger" onclick="toggleSidebar()">
                     <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
-                <span class="dp-topbar-title">@yield('page-title', $isTr ? 'Genel Bakış' : 'Dashboard')</span>
+                <span class="dp-topbar-title">@yield('page-title', 'Dashboard')</span>
             </div>
 
             <div class="dp-topbar-search">
                 <svg width="16" height="16" fill="none" stroke="var(--color-txt-muted)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="text" placeholder="{{ $isTr ? 'Ara...' : 'Search...' }}">
+                <input type="text" placeholder="Search...">
             </div>
 
             <div class="dp-topbar-right">
@@ -1058,7 +1048,7 @@
         </div>
 
         <footer style="text-align:center; padding:24px; font-size:12px; color:var(--color-txt-muted);">
-            &copy; {{ date('Y') }} DopiFuture. {{ $isTr ? 'Tüm hakları saklıdır.' : 'All rights reserved.' }}
+            &copy; {{ date('Y') }} DopiFuture. All rights reserved.
         </footer>
     </div>
 

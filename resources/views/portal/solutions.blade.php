@@ -1,6 +1,6 @@
 @extends('portal.layout')
-@section('title', app()->getLocale() === 'tr' ? 'Çözümler' : 'Solutions')
-@section('meta_description', app()->getLocale() === 'tr' ? 'DopiFuture dijital eğitim uygulamaları' : 'DopiFuture digital education applications')
+@section('title', 'Solutions')
+@section('meta_description', 'DopiFuture digital education applications')
 
 @section('content')
     <style>
@@ -105,8 +105,8 @@
 
     {{-- Hero --}}
     <section class="solutions-hero">
-        <h1>{{ app()->getLocale() === 'tr' ? 'Dijital Eğitim Çözümleri' : 'Digital Education Solutions' }}</h1>
-        <p>{{ app()->getLocale() === 'tr' ? 'İhtiyacınıza göre uygulamaları keşfedin ve okulunuza entegre edin.' : 'Discover applications tailored to your needs and integrate them into your school.' }}
+        <h1>{{ 'Digital Education Solutions' }}</h1>
+        <p>{{ 'Discover applications tailored to your needs and integrate them into your school.' }}
         </p>
     </section>
 
@@ -140,7 +140,7 @@
                         <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        {{ app()->getLocale() === 'tr' ? 'Aktif' : 'Active' }}
+                        {{ 'Active' }}
                     </div>
                 </div>
             @endforeach
@@ -152,7 +152,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                     d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
-            {{ app()->getLocale() === 'tr' ? 'Henüz uygulama bulunmuyor.' : 'No applications available yet.' }}
+            {{ 'No applications available yet.' }}
         </div>
     @endif
 
@@ -160,10 +160,10 @@
     <div
         style="text-align: center; margin-top: 3rem; padding: 2rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;">
         <p style="color: var(--gray-400); margin-bottom: 1rem;">
-            {{ app()->getLocale() === 'tr' ? 'Bu uygulamalardan faydalanmak ister misiniz?' : 'Want to use these applications?' }}
+            {{ 'Want to use these applications?' }}
         </p>
         <a href="{{ route('register.create') }}" class="btn-primary">
-            {{ app()->getLocale() === 'tr' ? 'Okulumu Kaydet' : 'Register My School' }}
+            {{ 'Register My School' }}
         </a>
     </div>
 @endsection

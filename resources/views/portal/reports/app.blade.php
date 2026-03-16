@@ -4,8 +4,7 @@
 
 @section('content')
 @php
-    $isTr = app()->getLocale() === 'tr';
-    $tab = request('tab', 'assignment');
+        $tab = request('tab', 'assignment');
     $slug = $app->slug;
 @endphp
 
@@ -14,7 +13,7 @@
     <div class="dp-tabs" style="border-bottom:none;margin-bottom:0;">
         <a href="{{ route('portal.reports.app', $app->slug) }}?tab=assignment"
            class="dp-tab {{ $tab === 'assignment' ? 'active' : '' }}">
-            {{ $isTr ? 'Görevler' : 'Assignments' }}
+            Assignments
             @if($slug === 'mission-way')
                 <span class="tab-count">{{ $total_missions ?? 0 }}</span>
             @else
@@ -23,18 +22,18 @@
         </a>
         <a href="{{ route('portal.reports.app', $app->slug) }}?tab=performance"
            class="dp-tab {{ $tab === 'performance' ? 'active' : '' }}">
-            {{ $isTr ? 'Performans' : 'Performance' }}
+            Performance
         </a>
     </div>
 
     <button type="button" class="dp-btn" onclick="document.getElementById('addAssignmentModal')?.classList.add('show')">
         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-width="2" d="M12 8v8m-4-4h8"/></svg>
         @if($slug === 'mission-way')
-            {{ $isTr ? 'Yeni Görev Ekle' : 'Add New Mission' }}
+            Add New Mission
         @elseif($slug === 'way-startup')
-            {{ $isTr ? 'Yeni Atama Ekle' : 'Add New Assignment' }}
+            Add New Assignment
         @else
-            {{ $isTr ? 'Yeni Ekle' : 'Add New' }}
+            Add New
         @endif
     </button>
 </div>
@@ -54,35 +53,35 @@
                     <thead>
                         <tr>
                             <th style="width:40px;">No</th>
-                            <th>{{ $isTr ? 'Görev Adı' : 'Mission Name' }}</th>
-                            <th>{{ $isTr ? 'Öğrenciler' : 'Students' }}</th>
-                            <th>{{ $isTr ? 'Atanma Tarihi' : 'Assigned Date' }}</th>
-                            <th>{{ $isTr ? 'Son Tarih' : 'Deadline' }}</th>
+                            <th>Mission Name</th>
+                            <th>Students</th>
+                            <th>Assigned Date</th>
+                            <th>Deadline</th>
                             <th>
                                 <span style="display:inline-flex;align-items:center;gap:4px;">
                                     <span style="color:#ef4444;">❤️</span>
-                                    {{ $isTr ? 'Sağlık Puanı' : 'Health Point' }}
+                                    Health Point
                                 </span>
                             </th>
                             <th>
                                 <span style="display:inline-flex;align-items:center;gap:4px;">
                                     <span style="color:#22c55e;">🌿</span>
-                                    {{ $isTr ? 'Kaynak Puanı' : 'Resource Point' }}
+                                    Resource Point
                                 </span>
                             </th>
                             <th>
                                 <span style="display:inline-flex;align-items:center;gap:4px;">
                                     <span style="color:#f59e0b;">🧡</span>
-                                    {{ $isTr ? 'Etik Puanı' : 'Ethics Point' }}
+                                    Ethics Point
                                 </span>
                             </th>
                             <th>
                                 <span style="display:inline-flex;align-items:center;gap:4px;">
                                     <span style="color:#22c55e;">✅</span>
-                                    {{ $isTr ? 'Adaptasyon Puanı' : 'Adaptation Point' }}
+                                    Adaptation Point
                                 </span>
                             </th>
-                            <th>{{ $isTr ? 'İşlemler' : 'Action' }}</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -166,31 +165,31 @@
                             <td>
                                 <div style="display:flex;align-items:center;gap:12px;white-space:nowrap;">
                                     {{-- Edit --}}
-                                    <a href="#" class="dp-action" title="{{ $isTr ? 'Düzenle' : 'Edit' }}" style="color:var(--color-txt-muted);">
+                                    <a href="#" class="dp-action" title="Edit" style="color:var(--color-txt-muted);">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     </a>
                                     {{-- Delete --}}
-                                    <a href="#" class="dp-action" title="{{ $isTr ? 'Sil' : 'Delete' }}" style="color:var(--color-txt-muted);">
+                                    <a href="#" class="dp-action" title="Delete" style="color:var(--color-txt-muted);">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </a>
                                     {{-- Details --}}
                                     <a href="{{ route('portal.reports.mission.detail', $mission->id) }}" style="color:var(--color-primary);font-size:13px;font-weight:500;text-decoration:none;">
-                                        {{ $isTr ? 'Detay' : 'Details' }}
+                                        Details
                                     </a>
                                 </div>
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="10" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ $isTr ? 'Henüz görev yok' : 'No missions yet' }}</td></tr>
+                        <tr><td colspan="10" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No missions yet</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
             {{-- Pagination — Figma: Page1 of 3 --}}
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
-                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }}1 {{ $isTr ? '/' : 'of' }} 3</span>
-                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
+                <span style="color:var(--color-txt-muted);cursor:default;">Previous</span>
+                <span style="color:var(--color-txt-muted);">Page1 of 3</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">Next</a>
             </div>
         </div>
 
@@ -202,14 +201,14 @@
                     <thead>
                         <tr>
                             <th style="width:40px;">No</th>
-                            <th>{{ $isTr ? 'Startup Adı' : 'Startup Name' }}</th>
-                            <th>{{ $isTr ? 'Startup Türü' : 'Startup Type' }}</th>
-                            <th>{{ $isTr ? 'Öğrenciler' : 'Students' }}</th>
-                            <th>{{ $isTr ? 'Son Tarih' : 'Deadline' }}</th>
-                            <th>{{ $isTr ? 'Adım' : 'Step' }}</th>
-                            <th>{{ $isTr ? 'Sistem Puanı' : 'System Point' }}</th>
-                            <th>{{ $isTr ? 'Öğretmen Puanı' : 'Teacher Point' }}</th>
-                            <th>{{ $isTr ? 'İşlemler' : 'Action' }}</th>
+                            <th>Startup Name</th>
+                            <th>Startup Type</th>
+                            <th>Students</th>
+                            <th>Deadline</th>
+                            <th>Step</th>
+                            <th>System Point</th>
+                            <th>Teacher Point</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -286,29 +285,29 @@
                             </td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;white-space:nowrap;">
-                                    <a href="{{ route('portal.reports.startup.detail', $startup->id) }}" class="dp-action" title="{{ $isTr ? 'Düzenle' : 'Edit' }}" style="color:var(--color-txt-muted);">
+                                    <a href="{{ route('portal.reports.startup.detail', $startup->id) }}" class="dp-action" title="Edit" style="color:var(--color-txt-muted);">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     </a>
-                                    <a href="#" class="dp-action" title="{{ $isTr ? 'Ayarlar' : 'Settings' }}" style="color:var(--color-txt-muted);">
+                                    <a href="#" class="dp-action" title="Settings" style="color:var(--color-txt-muted);">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
                                     </a>
-                                    <a href="#" class="dp-action" title="{{ $isTr ? 'Sil' : 'Delete' }}" style="color:var(--color-txt-muted);">
+                                    <a href="#" class="dp-action" title="Delete" style="color:var(--color-txt-muted);">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </a>
                                 </div>
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="9" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ $isTr ? 'Henüz startup yok' : 'No startups yet' }}</td></tr>
+                        <tr><td colspan="9" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No startups yet</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
             {{-- Pagination — Figma: Page1 of 12 --}}
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
-                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }}1 {{ $isTr ? '/' : 'of' }} 12</span>
-                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
+                <span style="color:var(--color-txt-muted);cursor:default;">Previous</span>
+                <span style="color:var(--color-txt-muted);">Page1 of 12</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">Next</a>
             </div>
         </div>
 
@@ -320,9 +319,9 @@
                     <thead>
                         <tr>
                             <th style="width:40px;">No</th>
-                            <th>{{ $isTr ? 'Öğrenciler' : 'Students' }}</th>
-                            <th>{{ $isTr ? 'Toplam Tartışma Süresi (dk)' : 'Total Discussion Minute' }}</th>
-                            <th>{{ $isTr ? 'Toplam Tartışma Sayısı' : 'Total Discussion Count' }}</th>
+                            <th>Students</th>
+                            <th>Total Discussion Minute</th>
+                            <th>Total Discussion Count</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -339,15 +338,15 @@
                             <td style="text-align:center;">{{ $stat['discussion_count'] ?? rand(0, 7) }}</td>
                         </tr>
                         @empty
-                        <tr><td colspan="4" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ $isTr ? 'Henüz veri yok' : 'No data yet' }}</td></tr>
+                        <tr><td colspan="4" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No data yet</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
-                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }} 1 {{ $isTr ? '/' : 'of' }} 3</span>
-                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
+                <span style="color:var(--color-txt-muted);cursor:default;">Previous</span>
+                <span style="color:var(--color-txt-muted);">Page 1 of 3</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">Next</a>
             </div>
         </div>
 
@@ -359,10 +358,10 @@
                     <thead>
                         <tr>
                             <th style="width:40px;">No</th>
-                            <th>{{ $isTr ? 'Öğrenciler' : 'Students' }}</th>
-                            <th>{{ $isTr ? 'AI Coach Etkileşim Sayısı' : 'AI Coach Interaction Number' }}</th>
-                            <th>{{ $isTr ? 'Toplam Süre (Saniye)' : 'Total Duration (Seconds)' }}</th>
-                            <th>{{ $isTr ? 'İşlemler' : 'Action' }}</th>
+                            <th>Students</th>
+                            <th>AI Coach Interaction Number</th>
+                            <th>Total Duration (Seconds)</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -389,19 +388,19 @@
                                 @endif
                             </td>
                             <td>
-                                <a href="{{ route('portal.reports.coach.questions', $stat['user']->id) }}" style="color:var(--color-primary);font-size:13px;font-weight:500;text-decoration:none;">{{ $isTr ? 'Detay' : 'Details' }}</a>
+                                <a href="{{ route('portal.reports.coach.questions', $stat['user']->id) }}" style="color:var(--color-primary);font-size:13px;font-weight:500;text-decoration:none;">Details</a>
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="5" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ $isTr ? 'Henüz veri yok' : 'No data yet' }}</td></tr>
+                        <tr><td colspan="5" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No data yet</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
-                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }} 1 {{ $isTr ? '/' : 'of' }} 3</span>
-                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
+                <span style="color:var(--color-txt-muted);cursor:default;">Previous</span>
+                <span style="color:var(--color-txt-muted);">Page 1 of 3</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">Next</a>
             </div>
         </div>
 
@@ -411,11 +410,11 @@
         <div style="display:flex;gap:16px;margin-bottom:20px;">
             <div class="dp-stat-card" style="flex:1;">
                 <div class="s-value">5</div>
-                <div class="s-label">{{ $isTr ? 'Ort. Galaxy Katılımı' : 'Average Galaxy Join' }}</div>
+                <div class="s-label">Average Galaxy Join</div>
             </div>
             <div class="dp-stat-card" style="flex:1;">
                 <div class="s-value">64</div>
-                <div class="s-label">{{ $isTr ? 'Ort. Süre (Saniye)' : 'Average Duration (Sec)' }}</div>
+                <div class="s-label">Average Duration (Sec)</div>
             </div>
         </div>
 
@@ -425,12 +424,12 @@
                     <thead>
                         <tr>
                             <th style="width:40px;">No</th>
-                            <th>{{ $isTr ? 'Öğrenciler' : 'Students' }}</th>
-                            <th>{{ $isTr ? 'Son Etkileşim' : 'Last Interaction' }}</th>
-                            <th>{{ $isTr ? 'Toplam Katılım' : 'Total Role Galaxies Joined' }}</th>
-                            <th>{{ $isTr ? 'Toplam Süre (Saniye)' : 'Total Duration (Seconds)' }}</th>
-                            <th>{{ $isTr ? 'Son 5 Katılım' : 'Last 5 Role Galaxies Joined' }}</th>
-                            <th>{{ $isTr ? 'İşlemler' : 'Action' }}</th>
+                            <th>Students</th>
+                            <th>Last Interaction</th>
+                            <th>Total Role Galaxies Joined</th>
+                            <th>Total Duration (Seconds)</th>
+                            <th>Last 5 Role Galaxies Joined</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -485,15 +484,15 @@
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="7" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ $isTr ? 'Henüz veri yok' : 'No data yet' }}</td></tr>
+                        <tr><td colspan="7" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No data yet</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
-                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }} 1 {{ $isTr ? '/' : 'of' }} 12</span>
-                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
+                <span style="color:var(--color-txt-muted);cursor:default;">Previous</span>
+                <span style="color:var(--color-txt-muted);">Page 1 of 12</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">Next</a>
             </div>
         </div>
 
@@ -503,81 +502,81 @@
         {{-- Stat cards --}}
         <div class="dp-stats-grid" style="margin-bottom:20px;">
             @if($slug === 'way-startup')
-                <div class="dp-stat-card"><div class="s-value">{{ $total_progress }}</div><div class="s-label">{{ $isTr ? 'Toplam İlerleme' : 'Total Progress' }}</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $total_completed }}</div><div class="s-label">{{ $isTr ? 'Tamamlanan' : 'Completed' }}</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div><div class="s-label">{{ $isTr ? 'Ort. Puan' : 'Avg Score' }}</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $total_sessions }}</div><div class="s-label">{{ $isTr ? 'Oturumlar' : 'Sessions' }}</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">{{ $isTr ? 'Toplam Süre' : 'Total Duration' }}</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_progress }}</div><div class="s-label">Total Progress</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_completed }}</div><div class="s-label">Completed</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div><div class="s-label">Avg Score</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_sessions }}</div><div class="s-label">Sessions</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">Total Duration</div></div>
             @elseif($slug === 'study-space')
-                <div class="dp-stat-card-yellow"><div class="s-value">{{ $total_progress }}</div><div class="s-label">{{ $isTr ? 'Toplam Tartışma' : 'Total Discussion' }}</div></div>
-                <div class="dp-stat-card-yellow"><div class="s-value">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div><div class="s-label">{{ $isTr ? 'Ort. Tartışma Süresi' : 'Avg Discussion Time' }}</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $total_sessions }}</div><div class="s-label">{{ $isTr ? 'Oturumlar' : 'Sessions' }}</div></div>
+                <div class="dp-stat-card-yellow"><div class="s-value">{{ $total_progress }}</div><div class="s-label">Total Discussion</div></div>
+                <div class="dp-stat-card-yellow"><div class="s-value">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div><div class="s-label">Avg Discussion Time</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_sessions }}</div><div class="s-label">Sessions</div></div>
             @elseif($slug === 'way-ai-coach')
-                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg></div><div class="s-value">{{ $total_progress }}</div><div class="s-label">{{ $isTr ? 'Empati Skoru' : 'Empathy Score' }}</div></div>
-                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><div class="s-value">{{ $total_sessions }}</div><div class="s-label">{{ $isTr ? 'Etkileşim Sayısı' : 'Interaction Count' }}</div></div>
-                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">{{ $isTr ? 'Toplam Süre' : 'Total Duration' }}</div></div>
+                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg></div><div class="s-value">{{ $total_progress }}</div><div class="s-label">Empathy Score</div></div>
+                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><div class="s-value">{{ $total_sessions }}</div><div class="s-label">Interaction Count</div></div>
+                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">Total Duration</div></div>
             @elseif($slug === 'role-galaxy')
-                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg></div><div class="s-value">{{ $total_progress }}</div><div class="s-label">{{ $isTr ? 'Galaksi Katılımı' : 'Galaxy Join' }}</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $total_completed }}</div><div class="s-label">{{ $isTr ? 'Tamamlanan Roller' : 'Roles Completed' }}</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">{{ $isTr ? 'Toplam Süre' : 'Total Duration' }}</div></div>
+                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg></div><div class="s-value">{{ $total_progress }}</div><div class="s-label">Galaxy Join</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_completed }}</div><div class="s-label">Roles Completed</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">Total Duration</div></div>
             @else
-                <div class="dp-stat-card"><div class="s-value">{{ $total_progress }}</div><div class="s-label">{{ $isTr ? 'Toplam İlerleme' : 'Total Progress' }}</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $total_completed }}</div><div class="s-label">{{ $isTr ? 'Tamamlanan' : 'Completed' }}</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div><div class="s-label">{{ $isTr ? 'Ort. Puan' : 'Avg Score' }}</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $total_sessions }}</div><div class="s-label">{{ $isTr ? 'Oturumlar' : 'Sessions' }}</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">{{ $isTr ? 'Toplam Süre' : 'Total Duration' }}</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_progress }}</div><div class="s-label">Total Progress</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_completed }}</div><div class="s-label">Completed</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div><div class="s-label">Avg Score</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_sessions }}</div><div class="s-label">Sessions</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">Total Duration</div></div>
             @endif
         </div>
 
         {{-- Charts --}}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
             <div class="dp-card">
-                <div class="dp-card-title">{{ $isTr ? 'Modül Dağılımı' : 'Module Distribution' }}</div>
+                <div class="dp-card-title">Module Distribution</div>
                 <canvas id="moduleChart"></canvas>
             </div>
             <div class="dp-card">
-                <div class="dp-card-title">{{ $isTr ? 'Günlük Oturumlar (Son 30 Gün)' : 'Daily Sessions (Last 30 Days)' }}</div>
+                <div class="dp-card-title">Daily Sessions (Last 30 Days)</div>
                 <canvas id="sessionsChart"></canvas>
             </div>
         </div>
 
         {{-- Student table --}}
         <div class="dp-card">
-            <div class="dp-card-title">👥 {{ $isTr ? 'Öğrenci Performansı' : 'Student Performance' }}</div>
+            <div class="dp-card-title">👥 Student Performance</div>
             <table class="dp-table">
                 <thead><tr>
                     @if($slug === 'way-startup')
-                        <th>{{ $isTr ? 'Startup Adı' : 'Startup Name' }}</th>
-                        <th>{{ $isTr ? 'Tür' : 'Type' }}</th>
-                        <th>{{ $isTr ? 'Öğrenciler' : 'Students' }}</th>
-                        <th>{{ $isTr ? 'Son Tarih' : 'Deadline' }}</th>
-                        <th>{{ $isTr ? 'Adım' : 'Step' }}</th>
-                        <th>{{ $isTr ? 'Sistem Puanı' : 'System Point' }}</th>
-                        <th>{{ $isTr ? 'Öğretmen Puanı' : 'Teacher Point' }}</th>
-                        <th>{{ $isTr ? 'İşlemler' : 'Actions' }}</th>
+                        <th>Startup Name</th>
+                        <th>Type</th>
+                        <th>Students</th>
+                        <th>Deadline</th>
+                        <th>Step</th>
+                        <th>System Point</th>
+                        <th>Teacher Point</th>
+                        <th>Actions</th>
                     @elseif($slug === 'way-ai-coach')
-                        <th>{{ $isTr ? 'Öğrenci' : 'Students' }}</th>
-                        <th>{{ $isTr ? 'Etkileşim Sayısı' : 'Interaction Count' }}</th>
-                        <th>{{ $isTr ? 'Toplam Süre' : 'Total Duration' }}</th>
-                        <th>{{ $isTr ? 'İşlemler' : 'Actions' }}</th>
+                        <th>Students</th>
+                        <th>Interaction Count</th>
+                        <th>Total Duration</th>
+                        <th>Actions</th>
                     @elseif($slug === 'role-galaxy')
-                        <th>{{ $isTr ? 'Öğrenci' : 'Students' }}</th>
-                        <th>{{ $isTr ? 'Seçilen Galaksi' : 'Galaxy Selected' }}</th>
-                        <th>{{ $isTr ? 'Oynanan Rol' : 'Role Played' }}</th>
-                        <th>{{ $isTr ? 'Toplam Süre' : 'Total Duration' }}</th>
-                        <th>{{ $isTr ? 'İşlemler' : 'Actions' }}</th>
+                        <th>Students</th>
+                        <th>Galaxy Selected</th>
+                        <th>Role Played</th>
+                        <th>Total Duration</th>
+                        <th>Actions</th>
                     @elseif($slug === 'study-space')
-                        <th>{{ $isTr ? 'Öğrenci' : 'Students' }}</th>
-                        <th>{{ $isTr ? 'Tartışma Süresi (dk)' : 'Discussion Minutes' }}</th>
-                        <th>{{ $isTr ? 'Tartışma Sayısı' : 'Discussion Count' }}</th>
-                        <th>{{ $isTr ? 'İşlemler' : 'Actions' }}</th>
+                        <th>Students</th>
+                        <th>Discussion Minutes</th>
+                        <th>Discussion Count</th>
+                        <th>Actions</th>
                     @else
-                        <th>{{ $isTr ? 'Öğrenci' : 'Student' }}</th>
-                        <th>{{ $isTr ? 'Toplam' : 'Total' }}</th>
-                        <th>{{ $isTr ? 'Tamamlanan' : 'Completed' }}</th>
-                        <th>{{ $isTr ? 'Tamamlanma %' : 'Completion %' }}</th>
-                        <th>{{ $isTr ? 'Ort. Puan' : 'Avg Score' }}</th>
-                        <th>{{ $isTr ? 'Süre' : 'Duration' }}</th>
+                        <th>Student</th>
+                        <th>Total</th>
+                        <th>Completed</th>
+                        <th>Completion %</th>
+                        <th>Avg Score</th>
+                        <th>Duration</th>
                         <th></th>
                     @endif
                 </tr></thead>
@@ -626,14 +625,14 @@
                         @endif
                         <td>
                             @if($us['user'])
-                            <a href="{{ route('portal.reports.student', $us['user']->id ?? 0) }}" class="dp-action dp-action-view" title="{{ $isTr ? 'Detay' : 'Details' }}">
+                            <a href="{{ route('portal.reports.student', $us['user']->id ?? 0) }}" class="dp-action dp-action-view" title="Details">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             </a>
                             @endif
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="10" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ $isTr ? 'Henüz veri yok' : 'No data yet' }}</td></tr>
+                    <tr><td colspan="10" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No data yet</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -654,25 +653,25 @@
                     <thead>
                         <tr>
                             <th style="width:40px;">No</th>
-                            <th>{{ $isTr ? 'Görev Adı' : 'Mission Name' }}</th>
-                            <th>{{ $isTr ? 'Öğrenciler' : 'Students' }}</th>
+                            <th>Mission Name</th>
+                            <th>Students</th>
                             <th>
                                 <span style="color:#ef4444;">❤️</span>
-                                {{ $isTr ? 'Sağlık Puanı' : 'Health Point' }}
+                                Health Point
                             </th>
                             <th>
                                 <span style="color:#22c55e;">🌿</span>
-                                {{ $isTr ? 'Kaynak Puanı' : 'Resource Point' }}
+                                Resource Point
                             </th>
                             <th>
                                 <span style="color:#f59e0b;">🧡</span>
-                                {{ $isTr ? 'Etik Puanı' : 'Ethics Point' }}
+                                Ethics Point
                             </th>
                             <th>
                                 <span style="color:#22c55e;">✅</span>
-                                {{ $isTr ? 'Adaptasyon Puanı' : 'Adaptation Point' }}
+                                Adaptation Point
                             </th>
-                            <th>{{ $isTr ? 'İşlemler' : 'Action' }}</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -726,29 +725,29 @@
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="8" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ $isTr ? 'Henüz veri yok' : 'No data yet' }}</td></tr>
+                        <tr><td colspan="8" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No data yet</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);cursor:default;">{{ $isTr ? 'Önceki' : 'Previous' }}</span>
-                <span style="color:var(--color-txt-muted);">{{ $isTr ? 'Sayfa' : 'Page' }}1 {{ $isTr ? '/' : 'of' }} 12</span>
-                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ $isTr ? 'Sonraki' : 'Next' }}</a>
+                <span style="color:var(--color-txt-muted);cursor:default;">Previous</span>
+                <span style="color:var(--color-txt-muted);">Page1 of 12</span>
+                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">Next</a>
             </div>
         </div>
     @else
         {{-- Non-mission-way performance: student performance table --}}
         <div class="dp-card">
-            <div class="dp-card-title">👥 {{ $isTr ? 'Öğrenci Performansı' : 'Student Performance' }}</div>
+            <div class="dp-card-title">👥 Student Performance</div>
             <table class="dp-table">
                 <thead><tr>
-                    <th>{{ $isTr ? 'Öğrenci' : 'Student' }}</th>
-                    <th>{{ $isTr ? 'Toplam' : 'Total' }}</th>
-                    <th>{{ $isTr ? 'Tamamlanan' : 'Completed' }}</th>
-                    <th>{{ $isTr ? 'Tamamlanma %' : 'Completion %' }}</th>
-                    <th>{{ $isTr ? 'Ort. Puan' : 'Avg Score' }}</th>
-                    <th>{{ $isTr ? 'Süre' : 'Duration' }}</th>
+                    <th>Student</th>
+                    <th>Total</th>
+                    <th>Completed</th>
+                    <th>Completion %</th>
+                    <th>Avg Score</th>
+                    <th>Duration</th>
                     <th></th>
                 </tr></thead>
                 <tbody>
@@ -779,7 +778,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="7" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ $isTr ? 'Henüz veri yok' : 'No data yet' }}</td></tr>
+                    <tr><td colspan="7" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No data yet</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -790,29 +789,29 @@
 {{-- ═══ ADD ASSIGNMENT MODAL — Figma node 1260-34190 ═══ --}}
 @include('portal.partials._modal', [
     'id' => 'addAssignmentModal',
-    'title' => $slug === 'mission-way' ? ($isTr ? 'Yeni Görev Ekle' : 'Add New Mission') : ($isTr ? 'Yeni Atama Ekle' : 'Add New Assignment'),
-    'subtitle' => $isTr ? 'Öğrenci için yeni görev oluşturun.' : 'Create a new assignment for students.',
+    'title' => $slug === 'mission-way' ? 'Add New Mission' : 'Add New Assignment',
+    'subtitle' => 'Create a new assignment for students.',
 ])
 @section('modal-addAssignmentModal-body')
 <form method="POST" action="#">
     @csrf
     <div class="dp-form-group">
-        <label class="dp-form-label">{{ $isTr ? 'Sınıf' : 'Grade' }}</label>
-        <select class="dp-form-select"><option value="">{{ $isTr ? 'Seçiniz' : 'Select' }}</option></select>
+        <label class="dp-form-label">Grade</label>
+        <select class="dp-form-select"><option value="">Select</option></select>
     </div>
     <div class="dp-form-group">
-        <label class="dp-form-label">{{ $isTr ? 'Öğrenci' : 'Student' }}</label>
-        <select class="dp-form-select"><option value="">{{ $isTr ? 'Seçiniz' : 'Select' }}</option></select>
+        <label class="dp-form-label">Student</label>
+        <select class="dp-form-select"><option value="">Select</option></select>
     </div>
     <div class="dp-form-group">
-        <label class="dp-form-label">{{ $isTr ? 'Görev / Uygulama' : 'Mission / Application' }}</label>
-        <select class="dp-form-select"><option value="">{{ $isTr ? 'Seçiniz' : 'Select' }}</option></select>
+        <label class="dp-form-label">Mission / Application</label>
+        <select class="dp-form-select"><option value="">Select</option></select>
     </div>
     <div class="dp-form-group">
-        <label class="dp-form-label">{{ $isTr ? 'Son Tarih' : 'Deadline' }}</label>
+        <label class="dp-form-label">Deadline</label>
         <input type="date" class="dp-form-input">
     </div>
-    <button type="submit" class="dp-btn-submit" disabled>{{ $isTr ? 'Kaydet' : 'Save' }}</button>
+    <button type="submit" class="dp-btn-submit" disabled>Save</button>
 </form>
 @endsection
 
@@ -837,7 +836,7 @@ new Chart(document.getElementById('moduleChart'), {
 if (document.getElementById('sessionsChart')) {
 new Chart(document.getElementById('sessionsChart'), {
     type: 'line',
-    data: { labels: {!! json_encode(($sessions_by_day ?? collect())->keys()) !!}, datasets: [{ label: '{{ $isTr ? "Oturumlar" : "Sessions" }}', data: {!! json_encode(($sessions_by_day ?? collect())->values()) !!}, borderColor: '#4364F7', backgroundColor: 'rgba(67,100,247,0.1)', fill: true, tension: 0.4, pointRadius: 3 }] },
+    data: { labels: {!! json_encode(($sessions_by_day ?? collect())->keys()) !!}, datasets: [{ label: 'Sessions', data: {!! json_encode(($sessions_by_day ?? collect())->values()) !!}, borderColor: '#4364F7', backgroundColor: 'rgba(67,100,247,0.1)', fill: true, tension: 0.4, pointRadius: 3 }] },
     options: { responsive: true, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } }, x: { grid: { display: false }, ticks: { maxRotation: 45 } } }, plugins: { legend: { display: false } } }
 });
 }

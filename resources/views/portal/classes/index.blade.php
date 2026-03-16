@@ -1,25 +1,24 @@
 @extends('portal.app')
-@section('title', app()->getLocale() === 'tr' ? 'Sınıflar' : 'Classes')
-@section('page-title', app()->getLocale() === 'tr' ? 'Sınıflar' : 'Classes')
-@php $isTr = app()->getLocale() === 'tr'; @endphp
+@section('title', 'Classes')
+@section('page-title', 'Classes')
 
 @section('content')
     <div class="dp-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
             <div>
-                <div class="dp-card-title" style="margin-bottom:4px;">{{ $isTr ? 'Sınıflar' : 'Classes' }}</div>
-                <p style="font-size:13px;color:var(--text-muted);margin:0;">{{ $isTr ? 'Okullara ait sınıfları görüntüleyin ve yönetin.' : 'View and manage school classes.' }}</p>
+                <div class="dp-card-title" style="margin-bottom:4px;">Classes</div>
+                <p style="font-size:13px;color:var(--text-muted);margin:0;">View and manage school classes.</p>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
                 <form style="display:flex;gap:8px;">
                     <div class="dp-search" style="width:220px;">
                         <svg width="14" height="14" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ $isTr ? 'Sınıf ara...' : 'Search class...' }}">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search class...">
                     </div>
-                    <button type="submit" class="dp-btn-ghost">{{ $isTr ? 'Ara' : 'Search' }}</button>
+                    <button type="submit" class="dp-btn-ghost">Search</button>
                 </form>
-                @if(auth()->user()->hasAnyRole(['super-admin','admin','license-manager','school-admin']))
-                    <a href="{{ route('portal.classes.create') }}" class="dp-btn">+ {{ $isTr ? 'Yeni Sınıf' : 'New Class' }}</a>
+                @if(auth()->user()->hasAnyRole(['super-admin','admin','license-manager','school-admin','school-principal']))
+                    <a href="{{ route('portal.classes.create') }}" class="dp-btn">+ New Class</a>
                 @endif
             </div>
         </div>
@@ -28,13 +27,13 @@
         <table class="dp-table">
             <thead>
                 <tr>
-                    <th>{{ $isTr ? 'Sınıf' : 'Class' }}</th>
-                    <th>{{ $isTr ? 'Okul' : 'School' }}</th>
-                    <th>{{ $isTr ? 'Seviye' : 'Grade' }}</th>
-                    <th>{{ $isTr ? 'Yıl' : 'Year' }}</th>
-                    <th>{{ $isTr ? 'Öğrenci' : 'Students' }}</th>
-                    <th>{{ $isTr ? 'Durum' : 'Status' }}</th>
-                    <th style="text-align:right;">{{ $isTr ? 'İşlemler' : 'Actions' }}</th>
+                    <th>Class</th>
+                    <th>School</th>
+                    <th>Grade</th>
+                    <th>Year</th>
+                    <th>Students</th>
+                    <th>Status</th>
+                    <th style="text-align:right;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -49,9 +48,9 @@
                         </td>
                         <td>
                             @if($cls->is_active)
-                                <span class="dp-badge dp-badge-active">{{ $isTr ? 'Aktif' : 'Active' }}</span>
+                                <span class="dp-badge dp-badge-active">Active</span>
                             @else
-                                <span class="dp-badge dp-badge-inactive">{{ $isTr ? 'Pasif' : 'Inactive' }}</span>
+                                <span class="dp-badge dp-badge-inactive">Inactive</span>
                             @endif
                         </td>
                         <td style="text-align:right;">
@@ -68,7 +67,7 @@
                 @empty
                     <tr>
                         <td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);">
-                            {{ $isTr ? 'Henüz sınıf bulunamadı.' : 'No classes found.' }}
+                            No classes found.
                         </td>
                     </tr>
                 @endforelse

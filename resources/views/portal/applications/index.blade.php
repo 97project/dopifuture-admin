@@ -1,16 +1,14 @@
 @extends('portal.app')
-@section('title', ($isTr = app()->getLocale() === 'tr') ? 'Uygulama Durumu' : 'Application Status')
-@section('page-title', $isTr ? 'Uygulama Durumu' : 'Application Status')
+@section('title', 'Application Status')
+@section('page-title', 'Application Status')
 
 @section('content')
-@php $isTr = app()->getLocale() === 'tr'; @endphp
-
 <div style="margin-bottom:24px;">
     <h2 style="font-size:24px;font-weight:700;color:#030719;margin:0 0 4px;font-family:'Nunito',sans-serif;">
-        {{ $isTr ? 'Uygulama Durumu' : 'Application Status' }}
+        Application Status
     </h2>
     <p style="font-size:14px;color:var(--color-txt-muted);margin:0;">
-        {{ $isTr ? 'Okulunuzun uygulama senkronizasyon ve bağlantı durumu' : 'Your school application sync and connectivity status' }}
+        Your school application sync and connectivity status
     </p>
 </div>
 
@@ -33,11 +31,11 @@
             </div>
             {{-- Health Badge --}}
             @if($app->health === 'healthy')
-            <span style="padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(16,185,129,0.1);color:#10B981;">✅ {{ $isTr ? 'Sağlıklı' : 'Healthy' }}</span>
+            <span style="padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(16,185,129,0.1);color:#10B981;">✅ Healthy</span>
             @elseif($app->health === 'down')
-            <span style="padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(239,68,68,0.1);color:#EF4444;">❌ {{ $isTr ? 'Çevrimdışı' : 'Down' }}</span>
+            <span style="padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(239,68,68,0.1);color:#EF4444;">❌ Down</span>
             @elseif($app->health === 'error')
-            <span style="padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(245,158,11,0.1);color:#F59E0B;">⚠️ {{ $isTr ? 'Hata' : 'Error' }}</span>
+            <span style="padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(245,158,11,0.1);color:#F59E0B;">⚠️ Error</span>
             @endif
         </div>
 
@@ -45,26 +43,26 @@
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;margin-bottom:16px;">
             <div>
                 <div style="font-size:20px;font-weight:800;color:#030719;">{{ $app->total_users }}</div>
-                <div style="font-size:10px;color:var(--color-txt-muted);">{{ $isTr ? 'Toplam' : 'Total' }}</div>
+                <div style="font-size:10px;color:var(--color-txt-muted);">Total</div>
             </div>
             <div>
                 <div style="font-size:20px;font-weight:800;color:#10B981;">{{ $app->synced }}</div>
-                <div style="font-size:10px;color:var(--color-txt-muted);">{{ $isTr ? 'Senkron' : 'Synced' }}</div>
+                <div style="font-size:10px;color:var(--color-txt-muted);">Synced</div>
             </div>
             <div>
                 <div style="font-size:20px;font-weight:800;color:#F59E0B;">{{ $app->pending }}</div>
-                <div style="font-size:10px;color:var(--color-txt-muted);">{{ $isTr ? 'Bekleyen' : 'Pending' }}</div>
+                <div style="font-size:10px;color:var(--color-txt-muted);">Pending</div>
             </div>
             <div>
                 <div style="font-size:20px;font-weight:800;color:#EF4444;">{{ $app->failed }}</div>
-                <div style="font-size:10px;color:var(--color-txt-muted);">{{ $isTr ? 'Başarısız' : 'Failed' }}</div>
+                <div style="font-size:10px;color:var(--color-txt-muted);">Failed</div>
             </div>
         </div>
 
         {{-- Sync Progress Bar --}}
         <div>
             <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-txt-muted);margin-bottom:4px;">
-                <span>{{ $isTr ? 'Senkronizasyon' : 'Sync Progress' }}</span>
+                <span>Sync Progress</span>
                 <span style="font-weight:600;color:#030719;">{{ $app->sync_percent }}%</span>
             </div>
             <div style="height:6px;background:rgba(0,0,0,0.06);border-radius:999px;overflow:hidden;">
@@ -77,8 +75,8 @@
 @else
 <div class="dp-card" style="text-align:center;padding:48px;">
     <div style="font-size:48px;margin-bottom:16px;">📱</div>
-    <h3 style="font-size:18px;font-weight:700;margin:0 0 8px;">{{ $isTr ? 'Henüz uygulama bulunamadı' : 'No applications found' }}</h3>
-    <p style="color:var(--color-txt-muted);">{{ $isTr ? 'Okulunuzun kullanıcıları henüz hiçbir uygulamaya atanmamış.' : 'No users from your school are assigned to any application yet.' }}</p>
+    <h3 style="font-size:18px;font-weight:700;margin:0 0 8px;">No applications found</h3>
+    <p style="color:var(--color-txt-muted);">No users from your school are assigned to any application yet.</p>
 </div>
 @endif
 @endsection

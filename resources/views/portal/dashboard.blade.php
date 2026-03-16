@@ -1,19 +1,16 @@
-@extends('portal.app')
-@section('title', app()->getLocale() === 'tr' ? 'Lisans Yönetimi' : 'License Management')
-
-@php $isTr = app()->getLocale() === 'tr'; @endphp
-
+﻿@extends('portal.app')
+@section('title', 'License Management')
 @section('content')
 
     {{-- ═══ HEADER — Figma F-51: Back arrow + "Lisans Yönetimi" + "⊕ Add New License" ═══ --}}
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
         <h2 style="font-size:24px; font-weight:700; color:#030719; margin:0; font-family:'Nunito',sans-serif;">
-            {{ $isTr ? 'Lisans Yönetimi' : 'License Management' }}
+            License Management
         </h2>
         <button onclick="document.getElementById('addLicenseModal').classList.add('show')"
                 style="display:inline-flex; align-items:center; gap:8px; padding:10px 24px; background:#10B981; color:#fff; border:none; border-radius:999px; font-size:14px; font-weight:600; cursor:pointer; transition:background 0.2s; font-family:'Nunito',sans-serif;">
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            {{ $isTr ? 'Yeni Lisans Ekle' : 'Add New License' }}
+            Add New License
         </button>
     </div>
 
@@ -24,14 +21,14 @@
             <thead>
                 <tr>
                     <th style="width:48px;">No</th>
-                    <th>{{ $isTr ? 'Okul Adı' : 'School Name' }}</th>
-                    <th>{{ $isTr ? 'Ülke/Şehir' : 'Country/State' }}</th>
-                    <th>{{ $isTr ? 'Toplam Lisans' : 'Total Licenses' }}</th>
-                    <th>{{ $isTr ? 'Durum' : 'Status' }}</th>
-                    <th>{{ $isTr ? 'Satın Alma Tarihi' : 'Purchase Date' }}</th>
-                    <th>{{ $isTr ? 'Lisans Süresi' : 'License Duration' }}</th>
-                    <th>{{ $isTr ? 'E-posta' : 'E-mail' }}</th>
-                    <th style="text-align:right;">{{ $isTr ? 'İşlemler' : 'Actions' }}</th>
+                    <th>School Name</th>
+                    <th>Country/State</th>
+                    <th>Total Licenses</th>
+                    <th>Status</th>
+                    <th>Purchase Date</th>
+                    <th>License Duration</th>
+                    <th>E-mail</th>
+                    <th style="text-align:right;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -70,13 +67,13 @@
                     <td class="muted" style="font-size:12px;">{{ $license['email'] ?? '—' }}</td>
                     <td style="text-align:right;">
                         <div style="display:flex;gap:8px;justify-content:flex-end;">
-                            <button class="dp-action-icon" title="{{ $isTr ? 'Düzenle' : 'Edit' }}">
+                            <button class="dp-action-icon" title="Edit">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             </button>
-                            <button class="dp-action-icon dp-action-primary" title="{{ $isTr ? 'Detay' : 'Details' }}">
+                            <button class="dp-action-icon dp-action-primary" title="Details">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             </button>
-                            <button class="dp-action-icon dp-action-delete" title="{{ $isTr ? 'Sil' : 'Delete' }}">
+                            <button class="dp-action-icon dp-action-delete" title="Delete">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             </button>
                         </div>
@@ -85,7 +82,7 @@
                 @empty
                 <tr>
                     <td colspan="9" style="text-align:center;padding:40px;color:var(--color-txt-muted);">
-                        {{ $isTr ? 'Henüz lisans bulunamadı.' : 'No licenses found.' }}
+                        No licenses found.
                     </td>
                 </tr>
                 @endforelse
@@ -96,13 +93,13 @@
         {{-- Pagination — Figma F-51: "Previous / Page1of 12 / Next" ═══ --}}
         <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 0 0; border-top:1px solid var(--color-row-border); margin-top:8px;">
             <button style="padding:8px 20px; border:1px solid var(--color-row-border); border-radius:8px; background:#fff; cursor:pointer; font-size:13px; font-weight:500; color:var(--color-txt-sec); font-family:'Nunito',sans-serif;">
-                {{ $isTr ? 'Önceki' : 'Previous' }}
+                Previous
             </button>
             <span style="font-size:13px; color:var(--color-txt-muted); font-family:'Nunito',sans-serif;">
-                {{ $isTr ? 'Sayfa' : 'Page' }}1{{ $isTr ? '/' : 'of ' }}12
+                Page1of 12
             </span>
             <button style="padding:8px 20px; border:1px solid var(--color-row-border); border-radius:8px; background:#fff; cursor:pointer; font-size:13px; font-weight:500; color:var(--color-txt-sec); font-family:'Nunito',sans-serif;">
-                {{ $isTr ? 'Sonraki' : 'Next' }}
+                Next
             </button>
         </div>
     </div>
@@ -111,39 +108,39 @@
     <div class="dp-modal-overlay" id="addLicenseModal">
         <div class="dp-modal" style="max-width:500px;">
             <div class="dp-modal-header">
-                <h3>{{ $isTr ? 'Yeni Lisans Ekle' : 'Add New License' }}</h3>
+                <h3>Add New License</h3>
                 <button class="dp-modal-close" onclick="document.getElementById('addLicenseModal').classList.remove('show')">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
             <div class="dp-modal-body" style="display:flex;flex-direction:column;gap:16px;">
                 <div>
-                    <label class="dp-label">{{ $isTr ? 'Okul Adı' : 'School Name' }}</label>
-                    <input class="dp-input" type="text" placeholder="{{ $isTr ? 'Okul adı girin' : 'Enter school name' }}">
+                    <label class="dp-label">School Name</label>
+                    <input class="dp-input" type="text" placeholder="Enter school name">
                 </div>
                 <div>
-                    <label class="dp-label">{{ $isTr ? 'Ülke/Şehir' : 'Country/State' }}</label>
-                    <input class="dp-input" type="text" placeholder="{{ $isTr ? 'Ülke/şehir girin' : 'Enter country/state' }}">
+                    <label class="dp-label">Country/State</label>
+                    <input class="dp-input" type="text" placeholder="Enter country/state">
                 </div>
                 <div>
-                    <label class="dp-label">{{ $isTr ? 'Lisans Sayısı' : 'Number of Licenses' }}</label>
+                    <label class="dp-label">Number of Licenses</label>
                     <input class="dp-input" type="number" placeholder="0">
                 </div>
                 <div>
-                    <label class="dp-label">{{ $isTr ? 'Lisans Süresi' : 'License Duration' }}</label>
-                    <input class="dp-input" type="text" placeholder="{{ $isTr ? 'Örn: 12/31/2026' : 'e.g. 12/31/2026' }}">
+                    <label class="dp-label">License Duration</label>
+                    <input class="dp-input" type="text" placeholder="e.g. 12/31/2026">
                 </div>
                 <div>
-                    <label class="dp-label">{{ $isTr ? 'E-posta' : 'E-mail' }}</label>
-                    <input class="dp-input" type="email" placeholder="{{ $isTr ? 'E-posta girin' : 'Enter email' }}">
+                    <label class="dp-label">E-mail</label>
+                    <input class="dp-input" type="email" placeholder="Enter email">
                 </div>
             </div>
             <div class="dp-modal-footer">
                 <button type="button" class="dp-btn dp-btn-secondary" onclick="document.getElementById('addLicenseModal').classList.remove('show')">
-                    {{ $isTr ? 'İptal' : 'Cancel' }}
+                    Cancel
                 </button>
                 <button type="button" class="dp-btn dp-btn-primary">
-                    {{ $isTr ? 'Kaydet' : 'Save' }}
+                    Save
                 </button>
             </div>
         </div>

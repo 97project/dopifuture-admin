@@ -1,38 +1,36 @@
-@extends('portal.app')
+﻿@extends('portal.app')
 @section('title', ($student->name ?? '') . ' — ' . __('admin.reports'))
 @section('page-title', ($student->name ?? '') . ' ' . ($student->surname ?? '') . ' — Rapor')
 
 @section('content')
-@php $isTr = app()->getLocale() === 'tr'; @endphp
-
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
     <div style="display:flex;align-items:center;gap:12px;">
         <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;">{{ strtoupper(substr($student->name,0,1).substr($student->surname??'',0,1)) }}</div>
         <div>
             <div style="font-size:18px;font-weight:600;">{{ $student->name }} {{ $student->surname }}</div>
-            <p style="font-size:13px;color:var(--text-muted);margin:2px 0 0;">{{ $student->email }} — {{ $isTr ? 'Detaylı öğrenci raporu' : 'Detailed student report' }}</p>
+            <p style="font-size:13px;color:var(--text-muted);margin:2px 0 0;">{{ $student->email }} — Detailed student report</p>
         </div>
     </div>
-    <a href="{{ route('portal.reports') }}" class="dp-btn-ghost">← {{ $isTr ? 'Geri' : 'Back' }}</a>
+    <a href="{{ route('portal.reports') }}" class="dp-btn-ghost">← Back</a>
 </div>
 
 {{-- Student Info Card --}}
 <div class="dp-card">
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;text-align:center;">
         <div>
-            <div style="font-size:12px;color:var(--text-muted);">{{ $isTr ? 'Roller' : 'Roles' }}</div>
+            <div style="font-size:12px;color:var(--text-muted);">Roles</div>
             <div style="margin-top:4px;">@foreach($student->roles as $r)<span class="dp-badge dp-badge-pending" style="margin-right:4px;">{{ $r->name }}</span>@endforeach</div>
         </div>
         <div>
-            <div style="font-size:12px;color:var(--text-muted);">{{ $isTr ? 'Okullar' : 'Schools' }}</div>
+            <div style="font-size:12px;color:var(--text-muted);">Schools</div>
             <div style="margin-top:4px;font-weight:500;">{{ $student->schools->pluck('name')->join(', ') ?: '-' }}</div>
         </div>
         <div>
-            <div style="font-size:12px;color:var(--text-muted);">{{ $isTr ? 'Sınıflar' : 'Classes' }}</div>
+            <div style="font-size:12px;color:var(--text-muted);">Classes</div>
             <div style="margin-top:4px;font-weight:500;">{{ $student->classes->pluck('name')->join(', ') ?: '-' }}</div>
         </div>
         <div>
-            <div style="font-size:12px;color:var(--text-muted);">{{ $isTr ? 'Uygulamalar' : 'Applications' }}</div>
+            <div style="font-size:12px;color:var(--text-muted);">Applications</div>
             <div style="margin-top:4px;font-weight:500;">{{ $student->applications->count() }}</div>
         </div>
     </div>
@@ -62,23 +60,23 @@
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;text-align:center;margin-bottom:16px;">
         <div>
             <div style="font-size:24px;font-weight:700;">{{ $appData['stats']['total_modules'] }}</div>
-            <div style="font-size:11px;color:var(--text-muted);">{{ $isTr ? 'Modül' : 'Modules' }}</div>
+            <div style="font-size:11px;color:var(--text-muted);">Modules</div>
         </div>
         <div>
             <div style="font-size:24px;font-weight:700;color:var(--active-green);">{{ $appData['stats']['completed'] }}</div>
-            <div style="font-size:11px;color:var(--text-muted);">{{ $isTr ? 'Tamamlanan' : 'Completed' }}</div>
+            <div style="font-size:11px;color:var(--text-muted);">Completed</div>
         </div>
         <div>
             <div style="font-size:24px;font-weight:700;color:#fbbf24;">{{ $appData['stats']['in_progress'] }}</div>
-            <div style="font-size:11px;color:var(--text-muted);">{{ $isTr ? 'Devam Eden' : 'In Progress' }}</div>
+            <div style="font-size:11px;color:var(--text-muted);">In Progress</div>
         </div>
         <div>
             <div style="font-size:24px;font-weight:700;color:var(--primary);">{{ $appData['stats']['avg_score'] ? number_format($appData['stats']['avg_score'], 1) : '-' }}</div>
-            <div style="font-size:11px;color:var(--text-muted);">{{ $isTr ? 'Ort. Puan' : 'Avg Score' }}</div>
+            <div style="font-size:11px;color:var(--text-muted);">Avg Score</div>
         </div>
         <div>
             <div style="font-size:24px;font-weight:700;color:#a78bfa;">{{ $appData['stats']['total_sessions'] }}</div>
-            <div style="font-size:11px;color:var(--text-muted);">{{ $isTr ? 'Oturum' : 'Sessions' }}</div>
+            <div style="font-size:11px;color:var(--text-muted);">Sessions</div>
         </div>
     </div>
 
@@ -88,12 +86,12 @@
 
     {{-- Module Progress --}}
     @if($appData['progress']->count())
-    <div class="dp-card-title" style="font-size:14px;">📋 {{ $isTr ? 'Modül İlerlemesi' : 'Module Progress' }}</div>
+    <div class="dp-card-title" style="font-size:14px;">📋 Module Progress</div>
     <table class="dp-table">
         <thead><tr>
-            <th>{{ $isTr ? 'Modül' : 'Module' }}</th><th>{{ $isTr ? 'Tip' : 'Type' }}</th>
-            <th>{{ $isTr ? 'Durum' : 'Status' }}</th><th>{{ $isTr ? 'Puan' : 'Score' }}</th>
-            <th>{{ $isTr ? 'Deneme' : 'Attempts' }}</th><th>{{ $isTr ? 'Tarih' : 'Date' }}</th>
+            <th>Module</th><th>Type</th>
+            <th>Status</th><th>Score</th>
+            <th>Attempts</th><th>Date</th>
         </tr></thead>
         <tbody>
         @foreach($appData['progress'] as $p)
@@ -112,12 +110,12 @@
 
     {{-- Sessions --}}
     @if($appData['sessions']->count())
-    <div class="dp-card-title" style="font-size:14px;margin-top:16px;">🕐 {{ $isTr ? 'Oturum Geçmişi' : 'Session History' }}</div>
+    <div class="dp-card-title" style="font-size:14px;margin-top:16px;">🕐 Session History</div>
     <table class="dp-table">
         <thead><tr>
-            <th>{{ $isTr ? 'Oturum' : 'Session' }}</th><th>{{ $isTr ? 'Tip' : 'Type' }}</th>
-            <th>{{ $isTr ? 'Başlangıç' : 'Start' }}</th><th>{{ $isTr ? 'Süre' : 'Duration' }}</th>
-            <th>{{ $isTr ? 'Puan' : 'Score' }}</th>
+            <th>Session</th><th>Type</th>
+            <th>Start</th><th>Duration</th>
+            <th>Score</th>
         </tr></thead>
         <tbody>
         @foreach($appData['sessions']->take(15) as $s)
@@ -138,7 +136,7 @@
 @if(empty($reportData))
 <div class="dp-card" style="text-align:center;padding:48px;">
     <div style="font-size:32px;margin-bottom:8px;">📭</div>
-    <p style="color:var(--text-muted);">{{ $isTr ? 'Henüz rapor verisi yok. Veriler uygulama senkronizasyonu sonrası burada görünecektir.' : 'No report data yet. Data will appear after application sync.' }}</p>
+    <p style="color:var(--text-muted);">No report data yet. Data will appear after application sync.</p>
 </div>
 @endif
 @endsection

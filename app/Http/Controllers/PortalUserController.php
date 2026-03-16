@@ -61,7 +61,14 @@ class PortalUserController extends Controller
         ];
 
         $roles = $this->getAllowedRoles();
-        return view('portal.users.index', compact('users', 'roles', 'licenseStats'));
+
+        // Real tab counts
+        $studentCount = User::whereHas('schools', fn($q) => $q->whereIn('schools.id', $schoolIds))
+            ->role('student')->count();
+        $teacherCount = User::whereHas('schools', fn($q) => $q->whereIn('schools.id', $schoolIds))
+            ->role('teacher')->count();
+
+        return view('portal.users.index', compact('users', 'roles', 'licenseStats', 'studentCount', 'teacherCount'));
     }
 
     public function show(User $user)
@@ -237,6 +244,17 @@ class PortalUserController extends Controller
         $user->delete();
         return redirect()->route('portal.users.index')
             ->with('success', __('admin.user_deleted'));
+    }
+
+    public function resetPassword(User $user)
+    {
+        $this->guardManageRoles();
+        $this->guardPrincipalCannotEditAdmin($user);
+
+        $newPassword = substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'), 0, 8);
+        $user->update(['password' => Hash::make($newPassword)]);
+
+        return back()->with('success', 'Password reset for ' . $user->name . '. New password: ' . $newPassword);
     }
 
     /* -- Guards -------------------------------------------------- */

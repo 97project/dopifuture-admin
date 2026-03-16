@@ -528,25 +528,25 @@
                     <a href="{{ route('portal.reports') }}"
                         class="{{ request()->routeIs('portal.reports*') ? 'active' : '' }}">{{ __('admin.reports') }}</a>
                     <a href="{{ route('portal.profile') }}"
-                        class="{{ request()->routeIs('portal.profile') ? 'active' : '' }}">{{ app()->getLocale() === 'tr' ? 'Profilim' : 'Profile' }}</a>
+                        class="{{ request()->routeIs('portal.profile') ? 'active' : '' }}">{{ 'Profile' }}</a>
                     <form action="{{ route('portal.logout') }}" method="POST" style="display:inline;">
                         @csrf
                         <button type="submit"
                             style="background:rgba(239,68,68,0.12);color:#f87171;border:none;padding:0.5rem 1rem;border-radius:8px;font-size:0.875rem;font-weight:500;cursor:pointer;font-family:inherit;">
-                            {{ app()->getLocale() === 'tr' ? 'Çıkış' : 'Logout' }}
+                            {{ 'Logout' }}
                         </button>
                     </form>
                 @else
                     <a href="{{ route('portal.home') }}"
-                        class="{{ request()->routeIs('portal.home') ? 'active' : '' }}">{{ app()->getLocale() === 'tr' ? 'Ana Sayfa' : 'Home' }}</a>
+                        class="{{ request()->routeIs('portal.home') ? 'active' : '' }}">{{ 'Home' }}</a>
                     <a href="{{ route('portal.solutions') }}"
-                        class="{{ request()->routeIs('portal.solutions') ? 'active' : '' }}">{{ app()->getLocale() === 'tr' ? 'Çözümler' : 'Solutions' }}</a>
+                        class="{{ request()->routeIs('portal.solutions') ? 'active' : '' }}">{{ 'Solutions' }}</a>
                     <a href="{{ route('register.create') }}"
-                        class="{{ request()->routeIs('register.*') ? 'active' : '' }}">{{ app()->getLocale() === 'tr' ? 'Okul Kaydı' : 'Register' }}</a>
+                        class="{{ request()->routeIs('register.*') ? 'active' : '' }}">{{ 'Register' }}</a>
                     <a href="{{ route('portal.contact') }}"
-                        class="{{ request()->routeIs('portal.contact') ? 'active' : '' }}">{{ app()->getLocale() === 'tr' ? 'İletişim' : 'Contact' }}</a>
+                        class="{{ request()->routeIs('portal.contact') ? 'active' : '' }}">{{ 'Contact' }}</a>
                     <a href="{{ route('portal.login') }}"
-                        style="background: rgba(59,130,246,0.15); color: var(--brand-400);">{{ app()->getLocale() === 'tr' ? 'Giriş Yap' : 'Login' }}</a>
+                        style="background: rgba(59,130,246,0.15); color: var(--brand-400);">{{ 'Login' }}</a>
                 @endauth
 
                 {{-- Language Switcher (end of nav) --}}
@@ -555,7 +555,7 @@
                         @csrf
                         <input type="hidden" name="locale" value="tr">
                         <button type="submit"
-                            style="background: {{ app()->getLocale() === 'tr' ? 'rgba(59,130,246,0.2)' : 'transparent' }}; color: {{ app()->getLocale() === 'tr' ? 'var(--brand-400)' : 'var(--gray-500)' }}; border: 1px solid {{ app()->getLocale() === 'tr' ? 'rgba(59,130,246,0.3)' : 'rgba(255,255,255,0.08)' }}; padding: 0.3rem 0.6rem; border-radius: 6px 0 0 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s;">
+                            style="background: {{ 'transparent' }}; color: {{ 'var(--gray-500)' }}; border: 1px solid {{ 'rgba(255,255,255,0.08)' }}; padding: 0.3rem 0.6rem; border-radius: 6px 0 0 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s;">
                             TR
                         </button>
                     </form>

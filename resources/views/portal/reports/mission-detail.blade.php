@@ -1,8 +1,6 @@
-@extends('portal.app')
+﻿@extends('portal.app')
 @section('title', ($isTr ?? false) ? 'Görev Detay' : 'Mission Detail')
 @section('page-title', 'Mission Detail')
-@php $isTr = app()->getLocale() === 'tr'; @endphp
-
 @section('content')
 
     {{-- ═══ HERO BANNER — Figma F-62: dark bg image with mission title ═══ --}}
@@ -15,7 +13,7 @@
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
                 {{-- Students Section --}}
                 <div style="background:rgba(255,255,255,0.9);border-radius:12px;padding:16px;">
-                    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">{{ $isTr ? 'Öğrenciler' : 'Students' }}</div>
+                    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">Students</div>
                     @foreach($students as $s)
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
                         <div style="display:flex;align-items:center;gap:10px;">
@@ -30,13 +28,13 @@
 
                 {{-- Result Section --}}
                 <div style="background:rgba(255,255,255,0.9);border-radius:12px;padding:16px;">
-                    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">{{ $isTr ? 'Sonuç' : 'Result' }}</div>
+                    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">Result</div>
                     <p style="font-size:13px;line-height:1.7;color:#374151;margin:0;">{{ $mission->result ?? 'The people willingly carry stones and repair walls with the belief that "salvation is near." However, the difference between the reinforcement time (35 min) and the door endurance time determines the lifespan of the lie. If reinforcement does not arrive on time, the people will open the doors.' }}</p>
                 </div>
 
                 {{-- Overall Score Section --}}
                 <div style="background:rgba(230,235,255,0.95);border-radius:12px;padding:16px;">
-                    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">{{ $isTr ? 'Genel Skor' : 'Overall Score' }}</div>
+                    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">Overall Score</div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                         <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
                             <div style="font-size:10px;font-weight:600;color:#EF4444;text-transform:uppercase;margin-bottom:4px;">❤️ HEALTH POINT:</div>
@@ -61,7 +59,7 @@
     </div>
 
     {{-- ═══ GROUP FLOW — Figma F-62: question cards with dashed arrow connectors ═══ --}}
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;font-family:'Nunito',sans-serif;">{{ $isTr ? 'Grup Akışı' : 'Group Flow' }}</h3>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;font-family:'Nunito',sans-serif;">Group Flow</h3>
 
     <div style="display:flex;gap:0;align-items:flex-start;overflow-x:auto;padding-bottom:16px;">
         @foreach($questions as $qi => $q)

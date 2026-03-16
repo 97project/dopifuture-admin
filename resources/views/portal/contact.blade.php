@@ -1,5 +1,5 @@
 @extends('portal.layout')
-@section('title', app()->getLocale() === 'tr' ? 'İletişim' : 'Contact')
+@section('title', 'Contact')
 
 @section('content')
     <style>
@@ -73,8 +73,8 @@
     <div class="contact-grid">
         {{-- Left: Info --}}
         <div class="contact-info">
-            <h1>{{ app()->getLocale() === 'tr' ? 'Bizimle İletişime Geçin' : 'Get in Touch' }}</h1>
-            <p>{{ app()->getLocale() === 'tr' ? 'Sorularınız veya işbirliği talepleriniz için bizimle iletişime geçin.' : 'Contact us for questions or collaboration requests.' }}
+            <h1>{{ 'Get in Touch' }}</h1>
+            <p>{{ 'Contact us for questions or collaboration requests.' }}
             </p>
 
             <div class="info-item">
@@ -100,8 +100,8 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="info-label">{{ app()->getLocale() === 'tr' ? 'Adres' : 'Address' }}</div>
-                    <div class="info-value">{{ app()->getLocale() === 'tr' ? 'İstanbul, Türkiye' : 'Istanbul, Turkey' }}
+                    <div class="info-label">{{ 'Address' }}</div>
+                    <div class="info-value">{{ 'Istanbul, Turkey' }}
                     </div>
                 </div>
             </div>
@@ -114,9 +114,9 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="info-label">{{ app()->getLocale() === 'tr' ? 'Çalışma Saatleri' : 'Working Hours' }}</div>
+                    <div class="info-label">{{ 'Working Hours' }}</div>
                     <div class="info-value">
-                        {{ app()->getLocale() === 'tr' ? 'Pazartesi - Cuma, 09:00 - 18:00' : 'Monday - Friday, 09:00 - 18:00' }}
+                        {{ 'Monday - Friday, 09:00 - 18:00' }}
                     </div>
                 </div>
             </div>
@@ -139,9 +139,9 @@
                 @csrf
                 <div class="form-grid-2" style="margin-bottom: 1.25rem;">
                     <div>
-                        <label class="form-label">{{ app()->getLocale() === 'tr' ? 'İsim' : 'Name' }} *</label>
+                        <label class="form-label">{{ 'Name' }} *</label>
                         <input type="text" name="name" value="{{ old('name') }}" required class="form-input"
-                            placeholder="{{ app()->getLocale() === 'tr' ? 'Adınız Soyadınız' : 'Full name' }}">
+                            placeholder="{{ 'Full name' }}">
                         @error('name') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
                     <div>
@@ -153,16 +153,16 @@
                 </div>
 
                 <div style="margin-bottom: 1.25rem;">
-                    <label class="form-label">{{ app()->getLocale() === 'tr' ? 'Konu' : 'Subject' }} *</label>
+                    <label class="form-label">{{ 'Subject' }} *</label>
                     <input type="text" name="subject" value="{{ old('subject') }}" required class="form-input"
-                        placeholder="{{ app()->getLocale() === 'tr' ? 'Mesajınızın konusu' : 'Subject of your message' }}">
+                        placeholder="{{ 'Subject of your message' }}">
                     @error('subject') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
 
                 <div style="margin-bottom: 1.5rem;">
-                    <label class="form-label">{{ app()->getLocale() === 'tr' ? 'Mesaj' : 'Message' }} *</label>
+                    <label class="form-label">{{ 'Message' }} *</label>
                     <textarea name="message" rows="5" required class="form-textarea"
-                        placeholder="{{ app()->getLocale() === 'tr' ? 'Mesajınızı buraya yazın...' : 'Write your message here...' }}">{{ old('message') }}</textarea>
+                        placeholder="{{ 'Write your message here...' }}">{{ old('message') }}</textarea>
                     @error('message') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
 
@@ -171,7 +171,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                     </svg>
-                    {{ app()->getLocale() === 'tr' ? 'Mesajı Gönder' : 'Send Message' }}
+                    {{ 'Send Message' }}
                 </button>
             </form>
         </div>

@@ -1,11 +1,9 @@
 @extends('portal.app')
-@section('title', app()->getLocale() === 'tr' ? 'Raporlar' : 'Reports')
-@php $isTr = app()->getLocale() === 'tr'; @endphp
-
+@section('title', 'Reports')
 @section('content')
     <div class="page-header">
-        <h1>{{ $isTr ? 'Raporlar' : 'Reports' }}</h1>
-        <p>{{ $isTr ? 'Uygulama kullanımı, lisans analizi ve okul bazlı dağılım raporları.' : 'Application usage, license analytics and per-school distribution reports.' }}
+        <h1>Reports</h1>
+        <p>Application usage, license analytics and per-school distribution reports.
         </p>
     </div>
 
@@ -18,7 +16,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
-                    {{ $isTr ? 'Uygulama Kullanıcı Dağılımı' : 'Application User Distribution' }}
+                    Application User Distribution
                 </h3>
             </div>
             <div style="padding: 1.5rem;">
@@ -34,7 +32,7 @@
                         </div>
                         <span
                             style="font-size: 0.85rem; color: var(--gray-300); min-width: 50px; text-align: right; font-weight: 600;">{{ $app->users_count }}
-                            {{ $isTr ? 'kişi' : 'users' }}</span>
+                            users</span>
                     </div>
                 @endforeach
             </div>
@@ -54,16 +52,16 @@
                             </svg>
                             {{ $appDetail->getTranslation('name') }}
                             <span style="font-weight: 400; font-size: 0.8rem; color: var(--gray-400); margin-left: 0.5rem;">
-                                ({{ $appDetail->users->count() }} {{ $isTr ? 'kullanıcı' : 'users' }})
+                                ({{ $appDetail->users->count() }} users)
                             </span>
                         </h3>
                     </div>
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>{{ $isTr ? 'Ad Soyad' : 'Name' }}</th>
-                                <th>E-posta</th>
-                                <th>{{ $isTr ? 'Durum' : 'Status' }}</th>
+                                <th>Name</th>
+                                <th>E-mail</th>
+                                <th>Status</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -74,12 +72,12 @@
                                     <td>{{ $appUser->email }}</td>
                                     <td>
                                         <span class="badge {{ $appUser->status === 'active' ? 'badge-success' : 'badge-danger' }}">
-                                            {{ $appUser->status === 'active' ? ($isTr ? 'Aktif' : 'Active') : ($isTr ? 'Pasif' : 'Inactive') }}
+                                            {{ $appUser->status === 'active' ? 'Active' : 'Inactive' }}
                                         </span>
                                     </td>
                                     <td>
                                         <a href="{{ route('portal.users.show', $appUser) }}"
-                                            class="btn btn-ghost btn-sm">{{ $isTr ? 'Detay' : 'Detail' }}</a>
+                                            class="btn btn-ghost btn-sm">Detail</a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -99,18 +97,18 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                    {{ $isTr ? 'Lisans Kullanım Oranları' : 'License Utilization Rates' }}
+                    License Utilization Rates
                 </h3>
             </div>
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>{{ $isTr ? 'Okul' : 'School' }}</th>
-                        <th>{{ $isTr ? 'Kapasite' : 'Capacity' }}</th>
-                        <th>{{ $isTr ? 'Kullanılan' : 'Used' }}</th>
-                        <th>{{ $isTr ? 'Kalan' : 'Remaining' }}</th>
-                        <th>{{ $isTr ? 'Oran' : 'Rate' }}</th>
-                        <th>{{ $isTr ? 'Bitiş' : 'Expiry' }}</th>
+                        <th>School</th>
+                        <th>Capacity</th>
+                        <th>Used</th>
+                        <th>Remaining</th>
+                        <th>Rate</th>
+                        <th>Expiry</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -140,7 +138,7 @@
                             </td>
                             <td>
                                 <a href="{{ route('portal.licenses.show', $lic) }}"
-                                    class="btn btn-ghost btn-sm">{{ $isTr ? 'Detay' : 'Detail' }}</a>
+                                    class="btn btn-ghost btn-sm">Detail</a>
                             </td>
                         </tr>
                     @endforeach
@@ -158,17 +156,17 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
-                    {{ $isTr ? 'Okul Bazlı Dağılım' : 'Per-School Distribution' }}
+                    Per-School Distribution
                 </h3>
             </div>
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>{{ $isTr ? 'Okul' : 'School' }}</th>
-                        <th>{{ $isTr ? 'Öğrenci' : 'Students' }}</th>
-                        <th>{{ $isTr ? 'Öğretmen' : 'Teachers' }}</th>
-                        <th>{{ $isTr ? 'Sınıf' : 'Classes' }}</th>
-                        <th>{{ $isTr ? 'Toplam Kullanıcı' : 'Total Users' }}</th>
+                        <th>School</th>
+                        <th>Students</th>
+                        <th>Teachers</th>
+                        <th>Classes</th>
+                        <th>Total Users</th>
                     </tr>
                 </thead>
                 <tbody>

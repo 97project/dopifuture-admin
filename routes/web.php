@@ -276,9 +276,29 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     Route::resource('classes', \App\Http\Controllers\PortalClassController::class)
         ->names('portal.classes');
 
+    // Class student/teacher assignment
+    Route::post('classes/{class}/students', [\App\Http\Controllers\PortalClassController::class, 'addStudent'])
+        ->name('portal.classes.add-student');
+    Route::delete('classes/{class}/students/{user}', [\App\Http\Controllers\PortalClassController::class, 'removeStudent'])
+        ->name('portal.classes.remove-student');
+    Route::post('classes/{class}/teachers', [\App\Http\Controllers\PortalClassController::class, 'addTeacher'])
+        ->name('portal.classes.add-teacher');
+    Route::delete('classes/{class}/teachers/{user}', [\App\Http\Controllers\PortalClassController::class, 'removeTeacher'])
+        ->name('portal.classes.remove-teacher');
+
+    // User CSV import (before resource to avoid {user} catching 'import')
+    Route::get('users/import', [\App\Http\Controllers\PortalUserController::class, 'importForm'])
+        ->name('portal.users.import-form');
+    Route::post('users/import', [\App\Http\Controllers\PortalUserController::class, 'import'])
+        ->name('portal.users.import');
+
     // CRUD: Users (with show/detail page)
     Route::resource('users', \App\Http\Controllers\PortalUserController::class)
         ->names('portal.users');
+
+    // User password reset
+    Route::post('users/{user}/reset-password', [\App\Http\Controllers\PortalUserController::class, 'resetPassword'])
+        ->name('portal.users.reset-password');
 
     // CRUD: Licenses (with show/detail page)
     Route::resource('licenses', \App\Http\Controllers\PortalLicenseController::class)

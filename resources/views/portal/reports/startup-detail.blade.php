@@ -1,8 +1,6 @@
-@extends('portal.app')
+﻿@extends('portal.app')
 @section('title', ($isTr ?? false) ? 'Proje Detay' : 'Project Detail')
 @section('page-title', 'Startup — Detail')
-@php $isTr = app()->getLocale() === 'tr'; @endphp
-
 @section('content')
 
     {{-- ═══ STEP ICONS — Figma 684-17330 exported assets ═══ --}}
@@ -27,7 +25,7 @@
         <a href="{{ route('portal.reports.app', 'way-startup') }}" style="display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--color-txt-muted);font-size:13px;">
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </a>
-        <span style="font-size:18px;font-weight:600;">{{ $isTr ? 'Proje Detay' : 'Project Detail' }}</span>
+        <span style="font-size:18px;font-weight:600;">Project Detail</span>
     </div>
 
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;align-items:start;">
@@ -99,7 +97,7 @@
                         @else
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#D97706" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="#D97706" stroke-width="1.5" stroke-linecap="round"/></svg>
                         @endif
-                        {{ $step->completed ? ($isTr ? 'Tamamlandı' : 'Completed') : ($isTr ? 'Devam Ediyor' : 'In Progress') }}
+                        {{ $step->completed ? 'Completed' : 'In Progress' }}
                     </div>
                 </div>
             </div>
@@ -122,10 +120,10 @@
             <div class="dp-card" style="margin-bottom:16px;">
                 <div style="font-size:18px;font-weight:700;margin-bottom:16px;">{{ $project->name ?? 'StudyFund / Fintech' }}</div>
                 {{-- Team Summary --}}
-                <div style="font-weight:600;font-size:13px;margin-bottom:12px;">{{ $isTr ? 'Takım Özeti' : 'Team Summary' }}</div>
+                <div style="font-weight:600;font-size:13px;margin-bottom:12px;">Team Summary</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px;margin-bottom:4px;">
-                    <span style="font-weight:500;">{{ $isTr ? 'Üye' : 'Member' }}</span>
-                    <span style="font-weight:500;text-align:right;">{{ $isTr ? 'Sorumlu' : 'Responsible' }}</span>
+                    <span style="font-weight:500;">Member</span>
+                    <span style="font-weight:500;text-align:right;">Responsible</span>
                 </div>
                 @foreach($team as $member)
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--color-row-border);">
@@ -141,7 +139,7 @@
             {{-- Progress --}}
             <div class="dp-card" style="margin-bottom:16px;">
                 <div style="font-size:13px;font-weight:600;color:var(--color-primary);margin-bottom:6px;">
-                    {{ $project->steps_completed ?? '6' }}/{{ $project->total_steps ?? '12' }} {{ $isTr ? 'Adım Tamamlandı' : 'Step Completed' }}
+                    {{ $project->steps_completed ?? '6' }}/{{ $project->total_steps ?? '12' }} Step Completed
                 </div>
                 <div style="width:100%;height:8px;border-radius:4px;background:#e2e8f0;">
                     <div style="width:{{ ($project->steps_completed ?? 6) / ($project->total_steps ?? 12) * 100 }}%;height:100%;border-radius:4px;background:var(--color-primary);"></div>
@@ -152,19 +150,19 @@
             <div class="dp-card" style="margin-bottom:16px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;">
                     <div>
-                        <div style="font-size:12px;color:var(--color-txt-muted);">{{ $isTr ? 'Toplam Ürün Puanı' : 'Total Product Score' }}</div>
+                        <div style="font-size:12px;color:var(--color-txt-muted);">Total Product Score</div>
                         <div style="font-size:22px;font-weight:700;">{{ $project->product_score ?? '120' }} / {{ $project->max_score ?? '2500' }}</div>
                     </div>
                     <span style="display:inline-flex;align-items:center;gap:4px;background:#FEE2E2;color:#DC2626;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;">
                         <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        {{ $isTr ? 'Sorun Var' : 'Problem in' }} Step 4
+                        Problem in Step 4
                     </span>
                 </div>
             </div>
 
             {{-- Submitted Files — Figma shows real file list --}}
             <div class="dp-card" style="margin-bottom:16px;">
-                <div style="font-weight:600;font-size:13px;margin-bottom:12px;">{{ $isTr ? 'Yüklenen Dosyalar' : 'Submitted Files' }}</div>
+                <div style="font-weight:600;font-size:13px;margin-bottom:12px;">Submitted Files</div>
                 @php
                     $mockFiles = [
                         ['step' => 1, 'name' => 'prototype_demo.mp4', 'size' => '2.4 MB'],
@@ -197,7 +195,7 @@
 
             {{-- Submitted Links --}}
             <div class="dp-card">
-                <div style="font-weight:600;font-size:13px;margin-bottom:12px;">{{ $isTr ? 'Paylaşılan Bağlantılar' : 'Submitted Links' }}</div>
+                <div style="font-weight:600;font-size:13px;margin-bottom:12px;">Submitted Links</div>
                 @php
                     $mockLinks = [
                         ['step' => 3, 'url' => 'https://drive.google.com/file/demo'],

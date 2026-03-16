@@ -1,5 +1,5 @@
 @extends('portal.layout')
-@section('title', app()->getLocale() === 'tr' ? 'Giriş Yap' : 'Login')
+@section('title', 'Login')
 @section('meta_description', 'DopiFuture portal login')
 
 @section('content')
@@ -15,12 +15,10 @@
                 </svg>
             </div>
             <h1 style="font-size: 2rem; font-weight: 800; color: white; margin-bottom: 0.5rem; letter-spacing: -0.025em;">
-                {{ app()->getLocale() === 'tr' ? 'Giriş Yap' : 'Sign In' }}
+                {{ 'Sign In' }}
             </h1>
             <p style="color: var(--gray-400); font-size: 0.95rem;">
-                {{ app()->getLocale() === 'tr'
-        ? 'DopiFuture hesabınızla giriş yapın.'
-        : 'Sign in with your DopiFuture account.' }}
+                {{ 'Sign in with your DopiFuture account.' }}
             </p>
         </div>
 
@@ -46,14 +44,14 @@
                 <div style="margin-bottom: 1.25rem;">
                     <label class="form-label">{{ __('admin.email') }}</label>
                     <input type="email" name="email" value="{{ old('email') }}" required autofocus class="form-input"
-                        placeholder="{{ app()->getLocale() === 'tr' ? 'E-posta adresiniz' : 'Your email address' }}">
+                        placeholder="{{ 'Your email address' }}">
                 </div>
 
                 {{-- Password --}}
                 <div style="margin-bottom: 1.5rem;">
                     <label class="form-label">{{ __('admin.password') }}</label>
                     <input type="password" name="password" required class="form-input"
-                        placeholder="{{ app()->getLocale() === 'tr' ? 'Şifreniz' : 'Your password' }}">
+                        placeholder="{{ 'Your password' }}">
                 </div>
 
                 {{-- Remember Me --}}
@@ -62,7 +60,7 @@
                         style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-400); font-size: 0.875rem; cursor: pointer;">
                         <input type="checkbox" name="remember" value="1"
                             style="accent-color: var(--brand-500); width: 16px; height: 16px;">
-                        {{ app()->getLocale() === 'tr' ? 'Beni hatırla' : 'Remember me' }}
+                        {{ 'Remember me' }}
                     </label>
                 </div>
 
@@ -72,7 +70,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
-                    {{ app()->getLocale() === 'tr' ? 'Giriş Yap' : 'Sign In' }}
+                    {{ 'Sign In' }}
                 </button>
             </form>
         </div>
@@ -81,10 +79,10 @@
         <div style="margin-top: 1.75rem; text-align: center; display: flex; flex-direction: column; gap: 0.75rem;">
             <a href="{{ route('register.create') }}"
                 style="color: var(--brand-400); font-size: 0.875rem; text-decoration: none;">
-                {{ app()->getLocale() === 'tr' ? 'Okulunuzu kaydetmek ister misiniz?' : 'Want to register your school?' }}
+                {{ 'Want to register your school?' }}
             </a>
             <a href="{{ url('/admin/login') }}" style="color: var(--gray-500); font-size: 0.8rem; text-decoration: none;">
-                {{ app()->getLocale() === 'tr' ? 'Yönetici Girişi →' : 'Admin Login →' }}
+                {{ 'Admin Login →' }}
             </a>
         </div>
     </div>
