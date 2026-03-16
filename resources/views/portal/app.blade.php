@@ -122,6 +122,58 @@
             padding: 20px 16px 6px;
         }
 
+        /* ═══ COLLAPSIBLE SUB-MENU ═══ */
+        .dp-nav-parent {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            line-height: 20px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 2px;
+            user-select: none;
+        }
+        .dp-nav-parent:hover {
+            color: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.06);
+        }
+        .dp-nav-parent.open {
+            color: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.08);
+        }
+        .dp-nav-parent .chevron {
+            transition: transform 0.25s ease;
+            flex-shrink: 0;
+        }
+        .dp-nav-parent.open .chevron {
+            transform: rotate(180deg);
+        }
+        .dp-nav-children {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding-left: 12px;
+        }
+        .dp-nav-children.open {
+            max-height: 600px;
+        }
+        .dp-nav-sub-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            color: rgba(255,255,255,0.3);
+            padding: 10px 16px 4px;
+        }
+        .dp-nav-children .dp-nav-item {
+            font-size: 13px;
+            padding: 8px 16px;
+        }
+
         /* ═══ MAIN WRAPPER ═══ */
         .dp-main {
             margin-left: 224px;
@@ -890,6 +942,43 @@
                 {{ $isTr ? 'Raporlar' : 'Reports' }}
             </a>
 
+            {{-- ═══ OKUL İŞLEMLERİ — Collapsible ═══ --}}
+            @php
+                $schoolMenuOpen = str_starts_with($cr, 'portal.users') || str_starts_with($cr, 'portal.classes');
+            @endphp
+            <div class="dp-nav-parent {{ $schoolMenuOpen ? 'open' : '' }}" onclick="toggleSchoolMenu(this)">
+                {{ $isTr ? 'Okul İşlemleri' : 'School Operations' }}
+                <svg class="chevron" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </div>
+            <div class="dp-nav-children {{ $schoolMenuOpen ? 'open' : '' }}" id="schoolMenu">
+                {{-- Öğrenci İşlemleri --}}
+                <div class="dp-nav-sub-label">{{ $isTr ? 'Öğrenci İşlemleri' : 'Student Operations' }}</div>
+                <a href="{{ route('portal.users.index', ['role' => 'student']) }}" class="dp-nav-item {{ $cr === 'portal.users.index' && request('role') === 'student' ? 'active' : '' }}">
+                    {{ $isTr ? 'Listele' : 'List' }}
+                </a>
+                <a href="{{ route('portal.users.create', ['role' => 'student']) }}" class="dp-nav-item {{ $cr === 'portal.users.create' && request('role') === 'student' ? 'active' : '' }}">
+                    {{ $isTr ? 'Ekle' : 'Add' }}
+                </a>
+
+                {{-- Öğretmen İşlemleri --}}
+                <div class="dp-nav-sub-label">{{ $isTr ? 'Öğretmen İşlemleri' : 'Teacher Operations' }}</div>
+                <a href="{{ route('portal.users.index', ['role' => 'teacher']) }}" class="dp-nav-item {{ $cr === 'portal.users.index' && request('role') === 'teacher' ? 'active' : '' }}">
+                    {{ $isTr ? 'Listele' : 'List' }}
+                </a>
+                <a href="{{ route('portal.users.create', ['role' => 'teacher']) }}" class="dp-nav-item {{ $cr === 'portal.users.create' && request('role') === 'teacher' ? 'active' : '' }}">
+                    {{ $isTr ? 'Ekle' : 'Add' }}
+                </a>
+
+                {{-- Sınıf İşlemleri --}}
+                <div class="dp-nav-sub-label">{{ $isTr ? 'Sınıf İşlemleri' : 'Class Operations' }}</div>
+                <a href="{{ route('portal.classes.index') }}" class="dp-nav-item {{ $cr === 'portal.classes.index' ? 'active' : '' }}">
+                    {{ $isTr ? 'Listele' : 'List' }}
+                </a>
+                <a href="{{ route('portal.classes.create') }}" class="dp-nav-item {{ $cr === 'portal.classes.create' ? 'active' : '' }}">
+                    {{ $isTr ? 'Ekle' : 'Add' }}
+                </a>
+            </div>
+
             <a href="{{ route('portal.profile') }}" class="dp-nav-item {{ str_starts_with($cr, 'portal.profile') ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                 {{ $isTr ? 'Profil' : 'Profile' }}
@@ -981,6 +1070,11 @@
         function closeSidebar(){
             document.getElementById('dpSidebar').classList.remove('open');
             document.getElementById('sidebarOverlay').classList.remove('show');
+        }
+        function toggleSchoolMenu(el){
+            el.classList.toggle('open');
+            var ch = el.nextElementSibling;
+            if(ch) ch.classList.toggle('open');
         }
         var t=document.getElementById('dpToast');
         if(t) setTimeout(function(){t.style.display='none';},4000);
