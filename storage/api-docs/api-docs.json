@@ -538,7 +538,7 @@
                 ]
             }
         },
-        "/cms/pages": {
+        "/api/v1/pages": {
             "get": {
                 "tags": [
                     "CMS"
@@ -605,7 +605,7 @@
                 }
             }
         },
-        "/cms/pages/{slug}": {
+        "/api/v1/pages/{slug}": {
             "get": {
                 "tags": [
                     "CMS"
@@ -643,7 +643,7 @@
                 }
             }
         },
-        "/cms/posts": {
+        "/api/v1/posts": {
             "get": {
                 "tags": [
                     "CMS"
@@ -708,7 +708,7 @@
                 }
             }
         },
-        "/cms/posts/{slug}": {
+        "/api/v1/posts/{slug}": {
             "get": {
                 "tags": [
                     "CMS"
@@ -746,7 +746,7 @@
                 }
             }
         },
-        "/cms/categories": {
+        "/api/v1/categories": {
             "get": {
                 "tags": [
                     "CMS"
@@ -787,7 +787,7 @@
                 }
             }
         },
-        "/cms/tags": {
+        "/api/v1/tags": {
             "get": {
                 "tags": [
                     "CMS"
@@ -814,7 +814,7 @@
                 }
             }
         },
-        "/cms/menus": {
+        "/api/v1/menus": {
             "get": {
                 "tags": [
                     "CMS"
@@ -849,7 +849,7 @@
                 }
             }
         },
-        "/faqs": {
+        "/api/v1/faqs": {
             "get": {
                 "tags": [
                     "FAQ"
@@ -922,7 +922,7 @@
                 }
             }
         },
-        "/faqs/{category}": {
+        "/api/v1/faqs/{category}": {
             "get": {
                 "tags": [
                     "FAQ"
