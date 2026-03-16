@@ -193,13 +193,11 @@ class PortalClassController extends Controller
     {
         $currentYear = (int) date('Y');
         $generated = [];
-        for ($y = $currentYear + 1; $y >= $currentYear - 3; $y--) {
+        for ($y = $currentYear; $y <= $currentYear + 5; $y++) {
             $generated[] = $y . '-' . ($y + 1);
         }
 
-        // Merge with existing DB values
-        $dbYears = SchoolClass::distinct()->pluck('academic_year')->filter()->toArray();
-        return collect(array_merge($generated, $dbYears))->unique()->sort(fn($a, $b) => strcmp($b, $a))->values()->toArray();
+        return $generated;
     }
 
     private function authorizeSchool(int $schoolId): void
