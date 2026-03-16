@@ -175,6 +175,8 @@ Route::prefix('admin')->name('admin.')->middleware(['web', \App\Http\Middleware\
         Route::post('applications/{application}/users/{user}/sync', [ApplicationController::class, 'syncUser'])->name('applications.sync-user');
         Route::get('applications/{application}/users/{user}/report', [ApplicationController::class, 'userReport'])->name('applications.user-report');
         Route::post('applications/{application}/sync-all', [ApplicationController::class, 'syncAll'])->name('applications.sync-all');
+        Route::post('applications/reconcile', [ApplicationController::class, 'reconcile'])->name('applications.reconcile');
+        Route::post('applications/harvest', [ApplicationController::class, 'harvest'])->name('applications.harvest');
 
         // ── Location API (cascading combobox) ───────────────
 
