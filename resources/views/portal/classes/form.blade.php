@@ -37,7 +37,12 @@
                 </div>
                 <div class="dp-form-group">
                     <label class="dp-form-label">Academic Year</label>
-                    <input type="text" name="academic_year" value="{{ old('academic_year', $class->academic_year ?? '2025-2026') }}" class="dp-form-input">
+                    <select name="academic_year" class="dp-form-select">
+                        <option value="">Select</option>
+                        @foreach($academicYears as $year)
+                            <option value="{{ $year }}" {{ old('academic_year', $class->academic_year) === $year ? 'selected' : '' }}>{{ $year }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 @if($class->exists)
                     <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">

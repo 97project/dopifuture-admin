@@ -61,7 +61,8 @@ class PortalClassController extends Controller
     {
         $this->guardClassManagement();
         $schools = $this->getAvailableSchools();
-        return view('portal.classes.form', ['class' => new SchoolClass, 'schools' => $schools]);
+        $academicYears = $this->getAcademicYears();
+        return view('portal.classes.form', ['class' => new SchoolClass, 'schools' => $schools, 'academicYears' => $academicYears]);
     }
 
     public function store(Request $request)
@@ -88,7 +89,8 @@ class PortalClassController extends Controller
         $this->guardClassManagement();
         $this->authorizeSchool($class->school_id);
         $schools = $this->getAvailableSchools();
-        return view('portal.classes.form', compact('class', 'schools'));
+        $academicYears = $this->getAcademicYears();
+        return view('portal.classes.form', compact('class', 'schools', 'academicYears'));
     }
 
     public function update(Request $request, SchoolClass $class)
@@ -182,6 +184,22 @@ class PortalClassController extends Controller
     private function getAvailableSchools()
     {
         return auth()->user()->schools()->get();
+    }
+
+    /**
+     * Generate academic years: DB existing + auto range (current ± 2).
+     */
+    private function getAcademicYears(): array
+    {
+        $currentYear = (int) date('Y');
+        $generated = [];
+        for ($y = $currentYear + 1; $y >= $currentYear - 3; $y--) {
+            $generated[] = $y . '-' . ($y + 1);
+        }
+
+        // Merge with existing DB values
+        $dbYears = SchoolClass::distinct()->pluck('academic_year')->filter()->toArray();
+        return collect(array_merge($generated, $dbYears))->unique()->sort(fn($a, $b) => strcmp($b, $a))->values()->toArray();
     }
 
     private function authorizeSchool(int $schoolId): void
