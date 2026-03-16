@@ -3,7 +3,7 @@
 @section('page-title', $license->exists ? 'Edit License' : 'Add New License')
 @section('content')
     {{-- ═══ Figma F-72: Add New Licence form — centered card ═══ --}}
-    <div style="max-width:640px;margin:0 auto;">
+    <div>
 
         {{-- Title + Subtitle --}}
         <h2 style="font-size:24px;font-weight:700;margin:0 0 6px 0;color:#111;font-family:'Nunito',sans-serif;">

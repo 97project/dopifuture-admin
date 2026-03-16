@@ -7,7 +7,7 @@
         <a href="{{ route('portal.schools.index') }}" class="dp-btn-ghost">← Back to Schools</a>
     </div>
 
-    <div style="max-width:700px;">
+    <div>
         <form action="{{ $school->exists ? route('portal.schools.update', $school) : route('portal.schools.store') }}" method="POST">
             @csrf
             @if($school->exists) @method('PUT') @endif

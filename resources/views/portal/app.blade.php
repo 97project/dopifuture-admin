@@ -895,10 +895,6 @@
                 Administration
             </a>
 
-            <a href="{{ route('portal.home') }}" class="dp-nav-item {{ $cr === 'portal.home' ? 'active' : '' }}">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                DopiFuture
-            </a>
 
             <a href="{{ route('portal.reports.app', 'mission-way') }}" class="dp-nav-item {{ $cr === 'portal.reports.app' && request()->route('app')?->slug === 'mission-way' ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>

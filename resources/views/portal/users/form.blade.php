@@ -8,7 +8,7 @@
         <a href="{{ route('portal.users.index') }}" class="dp-btn-ghost">← Back to Users</a>
     </div>
 
-    <div style="max-width:600px;">
+    <div>
         <form action="{{ $editUser->exists ? route('portal.users.update', $editUser) : route('portal.users.store') }}" method="POST">
             @csrf
             @if($editUser->exists) @method('PUT') @endif

@@ -214,6 +214,11 @@ Route::prefix('admin')->name('admin.')->middleware(['web', \App\Http\Middleware\
         Route::get('reports/{app:slug}', [\App\Http\Controllers\Admin\ReportController::class, 'appReport'])->name('reports.app');
         Route::get('reports/school/{school}', [\App\Http\Controllers\Admin\ReportController::class, 'schoolReport'])->name('reports.school');
         Route::get('reports/student/{user}', [\App\Http\Controllers\Admin\ReportController::class, 'studentReport'])->name('reports.student');
+
+        // ── Seat Requests (admin approval workflow) ──────
+        Route::get('seat-requests', [\App\Http\Controllers\SeatRequestController::class, 'adminIndex'])->name('seat-requests.index');
+        Route::post('seat-requests/{seatRequest}/approve', [\App\Http\Controllers\SeatRequestController::class, 'approve'])->name('seat-requests.approve');
+        Route::post('seat-requests/{seatRequest}/reject', [\App\Http\Controllers\SeatRequestController::class, 'reject'])->name('seat-requests.reject');
     });
 });
 
@@ -307,5 +312,9 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     // License purchases
     Route::post('licenses/{license}/purchases', [\App\Http\Controllers\PortalLicenseController::class, 'addPurchase'])
         ->name('portal.licenses.add-purchase');
+
+    // Seat Requests (school admin → request additional seats)
+    Route::post('seat-requests', [\App\Http\Controllers\SeatRequestController::class, 'store'])
+        ->name('portal.seat-requests.store');
 });
 

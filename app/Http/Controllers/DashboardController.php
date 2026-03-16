@@ -76,43 +76,40 @@ class DashboardController extends Controller
                 ->with(['purchases' => fn($q) => $q->orderByDesc('purchased_at'), 'school'])
                 ->first();
 
-            // Lisans süre uyarısı
+            // License warning
             $licenseWarning = null;
             if ($license && $license->is_active && $license->expires_at) {
                 $daysLeft = now()->diffInDays($license->expires_at, false);
                 if ($daysLeft <= 7 && $daysLeft >= 0) {
-                    $licenseWarning = 'critical'; // 🔴 7 gün veya daha az
+                    $licenseWarning = 'critical';
                 } elseif ($daysLeft <= 30 && $daysLeft > 7) {
-                    $licenseWarning = 'warning'; // 🟡 30 gün veya daha az
+                    $licenseWarning = 'warning';
                 }
             }
 
-            // Uygulama durumu (connector widget'ları)
-            $apps = Application::active()->ordered()->get();
-            $schoolUserIds = \DB::table('school_user')->whereIn('school_id', $schoolIds)->pluck('user_id');
-            $appWidgets = $apps->map(function ($app) use ($schoolUserIds) {
-                $appUsers = $app->users()->whereIn('users.id', $schoolUserIds);
-                return (object) [
-                    'name' => $app->name,
-                    'slug' => $app->slug,
-                    'icon' => $app->icon,
-                    'color' => $app->color,
-                    'total' => $appUsers->count(),
-                    'synced' => (clone $appUsers)->wherePivot('sync_status', 'synced')->count(),
-                    'failed' => (clone $appUsers)->wherePivot('sync_status', 'failed')->count(),
-                ];
-            })->filter(fn($w) => $w->total > 0);
+            // Recent students (last 5)
+            $recentStudents = \App\Models\User::whereHas('schools', fn($q) => $q->whereIn('schools.id', $schoolIds))
+                ->role('student')
+                ->orderByDesc('created_at')
+                ->limit(5)
+                ->get();
 
-            $data = [
+            // Seat requests for this school
+            $seatRequests = \App\Models\SeatRequest::where('school_id', $school?->id)
+                ->orderByDesc('created_at')
+                ->limit(10)
+                ->get();
+
+            return view('portal.dashboard-school', [
                 'user' => $user,
                 'school' => $school,
                 'license' => $license,
                 'licenseWarning' => $licenseWarning,
-                'appWidgets' => $appWidgets,
-                'mode' => 'school',
-            ];
+                'recentStudents' => $recentStudents,
+                'seatRequests' => $seatRequests,
+            ]);
         } else {
-            // Super admin → tüm lisanslar tablosu
+            // Super admin → license table
             $licenses = License::with('school')
                 ->orderByDesc('created_at')
                 ->paginate(15);

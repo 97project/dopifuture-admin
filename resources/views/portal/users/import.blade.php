@@ -8,7 +8,7 @@
     <a href="{{ route('portal.users.index') }}" class="dp-btn-ghost">← Back</a>
 </div>
 
-<div style="max-width:600px;">
+<div>
     <div class="dp-card" style="margin-bottom:20px;">
         <div style="padding:16px 20px;background:rgba(67,100,247,0.06);border-radius:10px;margin-bottom:16px;">
             <div style="font-size:13px;font-weight:600;color:#4364F7;margin-bottom:6px;">📋 CSV Format</div>

@@ -15,7 +15,7 @@
         </p>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:900px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
         {{-- Personal Info --}}
         <div class="dp-card">
             <div class="dp-card-title">Personal Details</div>
