@@ -1,16 +1,16 @@
 @extends('portal.app')
-@section('title', $school->exists ? ('Edit School') : ('New School'))
-@section('page-title', $school->exists ? ('Edit School') : ('New School'))
+@section('title', 'Edit School')
+@section('page-title', 'Edit School')
 @section('content')
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-        <div style="font-size:18px;font-weight:600;">{{ $school->exists ? 'Edit School' : 'New School' }}</div>
+        <div style="font-size:18px;font-weight:600;">Edit School</div>
         <a href="{{ route('portal.schools.index') }}" class="dp-btn-ghost">← Back to Schools</a>
     </div>
 
     <div>
-        <form action="{{ $school->exists ? route('portal.schools.update', $school) : route('portal.schools.store') }}" method="POST">
+        <form action="{{ route('portal.schools.update', $school) }}" method="POST">
             @csrf
-            @if($school->exists) @method('PUT') @endif
+            @method('PUT')
 
             <div class="dp-card">
                 <div class="dp-form-group">
@@ -61,13 +61,6 @@
                     <label class="dp-form-label">Website</label>
                     <input type="url" name="website" value="{{ old('website', $school->website) }}" class="dp-form-input" placeholder="https://">
                 </div>
-                @if($school->exists)
-                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:8px;">
-                        <input type="hidden" name="is_active" value="0">
-                        <input type="checkbox" name="is_active" value="1" {{ $school->is_active ? 'checked' : '' }} style="accent-color:var(--primary);">
-                        <span class="dp-form-label" style="margin:0;">Active</span>
-                    </label>
-                @endif
             </div>
 
             <div style="display:flex;gap:12px;align-items:center;margin-top:16px;">
@@ -75,13 +68,6 @@
                 <a href="{{ route('portal.schools.index') }}" class="dp-btn-ghost">Cancel</a>
             </div>
         </form>
-
-        @if($school->exists)
-            <form action="{{ route('portal.schools.destroy', $school) }}" method="POST" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--color-row-border);" onsubmit="return confirm('Are you sure you want to delete this school? This action cannot be undone.')">
-                @csrf @method('DELETE')
-                <button type="submit" style="background:var(--color-error-red);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;">Delete This School</button>
-            </form>
-        @endif
     </div>
 
 <script>

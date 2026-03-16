@@ -275,8 +275,9 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     Route::get('reports/startup/{id}', [\App\Http\Controllers\PortalReportController::class, 'startupDetail'])->name('portal.reports.startup.detail');
     Route::get('reports/coach/{id}/questions', [\App\Http\Controllers\PortalReportController::class, 'coachQuestions'])->name('portal.reports.coach.questions');
 
-    // CRUD: Schools (with show/detail page)
+    // Schools: school-admin can only view and edit their own school (NO create/delete)
     Route::resource('schools', \App\Http\Controllers\PortalSchoolController::class)
+        ->only(['index', 'show', 'edit', 'update'])
         ->names('portal.schools');
 
     // CRUD: Classes (with show/detail page)
