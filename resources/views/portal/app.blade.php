@@ -625,16 +625,7 @@
             gap: 16px;
         }
 
-        /* ═══ MODAL ═══ */
-        .dp-modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.4);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 60;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.2s;
-        }
-
+        /* ═══ MODAL (legacy .show pattern for dashboard) ═══ */
         .dp-modal-overlay.show { opacity: 1; pointer-events: auto; }
 
         .dp-modal {
@@ -941,42 +932,20 @@
                 Reports
             </a>
 
-            {{-- ═══ OKUL İŞLEMLERİ — Collapsible ═══ --}}
-            @php
-                $schoolMenuOpen = str_starts_with($cr, 'portal.users') || str_starts_with($cr, 'portal.classes');
-            @endphp
-            <div class="dp-nav-parent {{ $schoolMenuOpen ? 'open' : '' }}" onclick="toggleSchoolMenu(this)">
-                School Operations
-                <svg class="chevron" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-            </div>
-            <div class="dp-nav-children {{ $schoolMenuOpen ? 'open' : '' }}" id="schoolMenu">
-                {{-- Öğrenci İşlemleri --}}
-                <div class="dp-nav-sub-label">Student Operations</div>
-                <a href="{{ route('portal.users.index', ['role' => 'student']) }}" class="dp-nav-item {{ $cr === 'portal.users.index' && request('role') === 'student' ? 'active' : '' }}">
-                    List
-                </a>
-                <a href="{{ route('portal.users.create', ['role' => 'student']) }}" class="dp-nav-item {{ $cr === 'portal.users.create' && request('role') === 'student' ? 'active' : '' }}">
-                    Add
-                </a>
+            <a href="{{ route('portal.users.index', ['role' => 'student']) }}" class="dp-nav-item {{ str_starts_with($cr, 'portal.users') && request('role') === 'student' ? 'active' : '' }}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                Students
+            </a>
 
-                {{-- Öğretmen İşlemleri --}}
-                <div class="dp-nav-sub-label">Teacher Operations</div>
-                <a href="{{ route('portal.users.index', ['role' => 'teacher']) }}" class="dp-nav-item {{ $cr === 'portal.users.index' && request('role') === 'teacher' ? 'active' : '' }}">
-                    List
-                </a>
-                <a href="{{ route('portal.users.create', ['role' => 'teacher']) }}" class="dp-nav-item {{ $cr === 'portal.users.create' && request('role') === 'teacher' ? 'active' : '' }}">
-                    Add
-                </a>
+            <a href="{{ route('portal.users.index', ['role' => 'teacher']) }}" class="dp-nav-item {{ str_starts_with($cr, 'portal.users') && request('role') === 'teacher' ? 'active' : '' }}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V9a2 2 0 012-2h2a2 2 0 012 2v9a2 2 0 01-2 2h-2z"/></svg>
+                Teachers
+            </a>
 
-                {{-- Sınıf İşlemleri --}}
-                <div class="dp-nav-sub-label">Class Operations</div>
-                <a href="{{ route('portal.classes.index') }}" class="dp-nav-item {{ $cr === 'portal.classes.index' ? 'active' : '' }}">
-                    List
-                </a>
-                <a href="{{ route('portal.classes.create') }}" class="dp-nav-item {{ $cr === 'portal.classes.create' ? 'active' : '' }}">
-                    Add
-                </a>
-            </div>
+            <a href="{{ route('portal.classes.index') }}" class="dp-nav-item {{ str_starts_with($cr, 'portal.classes') ? 'active' : '' }}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                Classes
+            </a>
 
             <a href="{{ route('portal.profile') }}" class="dp-nav-item {{ str_starts_with($cr, 'portal.profile') ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
@@ -1020,12 +989,6 @@
             </div>
 
             <div class="dp-topbar-right">
-                <button class="dp-icon-btn">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                </button>
-                <button class="dp-icon-btn">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                </button>
                 <a href="{{ route('portal.profile') }}" class="dp-user-link">
                     <div class="dp-avatar">{{ strtoupper(substr($user->name??'U',0,1).substr($user->surname??'',0,1)) }}</div>
                     <span class="dp-username" style="display:none;">{{ $user->name }}</span>

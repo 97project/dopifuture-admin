@@ -549,25 +549,6 @@
                         style="background: rgba(59,130,246,0.15); color: var(--brand-400);">{{ 'Login' }}</a>
                 @endauth
 
-                {{-- Language Switcher (end of nav) --}}
-                <div style="display: flex; align-items: center; gap: 2px; margin-left: 0.5rem;">
-                    <form action="{{ route('portal.switch-locale') }}" method="POST" style="display:inline;">
-                        @csrf
-                        <input type="hidden" name="locale" value="tr">
-                        <button type="submit"
-                            style="background: {{ 'transparent' }}; color: {{ 'var(--gray-500)' }}; border: 1px solid {{ 'rgba(255,255,255,0.08)' }}; padding: 0.3rem 0.6rem; border-radius: 6px 0 0 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s;">
-                            TR
-                        </button>
-                    </form>
-                    <form action="{{ route('portal.switch-locale') }}" method="POST" style="display:inline;">
-                        @csrf
-                        <input type="hidden" name="locale" value="en">
-                        <button type="submit"
-                            style="background: {{ app()->getLocale() === 'en' ? 'rgba(59,130,246,0.2)' : 'transparent' }}; color: {{ app()->getLocale() === 'en' ? 'var(--brand-400)' : 'var(--gray-500)' }}; border: 1px solid {{ app()->getLocale() === 'en' ? 'rgba(59,130,246,0.3)' : 'rgba(255,255,255,0.08)' }}; padding: 0.3rem 0.6rem; border-radius: 0 6px 6px 0; font-size: 0.75rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s;">
-                            EN
-                        </button>
-                    </form>
-                </div>
             </nav>
         </div>
     </header>
