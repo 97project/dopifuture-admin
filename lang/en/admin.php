@@ -366,6 +366,11 @@ return [
     'assign_teacher' => 'Assign Teacher',
     'assign_student' => 'Assign Student',
     'assign_application' => 'Assign Application',
+    'student_added' => 'Student added to class successfully.',
+    'student_removed' => 'Student removed from class.',
+    'teacher_added' => 'Teacher added to class successfully.',
+    'teacher_removed' => 'Teacher removed from class.',
+    'password_reset' => 'Password has been reset successfully.',
 
     // DopiFuture — Licenses
     'licenses' => 'Licenses',

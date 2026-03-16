@@ -73,14 +73,15 @@
             <div style="display:flex;gap:12px;align-items:center;margin-top:16px;">
                 <button type="submit" class="dp-btn">Save</button>
                 <a href="{{ route('portal.schools.index') }}" class="dp-btn-ghost">Cancel</a>
-                @if($school->exists)
-                    <form action="{{ route('portal.schools.destroy', $school) }}" method="POST" style="margin-left:auto;" onsubmit="return confirm('Are you sure?')">
-                        @csrf @method('DELETE')
-                        <button type="submit" style="background:var(--error-red);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;">Delete</button>
-                    </form>
-                @endif
             </div>
         </form>
+
+        @if($school->exists)
+            <form action="{{ route('portal.schools.destroy', $school) }}" method="POST" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--color-row-border);" onsubmit="return confirm('Are you sure you want to delete this school? This action cannot be undone.')">
+                @csrf @method('DELETE')
+                <button type="submit" style="background:var(--color-error-red);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;">Delete This School</button>
+            </form>
+        @endif
     </div>
 
 <script>

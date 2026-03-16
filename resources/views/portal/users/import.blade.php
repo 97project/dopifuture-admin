@@ -14,8 +14,8 @@
             <div style="font-size:13px;font-weight:600;color:#4364F7;margin-bottom:6px;">📋 CSV Format</div>
             <div style="font-size:12px;color:var(--text-muted);line-height:1.6;">
                 First row must be headers. Required columns:<br>
-                <code>name</code> (or <code>ad</code>), <code>email</code> (or <code>e-posta</code>)<br>
-                Optional: <code>surname</code> (or <code>soyad</code>)
+                <code>name</code>, <code>email</code><br>
+                Optional: <code>surname</code>
             </div>
         </div>
         <form action="{{ route('portal.users.import') }}" method="POST" enctype="multipart/form-data">

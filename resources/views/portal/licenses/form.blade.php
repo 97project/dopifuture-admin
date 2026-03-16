@@ -1,16 +1,16 @@
-﻿@extends('portal.app')
-@section('title', $license->exists ? ('Edit License') : ('Add New Licence'))
-@section('page-title', $license->exists ? ('Edit License') : ('Add New Licence'))
+@extends('portal.app')
+@section('title', $license->exists ? 'Edit License' : 'Add New License')
+@section('page-title', $license->exists ? 'Edit License' : 'Add New License')
 @section('content')
     {{-- ═══ Figma F-72: Add New Licence form — centered card ═══ --}}
     <div style="max-width:640px;margin:0 auto;">
 
         {{-- Title + Subtitle --}}
         <h2 style="font-size:24px;font-weight:700;margin:0 0 6px 0;color:#111;font-family:'Nunito',sans-serif;">
-            {{ $license->exists ? 'Edit License' : 'Add New Licence' }}
+            {{ $license->exists ? 'Edit License' : 'Add New License' }}
         </h2>
         <p style="font-size:14px;color:#6B7280;margin:0 0 28px 0;">
-            Fill in the details below to add your new licence.
+            {{ $license->exists ? 'Update the license details below.' : 'Fill in the details below to create a new license.' }}
         </p>
 
         <form action="{{ $license->exists ? route('portal.licenses.update', $license) : route('portal.licenses.store') }}" method="POST">

@@ -22,12 +22,12 @@
             <form action="{{ route('portal.profile.update') }}" method="POST">
                 @csrf @method('PUT')
                 <div class="dp-form-group">
-                    <label class="dp-form-label">{{ __('admin.name') }} *</label>
+                    <label class="dp-form-label">First Name *</label>
                     <input type="text" name="name" value="{{ old('name', $user->name) }}" required class="dp-form-input">
                     @error('name') <p class="dp-form-error">{{ $message }}</p> @enderror
                 </div>
                 <div class="dp-form-group">
-                    <label class="dp-form-label">{{ __('admin.surname') }}</label>
+                    <label class="dp-form-label">Last Name</label>
                     <input type="text" name="surname" value="{{ old('surname', $user->surname) }}" class="dp-form-input">
                 </div>
                 <div class="dp-form-group">
@@ -41,8 +41,8 @@
                 <div class="dp-form-group">
                     <label class="dp-form-label">Language</label>
                     <select name="locale" class="dp-form-select">
-                        <option value="tr" {{ old('locale', $user->locale) === 'tr' ? 'selected' : '' }}>Turkish</option>
-                        <option value="en" {{ old('locale', $user->locale) === 'en' ? 'selected' : '' }}>English</option>
+                        <option value="en" {{ old('locale', $user->locale ?? 'en') === 'en' ? 'selected' : '' }}>English</option>
+                        <option value="tr" {{ old('locale', $user->locale ?? 'en') === 'tr' ? 'selected' : '' }}>Turkish</option>
                     </select>
                 </div>
                 <button type="submit" class="dp-btn-submit">Update</button>

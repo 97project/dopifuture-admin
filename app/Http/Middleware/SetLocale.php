@@ -41,22 +41,8 @@ class SetLocale
             return $defaultLocale;
         }
 
-        // Web requests: user pref → session → Accept-Language → default
-        if (auth()->check() && in_array(auth()->user()->locale, $validLocales)) {
-            return auth()->user()->locale;
-        }
-
-        $sessionLocale = session('locale');
-        if ($sessionLocale && in_array($sessionLocale, $validLocales)) {
-            return $sessionLocale;
-        }
-
-        $acceptLocale = $this->parseAcceptLanguage($request->header('Accept-Language'));
-        if ($acceptLocale && in_array($acceptLocale, $validLocales)) {
-            return $acceptLocale;
-        }
-
-        return $defaultLocale;
+        // Web requests: Portal is English-only, always use 'en'
+        return 'en';
     }
 
     protected function parseAcceptLanguage(?string $header): ?string

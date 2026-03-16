@@ -51,13 +51,14 @@
             <div style="display:flex;gap:12px;align-items:center;margin-top:16px;">
                 <button type="submit" class="dp-btn">Save</button>
                 <a href="{{ route('portal.classes.index') }}" class="dp-btn-ghost">Cancel</a>
-                @if($class->exists)
-                    <form action="{{ route('portal.classes.destroy', $class) }}" method="POST" style="margin-left:auto;" onsubmit="return confirm('Are you sure you want to delete this class?')">
-                        @csrf @method('DELETE')
-                        <button type="submit" style="background:var(--color-error-red, #e33131);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;">Delete</button>
-                    </form>
-                @endif
             </div>
         </form>
+
+        @if($class->exists)
+            <form action="{{ route('portal.classes.destroy', $class) }}" method="POST" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--color-row-border);" onsubmit="return confirm('Are you sure you want to delete this class? This action cannot be undone.')">
+                @csrf @method('DELETE')
+                <button type="submit" style="background:var(--color-error-red, #e33131);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;">Delete This Class</button>
+            </form>
+        @endif
     </div>
 @endsection

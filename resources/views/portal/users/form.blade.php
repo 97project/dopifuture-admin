@@ -81,13 +81,14 @@
             <div style="display:flex;gap:12px;align-items:center;margin-top:16px;">
                 <button type="submit" class="dp-btn">Save</button>
                 <a href="{{ route('portal.users.index') }}" class="dp-btn-ghost">Cancel</a>
-                @if($editUser->exists)
-                    <form action="{{ route('portal.users.destroy', $editUser) }}" method="POST" style="margin-left:auto;" onsubmit="return confirm('Are you sure you want to delete this user?')">
-                        @csrf @method('DELETE')
-                        <button type="submit" style="background:var(--color-error-red);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;">Delete</button>
-                    </form>
-                @endif
             </div>
         </form>
+
+        @if($editUser->exists)
+            <form action="{{ route('portal.users.destroy', $editUser) }}" method="POST" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--color-row-border);" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
+                @csrf @method('DELETE')
+                <button type="submit" style="background:var(--color-error-red);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;">Delete This User</button>
+            </form>
+        @endif
     </div>
 @endsection
