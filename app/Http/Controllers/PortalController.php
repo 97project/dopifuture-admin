@@ -21,9 +21,6 @@ class PortalController extends Controller
         return view('portal.home', [
             'appCount' => \App\Models\Application::count(),
             'schoolCount' => \App\Models\School::count(),
-            'students' => collect(),
-            'avgLoginCount' => 0,
-            'avgLoginDuration' => '0m',
         ]);
     }
 
