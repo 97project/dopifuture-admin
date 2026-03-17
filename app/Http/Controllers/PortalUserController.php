@@ -98,6 +98,24 @@ class PortalUserController extends Controller
         return view('portal.users.show', compact('user', 'reportData'));
     }
 
+    /**
+     * Return user details as JSON for AJAX modals.
+     */
+    public function userJson(User $user)
+    {
+        $this->guardManageRoles();
+
+        return response()->json([
+            'id'      => $user->id,
+            'name'    => $user->name,
+            'surname' => $user->surname ?? '',
+            'email'   => $user->email,
+            'role'    => $user->roles->first()?->name ?? '-',
+            'status'  => $user->status ?? 'active',
+            'school'  => $user->schools->first()?->name ?? '-',
+        ]);
+    }
+
     public function create()
     {
         $this->guardManageRoles();

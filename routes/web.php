@@ -308,6 +308,10 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     Route::post('users/{user}/reset-password', [\App\Http\Controllers\PortalUserController::class, 'resetPassword'])
         ->name('portal.users.reset-password');
 
+    // User JSON for AJAX modals
+    Route::get('users/{user}/json', [\App\Http\Controllers\PortalUserController::class, 'userJson'])
+        ->name('portal.users.json');
+
     // CRUD: Licenses (with show/detail page)
     Route::resource('licenses', \App\Http\Controllers\PortalLicenseController::class)
         ->names('portal.licenses');

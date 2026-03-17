@@ -101,20 +101,16 @@
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 Edit
                             </a>
-                            <form action="{{ route('portal.users.reset-password', $u) }}" method="POST" style="display:inline;" onsubmit="return confirm('Reset password for {{ $u->name }}?')">
-                                @csrf
-                                <button type="submit" style="background:none;border:none;cursor:pointer;color:#003AC9;padding:0;display:inline-flex;align-items:center;gap:4px;font-size:13px;">
-                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                    Reset Password
-                                </button>
-                            </form>
-                            <form action="{{ route('portal.users.destroy', $u) }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete {{ $u->name }}? This cannot be undone.')">
-                                @csrf @method('DELETE')
-                                <button type="submit" style="background:none;border:none;cursor:pointer;color:#E33131;padding:0;display:inline-flex;align-items:center;gap:4px;font-size:13px;">
-                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    Delete
-                                </button>
-                            </form>
+                            <button type="button" onclick="openResetModal({{ $u->id }})"
+                                    style="background:none;border:none;cursor:pointer;color:#003AC9;padding:0;display:inline-flex;align-items:center;gap:4px;font-size:13px;">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                Reset Password
+                            </button>
+                            <button type="button" onclick="openDeleteModal({{ $u->id }})"
+                                    style="background:none;border:none;cursor:pointer;color:#E33131;padding:0;display:inline-flex;align-items:center;gap:4px;font-size:13px;">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                Delete
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -191,5 +187,145 @@
             </form>
         </div>
     </div>
+
+    {{-- ═══ RESET PASSWORD CONFIRM MODAL ═══ --}}
+    <div id="resetPasswordModal" class="dp-modal-overlay" style="display:none;" onclick="if(event.target===this)closeModal('resetPasswordModal')">
+        <div class="dp-modal-card" style="max-width:440px;">
+            <button type="button" class="dp-modal-close" onclick="closeModal('resetPasswordModal')">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <div style="text-align:center;margin-bottom:16px;">
+                <div style="width:56px;height:56px;border-radius:50%;background:rgba(59,130,246,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                    <svg width="28" height="28" fill="none" stroke="#3B82F6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                </div>
+                <div class="dp-modal-title">Reset Password</div>
+                <p class="dp-modal-subtitle">Are you sure you want to reset this user's password?</p>
+            </div>
+            {{-- User info card (populated via AJAX) --}}
+            <div id="resetUserInfo" style="background:rgba(59,130,246,0.04);border:1px solid rgba(59,130,246,0.15);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:none;">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                    <img id="resetUserAvatar" src="" alt="" style="width:36px;height:36px;border-radius:50%;">
+                    <div>
+                        <div id="resetUserName" style="font-weight:600;font-size:14px;color:var(--color-txt);"></div>
+                        <div id="resetUserEmail" style="font-size:12px;color:var(--color-txt-muted);"></div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:16px;font-size:12px;color:var(--color-txt-muted);">
+                    <span>Role: <strong id="resetUserRole" style="color:var(--color-txt);"></strong></span>
+                    <span>School: <strong id="resetUserSchool" style="color:var(--color-txt);"></strong></span>
+                </div>
+            </div>
+            <div id="resetLoading" style="text-align:center;padding:20px;color:var(--color-txt-muted);font-size:13px;">Loading...</div>
+            <form id="resetPasswordForm" method="POST" action="">
+                @csrf
+                <div style="display:flex;gap:12px;">
+                    <button type="button" onclick="closeModal('resetPasswordModal')"
+                            style="flex:1;padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);background:#fff;color:#333;font-size:14px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;">
+                        Cancel
+                    </button>
+                    <button type="submit" id="resetSubmitBtn"
+                            style="flex:1;padding:12px;border-radius:10px;border:none;background:#3B82F6;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;">
+                        Reset Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- ═══ DELETE CONFIRM MODAL ═══ --}}
+    <div id="deleteUserModal" class="dp-modal-overlay" style="display:none;" onclick="if(event.target===this)closeModal('deleteUserModal')">
+        <div class="dp-modal-card" style="max-width:440px;">
+            <button type="button" class="dp-modal-close" onclick="closeModal('deleteUserModal')">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <div style="text-align:center;margin-bottom:16px;">
+                <div style="width:56px;height:56px;border-radius:50%;background:rgba(239,68,68,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                    <svg width="28" height="28" fill="none" stroke="#EF4444" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </div>
+                <div class="dp-modal-title" style="color:#DC2626;">Delete User</div>
+                <p class="dp-modal-subtitle">This action cannot be undone. The user will be permanently removed.</p>
+            </div>
+            {{-- User info card (populated via AJAX) --}}
+            <div id="deleteUserInfo" style="background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.15);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:none;">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                    <img id="deleteUserAvatar" src="" alt="" style="width:36px;height:36px;border-radius:50%;">
+                    <div>
+                        <div id="deleteUserName" style="font-weight:600;font-size:14px;color:var(--color-txt);"></div>
+                        <div id="deleteUserEmail" style="font-size:12px;color:var(--color-txt-muted);"></div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:16px;font-size:12px;color:var(--color-txt-muted);">
+                    <span>Role: <strong id="deleteUserRole" style="color:var(--color-txt);"></strong></span>
+                    <span>School: <strong id="deleteUserSchool" style="color:var(--color-txt);"></strong></span>
+                </div>
+            </div>
+            <div id="deleteLoading" style="text-align:center;padding:20px;color:var(--color-txt-muted);font-size:13px;">Loading...</div>
+            <form id="deleteUserForm" method="POST" action="">
+                @csrf @method('DELETE')
+                <div style="display:flex;gap:12px;">
+                    <button type="button" onclick="closeModal('deleteUserModal')"
+                            style="flex:1;padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);background:#fff;color:#333;font-size:14px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;">
+                        Cancel
+                    </button>
+                    <button type="submit" id="deleteSubmitBtn"
+                            style="flex:1;padding:12px;border-radius:10px;border:none;background:#DC2626;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;">
+                        Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    function fetchUserAndShow(userId, mode) {
+        var modalId = mode === 'reset' ? 'resetPasswordModal' : 'deleteUserModal';
+        var infoId  = mode === 'reset' ? 'resetUserInfo' : 'deleteUserInfo';
+        var loadId  = mode === 'reset' ? 'resetLoading' : 'deleteLoading';
+
+        // Show modal with loading state
+        document.getElementById(infoId).style.display = 'none';
+        document.getElementById(loadId).style.display = 'block';
+        document.getElementById(modalId).style.display = 'flex';
+
+        // Set form action
+        if (mode === 'reset') {
+            document.getElementById('resetPasswordForm').action = '/users/' + userId + '/reset-password';
+        } else {
+            document.getElementById('deleteUserForm').action = '/users/' + userId;
+        }
+
+        // Fetch user data from backend
+        fetch('/users/' + userId + '/json', {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(u) {
+            var prefix = mode === 'reset' ? 'reset' : 'delete';
+            var fullName = u.name + (u.surname ? ' ' + u.surname : '');
+            document.getElementById(prefix + 'UserName').textContent = fullName;
+            document.getElementById(prefix + 'UserEmail').textContent = u.email;
+            document.getElementById(prefix + 'UserRole').textContent = u.role;
+            document.getElementById(prefix + 'UserSchool').textContent = u.school;
+            document.getElementById(prefix + 'UserAvatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fullName) + '&size=72&background=random&rounded=true&bold=true&font-size=0.4';
+            document.getElementById(loadId).style.display = 'none';
+            document.getElementById(infoId).style.display = 'block';
+        })
+        .catch(function() {
+            document.getElementById(loadId).textContent = 'Failed to load user data.';
+        });
+    }
+
+    function openResetModal(userId) {
+        fetchUserAndShow(userId, 'reset');
+    }
+
+    function openDeleteModal(userId) {
+        fetchUserAndShow(userId, 'delete');
+    }
+    </script>
 
 @endsection
