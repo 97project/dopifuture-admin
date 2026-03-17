@@ -14,9 +14,10 @@ use Illuminate\Support\Facades\Log;
 /**
  * Kullanıcı silindiğinde tüm aktif uygulamalardan kaldırır.
  *
- * User nesnesi silinmeden ÖNCE dispatch edilmelidir,
- * böylece SerializesModels user'ı serialize edebilir.
- * Alternatif olarak, user ID ve email primitif olarak tutulur.
+ * dispatchSync() ile çağrılmalıdır — model silinmeden önce.
+ *
+ * Connector class deduplication: Aynı connector (ör. VegaConnector)
+ * birden fazla app'te kullanılıyorsa sadece 1 kez çağrılır.
  */
 class RemoveUserFromAppsJob implements ShouldQueue
 {
@@ -37,14 +38,24 @@ class RemoveUserFromAppsJob implements ShouldQueue
         ]);
 
         $apps = Application::active()->get();
+        $seen    = [];
         $success = 0;
         $failed  = 0;
+        $skipped = 0;
 
         foreach ($apps as $app) {
             $connector = $app->getConnector();
             if (!$connector) {
                 continue;
             }
+
+            // Aynı connector class'ı tekrar çağırma
+            $class = get_class($connector);
+            if (isset($seen[$class])) {
+                $skipped++;
+                continue;
+            }
+            $seen[$class] = true;
 
             try {
                 if ($connector->removeUser($this->user)) {
@@ -70,6 +81,7 @@ class RemoveUserFromAppsJob implements ShouldQueue
             'user_id' => $this->user->id,
             'success' => $success,
             'failed'  => $failed,
+            'skipped' => $skipped,
         ]);
     }
 

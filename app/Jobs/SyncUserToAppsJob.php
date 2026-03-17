@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
+use App\Models\Application;
 use App\Models\User;
-use App\Services\ConnectorSyncService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -12,7 +12,13 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Bir kullanıcının tüm aktif uygulamalarıyla connector verilerini senkronize eden job.
+ * Yeni kullanıcı oluşturulduğunda tüm aktif uygulamalara sync eden job.
+ *
+ * NOT: Application::active() kullanır, $user->applications() DEĞİL.
+ * Çünkü yeni kullanıcının pivot tablosunda henüz kayıt yoktur.
+ *
+ * Connector class deduplication: Aynı connector (ör. VegaConnector)
+ * birden fazla app'te kullanılıyorsa sadece 1 kez çağrılır.
  */
 class SyncUserToAppsJob implements ShouldQueue
 {
@@ -25,28 +31,68 @@ class SyncUserToAppsJob implements ShouldQueue
         public User $user
     ) {}
 
-    public function handle(ConnectorSyncService $syncService): void
+    public function handle(): void
     {
-        Log::channel('daily')->info('[SyncUserToAppsJob] Starting sync', [
+        Log::info('[SyncUserToApps] Starting sync', [
             'user_id' => $this->user->id,
-            'email' => $this->user->email,
+            'email'   => $this->user->email,
         ]);
 
-        $results = $syncService->syncAllAppsForUser($this->user);
+        $apps = Application::active()->get();
+        $seen    = [];
+        $success = 0;
+        $failed  = 0;
+        $skipped = 0;
 
-        Log::channel('daily')->info('[SyncUserToAppsJob] Completed', [
+        foreach ($apps as $app) {
+            $connector = $app->getConnector();
+            if (!$connector) {
+                continue;
+            }
+
+            // Aynı connector class'ı tekrar çağırma (Vega 3 app'te kullanılıyor)
+            $class = get_class($connector);
+            if (isset($seen[$class])) {
+                $skipped++;
+                continue;
+            }
+            $seen[$class] = true;
+
+            try {
+                $result = $connector->syncUser($this->user);
+                if ($result['success'] ?? false) {
+                    $success++;
+                } else {
+                    $failed++;
+                    Log::warning('[SyncUserToApps] Sync failed', [
+                        'user_id' => $this->user->id,
+                        'app'     => $app->slug,
+                        'error'   => $result['error'] ?? 'unknown',
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                $failed++;
+                Log::error('[SyncUserToApps] Exception', [
+                    'user_id' => $this->user->id,
+                    'app'     => $app->slug,
+                    'message' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        Log::info('[SyncUserToApps] Completed', [
             'user_id' => $this->user->id,
-            'success' => $results['success'],
-            'failed' => $results['failed'],
-            'total' => $results['total'],
+            'success' => $success,
+            'failed'  => $failed,
+            'skipped' => $skipped,
         ]);
     }
 
     public function failed(\Throwable $exception): void
     {
-        Log::channel('daily')->error('[SyncUserToAppsJob] Failed', [
+        Log::error('[SyncUserToApps] Job failed permanently', [
             'user_id' => $this->user->id,
-            'error' => $exception->getMessage(),
+            'error'   => $exception->getMessage(),
         ]);
     }
 }

@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Log;
 /**
  * Kullanıcı bilgileri güncellendiğinde (edit, reset password)
  * tüm aktif uygulamalardaki connector'larda updateUser() çağırır.
+ *
+ * Connector class deduplication: Aynı connector (ör. VegaConnector)
+ * birden fazla app'te kullanılıyorsa sadece 1 kez çağrılır.
  */
 class UpdateUserInAppsJob implements ShouldQueue
 {
@@ -34,14 +37,24 @@ class UpdateUserInAppsJob implements ShouldQueue
         ]);
 
         $apps = Application::active()->get();
+        $seen    = [];
         $success = 0;
         $failed  = 0;
+        $skipped = 0;
 
         foreach ($apps as $app) {
             $connector = $app->getConnector();
             if (!$connector) {
                 continue;
             }
+
+            // Aynı connector class'ı tekrar çağırma
+            $class = get_class($connector);
+            if (isset($seen[$class])) {
+                $skipped++;
+                continue;
+            }
+            $seen[$class] = true;
 
             try {
                 $result = $connector->updateUser($this->user);
@@ -69,6 +82,7 @@ class UpdateUserInAppsJob implements ShouldQueue
             'user_id' => $this->user->id,
             'success' => $success,
             'failed'  => $failed,
+            'skipped' => $skipped,
         ]);
     }
 

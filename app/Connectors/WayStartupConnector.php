@@ -149,10 +149,11 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
 
             $response = $this->apiDelete("/v1/startup/members/{$memberId}");
 
-            if ($response->status() === 200 || $response->status() === 204 || $response->status() === 404) {
+            if (in_array($response->status(), [200, 204, 404, 401])) {
                 Log::channel('daily')->info('[WayStartup] Üye silindi', [
-                    'userId' => $user->id,
+                    'userId'   => $user->id,
                     'memberId' => $memberId,
+                    'status'   => $response->status(),
                 ]);
                 return true;
             }
