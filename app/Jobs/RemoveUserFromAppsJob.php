@@ -31,7 +31,7 @@ class RemoveUserFromAppsJob implements ShouldQueue
 
     public function handle(): void
     {
-        Log::channel('daily')->info('[RemoveUserFromApps] Starting removal sync', [
+        Log::info('[RemoveUserFromApps] Starting removal sync', [
             'user_id' => $this->user->id,
             'email'   => $this->user->email,
         ]);
@@ -51,14 +51,14 @@ class RemoveUserFromAppsJob implements ShouldQueue
                     $success++;
                 } else {
                     $failed++;
-                    Log::channel('daily')->warning('[RemoveUserFromApps] Removal failed', [
+                    Log::warning('[RemoveUserFromApps] Removal failed', [
                         'user_id' => $this->user->id,
                         'app'     => $app->slug,
                     ]);
                 }
             } catch (\Throwable $e) {
                 $failed++;
-                Log::channel('daily')->error('[RemoveUserFromApps] Exception', [
+                Log::error('[RemoveUserFromApps] Exception', [
                     'user_id' => $this->user->id,
                     'app'     => $app->slug,
                     'message' => $e->getMessage(),
@@ -66,7 +66,7 @@ class RemoveUserFromAppsJob implements ShouldQueue
             }
         }
 
-        Log::channel('daily')->info('[RemoveUserFromApps] Completed', [
+        Log::info('[RemoveUserFromApps] Completed', [
             'user_id' => $this->user->id,
             'success' => $success,
             'failed'  => $failed,
@@ -75,7 +75,7 @@ class RemoveUserFromAppsJob implements ShouldQueue
 
     public function failed(\Throwable $exception): void
     {
-        Log::channel('daily')->error('[RemoveUserFromApps] Job failed permanently', [
+        Log::error('[RemoveUserFromApps] Job failed permanently', [
             'user_id' => $this->user->id,
             'error'   => $exception->getMessage(),
         ]);

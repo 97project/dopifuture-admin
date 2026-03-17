@@ -28,7 +28,7 @@ class UpdateUserInAppsJob implements ShouldQueue
 
     public function handle(): void
     {
-        Log::channel('daily')->info('[UpdateUserInApps] Starting update sync', [
+        Log::info('[UpdateUserInApps] Starting update sync', [
             'user_id' => $this->user->id,
             'email'   => $this->user->email,
         ]);
@@ -49,7 +49,7 @@ class UpdateUserInAppsJob implements ShouldQueue
                     $success++;
                 } else {
                     $failed++;
-                    Log::channel('daily')->warning('[UpdateUserInApps] Update failed', [
+                    Log::warning('[UpdateUserInApps] Update failed', [
                         'user_id' => $this->user->id,
                         'app'     => $app->slug,
                         'error'   => $result['error'] ?? 'unknown',
@@ -57,7 +57,7 @@ class UpdateUserInAppsJob implements ShouldQueue
                 }
             } catch (\Throwable $e) {
                 $failed++;
-                Log::channel('daily')->error('[UpdateUserInApps] Exception', [
+                Log::error('[UpdateUserInApps] Exception', [
                     'user_id' => $this->user->id,
                     'app'     => $app->slug,
                     'message' => $e->getMessage(),
@@ -65,7 +65,7 @@ class UpdateUserInAppsJob implements ShouldQueue
             }
         }
 
-        Log::channel('daily')->info('[UpdateUserInApps] Completed', [
+        Log::info('[UpdateUserInApps] Completed', [
             'user_id' => $this->user->id,
             'success' => $success,
             'failed'  => $failed,
@@ -74,7 +74,7 @@ class UpdateUserInAppsJob implements ShouldQueue
 
     public function failed(\Throwable $exception): void
     {
-        Log::channel('daily')->error('[UpdateUserInApps] Job failed permanently', [
+        Log::error('[UpdateUserInApps] Job failed permanently', [
             'user_id' => $this->user->id,
             'error'   => $exception->getMessage(),
         ]);
