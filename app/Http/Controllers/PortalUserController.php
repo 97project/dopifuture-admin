@@ -137,20 +137,23 @@ class PortalUserController extends Controller
             'surname' => 'nullable|string|max:60',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
-            'role' => 'required|string|exists:roles,name',
-            'school_id' => 'nullable|exists:schools,id',
+            'role' => 'nullable|string|in:student,teacher,school-principal',
         ]);
 
+        // Rol ve okul otomatik atanır
+        $role = $data['role'] ?? 'student';
+        $schoolId = $request->input('school_id') ?? auth()->user()->schools()->value('schools.id');
+
         // License seat check for student role
-        if ($data['role'] === 'student' && !empty($data['school_id'])) {
-            $license = License::where('school_id', $data['school_id'])
+        if ($role === 'student' && $schoolId) {
+            $license = License::where('school_id', $schoolId)
                 ->where('is_active', true)
                 ->first();
 
             if ($license && $license->used_seats >= $license->seat_count) {
                 return back()
                     ->withInput()
-                    ->withErrors(['role' => __('admin.seat_limit_reached')]);
+                    ->withErrors(['email' => __('admin.seat_limit_reached')]);
             }
         }
 
@@ -165,21 +168,21 @@ class PortalUserController extends Controller
             'email_verified_at' => now(),
         ]);
 
-        $newUser->assignRole($data['role']);
+        $newUser->assignRole($role);
 
-        // Attach to school
-        if (!empty($data['school_id'])) {
+        // Attach to school (otomatik)
+        if ($schoolId) {
             \DB::table('school_user')->insertOrIgnore([
-                'school_id' => $data['school_id'],
+                'school_id' => $schoolId,
                 'user_id' => $newUser->id,
-                'role' => $data['role'],
+                'role' => $role,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
             // Increment used_seats if student
-            if ($data['role'] === 'student') {
-                License::where('school_id', $data['school_id'])
+            if ($role === 'student') {
+                License::where('school_id', $schoolId)
                     ->where('is_active', true)
                     ->increment('used_seats');
             }
@@ -224,22 +227,21 @@ class PortalUserController extends Controller
             'surname' => 'nullable|string|max:60',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:6',
-            'role' => 'required|string|exists:roles,name',
-            'status' => 'required|in:active,inactive',
+            'status' => 'nullable|in:active,inactive',
         ]);
 
         $user->update([
             'name' => $data['name'],
             'surname' => $data['surname'] ?? $user->surname,
             'email' => $data['email'],
-            'status' => $data['status'],
+            'status' => $data['status'] ?? $user->status,
         ]);
 
         if (!empty($data['password'])) {
             $user->update(['password' => Hash::make($data['password'])]);
         }
 
-        $user->syncRoles([$data['role']]);
+        // Rol değiştirme yok — mevcut rol korunur
 
         // Sync updated user to external applications
         UpdateUserInAppsJob::dispatch($user);

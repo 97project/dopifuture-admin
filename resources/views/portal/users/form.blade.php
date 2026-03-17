@@ -35,16 +35,15 @@
                     <input type="password" name="password" class="dp-form-input" {{ $editUser->exists ? '' : 'required' }} placeholder="{{ $editUser->exists ? 'Fill to change' : '' }}">
                     @error('password') <p class="dp-form-error">{{ $message }}</p> @enderror
                 </div>
+                {{-- Role: otomatik atanır, formda gösterilmez --}}
+                @if($editUser->exists)
+                    <input type="hidden" name="role" value="{{ $editUser->roles->first()?->name ?? 'student' }}">
+                @else
+                    <input type="hidden" name="role" value="{{ request('role', 'student') }}">
+                @endif
+
+                @if($editUser->exists)
                 <div class="dp-form-grid" style="margin-bottom:16px;">
-                    <div>
-                        <label class="dp-form-label">Role *</label>
-                        <select name="role" class="dp-form-select" required>
-                            @foreach($roles as $role)
-                                <option value="{{ $role }}" {{ old('role', $editUser->roles->first()?->name) === $role ? 'selected' : '' }}>{{ $role }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    @if($editUser->exists)
                     <div>
                         <label class="dp-form-label">Status *</label>
                         <select name="status" class="dp-form-select" required>
@@ -52,17 +51,6 @@
                             <option value="inactive" {{ $editUser->status === 'inactive' ? 'selected' : '' }}>Inactive</option>
                         </select>
                     </div>
-                    @endif
-                </div>
-                @if(!$editUser->exists && isset($schools) && $schools->count())
-                <div class="dp-form-group">
-                    <label class="dp-form-label">Assign to School</label>
-                    <select name="school_id" class="dp-form-select">
-                        <option value="">Select (optional)</option>
-                        @foreach($schools as $school)
-                            <option value="{{ $school->id }}">{{ $school->name }}</option>
-                        @endforeach
-                    </select>
                 </div>
                 @endif
                 @if(!$editUser->exists && isset($classes) && $classes->count())
