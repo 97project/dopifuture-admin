@@ -162,8 +162,8 @@ class VegaConnector implements AppConnectorInterface
     }
 
     /**
-     * Kullanıcıyı Vega'da ban'la (soft-delete).
-     * POST /api/v1/user/ban
+     * Kullanıcıyı Vega'dan sil.
+     * DELETE /api/v1/users/{vegaId}
      */
     public function removeUser(User $user): bool
     {
@@ -176,26 +176,27 @@ class VegaConnector implements AppConnectorInterface
                 return true;
             }
 
-            $response = $this->request('POST', '/api/v1/user/ban', [
-                'user_id' => $existing['id'],
-            ]);
+            $vegaId = $existing['id'];
+            $response = $this->request('DELETE', "/api/v1/users/{$vegaId}");
 
-            if ($response->successful()) {
-                Log::channel('daily')->info('[Vega] Kullanıcı banlandı', [
+            if ($response->successful() || $response->status() === 404) {
+                Log::channel('daily')->info('[Vega] Kullanıcı silindi', [
                     'userId' => $user->id,
-                    'vegaId' => $existing['id'],
+                    'vegaId' => $vegaId,
+                    'status' => $response->status(),
                 ]);
                 return true;
             }
 
-            Log::channel('daily')->error('[Vega] Ban hatası', [
+            Log::channel('daily')->error('[Vega] Silme hatası', [
                 'userId' => $user->id,
+                'vegaId' => $vegaId,
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
             return false;
         } catch (\Throwable $e) {
-            Log::channel('daily')->error('[Vega] Ban bağlantı hatası', [
+            Log::channel('daily')->error('[Vega] Silme bağlantı hatası', [
                 'userId' => $user->id,
                 'message' => $e->getMessage(),
             ]);
