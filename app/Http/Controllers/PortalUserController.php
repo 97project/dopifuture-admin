@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\SyncUserToAppsJob;
+use App\Jobs\UpdateUserInAppsJob;
+use App\Jobs\RemoveUserFromAppsJob;
 use App\Models\License;
 use App\Models\User;
 use App\Models\School;
@@ -239,6 +241,9 @@ class PortalUserController extends Controller
 
         $user->syncRoles([$data['role']]);
 
+        // Sync updated user to external applications
+        UpdateUserInAppsJob::dispatch($user);
+
         return redirect()->route('portal.users.index')
             ->with('success', __('admin.user_updated'));
     }
@@ -247,6 +252,9 @@ class PortalUserController extends Controller
     {
         $this->guardManageRoles();
         $this->guardPrincipalCannotEditAdmin($user);
+
+        // Remove user from external applications BEFORE deleting locally
+        RemoveUserFromAppsJob::dispatchSync($user);
 
         // Öğrenci siliniyorsa used_seats azalt
         if ($user->hasRole('student')) {
@@ -271,6 +279,9 @@ class PortalUserController extends Controller
 
         $newPassword = substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'), 0, 8);
         $user->update(['password' => Hash::make($newPassword)]);
+
+        // Sync password change to external applications
+        UpdateUserInAppsJob::dispatch($user);
 
         return back()->with('success', 'Password reset for ' . $user->name . '. New password: ' . $newPassword);
     }
