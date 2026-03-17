@@ -18,8 +18,13 @@ class PortalController extends Controller
             return redirect()->route('portal.dashboard');
         }
 
-        // Guest users → login page
-        return redirect()->route('portal.login');
+        return view('portal.home', [
+            'appCount' => \App\Models\Application::count(),
+            'schoolCount' => \App\Models\School::count(),
+            'students' => collect(),
+            'avgLoginCount' => 0,
+            'avgLoginDuration' => '0m',
+        ]);
     }
 
     /**

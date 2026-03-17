@@ -1,6 +1,6 @@
-﻿@extends('portal.app')
+@extends('portal.layout')
 @section('title', 'DopiFuture')
-@section('page-title', 'DopiFuture')
+@section('meta_description', 'DopiFuture — Digital Education Platform')
 @section('content')
 
     {{-- ═══ 2 STAT CARDS — Figma node-id: 1164-17862 ═══ --}}
