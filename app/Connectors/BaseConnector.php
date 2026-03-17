@@ -99,6 +99,16 @@ abstract class BaseConnector
             ->delete("{$this->baseUrl}{$path}");
     }
 
+    /**
+     * Authenticated PATCH request.
+     */
+    protected function apiPatch(string $path, array $data = []): Response
+    {
+        return Http::timeout($this->timeout)
+            ->withHeaders($this->authHeaders())
+            ->patch("{$this->baseUrl}{$path}", $data);
+    }
+
     /* ─── Health check ──────────────────────────────── */
 
     public function getHealthCheck(): ?array

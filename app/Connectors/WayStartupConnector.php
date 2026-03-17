@@ -122,9 +122,60 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
 
     /* ─── Interface: updateUser ─────────────────────────── */
 
+    /**
+     * PATCH /v1/startup/members/{memberId}
+     * Üyeyi gerçekten günceller, syncUser (POST) değil.
+     */
     public function updateUser(User $user): array
     {
-        return $this->syncUser($user);
+        try {
+            // Önce member'ı bul
+            $member = $this->getUser($user);
+            $memberId = $member['id'] ?? null;
+
+            if (!$memberId) {
+                // Üye yoksa yeni oluştur
+                Log::channel('daily')->info('[WayStartup] Üye bulunamadı, yeni oluşturuluyor', [
+                    'userId' => $user->id,
+                ]);
+                return $this->syncUser($user);
+            }
+
+            $fullName = trim($user->full_name ?? '') ?: 'Öğrenci';
+
+            $payload = [
+                'name'  => $fullName,
+                'email' => $user->email,
+            ];
+
+            $response = $this->apiPatch("/v1/startup/members/{$memberId}", $payload);
+
+            if ($response->successful()) {
+                Log::channel('daily')->info('[WayStartup] Üye güncellendi', [
+                    'userId'   => $user->id,
+                    'memberId' => $memberId,
+                ]);
+                return ['success' => true, 'response' => $response->json(), 'error' => null];
+            }
+
+            Log::channel('daily')->error('[WayStartup] Güncelleme hatası', [
+                'userId'   => $user->id,
+                'memberId' => $memberId,
+                'status'   => $response->status(),
+                'body'     => $response->body(),
+            ]);
+            return [
+                'success' => false,
+                'response' => $response->json(),
+                'error' => "HTTP {$response->status()}: {$response->body()}",
+            ];
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[WayStartup] updateUser hatası', [
+                'userId' => $user->id,
+                'message' => $e->getMessage(),
+            ]);
+            return ['success' => false, 'response' => null, 'error' => $e->getMessage()];
+        }
     }
 
     /* ─── Interface: removeUser ─────────────────────────── */

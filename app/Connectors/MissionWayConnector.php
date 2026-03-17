@@ -122,9 +122,42 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
 
     /* ─── Interface: updateUser ─────────────────────────── */
 
+    /**
+     * MissionWay'de PUT/PATCH endpoint yok.
+     * Strateji: DELETE + POST (sil → yeniden oluştur).
+     * Kullanıcı yoksa sadece oluştur.
+     */
     public function updateUser(User $user): array
     {
-        return $this->syncUser($user);
+        try {
+            // Önce mevcut kaydı sil
+            $deleteResponse = $this->apiDelete("/v1/player-compositions/by-user/{$user->id}");
+
+            // 204 = silindi, 404 = zaten yok — her ikisi de kabul
+            if (!in_array($deleteResponse->status(), [200, 204, 404])) {
+                Log::channel('daily')->warning('[MissionWay] Güncelleme öncesi silme başarısız', [
+                    'userId' => $user->id,
+                    'status' => $deleteResponse->status(),
+                ]);
+            }
+
+            // Yeniden oluştur (güncel verilerle)
+            $result = $this->syncUser($user);
+
+            if ($result['success']) {
+                Log::channel('daily')->info('[MissionWay] Kullanıcı güncellendi (delete+create)', [
+                    'userId' => $user->id,
+                ]);
+            }
+
+            return $result;
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[MissionWay] updateUser hatası', [
+                'userId' => $user->id,
+                'message' => $e->getMessage(),
+            ]);
+            return ['success' => false, 'response' => null, 'error' => $e->getMessage()];
+        }
     }
 
     /* ─── Interface: removeUser ─────────────────────────── */
