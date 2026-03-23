@@ -52,7 +52,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web', \App\Http\Middleware\
         \App\Http\Middleware\SecureHeaders::class,
     ])->group(function () {
 
-        Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+        Route::match(['get', 'post'], 'logout', [LoginController::class, 'logout'])->name('logout');
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::post('switch-locale', [DashboardController::class, 'switchLocale'])->name('switch-locale');
         Route::post('toggle-dark-mode', [DashboardController::class, 'toggleDarkMode'])->name('toggle-dark-mode');
@@ -262,7 +262,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->group(function () {
 
 // ── Authenticated: Portal Dashboard ──────────────────────────────────────
 Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Middleware\PortalRole::class])->group(function () {
-    Route::post('logout', [\App\Http\Controllers\PortalAuthController::class, 'logout'])->name('portal.logout');
+    Route::match(['get', 'post'], 'logout', [\App\Http\Controllers\PortalAuthController::class, 'logout'])->name('portal.logout');
     Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('portal.dashboard');
     Route::get('profile', [\App\Http\Controllers\DashboardController::class, 'profile'])->name('portal.profile');
     Route::put('profile', [\App\Http\Controllers\DashboardController::class, 'profileUpdate'])->name('portal.profile.update');
