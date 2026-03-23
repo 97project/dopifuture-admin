@@ -123,34 +123,29 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
     /* ─── Interface: updateUser ─────────────────────────── */
 
     /**
-     * MissionWay'de PUT/PATCH endpoint yok.
-     * Strateji: DELETE + POST (sil → yeniden oluştur).
-     * Kullanıcı yoksa sadece oluştur.
+     * MissionWay API'sinde güncelleme endpoint'i yok (PATCH/PUT mevcut değil).
+     * Kullanıcı varlığı doğrulanır, yoksa oluşturulur.
+     * Not: MissionWay kullanıcıları userId ile eşleştirir, ad/email değişikliği
+     * işlevselliği etkilemez.
      */
     public function updateUser(User $user): array
     {
         try {
-            // Önce mevcut kaydı sil
-            $deleteResponse = $this->apiDelete("/v1/player-compositions/by-user/{$user->id}");
+            // Kullanıcı uzak sistemde mevcut mu kontrol et
+            $existing = $this->getUser($user);
 
-            // 204 = silindi, 404 = zaten yok — her ikisi de kabul
-            if (!in_array($deleteResponse->status(), [200, 204, 404])) {
-                Log::channel('daily')->warning('[MissionWay] Güncelleme öncesi silme başarısız', [
-                    'userId' => $user->id,
-                    'status' => $deleteResponse->status(),
-                ]);
-            }
-
-            // Yeniden oluştur (güncel verilerle)
-            $result = $this->syncUser($user);
-
-            if ($result['success']) {
-                Log::channel('daily')->info('[MissionWay] Kullanıcı güncellendi (delete+create)', [
+            if ($existing) {
+                Log::channel('daily')->info('[MissionWay] Kullanıcı mevcut (güncelleme API yok)', [
                     'userId' => $user->id,
                 ]);
+                return ['success' => true, 'response' => $existing, 'error' => null];
             }
 
-            return $result;
+            // Kullanıcı yoksa oluştur
+            Log::channel('daily')->info('[MissionWay] Kullanıcı bulunamadı, oluşturuluyor', [
+                'userId' => $user->id,
+            ]);
+            return $this->syncUser($user);
         } catch (\Throwable $e) {
             Log::channel('daily')->error('[MissionWay] updateUser hatası', [
                 'userId' => $user->id,
