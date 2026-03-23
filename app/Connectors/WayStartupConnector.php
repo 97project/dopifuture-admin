@@ -123,8 +123,8 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
     /* ─── Interface: updateUser ─────────────────────────── */
 
     /**
-     * WayStartup PATCH endpoint API key auth'u desteklemiyor (401).
-     * Strateji: DELETE + POST (sil → yeniden oluştur).
+     * PATCH /v1/startup/members/{memberId}
+     * Üye bilgilerini gerçekten günceller.
      */
     public function updateUser(User $user): array
     {
@@ -132,27 +132,35 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
             $member = $this->getUser($user);
             $memberId = $member['id'] ?? null;
 
-            if ($memberId) {
-                // Önce sil
-                $delResp = $this->apiDelete("/v1/startup/members/{$memberId}");
-                if (!in_array($delResp->status(), [200, 204, 404, 401])) {
-                    Log::channel('daily')->warning('[WayStartup] Güncelleme öncesi silme başarısız', [
-                        'userId' => $user->id,
-                        'status' => $delResp->status(),
-                    ]);
-                }
-            }
-
-            // Yeniden oluştur (güncel verilerle)
-            $result = $this->syncUser($user);
-
-            if ($result['success']) {
-                Log::channel('daily')->info('[WayStartup] Üye güncellendi (delete+create)', [
+            if (!$memberId) {
+                Log::channel('daily')->info('[WayStartup] Üye bulunamadı, yeni oluşturuluyor', [
                     'userId' => $user->id,
                 ]);
+                return $this->syncUser($user);
             }
 
-            return $result;
+            $fullName = trim($user->full_name ?? '') ?: 'Öğrenci';
+
+            $response = $this->apiPatch("/v1/startup/members/{$memberId}", [
+                'name'  => $fullName,
+                'email' => $user->email,
+            ]);
+
+            if ($response->successful()) {
+                Log::channel('daily')->info('[WayStartup] Üye güncellendi', [
+                    'userId'   => $user->id,
+                    'memberId' => $memberId,
+                ]);
+                return ['success' => true, 'response' => $response->json(), 'error' => null];
+            }
+
+            Log::channel('daily')->error('[WayStartup] Güncelleme hatası', [
+                'userId'   => $user->id,
+                'memberId' => $memberId,
+                'status'   => $response->status(),
+                'body'     => $response->body(),
+            ]);
+            return ['success' => false, 'response' => $response->json(), 'error' => "HTTP {$response->status()}"];
         } catch (\Throwable $e) {
             Log::channel('daily')->error('[WayStartup] updateUser hatası', [
                 'userId' => $user->id,
