@@ -41,30 +41,37 @@
     </div>
 </div>
 
-{{-- ═══ THEME DISTRIBUTION ═══ --}}
+{{-- ═══ TOPIC DISTRIBUTION — Matching dark card grid from WAY AI Coach ═══ --}}
 @if($themeBreakdown->count())
 <div class="dp-card" style="margin-bottom:24px;">
-    <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;">
+    <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
         <span style="font-size:20px;">📋</span> Topic Distribution
+        <span style="font-size:12px;color:var(--color-txt-muted);margin-left:auto;">{{ $themeBreakdown->count() }} active topics</span>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
+        @php
+            $topicEmojis = [
+                'emotional' => '❤️', 'future' => '🚀', 'well_being' => '🌱', 'body_movement' => '🏃',
+                'critical_thinking' => '🧠', 'language' => '💬', 'community' => '🤝', 'nature' => '🌿',
+                'art' => '🎨', 'philosophy' => '📖', 'technology' => '💻', 'science' => '🔬', 'free_format' => '✏️',
+            ];
+        @endphp
         @foreach($themeBreakdown as $tb)
             @php
                 $cfg = $themeConfig[$tb['theme']] ?? ['label' => ucfirst(str_replace('_', ' ', $tb['theme'])), 'color' => '#94a3b8'];
-                $topicEmojis = [
-                    'emotional' => '❤️', 'future' => '🚀', 'well_being' => '🌱', 'body_movement' => '🏃',
-                    'critical_thinking' => '🧠', 'language' => '💬', 'community' => '🤝', 'nature' => '🌿',
-                    'art' => '🎨', 'philosophy' => '📖', 'technology' => '💻', 'science' => '🔬', 'free_format' => '✏️',
-                ];
                 $emoji = $topicEmojis[$tb['theme']] ?? '📚';
+                $isHigh = $tb['count'] >= 10;
             @endphp
-            <div style="background:var(--color-input-bg);border-radius:10px;padding:14px;border-left:3px solid {{ $cfg['color'] ?? '#94a3b8' }};transition:transform .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-                    <span style="font-size:18px;">{{ $emoji }}</span>
-                    <div style="font-weight:600;font-size:13px;">{{ $cfg['label'] ?? $tb['theme'] }}</div>
+            <div style="background:#1e293b;border-radius:16px;padding:18px;transition:all .25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+                <div style="font-size:36px;margin-bottom:10px;">{{ $emoji }}</div>
+                <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:12px;">{{ $cfg['label'] ?? $tb['theme'] }}</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div style="font-size:10px;font-weight:600;color:#62748E;text-transform:uppercase;letter-spacing:0.5px;">Sessions</div>
+                    <div style="display:inline-flex;align-items:center;gap:6px;border:2px solid {{ $isHigh ? '#60A5FA' : '#F87171' }};border-radius:10px;padding:4px 10px;">
+                        <span style="font-size:10px;">{{ $isHigh ? '🟢' : '🔴' }}</span>
+                        <span style="font-size:16px;font-weight:700;color:#fff;">{{ $tb['count'] }}</span>
+                    </div>
                 </div>
-                <div style="font-size:18px;font-weight:700;color:var(--color-primary);">{{ $tb['count'] }}</div>
-                <div style="font-size:10px;color:var(--text-muted);">session{{ $tb['count'] != 1 ? 's' : '' }}</div>
             </div>
         @endforeach
     </div>

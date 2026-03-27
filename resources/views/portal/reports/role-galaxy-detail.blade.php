@@ -3,6 +3,12 @@
 @section('page-title', 'Role Galaxy — ' . ($student->name ?? '') . ' ' . ($student->surname ?? ''))
 
 @section('content')
+@php
+    // Full 12-scenario config matching mobile RoleGalaxyScreen.js
+    $allScenarios = \App\Services\VegaReportService::getScenarioConfig();
+    $breakdownMap = $scenarioBreakdown->keyBy('scenario');
+@endphp
+
 {{-- ═══ PROFILE MINI-HEADER ═══ --}}
 <div class="dp-card" style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;">
     <div style="display:flex;align-items:center;gap:14px;">
@@ -44,52 +50,77 @@
         <div class="s-label">Total Duration</div>
     </div>
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#fa709a,#fee140);">
-        <div class="s-value">{{ $scenarioBreakdown->count() }}</div>
+        <div class="s-value">{{ $scenarioBreakdown->count() }}/{{ count($allScenarios) }}</div>
         <div class="s-label">Scenarios Explored</div>
     </div>
 </div>
 
-{{-- ═══ SCENARIO DISTRIBUTION — Matching mobile RoleGalaxyScreen 12 scenario cards ═══ --}}
-@if($scenarioBreakdown->count())
+{{-- ═══ SCENARIO GALAXY — ALL 12 scenarios, matching mobile RoleGalaxyScreen.js card grid ═══ --}}
 <div class="dp-card" style="margin-bottom:24px;">
-    <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:20px;">🎮</span> Scenario Distribution
+    <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
+        <span style="font-size:20px;">🎮</span> Scenario Galaxy
+        <span style="font-size:12px;color:var(--color-txt-muted);margin-left:auto;">{{ $scenarioBreakdown->count() }} of {{ count($allScenarios) }} explored</span>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">
-        @foreach($scenarioBreakdown as $sb)
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
+        @foreach($allScenarios as $scenarioKey => $cfg)
             @php
-                $cfg = $scenarioConfig[$sb['scenario']] ?? ['icon' => '🌟', 'label' => ucfirst(str_replace('_', ' ', $sb['scenario'])), 'color' => '#94a3b8'];
-                $completionRate = $sb['count'] > 0 ? round(($sb['completed'] / $sb['count']) * 100) : 0;
+                $sb = $breakdownMap[$scenarioKey] ?? null;
+                $hasPlayed = $sb && $sb['count'] > 0;
+                $count = $sb ? $sb['count'] : 0;
+                $completed = $sb ? ($sb['completed'] ?? 0) : 0;
+                $avgScore = $sb ? ($sb['avg_score'] ?? null) : null;
+                $completionRate = $count > 0 ? round(($completed / $count) * 100) : 0;
             @endphp
-            <div style="background:var(--color-input-bg);border-radius:12px;padding:16px;border-left:4px solid {{ $cfg['color'] }};transition:transform .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                    <span style="font-size:24px;">{{ $cfg['icon'] }}</span>
-                    <div style="font-weight:600;font-size:14px;">{{ $cfg['label'] ?? $sb['scenario'] }}</div>
+            <div style="background:#1e293b;border-radius:16px;padding:18px;position:relative;overflow:hidden;transition:all .25s ease;{{ !$hasPlayed ? 'opacity:0.45;' : '' }}" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+                {{-- Played/Not-yet status indicator (matching mobile circleCheck vs notYetIcon) --}}
+                <div style="position:absolute;top:10px;right:10px;">
+                    @if($hasPlayed)
+                        <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#43e97b,#38f9d7);display:flex;align-items:center;justify-content:center;font-size:12px;">✓</div>
+                    @else
+                        <div style="width:24px;height:24px;border-radius:50%;background:rgba(148,163,184,0.2);display:flex;align-items:center;justify-content:center;font-size:12px;color:#475569;">✗</div>
+                    @endif
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:11px;color:var(--text-muted);">
-                    <div>
-                        <div style="font-size:18px;font-weight:700;color:var(--color-txt);">{{ $sb['count'] }}</div>
-                        <div>Sessions</div>
-                    </div>
-                    <div>
-                        <div style="font-size:18px;font-weight:700;color:var(--active-green);">{{ $sb['completed'] }}</div>
-                        <div>Completed</div>
-                    </div>
-                    <div>
-                        <div style="font-size:18px;font-weight:700;color:var(--primary);">{{ $sb['avg_score'] ? round($sb['avg_score']) : '-' }}</div>
-                        <div>Avg Score</div>
-                    </div>
+
+                {{-- Scenario icon --}}
+                <div style="font-size:40px;margin-bottom:10px;">{{ $cfg['icon'] }}</div>
+
+                {{-- Scenario title --}}
+                <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:4px;">{{ $cfg['label'] }}</div>
+
+                {{-- Category badge --}}
+                <div style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;background:{{ $cfg['color'] }}20;color:{{ $cfg['color'] }};margin-bottom:12px;">
+                    {{ ucfirst(str_replace(['2', '_'], ['', ' '], $cfg['category'])) }}
                 </div>
-                <div class="dp-progress" style="margin-top:8px;height:4px;">
-                    <div class="dp-progress-fill" style="width:{{ $completionRate }}%;"></div>
-                </div>
+
+                @if($hasPlayed)
+                    {{-- Stats row --}}
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+                        <div>
+                            <div style="font-size:18px;font-weight:800;color:#fff;">{{ $count }}</div>
+                            <div style="font-size:9px;color:#62748E;text-transform:uppercase;">Sessions</div>
+                        </div>
+                        <div>
+                            <div style="font-size:18px;font-weight:800;color:#43e97b;">{{ $completed }}</div>
+                            <div style="font-size:9px;color:#62748E;text-transform:uppercase;">Done</div>
+                        </div>
+                        <div>
+                            <div style="font-size:18px;font-weight:800;color:{{ $cfg['color'] }};">{{ $avgScore ? round($avgScore) : '-' }}</div>
+                            <div style="font-size:9px;color:#62748E;text-transform:uppercase;">Score</div>
+                        </div>
+                    </div>
+                    {{-- Progress bar --}}
+                    <div style="margin-top:10px;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;">
+                        <div style="height:100%;width:{{ $completionRate }}%;background:linear-gradient(90deg,{{ $cfg['color'] }},{{ $cfg['color'] }}cc);border-radius:2px;transition:width .3s;"></div>
+                    </div>
+                @else
+                    <div style="text-align:center;padding:8px 0;font-size:11px;color:#475569;font-weight:500;">Not yet explored</div>
+                @endif
             </div>
         @endforeach
     </div>
 </div>
-@endif
 
-{{-- ═══ SESSION HISTORY — Matching vega-dopi admin sessions table ═══ --}}
+{{-- ═══ SESSION HISTORY ═══ --}}
 @if($sessions->count())
 <div class="dp-card">
     <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;">

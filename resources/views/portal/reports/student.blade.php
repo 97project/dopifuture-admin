@@ -112,9 +112,19 @@
     @foreach($apps as $a)
         @php $hasData = isset($reportData[$a->slug]); @endphp
         @if($hasData)
+            @php
+                $cr = $reportData[$a->slug]['stats']['completion_rate'];
+                $sess = $reportData[$a->slug]['stats']['total_sessions'] ?? 0;
+            @endphp
             <a class="dp-tab {{ $selectedApp === $a->slug ? 'active' : '' }}" href="{{ route('portal.reports.student', $student->id) }}?app={{ $a->slug }}" style="cursor:pointer;">
                 {{ $a->name }}
-                <span class="tab-count">{{ $reportData[$a->slug]['stats']['completion_rate'] }}%</span>
+                @if($cr > 0)
+                    <span class="tab-count">{{ $cr }}%</span>
+                @elseif($sess > 0)
+                    <span class="tab-count" style="background:rgba(59,130,246,0.1);color:#3b82f6;">{{ $sess }} sessions</span>
+                @else
+                    <span class="tab-count" style="background:rgba(148,163,184,0.1);color:#94a3b8;">No activity</span>
+                @endif
             </a>
         @endif
     @endforeach

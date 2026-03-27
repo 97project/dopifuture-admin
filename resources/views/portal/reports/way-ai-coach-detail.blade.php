@@ -3,6 +3,40 @@
 @section('page-title', 'WAY AI Coach — ' . ($student->name ?? '') . ' ' . ($student->surname ?? ''))
 
 @section('content')
+@php
+    // Theme emojis matching mobile WayAICoachScreen.js icon assets
+    $themeEmojis = [
+        'emotional'         => '❤️',
+        'future'            => '🚀',
+        'well_being'        => '🌱',
+        'body_movement'     => '🏃',
+        'critical_thinking' => '🧠',
+        'language'          => '💬',
+        'community'         => '🤝',
+        'nature'            => '🌿',
+        'art'               => '🎨',
+        'philosophy'        => '📖',
+        'technology'        => '💻',
+        'science'           => '🔬',
+        'free_format'       => '✏️',
+    ];
+    // Wings category emojis (bird-based from mobile WingsPointScreen.js)
+    $wingsEmojis = [
+        'Nature'            => '🐦',
+        'Technology'        => '🦅',
+        'Emotional'         => '🦜',
+        'Future'            => '🕊️',
+        'Well-Being'        => '🦢',
+        'Body Movement'     => '🦩',
+        'Critical Thinking' => '🦉',
+        'Art'               => '🐧',
+        'Language'          => '🦆',
+        'Philosophy'        => '🦚',
+        'Community'         => '🐔',
+        'Science'           => '🦋',
+    ];
+@endphp
+
 {{-- ═══ PROFILE MINI-HEADER ═══ --}}
 <div class="dp-card" style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;">
     <div style="display:flex;align-items:center;gap:14px;">
@@ -25,7 +59,7 @@
     <span class="dp-badge dp-badge-active" style="margin-left:auto;">{{ $stats['total_sessions'] }} Sessions</span>
 </div>
 
-{{-- ═══ STAT CARDS — Matching vega-dopi VEGA AI Stats + Module Distribution ═══ --}}
+{{-- ═══ STAT CARDS ═══ --}}
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px;">
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#667eea,#764ba2);">
         <div class="s-value">{{ $stats['total_sessions'] }}</div>
@@ -53,65 +87,87 @@
     </div>
 </div>
 
-{{-- ═══ WINGS POINTS — Matching mobile "My Wings" screen with 12 bird categories ═══ --}}
+{{-- ═══ MY WINGS — Matching mobile WingsPointScreen.js 12-bird card grid ═══ --}}
 @if(($wingsPoints['total_wings'] ?? 0) > 0)
 <div class="dp-card" style="margin-bottom:24px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div style="display:flex;align-items:center;gap:10px;">
-            <span style="font-size:24px;">🦅</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:22px;">🦅</div>
             <div>
-                <div style="font-size:16px;font-weight:700;">My Wings</div>
+                <div style="font-size:18px;font-weight:700;">My Wings</div>
                 <div style="font-size:12px;color:var(--color-txt-muted);">Achievement points from WAY AI Coach</div>
             </div>
         </div>
-        <div style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:8px 18px;border-radius:20px;font-weight:700;font-size:18px;">
-            {{ $wingsPoints['total_wings'] }} pts
+        <div style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:10px 22px;border-radius:24px;font-weight:700;font-size:20px;box-shadow:0 4px 15px rgba(102,126,234,0.4);">
+            🏆 {{ $wingsPoints['total_wings'] }} pts
         </div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;">
         @foreach($wingsPoints['categories'] as $wing)
-        <div style="background:var(--color-input-bg);border-radius:10px;padding:12px;text-align:center;transition:transform .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
-            <div style="font-size:24px;margin-bottom:4px;">{{ $wing['emoji'] }}</div>
-            <div style="font-size:12px;font-weight:600;margin-bottom:2px;">{{ $wing['label'] }}</div>
-            <div style="font-size:18px;font-weight:700;color:var(--color-primary);">{{ $wing['total_score'] }}</div>
-            <div style="font-size:10px;color:var(--color-txt-muted);">{{ $wing['sessions'] }} session{{ $wing['sessions'] !== 1 ? 's' : '' }}</div>
+        @php
+            $wEmoji = $wingsEmojis[$wing['label']] ?? '🐦';
+            $wColor = $themeConfig[strtolower(str_replace(['-', ' '], '_', $wing['label']))] ?? null;
+            $borderCol = $wColor['color'] ?? '#667eea';
+            $isHigh = $wing['total_score'] >= 50;
+        @endphp
+        <div style="background:var(--color-card-bg);border-radius:14px;padding:16px;text-align:center;border:2px solid {{ $borderCol }}30;transition:all .25s ease;position:relative;overflow:hidden;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 20px {{ $borderCol }}20'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+            <div style="font-size:36px;margin-bottom:8px;">{{ $wEmoji }}</div>
+            <div style="font-size:13px;font-weight:600;color:var(--color-txt);margin-bottom:6px;">{{ $wing['label'] }}</div>
+            <div style="font-size:26px;font-weight:800;color:{{ $borderCol }};margin-bottom:4px;">{{ $wing['total_score'] }}</div>
+            <div style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;{{ $isHigh ? 'background:rgba(96,165,250,0.15);color:#60A5FA;' : 'background:rgba(248,113,113,0.15);color:#F87171;' }}">
+                {{ $isHigh ? '▲ High' : '▼ Low' }}
+            </div>
+            <div style="font-size:10px;color:var(--color-txt-muted);margin-top:4px;">{{ $wing['sessions'] }} session{{ $wing['sessions'] !== 1 ? 's' : '' }}</div>
         </div>
         @endforeach
     </div>
 </div>
 @endif
 
-{{-- ═══ THEME DISTRIBUTION — Matching mobile WayAICoachScreen 13 theme cards ═══ --}}
-@if($themeBreakdown->count())
+{{-- ═══ THEME DISTRIBUTION — Matching mobile WayAICoachScreen.js 13-theme dark card grid ═══ --}}
 <div class="dp-card" style="margin-bottom:24px;">
-    <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;">
+    <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
         <span style="font-size:20px;">🎯</span> Theme Distribution
+        <span style="font-size:12px;color:var(--color-txt-muted);margin-left:auto;">{{ $themeBreakdown->count() }} active themes</span>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
-        @foreach($themeBreakdown as $tb)
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
+        @php
+            // Show ALL 13 themes, not just ones with data
+            $breakdownMap = $themeBreakdown->keyBy('theme');
+        @endphp
+        @foreach($themeConfig as $themeKey => $cfg)
             @php
-                $cfg = $themeConfig[$tb['theme']] ?? ['label' => ucfirst(str_replace('_', ' ', $tb['theme'])), 'color' => '#94a3b8'];
-                $themeEmojis = [
-                    'emotional' => '❤️', 'future' => '🚀', 'well_being' => '🌱', 'body_movement' => '🏃',
-                    'critical_thinking' => '🧠', 'language' => '💬', 'community' => '🤝', 'nature' => '🌿',
-                    'art' => '🎨', 'philosophy' => '📖', 'technology' => '💻', 'science' => '🔬', 'free_format' => '✏️',
-                ];
-                $emoji = $themeEmojis[$tb['theme']] ?? '🌟';
+                $td = $breakdownMap[$themeKey] ?? null;
+                $count = $td ? $td['count'] : 0;
+                $emoji = $themeEmojis[$themeKey] ?? '🌟';
+                $isHigh = $count >= 10;
+                $isActive = $count > 0;
+                $modules = $td ? ($td['modules'] ?? []) : [];
             @endphp
-            <div style="background:var(--color-input-bg);border-radius:10px;padding:14px;border-left:4px solid {{ $cfg['color'] ?? '#94a3b8' }};transition:transform .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                    <span style="font-size:20px;">{{ $emoji }}</span>
-                    <div style="font-weight:600;font-size:13px;">{{ $cfg['label'] ?? $tb['theme'] }}</div>
+            <div style="background:#1e293b;border-radius:16px;padding:18px;position:relative;overflow:hidden;transition:all .25s ease;{{ !$isActive ? 'opacity:0.5;' : '' }}" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+                {{-- Theme icon --}}
+                <div style="font-size:36px;margin-bottom:10px;">{{ $emoji }}</div>
+                {{-- Theme title --}}
+                <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:12px;min-height:20px;">{{ $cfg['label'] }}</div>
+                {{-- Bottom: Total Interaction + count --}}
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div style="font-size:10px;font-weight:600;color:#62748E;text-transform:uppercase;letter-spacing:0.5px;">Total Interaction</div>
+                    <div style="display:inline-flex;align-items:center;gap:6px;border:2px solid {{ $isHigh ? '#60A5FA' : '#F87171' }};border-radius:10px;padding:4px 10px;">
+                        <span style="font-size:10px;">{{ $isHigh ? '🟢' : '🔴' }}</span>
+                        <span style="font-size:16px;font-weight:700;color:#fff;">{{ $count }}</span>
+                    </div>
                 </div>
-                <div style="display:flex;gap:12px;font-size:11px;color:var(--text-muted);">
-                    <span style="font-weight:600;color:var(--color-txt);">{{ $tb['count'] }} sessions</span>
-                    <span>{{ implode(', ', array_map('ucfirst', $tb['modules'])) }}</span>
+                @if(!empty($modules))
+                <div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap;">
+                    @foreach($modules as $mod)
+                        <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:{{ $mod === 'lecturer' ? 'rgba(59,130,246,0.2)' : 'rgba(245,158,11,0.2)' }};color:{{ $mod === 'lecturer' ? '#60A5FA' : '#FBBF24' }};">{{ ucfirst($mod) }}</span>
+                    @endforeach
                 </div>
+                @endif
             </div>
         @endforeach
     </div>
 </div>
-@endif
 
 {{-- ═══ MODULE DISTRIBUTION — Matching vega-dopi admin module distribution ═══ --}}
 <div class="dp-card" style="margin-bottom:24px;">
@@ -119,20 +175,20 @@
         <span style="font-size:20px;">📊</span> Module Distribution
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-        <div style="text-align:center;padding:20px;background:var(--color-input-bg);border-radius:12px;">
-            <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 10px;">📘</div>
-            <div style="font-size:28px;font-weight:700;color:var(--color-txt);">{{ $stats['lecturer'] }}</div>
-            <div style="font-size:13px;color:var(--text-muted);font-weight:500;">Lecturer Sessions</div>
+        <div style="text-align:center;padding:24px;background:#1e293b;border-radius:14px;transition:transform .2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='none'">
+            <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px;">📘</div>
+            <div style="font-size:32px;font-weight:800;color:#fff;">{{ $stats['lecturer'] }}</div>
+            <div style="font-size:13px;color:#94a3b8;font-weight:500;margin-top:4px;">Lecturer Sessions</div>
         </div>
-        <div style="text-align:center;padding:20px;background:var(--color-input-bg);border-radius:12px;">
-            <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 10px;">💬</div>
-            <div style="font-size:28px;font-weight:700;color:var(--color-txt);">{{ $stats['chatbot'] }}</div>
-            <div style="font-size:13px;color:var(--text-muted);font-weight:500;">Chatbot Sessions</div>
+        <div style="text-align:center;padding:24px;background:#1e293b;border-radius:14px;transition:transform .2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='none'">
+            <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px;">💬</div>
+            <div style="font-size:32px;font-weight:800;color:#fff;">{{ $stats['chatbot'] }}</div>
+            <div style="font-size:13px;color:#94a3b8;font-weight:500;margin-top:4px;">Chatbot Sessions</div>
         </div>
     </div>
 </div>
 
-{{-- ═══ SESSION HISTORY — Matching vega-dopi admin sessions table with type + theme badges ═══ --}}
+{{-- ═══ SESSION HISTORY ═══ --}}
 @if($sessions->count())
 <div class="dp-card">
     <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;">
@@ -163,7 +219,9 @@
                 </td>
                 <td>
                     @if($themeCfg)
-                        <span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;background:{{ $themeCfg['color'] }}15;color:{{ $themeCfg['color'] }};">{{ $themeCfg['label'] }}</span>
+                        <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:500;background:{{ $themeCfg['color'] }}15;color:{{ $themeCfg['color'] }};">
+                            {{ $themeEmojis[$s->theme] ?? '🌟' }} {{ $themeCfg['label'] }}
+                        </span>
                     @else
                         <span class="muted">{{ ucfirst(str_replace('_', ' ', $s->theme ?? '-')) }}</span>
                     @endif
