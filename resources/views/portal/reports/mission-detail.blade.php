@@ -1,4 +1,4 @@
-﻿@extends('portal.app')
+@extends('portal.app')
 @section('title', ($isTr ?? false) ? 'Görev Detay' : 'Mission Detail')
 @section('page-title', 'Mission Detail')
 @section('content')
@@ -17,8 +17,7 @@
                     @foreach($students as $s)
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
                         <div style="display:flex;align-items:center;gap:10px;">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode($s->name . ' ' . $s->surname) }}&size=56&background=random&rounded=true&bold=true&font-size=0.4"
-                                 alt="{{ $s->name }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+                            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;">{{ strtoupper(substr($s->name ?? '', 0, 1) . substr($s->surname ?? '', 0, 1)) }}</div>
                             <span style="font-size:13px;font-weight:500;color:#111;">{{ $s->name }} {{ $s->surname }}</span>
                         </div>
                         <span style="font-size:12px;font-weight:600;color:#6366F1;">{{ $s->role ?? 'Diplomat' }}</span>

@@ -896,27 +896,27 @@
             </a>
 
 
-            <a href="{{ route('portal.reports.app', 'mission-way') }}" class="dp-nav-item {{ $cr === 'portal.reports.app' && request()->route('app')?->slug === 'mission-way' ? 'active' : '' }}">
+            <a href="{{ route('portal.reports.app', 'mission-way') }}" class="dp-nav-item {{ ($cr === 'portal.reports.app' && request()->route('app')?->slug === 'mission-way') || ($activeApp ?? '') === 'mission-way' ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                 Mission WAY
             </a>
 
-            <a href="{{ route('portal.reports.app', 'way-startup') }}" class="dp-nav-item {{ $cr === 'portal.reports.app' && request()->route('app')?->slug === 'way-startup' ? 'active' : '' }}">
+            <a href="{{ route('portal.reports.app', 'way-startup') }}" class="dp-nav-item {{ ($cr === 'portal.reports.app' && request()->route('app')?->slug === 'way-startup') || ($activeApp ?? '') === 'way-startup' ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 Startup
             </a>
 
-            <a href="{{ route('portal.reports.app', 'role-galaxy') }}" class="dp-nav-item {{ $cr === 'portal.reports.app' && request()->route('app')?->slug === 'role-galaxy' ? 'active' : '' }}">
+            <a href="{{ route('portal.reports.app', 'role-galaxy') }}" class="dp-nav-item {{ ($cr === 'portal.reports.app' && request()->route('app')?->slug === 'role-galaxy') || ($activeApp ?? '') === 'role-galaxy' ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
                 Role Galaxy
             </a>
 
-            <a href="{{ route('portal.reports.app', 'study-space') }}" class="dp-nav-item {{ $cr === 'portal.reports.app' && request()->route('app')?->slug === 'study-space' ? 'active' : '' }}">
+            <a href="{{ route('portal.reports.app', 'study-space') }}" class="dp-nav-item {{ ($cr === 'portal.reports.app' && request()->route('app')?->slug === 'study-space') || ($activeApp ?? '') === 'study-space' ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                 Study Space
             </a>
 
-            <a href="{{ route('portal.reports.app', 'way-ai-coach') }}" class="dp-nav-item {{ $cr === 'portal.reports.app' && request()->route('app')?->slug === 'way-ai-coach' ? 'active' : '' }}">
+            <a href="{{ route('portal.reports.app', 'way-ai-coach') }}" class="dp-nav-item {{ ($cr === 'portal.reports.app' && request()->route('app')?->slug === 'way-ai-coach') || ($activeApp ?? '') === 'way-ai-coach' ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                 WAY AI Coach
             </a>
@@ -979,9 +979,10 @@
                 <span class="dp-topbar-title">@yield('page-title', 'Dashboard')</span>
             </div>
 
-            <div class="dp-topbar-search">
+            <div class="dp-topbar-search" style="position:relative;">
                 <svg width="16" height="16" fill="none" stroke="var(--color-txt-muted)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="text" placeholder="Search...">
+                <input type="text" id="dp-student-search" placeholder="Search students..." autocomplete="off">
+                <div id="dp-search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--color-card-bg);border:1px solid var(--color-row-border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);max-height:280px;overflow-y:auto;z-index:999;margin-top:4px;"></div>
             </div>
 
             <div class="dp-topbar-right">
@@ -1033,6 +1034,37 @@
             var un = document.querySelector('.dp-username');
             if(un) un.style.display = 'inline';
         }
+
+        // ── Student Search (Live) ──
+        (function(){
+            var inp = document.getElementById('dp-student-search');
+            var res = document.getElementById('dp-search-results');
+            if(!inp || !res) return;
+            var timer = null;
+            inp.addEventListener('input', function(){
+                clearTimeout(timer);
+                var q = inp.value.trim();
+                if(q.length < 2){ res.style.display='none'; return; }
+                timer = setTimeout(function(){
+                    fetch('{{ route("portal.api.students.search") }}?q=' + encodeURIComponent(q), {
+                        headers: {'X-Requested-With':'XMLHttpRequest'}
+                    })
+                    .then(function(r){ return r.json(); })
+                    .then(function(data){
+                        if(!data.length){ res.innerHTML='<div style="padding:16px;text-align:center;color:var(--color-txt-muted);font-size:13px;">No students found</div>'; res.style.display='block'; return; }
+                        res.innerHTML = data.map(function(s){
+                            return '<a href="'+s.url+'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;color:inherit;border-bottom:1px solid var(--color-row-border);transition:background .15s;" onmouseover="this.style.background=\'var(--color-hover)\';" onmouseout="this.style.background=\'transparent\';">'
+                                +'<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;">'+s.initials+'</div>'
+                                +'<div><div style="font-weight:500;font-size:13px;">'+s.name+'</div><div style="font-size:11px;color:var(--color-txt-muted);">'+s.email+'</div></div>'
+                                +'</a>';
+                        }).join('');
+                        res.style.display='block';
+                    });
+                }, 300);
+            });
+            inp.addEventListener('keydown', function(e){ if(e.key==='Escape'){ res.style.display='none'; inp.value=''; }});
+            document.addEventListener('click', function(e){ if(!inp.contains(e.target)&&!res.contains(e.target)) res.style.display='none'; });
+        })();
     </script>
 
     @yield('scripts')

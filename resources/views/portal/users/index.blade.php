@@ -88,8 +88,7 @@
                     <td class="muted">{{ str_pad(($users->currentPage()-1)*$users->perPage()+$i+1, 2, '0', STR_PAD_LEFT) }}</td>
                     <td>
                         <div class="dp-td-avatar">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode($u->name . ' ' . ($u->surname ?? '')) }}&size=56&background=random&rounded=true&bold=true&font-size=0.4"
-                                 alt="{{ $u->name }}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+                            <div class="av" style="width:28px;height:28px;font-size:10px;">{{ strtoupper(substr($u->name ?? '', 0, 1) . substr($u->surname ?? '', 0, 1)) }}</div>
                             <a href="{{ route('portal.users.show', $u) }}" style="font-weight:500;color:#030719;text-decoration:none;">{{ $u->name }} {{ $u->surname }}</a>
                         </div>
                     </td>
@@ -97,6 +96,10 @@
                     <td>{{ $u->grade ?? $u->branch ?? '—' }}</td>
                     <td>
                         <div style="display:flex;gap:16px;align-items:center;white-space:nowrap;">
+                            <a href="{{ route('portal.reports.student', $u) }}" style="background:none;border:none;cursor:pointer;color:#667eea;padding:0;display:inline-flex;align-items:center;gap:4px;font-size:13px;text-decoration:none;font-weight:500;">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                Report
+                            </a>
                             <a href="{{ route('portal.users.edit', $u) }}" style="background:none;border:none;cursor:pointer;color:#A0A0A0;padding:0;display:inline-flex;align-items:center;gap:4px;font-size:13px;text-decoration:none;">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 Edit
@@ -310,7 +313,15 @@
             document.getElementById(prefix + 'UserEmail').textContent = u.email;
             document.getElementById(prefix + 'UserRole').textContent = u.role;
             document.getElementById(prefix + 'UserSchool').textContent = u.school;
-            document.getElementById(prefix + 'UserAvatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fullName) + '&size=72&background=random&rounded=true&bold=true&font-size=0.4';
+            // Generate initials avatar via canvas
+            var canvas = document.createElement('canvas'); canvas.width = 72; canvas.height = 72;
+            var ctx = canvas.getContext('2d');
+            var grad = ctx.createLinearGradient(0, 0, 72, 72); grad.addColorStop(0, '#4364F7'); grad.addColorStop(1, '#1a237e');
+            ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(36, 36, 36, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 24px Nunito,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            var initials = fullName.split(' ').map(function(w){ return w.charAt(0); }).join('').substring(0,2).toUpperCase();
+            ctx.fillText(initials, 36, 36);
+            document.getElementById(prefix + 'UserAvatar').src = canvas.toDataURL();
             document.getElementById(loadId).style.display = 'none';
             document.getElementById(infoId).style.display = 'block';
         })

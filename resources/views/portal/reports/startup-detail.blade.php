@@ -1,4 +1,4 @@
-﻿@extends('portal.app')
+@extends('portal.app')
 @section('title', ($isTr ?? false) ? 'Proje Detay' : 'Project Detail')
 @section('page-title', 'Startup — Detail')
 @section('content')
@@ -84,9 +84,7 @@
                             <div style="font-weight:700;font-size:14px;color:#030719;font-family:'Nunito',sans-serif;line-height:18px;">{{ $step->title }}</div>
                         </div>
                         <div style="display:flex;align-items:center;gap:6px;">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode($step->responsible) }}&size=40&background=random&rounded=true&bold=true&font-size=0.4"
-                                 alt="{{ $step->responsible }}"
-                                 style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+                            <div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;flex-shrink:0;">{{ strtoupper(substr($step->responsible ?? '', 0, 2)) }}</div>
                             <span style="font-size:12px;font-weight:400;color:#030719;font-family:'Nunito',sans-serif;line-height:18px;">{{ $step->responsible }}</span>
                         </div>
                     </div>
@@ -185,9 +183,9 @@
                                 <div style="font-size:11px;color:var(--color-txt-muted);">{{ $file['size'] }}</div>
                             </div>
                         </div>
-                        <a href="#" style="color:var(--color-txt-muted);">
+                        <span style="color:var(--color-txt-muted);cursor:pointer;" title="Download">
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                        </a>
+                        </span>
                     </div>
                 </div>
                 @endforeach

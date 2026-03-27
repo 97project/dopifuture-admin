@@ -1,6 +1,6 @@
-﻿@extends('portal.app')
+@extends('portal.app')
 @section('title', $class->name . ' — ' . __('admin.reports'))
-@section('page-title', $class->name . ' — Rapor')
+@section('page-title', $class->name . ' — Report')
 
 @section('content')
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">

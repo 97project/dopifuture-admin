@@ -26,6 +26,7 @@
         </a>
     </div>
 
+    @if(!in_array($slug, ['role-galaxy', 'study-space', 'way-ai-coach']))
     <button type="button" class="dp-btn" onclick="document.getElementById('addAssignmentModal')?.classList.add('show')">
         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-width="2" d="M12 8v8m-4-4h8"/></svg>
         @if($slug === 'mission-way')
@@ -36,6 +37,7 @@
             Add New
         @endif
     </button>
+    @endif
 </div>
 
 @if($tab === 'assignment')
@@ -164,17 +166,9 @@
                             </td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:12px;white-space:nowrap;">
-                                    {{-- Edit --}}
-                                    <a href="#" class="dp-action" title="Edit" style="color:var(--color-txt-muted);">
-                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    </a>
-                                    {{-- Delete --}}
-                                    <a href="#" class="dp-action" title="Delete" style="color:var(--color-txt-muted);">
-                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    </a>
                                     {{-- Details --}}
-                                    <a href="{{ route('portal.reports.mission.detail', $mission->id) }}" style="color:var(--color-primary);font-size:13px;font-weight:500;text-decoration:none;">
-                                        Details
+                                    <a href="{{ route('portal.reports.mission.detail', $mission->id) }}" class="dp-action dp-action-view" title="View Details">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     </a>
                                 </div>
                             </td>
@@ -185,11 +179,10 @@
                     </tbody>
                 </table>
             </div>
-            {{-- Pagination — Figma: Page1 of 3 --}}
+            {{-- Pagination --}}
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);cursor:default;">Previous</span>
-                <span style="color:var(--color-txt-muted);">Page1 of 3</span>
-                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">Next</a>
+                <span style="color:var(--color-txt-muted);">Showing {{ ($missions ?? collect())->count() }} missions</span>
+                <span style="color:var(--color-txt-muted);">{{ ($missions ?? collect())->count() }} total</span>
             </div>
         </div>
 
@@ -276,7 +269,7 @@
                             </td>
                             <td>
                                 @if($startup->teacher_point === 'Score')
-                                    <a href="#" style="display:inline-block;padding:4px 12px;background:var(--color-primary);color:#fff;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">Score</a>
+                                    <span style="display:inline-block;padding:4px 12px;background:var(--color-primary);color:#fff;border-radius:6px;font-size:12px;font-weight:500;">Score</span>
                                 @elseif($startup->teacher_point)
                                     <span style="font-weight:500;">{{ $startup->teacher_point }}</span>
                                 @else
@@ -285,14 +278,8 @@
                             </td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;white-space:nowrap;">
-                                    <a href="{{ route('portal.reports.startup.detail', $startup->id) }}" class="dp-action" title="Edit" style="color:var(--color-txt-muted);">
-                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    </a>
-                                    <a href="#" class="dp-action" title="Settings" style="color:var(--color-txt-muted);">
-                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
-                                    </a>
-                                    <a href="#" class="dp-action" title="Delete" style="color:var(--color-txt-muted);">
-                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    <a href="{{ route('portal.reports.startup.detail', $startup->id) }}" class="dp-action dp-action-view" title="View Report">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     </a>
                                 </div>
                             </td>
@@ -303,11 +290,10 @@
                     </tbody>
                 </table>
             </div>
-            {{-- Pagination — Figma: Page1 of 12 --}}
+            {{-- Pagination --}}
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);cursor:default;">Previous</span>
-                <span style="color:var(--color-txt-muted);">Page1 of 12</span>
-                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">Next</a>
+                <span style="color:var(--color-txt-muted);">Showing {{ ($missions ?? collect())->count() }} missions</span>
+                <span style="color:var(--color-txt-muted);">{{ ($missions ?? collect())->count() }} total</span>
             </div>
         </div>
 
@@ -322,6 +308,7 @@
                             <th>Students</th>
                             <th>Total Discussion Minute</th>
                             <th>Total Discussion Count</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -330,23 +317,30 @@
                             <td class="muted">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <img src="https://i.pravatar.cc/32?u={{ $stat['user']->id ?? ($idx + 100) }}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+                                    <div class="av" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;">{{ strtoupper(substr($stat['user']->name ?? '', 0, 1) . substr($stat['user']->surname ?? '', 0, 1)) }}</div>
                                     <span style="font-weight:500;">{{ $stat['user']->name }} {{ $stat['user']->surname }}</span>
                                 </div>
                             </td>
-                            <td style="text-align:center;">{{ $stat['discussion_minutes'] ?? rand(0, 32) }}</td>
-                            <td style="text-align:center;">{{ $stat['discussion_count'] ?? rand(0, 7) }}</td>
+                            <td style="text-align:center;">{{ $stat['discussion_minutes'] }}</td>
+                            <td style="text-align:center;">{{ $stat['discussion_count'] }}</td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <a href="{{ route('portal.reports.student.study-space', $stat['user']->id) }}" class="dp-action dp-action-view" title="Study Space Detail">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    </a>
+                                    <a href="{{ route('portal.reports.student.study-space', $stat['user']->id) }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">Details →</a>
+                                </div>
+                            </td>
                         </tr>
                         @empty
-                        <tr><td colspan="4" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No data yet</td></tr>
+                        <tr><td colspan="5" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No data yet</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);cursor:default;">Previous</span>
-                <span style="color:var(--color-txt-muted);">Page 1 of 3</span>
-                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">Next</a>
+                <span style="color:var(--color-txt-muted);">Showing {{ ($user_stats ?? collect())->count() }} students</span>
+                <span style="color:var(--color-txt-muted);">{{ ($user_stats ?? collect())->count() }} total</span>
             </div>
         </div>
 
@@ -360,35 +354,38 @@
                             <th style="width:40px;">No</th>
                             <th>Students</th>
                             <th>AI Coach Interaction Number</th>
-                            <th>Total Duration (Seconds)</th>
+                            <th>Total Duration</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse(($user_stats ?? collect()) as $idx => $stat)
                         @php
-                            $interactionNum = rand(0, 17);
-                            $totalDuration = $interactionNum > 3 ? 83 : rand(0, 7);
-                            $isAlert = $stat['alert'] ?? ($totalDuration < 10);
+                            $isAlert = $stat['alert'] ?? false;
                         @endphp
                         <tr style="{{ $isAlert ? 'background:rgba(239,68,68,0.04);' : '' }}">
                             <td class="muted">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <img src="https://i.pravatar.cc/32?u={{ $stat['user']->id ?? ($idx + 200) }}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+                                    <div class="av" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;">{{ strtoupper(substr($stat['user']->name ?? '', 0, 1) . substr($stat['user']->surname ?? '', 0, 1)) }}</div>
                                     <span style="font-weight:500;">{{ $stat['user']->name }} {{ $stat['user']->surname }}</span>
                                 </div>
                             </td>
-                            <td style="text-align:center;">{{ $interactionNum }}</td>
+                            <td style="text-align:center;">{{ $stat['interaction_count'] }}</td>
                             <td style="text-align:center;">
                                 @if($isAlert)
-                                    <span style="color:#ef4444;font-weight:600;">{{ $totalDuration }} <span title="Alert">🔴</span></span>
+                                    <span style="color:#ef4444;font-weight:600;">{{ \App\Services\ReportService::formatDuration($stat['total_duration'] ?? 0) }} <span title="Alert">🔴</span></span>
                                 @else
-                                    {{ $totalDuration }}
+                                    {{ \App\Services\ReportService::formatDuration($stat['total_duration'] ?? 0) }}
                                 @endif
                             </td>
                             <td>
-                                <a href="{{ route('portal.reports.coach.questions', $stat['user']->id) }}" style="color:var(--color-primary);font-size:13px;font-weight:500;text-decoration:none;">Details</a>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <a href="{{ route('portal.reports.student.way-ai-coach', $stat['user']->id) }}" class="dp-action dp-action-view" title="WAY AI Coach Detail">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    </a>
+                                    <a href="{{ route('portal.reports.student.way-ai-coach', $stat['user']->id) }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">Details →</a>
+                                </div>
                             </td>
                         </tr>
                         @empty
@@ -398,9 +395,8 @@
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);cursor:default;">Previous</span>
-                <span style="color:var(--color-txt-muted);">Page 1 of 3</span>
-                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">Next</a>
+                <span style="color:var(--color-txt-muted);">Showing {{ ($user_stats ?? collect())->count() }} students</span>
+                <span style="color:var(--color-txt-muted);">{{ ($user_stats ?? collect())->count() }} total</span>
             </div>
         </div>
 
@@ -409,12 +405,12 @@
         {{-- Stat cards --}}
         <div style="display:flex;gap:16px;margin-bottom:20px;">
             <div class="dp-stat-card" style="flex:1;">
-                <div class="s-value">5</div>
+                <div class="s-value">{{ $avg_galaxy_join ?? 0 }}</div>
                 <div class="s-label">Average Galaxy Join</div>
             </div>
             <div class="dp-stat-card" style="flex:1;">
-                <div class="s-value">64</div>
-                <div class="s-label">Average Duration (Sec)</div>
+                <div class="s-value">{{ \App\Services\ReportService::formatDuration($avg_duration_sec ?? 0) }}</div>
+                <div class="s-label">Average Duration</div>
             </div>
         </div>
 
@@ -427,35 +423,30 @@
                             <th>Students</th>
                             <th>Last Interaction</th>
                             <th>Total Role Galaxies Joined</th>
-                            <th>Total Duration (Seconds)</th>
+                            <th>Total Duration</th>
                             <th>Last 5 Role Galaxies Joined</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse(($user_stats ?? collect()) as $idx => $stat)
-                        @php
-                            $lastInteractions = ['1 month ago','2 weeks ago','3 days ago','1 week ago','5 days ago','2 months ago','1 day ago','4 weeks ago'];
-                            $totalJoined = rand(2, 15);
-                            $totalDur = rand(10, 120);
-                            $galaxyIcons = ['🌍','🚀','🔬','💡','🎭','🎨','🏗️','📊'];
-                        @endphp
                         <tr>
                             <td class="muted">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <img src="https://i.pravatar.cc/32?u={{ $stat['user']->id ?? ($idx + 300) }}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+                                    <div class="av" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;">{{ strtoupper(substr($stat['user']->name ?? '', 0, 1) . substr($stat['user']->surname ?? '', 0, 1)) }}</div>
                                     <span style="font-weight:500;">{{ $stat['user']->name }} {{ $stat['user']->surname }}</span>
                                 </div>
                             </td>
-                            <td class="muted">{{ $lastInteractions[$idx % count($lastInteractions)] }}</td>
-                            <td style="text-align:center;">{{ $totalJoined }}</td>
+                            <td class="muted">{{ $stat['last_interaction'] }}</td>
+                            <td style="text-align:center;">{{ $stat['total_joined'] }}</td>
                             <td style="text-align:center;">
+                                @php $totalDur = $stat['total_duration']; @endphp
                                 <span style="display:inline-flex;align-items:center;gap:4px;">
-                                    {{ $totalDur }}
-                                    @if($totalDur < 30)
+                                    {{ \App\Services\ReportService::formatDuration($totalDur) }}
+                                    @if($totalDur < 60)
                                         <svg width="12" height="12" fill="none" stroke="#ef4444" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    @elseif($totalDur < 60)
+                                    @elseif($totalDur < 300)
                                         <svg width="12" height="12" fill="none" stroke="#f59e0b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                                     @else
                                         <svg width="12" height="12" fill="none" stroke="#22c55e" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
@@ -464,22 +455,17 @@
                             </td>
                             <td>
                                 <div style="display:flex;gap:4px;">
-                                    @for($g = 0; $g < 5; $g++)
-                                        <span style="font-size:16px;" title="Galaxy {{ $g+1 }}">{{ $galaxyIcons[($idx + $g) % count($galaxyIcons)] }}</span>
-                                    @endfor
+                                    @foreach(($stat['last_scenarios'] ?? []) as $icon)
+                                        <span style="font-size:16px;">{{ $icon }}</span>
+                                    @endforeach
                                 </div>
                             </td>
                             <td>
-                                <div style="display:flex;align-items:center;gap:10px;white-space:nowrap;">
-                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);">
-                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <a href="{{ route('portal.reports.student.role-galaxy', $stat['user']->id) }}" class="dp-action dp-action-view" title="Role Galaxy Detail">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     </a>
-                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);">
-                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
-                                    </a>
-                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);">
-                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    </a>
+                                    <a href="{{ route('portal.reports.student.role-galaxy', $stat['user']->id) }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">Details →</a>
                                 </div>
                             </td>
                         </tr>
@@ -490,9 +476,8 @@
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);cursor:default;">Previous</span>
-                <span style="color:var(--color-txt-muted);">Page 1 of 12</span>
-                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">Next</a>
+                <span style="color:var(--color-txt-muted);">Showing {{ ($user_stats ?? collect())->count() }} students</span>
+                <span style="color:var(--color-txt-muted);">{{ ($user_stats ?? collect())->count() }} total</span>
             </div>
         </div>
 
@@ -625,9 +610,20 @@
                         @endif
                         <td>
                             @if($us['user'])
-                            <a href="{{ route('portal.reports.student', $us['user']->id ?? 0) }}" class="dp-action dp-action-view" title="Details">
-                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            </a>
+                            @php
+                                $perAppRouteMap = [
+                                    'role-galaxy' => 'portal.reports.student.role-galaxy',
+                                    'way-ai-coach' => 'portal.reports.student.way-ai-coach',
+                                    'study-space' => 'portal.reports.student.study-space',
+                                ];
+                                $detailRoute = isset($perAppRouteMap[$slug]) ? route($perAppRouteMap[$slug], $us['user']->id) : route('portal.reports.student', $us['user']->id);
+                            @endphp
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <a href="{{ $detailRoute }}" class="dp-action dp-action-view" title="Details">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </a>
+                                <a href="{{ $detailRoute }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">Details →</a>
+                            </div>
                             @endif
                         </td>
                     </tr>
@@ -717,11 +713,7 @@
                                 @else <span class="muted">-</span> @endif
                             </td>
                             <td>
-                                <div style="display:flex;align-items:center;gap:12px;white-space:nowrap;">
-                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></a>
-                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg></a>
-                                    <a href="#" class="dp-action" style="color:var(--color-txt-muted);"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></a>
-                                </div>
+                                <a href="{{ route('portal.reports.mission.detail', $mission->id) }}" style="color:var(--color-primary);font-size:13px;font-weight:500;text-decoration:none;">Details</a>
                             </td>
                         </tr>
                         @empty
@@ -731,9 +723,8 @@
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);cursor:default;">Previous</span>
-                <span style="color:var(--color-txt-muted);">Page1 of 12</span>
-                <a href="#" class="dp-btn" style="font-size:12px;padding:6px 16px;">Next</a>
+                <span style="color:var(--color-txt-muted);">Showing {{ ($missions ?? collect())->count() }} missions</span>
+                <span style="color:var(--color-txt-muted);">{{ ($missions ?? collect())->count() }} total</span>
             </div>
         </div>
     @else
@@ -771,9 +762,12 @@
                         <td class="muted">{{ \App\Services\ReportService::formatDuration($us['total_duration'] ?? 0) }}</td>
                         <td>
                             @if($us['user'])
-                            <a href="{{ route('portal.reports.student', $us['user']->id ?? 0) }}" class="dp-action dp-action-view">
-                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            </a>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <a href="{{ route('portal.reports.student', $us['user']->id ?? 0) }}?app={{ $slug }}" class="dp-action dp-action-view" title="Student Report">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </a>
+                                <a href="{{ route('portal.reports.student', $us['user']->id ?? 0) }}?app={{ $slug }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">Details →</a>
+                            </div>
                             @endif
                         </td>
                     </tr>

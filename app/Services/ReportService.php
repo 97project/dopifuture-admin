@@ -11,12 +11,12 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Raporlama servisi — DB'deki sync verileri üzerinden rapor üretir.
+ * Report service — generates reports from sync DB data.
  */
 class ReportService
 {
     /**
-     * Okul genel istatistikleri.
+     * School overview statistics.
      */
     public function getSchoolOverviewStats(Collection $schoolIds): array
     {
@@ -56,7 +56,7 @@ class ReportService
     }
 
     /**
-     * Uygulama bazlı detaylı rapor (belirli okullar için).
+     * Per-application detailed report (for specific schools).
      */
     public function getAppReport(Application $app, Collection $userIds): array
     {
@@ -117,56 +117,72 @@ class ReportService
     }
 
     /**
-     * Öğrenci bazlı uygulama raporu (tek öğrenci, tüm uygulamalar).
+     * Student-level app report (single student, all applications).
      */
     public function getStudentReport(User $user): array
     {
         $apps = $user->applications()->active()->ordered()->get();
 
-        // VegaConnector uygulamaları için direkt atanmış olamayabilir — tüm aktif uygulamalardan kontrol et
+        // Vega connector apps may not be directly assigned — check all active apps
         $allApps = Application::active()->ordered()->get();
 
         return $allApps->map(function ($app) use ($user) {
             $isVega = $app->connector_class === 'App\\Connectors\\VegaConnector';
 
             if ($isVega) {
-                // VegaConnector: vega_sessions tablosundan oku
-                $vegaSessions = \App\Models\VegaSession::where('application_id', $app->id)
-                    ->where('user_id', $user->id)
-                    ->orderByDesc('started_at')
+                // VegaConnector: read from remote vega_db
+                $vegaReportService = app(\App\Services\VegaReportService::class);
+                $vegaUserId = $vegaReportService->resolveVegaUserId($user->id);
+
+                if (!$vegaUserId) return null;
+
+                $vegaSessions = \App\Models\Vega\VegaDbSession::forUser($vegaUserId)
+                    ->orderByDesc('created_at')
                     ->get();
 
                 if ($vegaSessions->isEmpty()) return null;
 
-                $messages = \App\Models\VegaSessionMessage::whereIn('session_id', $vegaSessions->pluck('id'))->get();
-
-                // Module bazında progress simüle et
+                // Module-level progress
                 $moduleGroups = $vegaSessions->groupBy('module');
-                $progress = $moduleGroups->map(function ($items, $module) use ($app) {
+                $progress = $moduleGroups->map(function ($items, $module) {
+                    $hasActive = $items->contains(fn($s) => strtoupper($s->status ?? '') === 'ACTIVE');
+                    $hasCompleted = $items->filter(fn($s) => strtoupper($s->status ?? '') === 'COMPLETED')->count() > 0;
+
                     return (object) [
                         'module_name'  => ucfirst($module),
                         'module_id'    => $module,
                         'module_type'  => $module,
-                        'status'       => 'completed',
+                        'status'       => $hasActive ? 'in_progress' : ($hasCompleted ? 'completed' : 'in_progress'),
                         'score'        => $items->whereNotNull('score')->avg('score'),
                         'max_score'    => 100,
                         'attempts'     => $items->count(),
-                        'started_at'   => $items->min('started_at'),
-                        'completed_at' => $items->max('ended_at'),
+                        'started_at'   => $items->min('created_at'),
+                        'completed_at' => $items->max('updated_at'),
                     ];
                 })->values();
 
-                // Session'ları AppUserSession formatında dön
+                // Return sessions in AppUserSession format (rich data fields)
                 $sessions = $vegaSessions->map(function ($s) {
                     return (object) [
-                        'session_name'        => $s->user_name . ' — ' . ucfirst($s->module),
-                        'external_session_id' => $s->external_id,
+                        'session_name'        => $s->title ?: (ucfirst($s->module) . ' — ' . ($s->scenario ?? $s->subject ?? 'Session')),
+                        'external_session_id' => $s->external_session_id,
+                        'vega_session_id'     => $s->id,
                         'session_type'        => $s->module,
-                        'started_at'          => $s->started_at,
-                        'duration_seconds'    => min(($s->duration_minutes ?? 0), 120) * 60,
+                        'started_at'          => $s->created_at,
+                        'duration_seconds'    => $s->duration_seconds,
                         'score'               => $s->score,
+                        'status'              => $s->status,
+                        'threshold'           => $s->threshold,
+                        'subject'             => $s->subject,
+                        'topic'               => $s->topic,
+                        'theme'               => $s->theme,
+                        'language'            => $s->language,
                     ];
                 });
+
+                // Real completion calculation
+                $completedModules = $moduleGroups->filter(fn($items) => !$items->contains(fn($s) => strtoupper($s->status ?? '') === 'ACTIVE'))->count();
+                $inProgressModules = $moduleGroups->count() - $completedModules;
 
                 return [
                     'app' => $app,
@@ -174,17 +190,19 @@ class ReportService
                     'sessions' => $sessions,
                     'stats' => [
                         'total_modules'   => $moduleGroups->count(),
-                        'completed'       => $moduleGroups->count(),
-                        'in_progress'     => 0,
-                        'completion_rate' => 100,
+                        'completed'       => $completedModules,
+                        'in_progress'     => $inProgressModules,
+                        'completion_rate' => $moduleGroups->count() > 0
+                            ? round(($completedModules / $moduleGroups->count()) * 100, 1)
+                            : 0,
                         'avg_score'       => $vegaSessions->whereNotNull('score')->avg('score'),
                         'total_sessions'  => $vegaSessions->count(),
-                        'total_duration'  => $vegaSessions->sum(fn($s) => min($s->duration_minutes ?? 0, 120)) * 60,
+                        'total_duration'  => $vegaSessions->sum(fn($s) => $s->duration_seconds),
                     ],
                 ];
             }
 
-            // Non-Vega: mevcut AppUserProgress/AppUserSession mantığı
+            // Non-Vega: existing AppUserProgress/AppUserSession logic
             $progress = AppUserProgress::where('user_id', $user->id)
                 ->where('application_id', $app->id)
                 ->orderBy('module_type')
@@ -217,7 +235,7 @@ class ReportService
     }
 
     /**
-     * Sınıf bazlı rapor.
+     * Class-level report.
      */
     public function getClassReport($class, ?Application $app = null): array
     {
@@ -247,7 +265,7 @@ class ReportService
     }
 
     /**
-     * Öğretmenin tüm sınıflarının raporu.
+     * Teacher's all classes report.
      */
     public function getTeacherClassReport(User $teacher): array
     {
@@ -264,7 +282,7 @@ class ReportService
     }
 
     /**
-     * Tek öğrenci, tek uygulama raporu.
+     * Single student, single application report.
      */
     public function getStudentAppReport(User $user, Application $app): array
     {

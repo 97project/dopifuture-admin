@@ -1,4 +1,4 @@
-﻿@extends('portal.app')
+@extends('portal.app')
 @section('title', ($isTr ?? false) ? 'AI Koç Geri Bildirimi' : 'AI Coach Feedback')
 @section('page-title', 'WAY AI Coach')
 @section('content')
@@ -47,7 +47,7 @@
                 {{-- Your Answer --}}
                 <div style="margin-bottom:12px;">
                     <div style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">YOUR ANSWER</div>
-                    <p style="font-size:13px;color:#374151;line-height:1.6;margin:0;font-style:italic;background:#F8FAFC;border-radius:8px;padding:12px 14px;">{{ $q->answer ?? '"Users struggle to find reliable local plumbers because current directories lack verified reviews and transparent pricing."' }}</p>
+                    <p style="font-size:13px;color:#374151;line-height:1.6;margin:0;font-style:italic;background:#F8FAFC;border-radius:8px;padding:12px 14px;">{{ $q->answer ?? '-' }}</p>
                 </div>
 
                 {{-- Feedback --}}
@@ -56,7 +56,7 @@
                         <svg width="8" height="8" fill="white" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                     </div>
                     <p style="font-size:12px;color:#6B7280;line-height:1.6;margin:0;">
-                        <strong style="color:#8B5CF6;">Feedback:</strong> {{ $q->feedback ?? 'This is a clear and concise problem statement. It identifies the target (users looking for plumbers) and the specific pain points (lack of verification and price transparency). Well done.' }}
+                        <strong style="color:#8B5CF6;">Feedback:</strong> {{ $q->feedback ?? '-' }}
                     </p>
                 </div>
             </div>

@@ -6,6 +6,7 @@ use App\Models\Application;
 use App\Models\SchoolClass;
 use App\Models\User;
 use App\Services\ReportService;
+use App\Services\VegaReportService;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -14,8 +15,10 @@ use Illuminate\Support\Facades\DB;
  */
 class PortalReportController extends Controller
 {
-    public function __construct(private ReportService $reportService)
-    {
+    public function __construct(
+        private ReportService $reportService,
+        private VegaReportService $vegaReportService,
+    ) {
     }
 
     /**
@@ -31,6 +34,41 @@ class PortalReportController extends Controller
             $schoolIds = $user->schools()->pluck('schools.id');
             $data['overview'] = $this->reportService->getSchoolOverviewStats($schoolIds);
             $data['apps'] = Application::active()->ordered()->get();
+
+            // Enrich Vega app cards with real remote DB data
+            try {
+                $panelUserIds = DB::table('school_user')
+                    ->whereIn('school_id', $schoolIds)
+                    ->pluck('user_id')
+                    ->unique()
+                    ->values();
+                $vegaUserMap = $this->vegaReportService->resolveVegaUserIds($panelUserIds);
+                $vegaUserIds = array_values($vegaUserMap);
+                $vegaSummary = $this->vegaReportService->getDashboardSummary($vegaUserIds);
+
+                // Map portal slug → Vega summary key
+                $slugToVega = [
+                    'role-galaxy'  => 'role_galaxy',
+                    'study-space'  => 'study_space',
+                    'way-ai-coach' => 'way_ai_coach',
+                ];
+
+                $data['overview']['app_stats'] = $data['overview']['app_stats']->map(function ($stat) use ($slugToVega, $vegaSummary) {
+                    $vegaKey = $slugToVega[$stat['app']->slug] ?? null;
+                    if ($vegaKey && isset($vegaSummary[$vegaKey])) {
+                        $v = $vegaSummary[$vegaKey];
+                        // Overlay Vega data onto the app card
+                        $stat['total_progress'] = $v['sessions'];
+                        $stat['completed'] = $v['completed'] ?? 0;
+                        $stat['in_progress'] = ($v['sessions']) - ($v['completed'] ?? 0);
+                        $stat['total_users'] = $v['active_students'];
+                        $stat['avg_score'] = $v['avg_score'] ?? null;
+                    }
+                    return $stat;
+                });
+            } catch (\Exception $e) {
+                // Vega DB unavailable — keep local data
+            }
         } elseif ($user->hasRole('teacher')) {
             // Teacher sees class-level overview
             $data['myClasses'] = $user->classes()
@@ -49,13 +87,38 @@ class PortalReportController extends Controller
     /**
      * Per-application detailed report.
      * Figma F-38 (Assignments tab) + F-63 (Performance tab)
-     * TODO: Remove mock data block and reconnect ReportService when DB is populated.
+     *
+     * Vega apps (role-galaxy, way-ai-coach, study-space): real Vega DB data.
+     * Mission WAY, Way Startup: fixture data.
      */
     public function appReport(Application $app)
     {
         $user = auth()->user();
+        $panelUserIds = $this->getScopedUserIds($user);
 
-        // ── MOCK STUDENTS ──────────────────────────────────────────
+        // ── VEGA APPS: Direct SQL from Vega remote DB ──────────────
+        if (in_array($app->slug, ['role-galaxy', 'way-ai-coach', 'study-space'])) {
+            $vegaUserMap = $this->vegaReportService->resolveVegaUserIds($panelUserIds);
+
+            // Prepare panel user models as keyed collection
+            $panelUsers = User::whereIn('id', array_keys($vegaUserMap))->get()->keyBy('id');
+
+            $data = match ($app->slug) {
+                'role-galaxy'  => $this->vegaReportService->getRoleGalaxyReport($vegaUserMap, $panelUsers),
+                'way-ai-coach' => $this->vegaReportService->getWayAiCoachReport($vegaUserMap, $panelUsers),
+                'study-space'  => $this->vegaReportService->getStudySpaceReport($vegaUserMap, $panelUsers),
+            };
+
+            $data['app'] = $app;
+            $data['user'] = $user;
+            $data['missions'] = collect();
+            $data['startups'] = collect();
+            $data['total_missions'] = 0;
+
+            return view('portal.reports.app', $data);
+        }
+
+        // ── NON-VEGA APPS: Mock data (mission-way, way-startup) ────
         $mockStudents = collect([
             (object)['id'=>901,'name'=>'Elif','surname'=>'Demir','avatar'=>null,'classes'=>collect([(object)['name'=>'9-A']])],
             (object)['id'=>902,'name'=>'Ahmet','surname'=>'Çelik','avatar'=>null,'classes'=>collect([(object)['name'=>'10-B']])],
@@ -153,7 +216,7 @@ class PortalReportController extends Controller
             }
         }
 
-        // ── USER STATS for Performance tab ─────────────────────────
+        // ── USER STATS for Performance tab (non-Vega apps) ─────────
         $userStats = $mockStudents->map(function($s, $i) use ($app) {
             $base = [
                 'user' => $s,
@@ -169,17 +232,9 @@ class PortalReportController extends Controller
                 $base['ethics_point'] = rand(50,90);
                 $base['adaptation_point'] = rand(35,88);
             } elseif ($app->slug === 'way-startup') {
-                $base['startup_type'] = ['Teknoloji','Sağlık','Eğitim','Finans'][$i % 4];
+                $base['startup_type'] = ['Technology','Health','Education','Finance'][$i % 4];
                 $base['deadline'] = now()->addDays(rand(5,30))->format('d.m.Y');
                 $base['teacher_score'] = rand(60,95);
-            } elseif ($app->slug === 'way-ai-coach') {
-                $base['alert'] = $i === 2;
-            } elseif ($app->slug === 'role-galaxy') {
-                $base['galaxy_selected'] = ['Liderlik','İletişim','Empati','Problem Çözme'][$i % 4];
-                $base['role_played'] = ['Kaptan','Arabulucu','Danışman','Gözlemci'][$i % 4];
-            } elseif ($app->slug === 'study-space') {
-                $base['discussion_minutes'] = rand(15,120);
-                $base['discussion_count'] = rand(3,18);
             }
             return $base;
         })->values();
@@ -239,10 +294,19 @@ class PortalReportController extends Controller
         $student->load(['roles', 'schools', 'classes.school', 'applications']);
         $reportData = $this->reportService->getStudentReport($student);
 
+        // Determine which app to highlight in sidebar
+        $activeApp = request('app');
+
+        // Wings Points — accumulated theme-based scores from vega sessions
+        $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+        $wingsPoints = $vegaUserId ? $this->vegaReportService->getWingsPoints($vegaUserId) : ['total_wings' => 0, 'categories' => []];
+
         return view('portal.reports.student', [
             'student' => $student,
             'reportData' => $reportData,
             'apps' => Application::active()->ordered()->get(),
+            'activeApp' => $activeApp,
+            'wingsPoints' => $wingsPoints,
         ]);
     }
 
@@ -280,8 +344,8 @@ class PortalReportController extends Controller
     {
         $mission = (object)[
             'id' => $id, 'title' => 'After the Earthquake',
-            'status' => 'Tamamlandı', 'difficulty' => 'Easy', 'created' => '28.02.2026',
-            'description' => 'Bu görevde öğrenciler dijital harita oluşturma sürecini öğrenecek ve pratik yapacaklar.',
+            'status' => 'Completed', 'difficulty' => 'Easy', 'created' => '28.02.2026',
+            'description' => 'In this mission, students will learn and practice the digital map creation process.',
             'result' => 'The people willingly carry stones and repair walls with the belief that "salvation is near." However, the difference between the reinforcement time (35 min) and the door endurance time determines the lifespan of the lie. If reinforcement does not arrive on time, the people will open the doors.',
             'completion_rate' => 72, 'avg_score' => 74.3,
             'health' => 75, 'resource' => 40, 'ethics' => 85, 'adaptation' => 100,
@@ -349,53 +413,241 @@ class PortalReportController extends Controller
 
     /**
      * WAY AI Coach — Question Detail — Figma F-71/F-74
+     * Real Vega lecturer messages → question/answer/feedback timeline.
      */
     public function coachQuestions($id)
     {
-        $student = (object)['name' => 'Ahmet Çelik'];
-        $questions = collect([
-            (object)[
-                'question' => 'Define the problem you want to solve in 2–3 precise sentences. Avoid general statements.',
-                'score' => 18, 'max_score' => 20,
-                'answer' => '"Users struggle to find reliable local plumbers because current directories lack verified reviews and transparent pricing."',
-                'feedback' => 'This is a clear and concise problem statement. It identifies the target (users looking for plumbers) and the specific pain points (lack of verification and price transparency). Well done.',
-                'health' => 65, 'resource' => 70, 'ethics' => 80, 'adaptation' => 60,
-                'options' => collect([]),
-            ],
-            (object)[
-                'question' => 'Identify your primary target user. Describe them using age range, context, and specific need.',
-                'score' => 18, 'max_score' => 20,
-                'answer' => '"Homeowners aged 30-50 living in urban areas who need emergency repair services but don\'t have a trusted network."',
-                'feedback' => 'Good specificity on age and context. You could narrow down \'urban areas\' to a specific region for an MVP, but this is a solid start.',
-                'health' => 70, 'resource' => 65, 'ethics' => 75, 'adaptation' => 55,
-                'options' => collect([]),
-            ],
-            (object)[
-                'question' => 'Explain why this problem is worth solving. Support your answer with a real-life example or observation.',
-                'score' => 18, 'max_score' => 20,
-                'answer' => '"It\'s worth solving because emergency repairs are high-stress. I saw my neighbor pay triple the standard rate for a leak because they couldn\'t verify quotes quickly."',
-                'feedback' => 'Excellent use of a real-life observation. It validates the emotional urgency and financial impact of the problem.',
-                'health' => 80, 'resource' => 60, 'ethics' => 85, 'adaptation' => 70,
-                'options' => collect([]),
-            ],
-            (object)[
-                'question' => 'List three different solution ideas.',
-                'score' => 19, 'max_score' => 20,
-                'answer' => '"1. An \'Uber for Plumbers\' app. 2. A community-vetted WhatsApp group. 3. A certification board website."',
-                'feedback' => 'Excellent use of a real-life observation. It validates the emotional urgency and financial impact of the problem.',
-                'health' => 75, 'resource' => 80, 'ethics' => 70, 'adaptation' => 65,
-                'options' => collect([]),
-            ],
-            (object)[
-                'question' => 'Select one idea and justify your choice using at least two logical reasons.',
-                'score' => 18, 'max_score' => 20,
-                'answer' => '"I choose the \'Uber for Plumbers\' app because it allows for real-time tracking and instant payments, which addresses the trust and speed issues directly."',
-                'feedback' => 'Strong justification linking back to the core problems of trust and speed. Ensure you consider the supply-side acquisition costs.',
-                'health' => 85, 'resource' => 75, 'ethics' => 80, 'adaptation' => 90,
-                'options' => collect([]),
-            ],
+        $student = User::findOrFail($id);
+        $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+        $questions = $this->vegaReportService->getCoachFeedback($vegaUserId);
+
+        return view('portal.reports.coach-questions', compact('student', 'questions'))
+            ->with('activeApp', 'way-ai-coach');
+    }
+
+    /**
+     * Full-page session detail view — Simulator / Lecturer / Chatbot
+     * Renders a dedicated detail page per module type.
+     */
+    public function sessionDetail(int $sessionId)
+    {
+        $session = \App\Models\Vega\VegaDbSession::with([
+            'simulatorSteps', 'lecturerMessages', 'chatMessages'
+        ])->findOrFail($sessionId);
+
+        // Determine module type
+        $module = $session->module; // simulator, lecturer, chatbot
+
+        // Chart data for simulator
+        $chartData = [];
+        if ($module === 'simulator') {
+            $chartData = $session->simulatorSteps
+                ->sortBy('turn')
+                ->map(fn($s) => ['turn' => $s->turn, 'score' => $s->score_after])
+                ->values()
+                ->toArray();
+        }
+
+        // Token count for lecturer/chatbot
+        $totalTokens = 0;
+        if ($module === 'lecturer') {
+            $totalTokens = $session->lecturerMessages->count() * 250; // approx
+        } elseif ($module === 'chatbot') {
+            $totalTokens = $session->chatMessages->count() * 200; // approx
+        }
+
+        // Try to find the portal student linked to this vega user
+        $student = null;
+        if ($session->user_id) {
+            $vegaUser = \App\Models\Vega\VegaDbUser::find($session->user_id);
+            if ($vegaUser && $vegaUser->email) {
+                $student = \App\Models\User::where('email', $vegaUser->email)->first();
+            }
+        }
+
+        // Map module type to app slug for sidebar active state
+        $activeApp = match($module) {
+            'simulator' => 'role-galaxy',
+            'lecturer'  => 'way-ai-coach',
+            'chatbot'   => 'study-space',
+            default     => null,
+        };
+
+        return view('portal.reports.session-detail', compact(
+            'session', 'module', 'chartData', 'totalTokens', 'student', 'activeApp'
+        ));
+    }
+
+    /**
+     * AJAX: Student enrichment data — Tier 2/3
+     * Returns scenario breakdown, theme breakdown, score trend.
+     */
+    public function studentEnrichment(User $student)
+    {
+        $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+
+        if (!$vegaUserId) {
+            return response()->json([
+                'scenario_breakdown' => [],
+                'theme_breakdown'    => [],
+                'score_trend'        => [],
+            ]);
+        }
+
+        return response()->json([
+            'scenario_breakdown' => $this->vegaReportService->getScenarioBreakdown($vegaUserId),
+            'theme_breakdown'    => $this->vegaReportService->getThemeBreakdown($vegaUserId),
+            'score_trend'        => $this->vegaReportService->getScoreTrend($vegaUserId),
         ]);
-        return view('portal.reports.coach-questions', compact('student', 'questions'));
+    }
+
+    /**
+     * Per-app student detail: Role Galaxy (simulator)
+     * Matches mobile RoleGalaxyScreen → 12 scenario cards with per-scenario breakdown.
+     */
+    public function roleGalaxyDetail(User $student)
+    {
+        $this->authorizeStudentAccess($student);
+        $student->load(['roles', 'schools', 'classes']);
+
+        $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+        $sessions = collect();
+        $scenarioBreakdown = collect();
+        $stats = ['total_sessions' => 0, 'completed' => 0, 'avg_score' => null, 'total_duration' => 0];
+
+        if ($vegaUserId) {
+            $sessions = \App\Models\Vega\VegaDbSession::simulator()
+                ->forUser($vegaUserId)
+                ->with('simulatorSteps:id,session_id,created_at')
+                ->orderByDesc('created_at')
+                ->get();
+
+            $stats = [
+                'total_sessions' => $sessions->count(),
+                'completed'      => $sessions->where('status', 'COMPLETED')->count(),
+                'avg_score'      => $sessions->whereNotNull('score')->avg('score'),
+                'total_duration' => $sessions->sum(fn($s) => $s->duration_seconds),
+            ];
+            $scenarioBreakdown = $this->vegaReportService->getScenarioBreakdown($vegaUserId);
+        }
+
+        return view('portal.reports.role-galaxy-detail', [
+            'student'            => $student,
+            'sessions'           => $sessions,
+            'stats'              => $stats,
+            'scenarioBreakdown'  => $scenarioBreakdown,
+            'scenarioConfig'     => VegaReportService::getScenarioConfig(),
+        ]);
+    }
+
+    /**
+     * Per-app student detail: WAY AI Coach (lecturer + chatbot)
+     * Matches mobile WayAICoachScreen → 13 theme cards + WayAICoachDetailScreen per-theme sessions.
+     */
+    public function wayAiCoachDetail(User $student)
+    {
+        $this->authorizeStudentAccess($student);
+        $student->load(['roles', 'schools', 'classes']);
+
+        $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+        $sessions = collect();
+        $themeBreakdown = collect();
+        $stats = ['total_sessions' => 0, 'lecturer' => 0, 'chatbot' => 0, 'avg_score' => null, 'total_duration' => 0, 'total_messages' => 0];
+
+        if ($vegaUserId) {
+            $sessions = \App\Models\Vega\VegaDbSession::forUser($vegaUserId)
+                ->whereIn('module', ['lecturer', 'chatbot'])
+                ->withCount(['lecturerMessages', 'chatMessages'])
+                ->orderByDesc('created_at')
+                ->get();
+
+            $stats = [
+                'total_sessions'  => $sessions->count(),
+                'lecturer'        => $sessions->where('module', 'lecturer')->count(),
+                'chatbot'         => $sessions->where('module', 'chatbot')->count(),
+                'avg_score'       => $sessions->whereNotNull('score')->avg('score'),
+                'total_duration'  => $sessions->sum(fn($s) => $s->duration_seconds),
+                'total_messages'  => $sessions->sum('lecturer_messages_count') + $sessions->sum('chat_messages_count'),
+            ];
+            $themeBreakdown = $this->vegaReportService->getThemeBreakdown($vegaUserId);
+        }
+
+        $wingsPoints = $vegaUserId ? $this->vegaReportService->getWingsPoints($vegaUserId) : ['total_wings' => 0, 'categories' => []];
+
+        return view('portal.reports.way-ai-coach-detail', [
+            'student'        => $student,
+            'sessions'       => $sessions,
+            'stats'          => $stats,
+            'themeBreakdown' => $themeBreakdown,
+            'themeConfig'    => VegaReportService::THEME_CONFIG,
+            'wingsPoints'    => $wingsPoints,
+        ]);
+    }
+
+    /**
+     * Per-app student detail: Study Space (chatbot)
+     * Matches mobile WorkspaceScreen chat workspace.
+     */
+    public function studySpaceDetail(User $student)
+    {
+        $this->authorizeStudentAccess($student);
+        $student->load(['roles', 'schools', 'classes']);
+
+        $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+        $sessions = collect();
+        $themeBreakdown = collect();
+        $stats = ['total_sessions' => 0, 'total_messages' => 0, 'total_duration' => 0];
+
+        if ($vegaUserId) {
+            $sessions = \App\Models\Vega\VegaDbSession::chatbot()
+                ->forUser($vegaUserId)
+                ->withCount('chatMessages')
+                ->orderByDesc('created_at')
+                ->get();
+
+            $stats = [
+                'total_sessions'  => $sessions->count(),
+                'total_messages'  => $sessions->sum('chat_messages_count'),
+                'total_duration'  => $sessions->sum(fn($s) => $s->duration_seconds),
+            ];
+
+            // Theme breakdown for chatbot sessions
+            $themeBreakdown = $sessions->groupBy('theme')
+                ->map(fn($items, $theme) => [
+                    'theme'   => $theme ?: 'unknown',
+                    'count'   => $items->count(),
+                    'modules' => ['chatbot'],
+                ])
+                ->values();
+        }
+
+        return view('portal.reports.study-space-detail', [
+            'student'        => $student,
+            'sessions'       => $sessions,
+            'stats'          => $stats,
+            'themeBreakdown' => $themeBreakdown,
+            'themeConfig'    => VegaReportService::THEME_CONFIG,
+        ]);
+    }
+
+    /**
+     * Authorization check for student access.
+     */
+    private function authorizeStudentAccess(User $student): void
+    {
+        $authUser = auth()->user();
+
+        if ($authUser->hasRole('student') && $authUser->id !== $student->id) {
+            abort(403);
+        }
+
+        if ($authUser->hasRole('teacher')) {
+            $classIds = $authUser->classes()->pluck('school_classes.id');
+            $studentIds = DB::table('class_user')->whereIn('class_id', $classIds)->pluck('user_id');
+            if (!$studentIds->contains($student->id)) {
+                abort(403);
+            }
+        }
     }
 
     /* ── Helpers ─────────────────────────────────────── */
@@ -420,5 +672,35 @@ class PortalReportController extends Controller
 
         // Student
         return collect([$user->id]);
+    }
+
+    /**
+     * AJAX: Search students by name for the top bar search.
+     */
+    public function searchStudents()
+    {
+        $q = request('q', '');
+        if (strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $allowedIds = $this->getScopedUserIds(auth()->user());
+
+        $students = User::whereIn('id', $allowedIds)
+            ->where(function ($query) use ($q) {
+                $query->where('name', 'LIKE', "%{$q}%")
+                      ->orWhere('surname', 'LIKE', "%{$q}%")
+                      ->orWhere('email', 'LIKE', "%{$q}%");
+            })
+            ->take(10)
+            ->get(['id', 'name', 'surname', 'email']);
+
+        return response()->json($students->map(fn($s) => [
+            'id'     => $s->id,
+            'name'   => $s->name . ' ' . $s->surname,
+            'email'  => $s->email,
+            'url'    => route('portal.reports.student', $s->id),
+            'initials' => strtoupper(substr($s->name, 0, 1) . substr($s->surname ?? '', 0, 1)),
+        ]));
     }
 }

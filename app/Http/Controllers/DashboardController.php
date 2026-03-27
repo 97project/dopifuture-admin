@@ -25,7 +25,7 @@ class DashboardController extends Controller
                 ->withCount('students')
                 ->get();
 
-            // Son 5 öğrenci (teacher'ın sınıflarından)
+            // Last 5 students (from teacher's classes)
             $classIds = $user->classes()->pluck('school_classes.id');
             $recentStudents = \App\Models\User::whereHas('classes', fn($q) => $q->whereIn('school_classes.id', $classIds))
                 ->role('student')
@@ -45,7 +45,7 @@ class DashboardController extends Controller
         if ($user->hasRole('student')) {
             $user->load(['applications', 'classes.school']);
 
-            // App istatistikleri
+            // App statistics
             $appStats = $user->applications->map(fn($app) => (object) [
                 'name' => $app->name,
                 'slug' => $app->slug,
@@ -100,6 +100,14 @@ class DashboardController extends Controller
                 ->limit(10)
                 ->get();
 
+            // Vega app summary (Role Galaxy / Study Space / WAY AI Coach)
+            $vegaService = app(\App\Services\VegaReportService::class);
+            $schoolStudentIds = \App\Models\User::whereHas('schools', fn($q) => $q->whereIn('schools.id', $schoolIds))
+                ->role('student')
+                ->pluck('id');
+            $vegaUserMap = $vegaService->resolveVegaUserIds($schoolStudentIds);
+            $vegaSummary = $vegaService->getDashboardSummary(array_values($vegaUserMap));
+
             return view('portal.dashboard-school', [
                 'user' => $user,
                 'school' => $school,
@@ -107,6 +115,7 @@ class DashboardController extends Controller
                 'licenseWarning' => $licenseWarning,
                 'recentStudents' => $recentStudents,
                 'seatRequests' => $seatRequests,
+                'vegaSummary' => $vegaSummary,
             ]);
         } else {
             // Super admin → license table

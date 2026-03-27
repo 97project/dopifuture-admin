@@ -215,7 +215,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web', \App\Http\Middleware\
         Route::get('reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/{app:slug}', [\App\Http\Controllers\Admin\ReportController::class, 'appReport'])->name('reports.app');
         Route::get('reports/school/{school}', [\App\Http\Controllers\Admin\ReportController::class, 'schoolReport'])->name('reports.school');
-        Route::get('reports/student/{user}', [\App\Http\Controllers\Admin\ReportController::class, 'studentReport'])->name('reports.student');
+        Route::get('reports/student/{student}', [\App\Http\Controllers\Admin\ReportController::class, 'studentReport'])->name('reports.student');
 
         // ── Seat Requests (admin approval workflow) ──────
         Route::get('seat-requests', [\App\Http\Controllers\SeatRequestController::class, 'adminIndex'])->name('seat-requests.index');
@@ -268,12 +268,18 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     Route::put('profile', [\App\Http\Controllers\DashboardController::class, 'profileUpdate'])->name('portal.profile.update');
     Route::get('reports', [\App\Http\Controllers\PortalReportController::class, 'index'])->name('portal.reports');
     Route::get('reports/{app:slug}', [\App\Http\Controllers\PortalReportController::class, 'appReport'])->name('portal.reports.app');
-    Route::get('reports/student/{user}', [\App\Http\Controllers\PortalReportController::class, 'studentReport'])->name('portal.reports.student');
+    Route::get('reports/student/{student}', [\App\Http\Controllers\PortalReportController::class, 'studentReport'])->name('portal.reports.student');
     Route::get('reports/class/{class}', [\App\Http\Controllers\PortalReportController::class, 'classReport'])->name('portal.reports.class');
     Route::get('reports/class/{class}/{app:slug}', [\App\Http\Controllers\PortalReportController::class, 'classReport'])->name('portal.reports.class.app');
     Route::get('reports/mission/{id}', [\App\Http\Controllers\PortalReportController::class, 'missionDetail'])->name('portal.reports.mission.detail');
     Route::get('reports/startup/{id}', [\App\Http\Controllers\PortalReportController::class, 'startupDetail'])->name('portal.reports.startup.detail');
     Route::get('reports/coach/{id}/questions', [\App\Http\Controllers\PortalReportController::class, 'coachQuestions'])->name('portal.reports.coach.questions');
+    Route::get('reports/session/{sessionId}/detail', [\App\Http\Controllers\PortalReportController::class, 'sessionDetail'])->name('portal.reports.session.detail');
+    Route::get('reports/student/{student}/enrichment', [\App\Http\Controllers\PortalReportController::class, 'studentEnrichment'])->name('portal.reports.student.enrichment');
+    Route::get('reports/student/{student}/role-galaxy', [\App\Http\Controllers\PortalReportController::class, 'roleGalaxyDetail'])->name('portal.reports.student.role-galaxy');
+    Route::get('reports/student/{student}/way-ai-coach', [\App\Http\Controllers\PortalReportController::class, 'wayAiCoachDetail'])->name('portal.reports.student.way-ai-coach');
+    Route::get('reports/student/{student}/study-space', [\App\Http\Controllers\PortalReportController::class, 'studySpaceDetail'])->name('portal.reports.student.study-space');
+    Route::get('api/students/search', [\App\Http\Controllers\PortalReportController::class, 'searchStudents'])->name('portal.api.students.search');
 
     // Schools: school-admin can only view and edit their own school (NO create/delete)
     Route::resource('schools', \App\Http\Controllers\PortalSchoolController::class)

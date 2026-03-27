@@ -87,6 +87,78 @@
         </div>
     </div>
 
+    {{-- ═══ VEGA APP ACTIVITY CARDS ═══ --}}
+    @if(isset($vegaSummary))
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+        {{-- Role Galaxy --}}
+        <div style="background:linear-gradient(135deg,#ec4899,#f472b6);border-radius:16px;padding:20px 24px;color:#fff;box-shadow:0 4px 14px rgba(236,72,153,0.25);position:relative;overflow:hidden;">
+            <div style="position:absolute;right:-10px;top:-10px;font-size:64px;opacity:0.15;">🎮</div>
+            <div style="font-size:15px;font-weight:700;margin-bottom:12px;">Role Galaxy</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div>
+                    <div style="font-size:24px;font-weight:700;">{{ $vegaSummary['role_galaxy']['sessions'] }}</div>
+                    <div style="font-size:11px;opacity:0.85;">Simulations</div>
+                </div>
+                <div>
+                    <div style="font-size:24px;font-weight:700;">{{ $vegaSummary['role_galaxy']['avg_score'] ?? '-' }}</div>
+                    <div style="font-size:11px;opacity:0.85;">Avg Score</div>
+                </div>
+                <div>
+                    <div style="font-size:18px;font-weight:600;">{{ $vegaSummary['role_galaxy']['active_students'] }}</div>
+                    <div style="font-size:11px;opacity:0.85;">Active Students</div>
+                </div>
+                <div>
+                    <div style="font-size:18px;font-weight:600;">{{ $vegaSummary['role_galaxy']['completed'] ?? 0 }}</div>
+                    <div style="font-size:11px;opacity:0.85;">Completed</div>
+                </div>
+            </div>
+            <a href="{{ route('portal.reports.app', 'role-galaxy') }}" style="display:inline-block;margin-top:12px;font-size:12px;color:#fff;text-decoration:none;font-weight:600;opacity:0.9;">View Details →</a>
+        </div>
+
+        {{-- Study Space --}}
+        <div style="background:linear-gradient(135deg,#9333ea,#a855f7);border-radius:16px;padding:20px 24px;color:#fff;box-shadow:0 4px 14px rgba(147,51,234,0.25);position:relative;overflow:hidden;">
+            <div style="position:absolute;right:-10px;top:-10px;font-size:64px;opacity:0.15;">🤖</div>
+            <div style="font-size:15px;font-weight:700;margin-bottom:12px;">Study Space</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div>
+                    <div style="font-size:24px;font-weight:700;">{{ $vegaSummary['study_space']['sessions'] }}</div>
+                    <div style="font-size:11px;opacity:0.85;">Discussions</div>
+                </div>
+                <div>
+                    <div style="font-size:24px;font-weight:700;">{{ number_format($vegaSummary['study_space']['total_messages']) }}</div>
+                    <div style="font-size:11px;opacity:0.85;">Messages</div>
+                </div>
+                <div>
+                    <div style="font-size:18px;font-weight:600;">{{ $vegaSummary['study_space']['active_students'] }}</div>
+                    <div style="font-size:11px;opacity:0.85;">Active Students</div>
+                </div>
+            </div>
+            <a href="{{ route('portal.reports.app', 'study-space') }}" style="display:inline-block;margin-top:12px;font-size:12px;color:#fff;text-decoration:none;font-weight:600;opacity:0.9;">View Details →</a>
+        </div>
+
+        {{-- WAY AI Coach --}}
+        <div style="background:linear-gradient(135deg,#0369a1,#38bdf8);border-radius:16px;padding:20px 24px;color:#fff;box-shadow:0 4px 14px rgba(3,105,161,0.25);position:relative;overflow:hidden;">
+            <div style="position:absolute;right:-10px;top:-10px;font-size:64px;opacity:0.15;">💬</div>
+            <div style="font-size:15px;font-weight:700;margin-bottom:12px;">WAY AI Coach</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div>
+                    <div style="font-size:24px;font-weight:700;">{{ $vegaSummary['way_ai_coach']['sessions'] }}</div>
+                    <div style="font-size:11px;opacity:0.85;">Sessions</div>
+                </div>
+                <div>
+                    <div style="font-size:24px;font-weight:700;">{{ number_format($vegaSummary['way_ai_coach']['total_messages']) }}</div>
+                    <div style="font-size:11px;opacity:0.85;">Messages</div>
+                </div>
+                <div>
+                    <div style="font-size:18px;font-weight:600;">{{ $vegaSummary['way_ai_coach']['active_students'] }}</div>
+                    <div style="font-size:11px;opacity:0.85;">Active Students</div>
+                </div>
+            </div>
+            <a href="{{ route('portal.reports.app', 'way-ai-coach') }}" style="display:inline-block;margin-top:12px;font-size:12px;color:#fff;text-decoration:none;font-weight:600;opacity:0.9;">View Details →</a>
+        </div>
+    </div>
+    @endif
+
     {{-- ═══ LICENSE STATUS + RECENT STUDENTS ═══ --}}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
 
@@ -160,8 +232,7 @@
             @forelse($recentStudents as $s)
             <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;{{ !$loop->last ? 'border-bottom:1px solid #f3f4f6;' : '' }}">
                 <div style="display:flex;align-items:center;gap:10px;">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode($s->name . ' ' . ($s->surname ?? '')) }}&size=40&background=random&rounded=true&bold=true&font-size=0.4"
-                         alt="{{ $s->name }}" style="width:32px;height:32px;border-radius:50%;">
+                    <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;">{{ strtoupper(substr($s->name ?? '', 0, 1) . substr($s->surname ?? '', 0, 1)) }}</div>
                     <div>
                         <div style="font-size:13px;font-weight:500;color:var(--color-txt);">{{ $s->name }} {{ $s->surname }}</div>
                         <div style="font-size:12px;color:var(--color-txt-muted);">{{ $s->email }}</div>

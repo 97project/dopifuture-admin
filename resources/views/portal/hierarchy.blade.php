@@ -1,6 +1,6 @@
-﻿@extends('portal.app')
-@section('title', 'Okul Hiyerarşisi')
-@section('page-title', 'Okul Hiyerarşisi')
+@extends('portal.app')
+@section('title', 'School Hierarchy')
+@section('page-title', 'School Hierarchy')
 
 @section('content')
 @php
@@ -56,7 +56,7 @@
                 @foreach($students as $s)
                 <div style="padding:6px 20px 6px 52px;display:flex;align-items:center;justify-content:space-between;font-size:13px;border-top:1px solid var(--color-row-border,#f0f0f0);">
                     <div style="display:flex;align-items:center;gap:6px;">
-                        <span style="width:22px;height:22px;border-radius:50%;background:#E8F0FE;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#0B6AB2;">{{ strtoupper(substr($s->name ?? 'Ö', 0, 1)) }}</span>
+                        <span style="width:22px;height:22px;border-radius:50%;background:#E8F0FE;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#0B6AB2;">{{ strtoupper(substr($s->name ?? 'S', 0, 1)) }}</span>
                         <span style="font-weight:500;">{{ $s->name }} {{ $s->surname }}</span>
                         <span style="font-size:11px;color:var(--text-muted);">{{ $s->email }}</span>
                     </div>
