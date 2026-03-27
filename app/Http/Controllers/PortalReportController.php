@@ -425,58 +425,6 @@ class PortalReportController extends Controller
             ->with('activeApp', 'way-ai-coach');
     }
 
-    /**
-     * Full-page session detail view — Simulator / Lecturer / Chatbot
-     * Renders a dedicated detail page per module type.
-     */
-    public function sessionDetail(int $sessionId)
-    {
-        $session = \App\Models\Vega\VegaDbSession::with([
-            'simulatorSteps', 'lecturerMessages', 'chatMessages'
-        ])->findOrFail($sessionId);
-
-        // Determine module type
-        $module = $session->module; // simulator, lecturer, chatbot
-
-        // Chart data for simulator
-        $chartData = [];
-        if ($module === 'simulator') {
-            $chartData = $session->simulatorSteps
-                ->sortBy('turn')
-                ->map(fn($s) => ['turn' => $s->turn, 'score' => $s->score_after])
-                ->values()
-                ->toArray();
-        }
-
-        // Token count for lecturer/chatbot
-        $totalTokens = 0;
-        if ($module === 'lecturer') {
-            $totalTokens = $session->lecturerMessages->count() * 250; // approx
-        } elseif ($module === 'chatbot') {
-            $totalTokens = $session->chatMessages->count() * 200; // approx
-        }
-
-        // Try to find the portal student linked to this vega user
-        $student = null;
-        if ($session->user_id) {
-            $vegaUser = \App\Models\Vega\VegaDbUser::find($session->user_id);
-            if ($vegaUser && $vegaUser->email) {
-                $student = \App\Models\User::where('email', $vegaUser->email)->first();
-            }
-        }
-
-        // Map module type to app slug for sidebar active state
-        $activeApp = match($module) {
-            'simulator' => 'role-galaxy',
-            'lecturer'  => 'way-ai-coach',
-            'chatbot'   => 'study-space',
-            default     => null,
-        };
-
-        return view('portal.reports.session-detail', compact(
-            'session', 'module', 'chartData', 'totalTokens', 'student', 'activeApp'
-        ));
-    }
 
     /**
      * AJAX: Student enrichment data — Tier 2/3
@@ -627,6 +575,56 @@ class PortalReportController extends Controller
             'stats'          => $stats,
             'themeBreakdown' => $themeBreakdown,
             'themeConfig'    => VegaReportService::THEME_CONFIG,
+        ]);
+    }
+
+    /**
+     * Individual session detail page.
+     * Displays full timeline for simulator, or WhatsApp-style chat for lecturer/chatbot.
+     */
+    public function sessionDetail(string $sessionId)
+    {
+        $session = \App\Models\Vega\VegaDbSession::on('vega_db')
+            ->with(['simulatorSteps', 'lecturerMessages', 'chatMessages'])
+            ->findOrFail($sessionId);
+
+        $module = $session->module; // simulator, lecturer, chatbot
+
+        // Resolve student from vega user_id
+        $vegaUser = \App\Models\Vega\VegaDbUser::on('vega_db')->find($session->user_id);
+        $student = null;
+        if ($vegaUser?->email) {
+            $student = User::where('email', $vegaUser->email)->first();
+        }
+
+        // Authorization: ensure the logged-in user has access to this student
+        if ($student) {
+            $this->authorizeStudentAccess($student);
+        }
+
+        // Simulator chart data
+        $chartData = [];
+        if ($module === 'simulator' && $session->simulatorSteps->count() > 0) {
+            $chartData = $session->simulatorSteps->sortBy('turn')->map(fn($step) => [
+                'turn'  => $step->turn,
+                'score' => $step->score_after ?? 0,
+            ])->values()->toArray();
+        }
+
+        // Token estimation for chat sessions
+        $totalTokens = 0;
+        if ($module === 'lecturer') {
+            $totalTokens = $session->lecturerMessages->sum(fn($m) => (int) ceil(strlen($m->content ?? '') / 4));
+        } elseif ($module === 'chatbot') {
+            $totalTokens = $session->chatMessages->sum(fn($m) => (int) ceil(strlen($m->content ?? '') / 4));
+        }
+
+        return view('portal.reports.session-detail', [
+            'session'    => $session,
+            'module'     => $module,
+            'student'    => $student,
+            'chartData'  => $chartData,
+            'totalTokens' => $totalTokens,
         ]);
     }
 
