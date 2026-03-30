@@ -8,7 +8,7 @@
         <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.6) 100%);"></div>
         <div style="position:relative;z-index:1;padding:24px 28px;">
             {{-- Mission Title --}}
-            <h2 style="color:#fff;font-size:22px;font-weight:700;margin:0 0 20px 0;font-family:'Nunito',sans-serif;">{{ $mission->title ?? 'After the Earthquake' }}</h2>
+            <h2 style="color:#fff;font-size:22px;font-weight:700;margin:0 0 20px 0;font-family:'Nunito',sans-serif;">{{ $mission->title ?? 'Session' }}</h2>
 
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
                 {{-- Students Section --}}
@@ -20,7 +20,7 @@
                             <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;">{{ strtoupper(substr($s->name ?? '', 0, 1) . substr($s->surname ?? '', 0, 1)) }}</div>
                             <span style="font-size:13px;font-weight:500;color:#111;">{{ $s->name }} {{ $s->surname }}</span>
                         </div>
-                        <span style="font-size:12px;font-weight:600;color:#6366F1;">{{ $s->role ?? 'Diplomat' }}</span>
+                        <span style="font-size:12px;font-weight:600;color:#6366F1;">{{ $s->role ?? '-' }}</span>
                     </div>
                     @endforeach
                 </div>
@@ -28,7 +28,7 @@
                 {{-- Result Section --}}
                 <div style="background:rgba(255,255,255,0.9);border-radius:12px;padding:16px;">
                     <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">Result</div>
-                    <p style="font-size:13px;line-height:1.7;color:#374151;margin:0;">{{ $mission->result ?? 'The people willingly carry stones and repair walls with the belief that "salvation is near." However, the difference between the reinforcement time (35 min) and the door endurance time determines the lifespan of the lie. If reinforcement does not arrive on time, the people will open the doors.' }}</p>
+                    <p style="font-size:13px;line-height:1.7;color:#374151;margin:0;">{{ $mission->result ?? 'Awaiting completion data.' }}</p>
                 </div>
 
                 {{-- Overall Score Section --}}

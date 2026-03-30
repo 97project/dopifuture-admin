@@ -116,7 +116,7 @@
         <div style="position:sticky;top:80px;">
             {{-- Project name + Team --}}
             <div class="dp-card" style="margin-bottom:16px;">
-                <div style="font-size:18px;font-weight:700;margin-bottom:16px;">{{ $project->name ?? 'StudyFund / Fintech' }}</div>
+                <div style="font-size:18px;font-weight:700;margin-bottom:16px;">{{ $project->name ?? 'Project' }}</div>
                 {{-- Team Summary --}}
                 <div style="font-weight:600;font-size:13px;margin-bottom:12px;">Team Summary</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px;margin-bottom:4px;">
@@ -140,7 +140,7 @@
                     {{ $project->steps_completed }}/{{ $project->total_steps }} Step Completed
                 </div>
                 <div style="width:100%;height:8px;border-radius:4px;background:#e2e8f0;">
-                    <div style="width:{{ ($project->steps_completed ?? 6) / ($project->total_steps ?? 12) * 100 }}%;height:100%;border-radius:4px;background:var(--color-primary);"></div>
+                    <div style="width:{{ ($project->total_steps ?? 0) > 0 ? (($project->steps_completed ?? 0) / $project->total_steps * 100) : 0 }}%;height:100%;border-radius:4px;background:var(--color-primary);"></div>
                 </div>
             </div>
 

@@ -28,6 +28,37 @@ class ReportService
         $apps = Application::active()->ordered()->get();
 
         $appStats = $apps->map(function ($app) use ($userIds) {
+            if ($app->slug === 'mission-way') {
+                $playerIds = \App\Models\MissionWay\MwPlayer::whereIn('user_id', $userIds)->pluck('id');
+                $sessionQuery = \App\Models\MissionWay\MwSimulationSession::whereHas('players', function($q) use ($playerIds) {
+                    $q->whereIn('player_id', $playerIds);
+                });
+                return [
+                    'app' => $app,
+                    'total_users' => $app->users()->whereIn('users.id', $userIds)->count(),
+                    'total_progress' => (clone $sessionQuery)->count(),
+                    'completed' => (clone $sessionQuery)->where('status', 'completed')->count(),
+                    'in_progress' => (clone $sessionQuery)->where('status', 'in_progress')->count(),
+                    'avg_score' => (clone $sessionQuery)->whereNotNull('final_score')->avg('final_score'),
+                    'total_sessions' => (clone $sessionQuery)->count(),
+                    'total_duration' => 0,
+                ];
+            }
+            if ($app->slug === 'way-startup') {
+                $members = \App\Models\WsMember::where('application_id', $app->id)
+                    ->whereIn('user_id', $userIds)->get();
+                $allProgress = $members->flatMap(fn($m) => collect($m->step_progress ?? []));
+                return [
+                    'app' => $app,
+                    'total_users' => $app->users()->whereIn('users.id', $userIds)->count(),
+                    'total_progress' => $members->count(),
+                    'completed' => $allProgress->where('status', 'completed')->count(),
+                    'in_progress' => $allProgress->where('status', 'in_progress')->count(),
+                    'avg_score' => $members->avg('points'),
+                    'total_sessions' => $members->count(),
+                    'total_duration' => 0,
+                ];
+            }
             $progressQuery = AppUserProgress::where('application_id', $app->id)
                 ->whereIn('user_id', $userIds);
 
@@ -60,6 +91,44 @@ class ReportService
      */
     public function getAppReport(Application $app, Collection $userIds): array
     {
+        if ($app->slug === 'mission-way') {
+            $playerIds = \App\Models\MissionWay\MwPlayer::whereIn('user_id', $userIds)->pluck('id');
+            $sessionQuery = \App\Models\MissionWay\MwSimulationSession::whereHas('players', function($q) use ($playerIds) {
+                $q->whereIn('player_id', $playerIds);
+            });
+            $sessions = (clone $sessionQuery)->get();
+            return [
+                'app' => $app,
+                'total_progress' => $sessions->count(),
+                'total_completed' => $sessions->where('status', 'completed')->count(),
+                'total_sessions' => $sessions->count(),
+                'total_duration' => 0,
+                'avg_score' => $sessions->avg('final_score'),
+                'module_stats' => collect(),
+                'user_stats' => collect(),
+                'sessions_by_day' => collect(),
+                'recent_sessions' => $sessions->take(20),
+            ];
+        }
+
+        if ($app->slug === 'way-startup') {
+            $members = \App\Models\WsMember::where('application_id', $app->id)
+                ->whereIn('user_id', $userIds)->get();
+            $allProgress = $members->flatMap(fn($m) => collect($m->step_progress ?? []));
+            return [
+                'app' => $app,
+                'total_progress' => $members->count(),
+                'total_completed' => $allProgress->where('status', 'completed')->count(),
+                'total_sessions' => $members->count(),
+                'total_duration' => 0,
+                'avg_score' => $members->avg('points'),
+                'module_stats' => collect(),
+                'user_stats' => collect(),
+                'sessions_by_day' => collect(),
+                'recent_sessions' => collect(),
+            ];
+        }
+
         $progress = AppUserProgress::where('application_id', $app->id)
             ->whereIn('user_id', $userIds)
             ->get();
@@ -203,6 +272,52 @@ class ReportService
             }
 
             // Non-Vega: existing AppUserProgress/AppUserSession logic
+            if ($app->slug === 'mission-way') {
+                $player = \App\Models\MissionWay\MwPlayer::where('user_id', $user->id)->first();
+                if (!$player) return null;
+                $sessions = \App\Models\MissionWay\MwSimulationSession::whereHas('players', fn($q) => $q->where('player_id', $player->id))
+                    ->orderByDesc('created_at')->get();
+                if ($sessions->isEmpty()) return null;
+                $completed = $sessions->where('status', 'completed')->count();
+                $totalSessions = $sessions->count();
+                return [
+                    'app' => $app,
+                    'progress' => collect(),
+                    'sessions' => $sessions,
+                    'stats' => [
+                        'total_modules' => $totalSessions,
+                        'completed' => $completed,
+                        'in_progress' => $sessions->where('status', 'in_progress')->count(),
+                        'completion_rate' => $totalSessions > 0 ? round(($completed / $totalSessions) * 100, 1) : 0,
+                        'avg_score' => $sessions->whereNotNull('final_score')->avg('final_score'),
+                        'total_sessions' => $totalSessions,
+                        'total_duration' => 0,
+                    ],
+                ];
+            }
+            if ($app->slug === 'way-startup') {
+                $member = \App\Models\WsMember::where('application_id', $app->id)->where('user_id', $user->id)->first();
+                if (!$member) return null;
+                $allProgress = collect($member->step_progress ?? []);
+                if ($allProgress->isEmpty() && !$member->points) return null;
+                $totalSteps = count($allProgress);
+                $completed = $allProgress->where('status', 'completed')->count();
+                return [
+                    'app' => $app,
+                    'progress' => $allProgress,
+                    'sessions' => collect(),
+                    'stats' => [
+                        'total_modules' => $totalSteps,
+                        'completed' => $completed,
+                        'in_progress' => $allProgress->where('status', 'in_progress')->count(),
+                        'completion_rate' => $totalSteps > 0 ? round(($completed / $totalSteps) * 100, 1) : 0,
+                        'avg_score' => $member->points ?? 0,
+                        'total_sessions' => 1,
+                        'total_duration' => 0,
+                    ],
+                ];
+            }
+
             $progress = AppUserProgress::where('user_id', $user->id)
                 ->where('application_id', $app->id)
                 ->orderBy('module_type')
@@ -248,6 +363,37 @@ class ReportService
         // All apps summary
         $apps = Application::active()->ordered()->get();
         return $apps->map(function ($a) use ($studentIds) {
+            if ($a->slug === 'mission-way') {
+                $playerIds = \App\Models\MissionWay\MwPlayer::whereIn('user_id', $studentIds)->pluck('id');
+                $sessionQuery = \App\Models\MissionWay\MwSimulationSession::whereHas('players', function($q) use ($playerIds) {
+                    $q->whereIn('player_id', $playerIds);
+                });
+                $totalCount = (clone $sessionQuery)->count();
+                $completed = (clone $sessionQuery)->where('status', 'completed')->count();
+                return [
+                    'app' => $a,
+                    'students_count' => $studentIds->count(),
+                    'total_progress' => $totalCount,
+                    'completed' => $completed,
+                    'completion_rate' => $totalCount > 0 ? round(($completed / $totalCount) * 100, 1) : 0,
+                    'avg_score' => (clone $sessionQuery)->whereNotNull('final_score')->avg('final_score'),
+                ];
+            }
+            if ($a->slug === 'way-startup') {
+                $members = \App\Models\WsMember::where('application_id', $a->id)
+                    ->whereIn('user_id', $studentIds)->get();
+                $allProgress = $members->flatMap(fn($m) => collect($m->step_progress ?? []));
+                $totalCount = $members->count();
+                $completed = $allProgress->where('status', 'completed')->count();
+                return [
+                    'app' => $a,
+                    'students_count' => $studentIds->count(),
+                    'total_progress' => $totalCount,
+                    'completed' => $completed,
+                    'completion_rate' => $totalCount > 0 ? round(($completed / $totalCount) * 100, 1) : 0,
+                    'avg_score' => $members->avg('points'),
+                ];
+            }
             $progress = AppUserProgress::where('application_id', $a->id)
                 ->whereIn('user_id', $studentIds);
 

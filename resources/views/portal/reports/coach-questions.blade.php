@@ -23,8 +23,8 @@
             @php
                 $colors = ['#22C55E', '#3B82F6', '#F59E0B', '#8B5CF6', '#EF4444'];
                 $color = $colors[$qi % count($colors)];
-                $score = $q->score ?? 18;
-                $maxScore = $q->max_score ?? 20;
+                $score = $q->score ?? 0;
+                $maxScore = $q->max_score ?? 100;
                 $percent = ($score / $maxScore) * 100;
             @endphp
             <div style="position:relative;padding-left:52px;margin-bottom:32px;">
