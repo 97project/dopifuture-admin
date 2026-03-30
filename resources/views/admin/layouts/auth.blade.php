@@ -179,7 +179,7 @@
             </div>
 
             <div class="mb-4">
-                <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" class="h-10 object-contain mx-auto drop-shadow-md">
+                <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" class="h-10 object-contain mx-auto drop-shadow-md" style="filter: invert(1) brightness(100);">
             </div>
             <p class="text-blue-200/70 mt-3 text-center text-lg max-w-sm leading-relaxed">
                 {{ __('admin.auth_description') }}

@@ -11,7 +11,7 @@
                 <img src="{{ asset('images/dopifuture-logo-gorsel.png') }}" alt="DopiFuture Icon" style="width: 72px; height: 72px; object-fit: contain; margin: 0 auto; display: block;" />
             </div>
             <div style="margin-bottom: 0.5rem;">
-                <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" style="height: 36px; object-fit: contain; margin: 0 auto; display: block;" />
+                <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" style="height: 36px; object-fit: contain; margin: 0 auto; display: block; filter: invert(1) brightness(100);" />
             </div>
             <p style="color: var(--gray-400); font-size: 0.95rem;">
                 {{ 'Sign in with your DopiFuture account.' }}

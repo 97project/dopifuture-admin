@@ -498,7 +498,7 @@
         <div class="portal-header-inner">
             <a href="{{ url('/') }}" class="portal-logo" style="gap: 0.5rem; display: flex; align-items: center;">
                 <img src="{{ asset('images/dopifuture-logo-gorsel.png') }}" alt="DopiFuture" style="width: 28px; height: 28px; object-fit: contain;">
-                <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" style="height: 20px; object-fit: contain;">
+                <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" style="height: 20px; object-fit: contain; filter: invert(1) brightness(100);">
             </a>
             <nav class="portal-nav">
                 @auth

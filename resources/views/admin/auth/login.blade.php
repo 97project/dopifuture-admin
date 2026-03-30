@@ -8,7 +8,7 @@
         <div class="inline-flex items-center justify-center w-16 h-16 bg-white/5 rounded-2xl backdrop-blur-md border border-white/10 shadow-lg shadow-blue-800/10 mb-4">
             <img src="{{ asset('images/dopifuture-logo-gorsel.png') }}" alt="DopiFuture" class="w-10 h-10 object-contain drop-shadow-md">
         </div>
-        <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" class="h-8 object-contain drop-shadow-md">
+        <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" class="h-8 object-contain drop-shadow-md" style="filter: invert(1) brightness(100);">
     </div>
 
     {{-- Login Card --}}

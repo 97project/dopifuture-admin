@@ -37,7 +37,7 @@
             <div class="flex items-center gap-2 h-16 px-5 border-b border-white/5 bg-white/5 backdrop-blur-sm">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 w-full">
                     <img src="{{ asset('images/dopifuture-logo-gorsel.png') }}" alt="DopiFuture" class="w-8 h-8 object-contain drop-shadow-md">
-                    <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" class="h-6 object-contain drop-shadow-sm">
+                    <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" class="h-6 object-contain drop-shadow-sm" style="filter: invert(1) brightness(100);">
                 </a>
             </div>
 
