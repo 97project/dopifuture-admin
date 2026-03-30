@@ -4,11 +4,11 @@
 
 @section('content')
     {{-- Mobile logo (visible only on small screens) --}}
-    <div class="lg:hidden text-center mb-8">
-        <div
-            class="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-[#0B6AB2] to-[#13398E] shadow-lg shadow-blue-800/25 mb-4">
-            <span class="text-white text-xl font-black tracking-tighter">DF</span>
+    <div class="lg:hidden text-center mb-8 flex flex-col items-center">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-white/5 rounded-2xl backdrop-blur-md border border-white/10 shadow-lg shadow-blue-800/10 mb-4">
+            <img src="{{ asset('images/dopifuture-logo-gorsel.png') }}" alt="DopiFuture" class="w-10 h-10 object-contain drop-shadow-md">
         </div>
+        <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" class="h-8 object-contain drop-shadow-md">
     </div>
 
     {{-- Login Card --}}

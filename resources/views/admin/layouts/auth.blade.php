@@ -172,20 +172,15 @@
         {{-- Content --}}
         <div class="relative z-10 flex flex-col items-center justify-center w-full px-12 animate-fade-slow">
             {{-- Logo mark --}}
-            <div class="mb-8 relative">
-                <div
-                    class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#0B6AB2] to-[#13398E] flex items-center justify-center shadow-2xl shadow-blue-800/25 rotate-3 hover:rotate-0 transition-transform duration-500">
-                    <span class="text-white text-3xl font-black tracking-tighter">DF</span>
-                </div>
-                <div
-                    class="absolute -inset-1 bg-gradient-to-br from-[#0B6AB2] to-[#13398E] rounded-2xl blur-xl opacity-30">
+            <div class="mb-6 relative group">
+                <div class="w-24 h-24 rounded-2xl bg-white/5 flex items-center justify-center shadow-2xl shadow-blue-800/10 backdrop-blur-md border border-white/10 rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                    <img src="{{ asset('images/dopifuture-logo-gorsel.png') }}" alt="DopiFuture" class="w-16 h-16 object-contain drop-shadow-lg">
                 </div>
             </div>
 
-            <h1 class="text-4xl font-extrabold text-white tracking-tight text-center">
-                Dopi<span
-                    class="bg-gradient-to-r from-[#F87D17] to-[#FFB347] bg-clip-text text-transparent">Future</span>
-            </h1>
+            <div class="mb-4">
+                <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" class="h-10 object-contain mx-auto drop-shadow-md">
+            </div>
             <p class="text-blue-200/70 mt-3 text-center text-lg max-w-sm leading-relaxed">
                 {{ __('admin.auth_description') }}
             </p>

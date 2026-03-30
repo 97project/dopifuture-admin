@@ -7,16 +7,12 @@
 
         {{-- Hero --}}
         <div style="text-align: center; margin-bottom: 2.5rem;">
-            <div
-                style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: linear-gradient(135deg, var(--brand-500), var(--brand-700)); border-radius: 16px; margin-bottom: 1.25rem;">
-                <svg width="28" height="28" fill="none" stroke="white" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
+            <div style="margin-bottom: 1.25rem;">
+                <img src="{{ asset('images/dopifuture-logo-gorsel.png') }}" alt="DopiFuture Icon" style="width: 72px; height: 72px; object-fit: contain; margin: 0 auto; display: block;" />
             </div>
-            <h1 style="font-size: 2rem; font-weight: 800; color: white; margin-bottom: 0.5rem; letter-spacing: -0.025em;">
-                {{ 'Sign In' }}
-            </h1>
+            <div style="margin-bottom: 0.5rem;">
+                <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" style="height: 36px; object-fit: contain; margin: 0 auto; display: block;" />
+            </div>
             <p style="color: var(--gray-400); font-size: 0.95rem;">
                 {{ 'Sign in with your DopiFuture account.' }}
             </p>

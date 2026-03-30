@@ -34,14 +34,10 @@
         <aside id="sidebar" class="sidebar hidden lg:flex flex-col w-[260px] min-w-[260px] transition-all duration-300">
 
             {{-- Logo --}}
-            <div class="flex items-center gap-3 h-16 px-5 border-b border-white/5">
-                <div
-                    class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0B6AB2] to-[#13398E] flex items-center justify-center shadow-lg shadow-blue-800/20 flex-shrink-0">
-                    <span class="text-white text-xs font-black">DF</span>
-                </div>
-                <a href="{{ route('admin.dashboard') }}" class="text-lg font-bold text-white tracking-tight">
-                    Dopi<span
-                        class="bg-gradient-to-r from-[#F87D17] to-[#FFB347] bg-clip-text text-transparent">Future</span>
+            <div class="flex items-center gap-2 h-16 px-5 border-b border-white/5 bg-white/5 backdrop-blur-sm">
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 w-full">
+                    <img src="{{ asset('images/dopifuture-logo-gorsel.png') }}" alt="DopiFuture" class="w-8 h-8 object-contain drop-shadow-md">
+                    <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" class="h-6 object-contain drop-shadow-sm">
                 </a>
             </div>
 

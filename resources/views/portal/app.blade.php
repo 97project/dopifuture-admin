@@ -883,8 +883,8 @@
     <aside class="dp-sidebar" id="dpSidebar">
         <div class="dp-sidebar-logo">
             <a href="{{ route('portal.dashboard') }}">
-                <img src="{{ asset('images/dopifuture-logo.png') }}" alt="DopiFuture" class="logo-img" onerror="this.style.display='none'">
-                <span class="logo-text">dopifuture</span>
+                <img src="{{ asset('images/dopifuture-logo-gorsel.png') }}" alt="DopiFuture Icon" class="logo-img" style="border-radius: 0; object-fit: contain;">
+                <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" style="height: 28px; object-fit: contain;">
             </a>
         </div>
 

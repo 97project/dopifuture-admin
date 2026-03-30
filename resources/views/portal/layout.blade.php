@@ -496,14 +496,9 @@
     {{-- Header --}}
     <header class="portal-header">
         <div class="portal-header-inner">
-            <a href="{{ url('/') }}" class="portal-logo">
-                <div class="portal-logo-icon">
-                    <svg width="16" height="16" fill="none" stroke="white" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                </div>
-                DopiFuture
+            <a href="{{ url('/') }}" class="portal-logo" style="gap: 0.5rem; display: flex; align-items: center;">
+                <img src="{{ asset('images/dopifuture-logo-gorsel.png') }}" alt="DopiFuture" style="width: 28px; height: 28px; object-fit: contain;">
+                <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" style="height: 20px; object-fit: contain;">
             </a>
             <nav class="portal-nav">
                 @auth
