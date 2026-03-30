@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('ref_translations')) return;
         Schema::create('ref_translations', function (Blueprint $table) {
             $table->id();
             $table->string('entity_type', 50)->comment('Entity type: simulation, role, simulation_path, challenge_option, objective, info_card, media_asset, metric_definition');

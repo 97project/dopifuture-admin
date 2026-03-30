@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('ref_metric_definitions')) return;
         Schema::create('ref_metric_definitions', function (Blueprint $table) {
             $table->id();
             $table->string('metric_key', 50)->unique()->comment('Unique metric key (e.g., resource, health, ethics)');

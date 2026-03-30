@@ -281,6 +281,10 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     Route::get('reports/student/{student}/study-space', [\App\Http\Controllers\PortalReportController::class, 'studySpaceDetail'])->name('portal.reports.student.study-space');
     Route::get('api/students/search', [\App\Http\Controllers\PortalReportController::class, 'searchStudents'])->name('portal.api.students.search');
 
+    // Assignment creation — MW & WS
+    Route::post('reports/mission-way/assignments', [\App\Http\Controllers\PortalAssignmentController::class, 'storeMwAssignment'])->name('portal.assignments.mw.store');
+    Route::post('reports/way-startup/assignments', [\App\Http\Controllers\PortalAssignmentController::class, 'storeWsAssignment'])->name('portal.assignments.ws.store');
+
     // Schools: school-admin can only view and edit their own school (NO create/delete)
     Route::resource('schools', \App\Http\Controllers\PortalSchoolController::class)
         ->only(['index', 'show', 'edit', 'update'])

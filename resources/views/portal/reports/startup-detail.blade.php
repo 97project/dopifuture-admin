@@ -137,7 +137,7 @@
             {{-- Progress --}}
             <div class="dp-card" style="margin-bottom:16px;">
                 <div style="font-size:13px;font-weight:600;color:var(--color-primary);margin-bottom:6px;">
-                    {{ $project->steps_completed ?? '6' }}/{{ $project->total_steps ?? '12' }} Step Completed
+                    {{ $project->steps_completed }}/{{ $project->total_steps }} Step Completed
                 </div>
                 <div style="width:100%;height:8px;border-radius:4px;background:#e2e8f0;">
                     <div style="width:{{ ($project->steps_completed ?? 6) / ($project->total_steps ?? 12) * 100 }}%;height:100%;border-radius:4px;background:var(--color-primary);"></div>
@@ -149,7 +149,7 @@
                 <div style="display:flex;justify-content:space-between;align-items:center;">
                     <div>
                         <div style="font-size:12px;color:var(--color-txt-muted);">Total Product Score</div>
-                        <div style="font-size:22px;font-weight:700;">{{ $project->product_score ?? '120' }} / {{ $project->max_score ?? '2500' }}</div>
+                        <div style="font-size:22px;font-weight:700;">{{ $project->product_score }} / {{ $project->max_score }}</div>
                     </div>
                     <span style="display:inline-flex;align-items:center;gap:4px;background:#FEE2E2;color:#DC2626;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;">
                         <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -161,17 +161,10 @@
             {{-- Submitted Files — Figma shows real file list --}}
             <div class="dp-card" style="margin-bottom:16px;">
                 <div style="font-weight:600;font-size:13px;margin-bottom:12px;">Submitted Files</div>
-                @php
-                    $mockFiles = [
-                        ['step' => 1, 'name' => 'prototype_demo.mp4', 'size' => '2.4 MB'],
-                        ['step' => 2, 'name' => 'prototype_demo.mp4', 'size' => '2.4 MB'],
-                        ['step' => 5, 'name' => 'prototype_demo.mp4', 'size' => '2.4 MB'],
-                    ];
-                @endphp
-                @foreach($mockFiles as $file)
+                @forelse($files ?? [] as $file)
                 <div style="margin-bottom:12px;">
                     <div style="display:inline-block;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:600;background:#DBEAFE;color:#2563EB;margin-bottom:6px;">
-                        Step {{ $file['step'] }}
+                        Step {{ $file['step'] ?? '-' }}
                     </div>
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--color-input-bg);border-radius:10px;">
                         <div style="display:flex;align-items:center;gap:10px;">
@@ -179,40 +172,46 @@
                                 <svg width="16" height="16" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                             </div>
                             <div>
-                                <div style="font-size:13px;font-weight:500;">{{ $file['name'] }}</div>
-                                <div style="font-size:11px;color:var(--color-txt-muted);">{{ $file['size'] }}</div>
+                                <div style="font-size:13px;font-weight:500;">{{ $file['name'] ?? 'file' }}</div>
+                                <div style="font-size:11px;color:var(--color-txt-muted);">{{ $file['size'] ?? '' }}</div>
                             </div>
                         </div>
-                        <span style="color:var(--color-txt-muted);cursor:pointer;" title="Download">
+                        @if(!empty($file['url']))
+                        <a href="{{ $file['url'] }}" target="_blank" style="color:var(--color-txt-muted);cursor:pointer;" title="Download">
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                        </span>
+                        </a>
+                        @endif
                     </div>
                 </div>
-                @endforeach
+                @empty
+                <div style="text-align:center;padding:16px;color:var(--color-txt-muted);font-size:13px;">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 8px;display:block;opacity:0.4;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    No files submitted yet
+                </div>
+                @endforelse
             </div>
 
             {{-- Submitted Links --}}
             <div class="dp-card">
                 <div style="font-weight:600;font-size:13px;margin-bottom:12px;">Submitted Links</div>
-                @php
-                    $mockLinks = [
-                        ['step' => 3, 'url' => 'https://drive.google.com/file/demo'],
-                        ['step' => 4, 'url' => 'https://drive.google.com/file/demo'],
-                    ];
-                @endphp
-                @foreach($mockLinks as $link)
+                @forelse($links ?? [] as $link)
                 <div style="margin-bottom:12px;">
                     <div style="display:inline-block;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:600;background:#FEF3C7;color:#D97706;margin-bottom:6px;">
-                        Step {{ $link['step'] }}
+                        Step {{ $link['step'] ?? '-' }}
                     </div>
                     <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--color-input-bg);border-radius:10px;">
                         <div style="width:36px;height:36px;border-radius:8px;background:#F59E0B;display:flex;align-items:center;justify-content:center;">
                             <svg width="16" height="16" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                         </div>
-                        <span style="font-size:12px;color:var(--color-primary);word-break:break-all;">{{ $link['url'] }}</span>
+                        <a href="{{ $link['url'] }}" target="_blank" style="font-size:12px;color:var(--color-primary);word-break:break-all;">{{ $link['url'] }}</a>
                     </div>
                 </div>
-                @endforeach
+                @empty
+                <div style="text-align:center;padding:16px;color:var(--color-txt-muted);font-size:13px;">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 8px;display:block;opacity:0.4;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"/></svg>
+                    No links submitted yet
+                </div>
+                @endforelse
             </div>
         </div>
     </div>

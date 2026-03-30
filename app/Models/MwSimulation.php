@@ -2,38 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\MissionWay\RefSimulation as BaseRefSimulation;
 
-class MwSimulation extends Model
+/**
+ * Legacy alias — yeni App\Models\MissionWay\RefSimulation modeline yönlendirir.
+ * HarvestAppData MwSimulation olarak kullanır; artık ref_simulations tablosuna yazar.
+ *
+ * @deprecated Doğrudan App\Models\MissionWay\RefSimulation kullanın.
+ */
+class MwSimulation extends BaseRefSimulation
 {
-    protected $table = 'mw_simulations';
-
-    protected $fillable = [
-        'external_id', 'application_id', 'name', 'difficulty_level', 'status',
-        'description', 'cover_image', 'min_players', 'max_players',
-        'estimated_duration', 'metadata', 'synced_at',
-    ];
-
-    protected $casts = [
-        'metadata'  => 'array',
-        'synced_at' => 'datetime',
-    ];
-
-    public function application(): BelongsTo
-    {
-        return $this->belongsTo(Application::class);
-    }
-
-    public function sessions(): HasMany
-    {
-        return $this->hasMany(MwSession::class, 'simulation_id');
-    }
-
-    /** Tüm session path'leri — unique version id'ler üzerinden */
-    public function paths(): HasMany
-    {
-        return $this->hasMany(MwSimulationPath::class, 'simulation_version_id', 'external_id');
-    }
 }

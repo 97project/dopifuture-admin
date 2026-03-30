@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('ref_simulations')) return;
         Schema::create('ref_simulations', function (Blueprint $table) {
             $table->id();
             $table->string('difficulty_level', 20)->nullable()->comment('Difficulty: easy, medium, hard, expert');

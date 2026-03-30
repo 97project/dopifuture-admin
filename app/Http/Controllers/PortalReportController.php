@@ -3,8 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Application;
+use App\Models\MissionWay\MwAssignment;
+use App\Models\MissionWay\MwPlayer;
+use App\Models\MissionWay\MwPlayerChoice;
+use App\Models\MissionWay\MwSimulationSession;
+use App\Models\MissionWay\RefSimulation;
+use App\Models\MissionWay\RefSimulationPath;
+use App\Models\MissionWay\RefTranslation;
 use App\Models\SchoolClass;
 use App\Models\User;
+use App\Models\WsMember;
+use App\Models\WsSimulation;
+use App\Services\MwMetricService;
 use App\Services\ReportService;
 use App\Services\VegaReportService;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +28,7 @@ class PortalReportController extends Controller
     public function __construct(
         private ReportService $reportService,
         private VegaReportService $vegaReportService,
+        private MwMetricService $mwMetricService,
     ) {
     }
 
@@ -89,7 +100,7 @@ class PortalReportController extends Controller
      * Figma F-38 (Assignments tab) + F-63 (Performance tab)
      *
      * Vega apps (role-galaxy, way-ai-coach, study-space): real Vega DB data.
-     * Mission WAY, Way Startup: fixture data.
+     * Mission WAY, Way Startup: real MySQL data from harvested tables.
      */
     public function appReport(Application $app)
     {
@@ -123,25 +134,15 @@ class PortalReportController extends Controller
             return view('portal.reports.app', $data);
         }
 
-        // ── NON-VEGA APPS: Mock data (mission-way, way-startup) ────
-        $mockStudents = collect([
-            (object)['id'=>901,'name'=>'Elif','surname'=>'Demir','avatar'=>null,'classes'=>collect([(object)['name'=>'9-A']])],
-            (object)['id'=>902,'name'=>'Ahmet','surname'=>'Çelik','avatar'=>null,'classes'=>collect([(object)['name'=>'10-B']])],
-            (object)['id'=>903,'name'=>'Fatma','surname'=>'Şahin','avatar'=>null,'classes'=>collect([(object)['name'=>'9-A']])],
-            (object)['id'=>904,'name'=>'Emre','surname'=>'Aydın','avatar'=>null,'classes'=>collect([(object)['name'=>'11-C']])],
-            (object)['id'=>905,'name'=>'Selin','surname'=>'Öztürk','avatar'=>null,'classes'=>collect([(object)['name'=>'10-B']])],
-            (object)['id'=>906,'name'=>'Burak','surname'=>'Yılmaz','avatar'=>null,'classes'=>collect([(object)['name'=>'9-A']])],
-            (object)['id'=>907,'name'=>'Cansu','surname'=>'Koç','avatar'=>null,'classes'=>collect([(object)['name'=>'11-C']])],
-            (object)['id'=>908,'name'=>'Deniz','surname'=>'Arslan','avatar'=>null,'classes'=>collect([(object)['name'=>'10-B']])],
-        ]);
+        // ── NON-VEGA APPS: Real Database Queries ────────────────
 
         // ── MISSION WAY: Real Database Query ──────────
         $missions = collect();
         if ($app->slug === 'mission-way') {
-            $simulations = \App\Models\MissionWay\RefSimulation::with('versions.paths')->get();
+            $simulations = RefSimulation::with('versions.paths')->get();
             foreach ($simulations as $sim) {
                 $versionIds = $sim->versions->pluck('id');
-                $sessions = \App\Models\MissionWay\MwSimulationSession::whereIn('simulation_version_id', $versionIds)
+                $sessions = MwSimulationSession::whereIn('simulation_version_id', $versionIds)
                     ->with('players.player.user')
                     ->get();
 
@@ -152,12 +153,20 @@ class PortalReportController extends Controller
                         'name' => $u ? $u->name : $sp->player->name,
                         'surname' => $u ? $u->surname : $sp->player->surname,
                         'avatar' => null,
-                        'classes' => collect(),
+                        'classes' => $u ? $u->classes->map(fn($c) => (object)['name' => $c->name]) : collect(),
                     ];
                 })->unique('id');
 
-                $assignedDate = $sessions->min('created_at')?->format('d/m/Y') ?? '-';
-                $deadlineDate = \App\Models\MissionWay\MwAssignment::where('simulation_id', $sim->id)->min('deadline')?->format('d/m/Y') ?? '-';
+                $minCreated = $sessions->min('created_at');
+                $assignedDate = $minCreated ? \Carbon\Carbon::parse($minCreated)->format('d/m/Y') : '-';
+                $minDeadline = MwAssignment::where('simulation_id', $sim->id)->min('deadline');
+                $deadlineDate = $minDeadline ? \Carbon\Carbon::parse($minDeadline)->format('d/m/Y') : '-';
+
+                // Metric enrichment from completed sessions
+                $completedSessions = $sessions->where('status', 'completed');
+                $enriched = $this->mwMetricService->aggregateSessionMetrics($completedSessions, $sim->versions->first()?->id);
+                $metricValues = $this->mwMetricService->getAllMetricValues($enriched);
+                $metricTrends = $this->mwMetricService->getAllMetricValues($enriched, 'trend');
 
                 $missions->push((object)[
                     'id'             => $sim->id,
@@ -165,98 +174,159 @@ class PortalReportController extends Controller
                     'students'       => $players,
                     'assigned_date'  => $assignedDate,
                     'deadline'       => $deadlineDate,
-                    'health_point'   => null,
-                    'resource_point' => null,
-                    'ethics_point'   => null,
-                    'adaptation_point' => null,
-                    'health_trend'   => null,
-                    'resource_trend' => null,
-                    'ethics_trend'   => null,
-                    'adaptation_trend' => null,
+                    'health_point'   => $metricValues['health'],
+                    'resource_point' => $metricValues['resource'],
+                    'ethics_point'   => $metricValues['ethics'],
+                    'adaptation_point' => $metricValues['adaptation'],
+                    'health_trend'   => $metricTrends['health'],
+                    'resource_trend' => $metricTrends['resource'],
+                    'ethics_trend'   => $metricTrends['ethics'],
+                    'adaptation_trend' => $metricTrends['adaptation'],
                 ]);
             }
         }
 
-        // ── WAY STARTUP: Figma F-4 Assignments mock data ───────────
+        // ── WAY STARTUP: Real Database Query ───────────
         $startups = collect();
         if ($app->slug === 'way-startup') {
-            $startupData = [
-                ['SmartClass',   'Edtech',           2, 12, 150, 1500, null,   'in_progress'],
-                ['VitaCare',     'Healthcare Tech',   0, 12,   0, 1500, null,   'not_started'],
-                ['StudyFund',    'Fintech',           3, 12, 450, 1500, null,   'in_progress'],
-                ['TrendBox',     'E-commerce',        0, 12,1100, 1500, 'Score','completed'],
-                ['FutureBot',    'Robotics',          0, 12,   0, 1500, null,   'not_started'],
-                ['DreamVR',      'Virtual Reality',   0, 12, 750, 1500, null,   'completed'],
-                ['LifeCheck',    'Healthcare Tech',   6, 12, 600, 1500, null,   'in_progress'],
-                ['SenseFit',     'Wearable Tech',     0, 12,1300, 1500, 'Score','completed'],
-                ['EasyTrip',     'Travel Management', 0, 12, 350, 1500, null,   'not_started'],
-                ['SafeCore',     'Cybersecurity',    11, 12,1300, 1500, null,   'in_progress'],
-                ['DialogAI',     'Conversational AI', 0, 12,   0, 1500, null,   'not_started'],
-                ['TokenLab',     'Blockchain',        0, 12,1200, 1500, null,   'completed'],
-                ['ShopNest',     'E-commerce',        2, 12, 300, 1500, null,   'in_progress'],
-                ['TrustNet',     'Cybersecurity',     0, 12,1450, 1500, 'Score','completed'],
-                ['Learnify',     'Edtech',            0, 12,   0, 1500, null,   'not_started'],
-            ];
-            $typeIcons = [
-                'Edtech' => '📚', 'Healthcare Tech' => '🏥', 'Fintech' => '💰',
-                'E-commerce' => '🛒', 'Robotics' => '🤖', 'Virtual Reality' => '🎮',
-                'Wearable Tech' => '⌚', 'Travel Management' => '✈️',
-                'Cybersecurity' => '🔒', 'Conversational AI' => '💬', 'Blockchain' => '🔗',
-            ];
-            foreach ($startupData as $idx => $row) {
-                $studentSlice = $mockStudents->random(rand(2, 4));
-                $deadlineOverdue = in_array($idx, [9, 12, 14]);
+            $wsSims = WsSimulation::with('steps')->get();
+            foreach ($wsSims as $wsSim) {
+                $stepCount = $wsSim->steps->count();
+
+                // Real completion from member step_progress
+                $members = WsMember::where('application_id', $wsSim->application_id)->with('user')->get();
+                $completedSteps = 0;
+                foreach ($members as $m) {
+                    foreach (($m->step_progress ?? []) as $sp) {
+                        if (($sp['status'] ?? '') === 'completed') $completedSteps++;
+                    }
+                }
+                $totalPoints = $wsSim->steps->sum('points');
+                $maxPoints = $wsSim->steps->sum('max_score');
+
+                // Deadline from assignment metadata (if available)
+                $deadline = $wsSim->metadata['dueDate'] ?? $wsSim->metadata['deadline'] ?? null;
+                $deadlineStr = $deadline ? \Carbon\Carbon::parse($deadline)->format('d/m/Y') : '-';
+                $deadlineOverdue = $deadline ? \Carbon\Carbon::parse($deadline)->isPast() : false;
+
                 $startups->push((object)[
-                    'id'            => $idx + 1,
-                    'name'          => $row[0],
-                    'type'          => $row[1],
-                    'type_icon'     => $typeIcons[$row[1]] ?? '📁',
-                    'students'      => $studentSlice,
-                    'deadline'      => $deadlineOverdue ? now()->subDays(rand(10,50))->format('m/d/Y') : '03/16/2026',
+                    'id'            => $wsSim->id,
+                    'name'          => $wsSim->name,
+                    'type'          => $wsSim->type ?? $wsSim->category ?? '-',
+                    'type_icon'     => '📁',
+                    'students'      => $members->map(fn($m) => (object)[
+                        'id' => $m->user_id,
+                        'name' => $m->user?->name ?? '-',
+                        'surname' => $m->user?->surname ?? '',
+                    ]),
+                    'deadline'      => $deadlineStr,
                     'deadline_overdue' => $deadlineOverdue,
-                    'step_completed'=> $row[2],
-                    'step_total'    => $row[3],
-                    'system_point'  => $row[4],
-                    'max_point'     => $row[5],
-                    'teacher_point' => $row[6],
-                    'status'        => $row[7],
+                    'step_completed'=> $completedSteps,
+                    'step_total'    => $stepCount,
+                    'system_point'  => $totalPoints,
+                    'max_point'     => $maxPoints,
+                    'teacher_point' => null,
+                    'status'        => $completedSteps >= $stepCount && $stepCount > 0 ? 'completed' : ($completedSteps > 0 ? 'in_progress' : 'not_started'),
                 ]);
             }
         }
 
-        // ── USER STATS for Performance tab (non-Vega apps) ─────────
-        $userStats = $mockStudents->map(function($s, $i) use ($app) {
+        // ── USER STATS for Performance tab — Real DB ─────────
+        $panelStudents = User::whereIn('id', $panelUserIds)->with('classes')->get();
+        $userStats = $panelStudents->map(function ($s) use ($app) {
             $base = [
                 'user' => $s,
-                'total' => rand(4,8),
-                'completed' => rand(1,5),
-                'completion_rate' => rand(30,95),
-                'avg_score' => rand(45,92) + rand(0,9)/10,
-                'total_duration' => rand(1800, 14400),
+                'total' => 0,
+                'completed' => 0,
+                'completion_rate' => 0,
+                'avg_score' => 0,
+                'total_duration' => 0,
             ];
             if ($app->slug === 'mission-way') {
-                $base['health_point'] = rand(60,100);
-                $base['resource_point'] = rand(40,95);
-                $base['ethics_point'] = rand(50,90);
-                $base['adaptation_point'] = rand(35,88);
+                $player = MwPlayer::where('user_id', $s->id)->first();
+                if ($player) {
+                    $progressRecords = $player->progress;
+                    $base['total'] = $progressRecords->count();
+                    $base['completed'] = $progressRecords->whereNotNull('completed_at')->count();
+                    $base['completion_rate'] = $base['total'] > 0 ? round(($base['completed'] / $base['total']) * 100) : 0;
+                    $base['avg_score'] = $player->profile?->total_score ?? 0;
+
+                    // Per-student metrics from latest completed session
+                    $latestSession = MwSimulationSession::whereHas('players', fn($q) => $q->where('player_id', $player->id))
+                        ->where('status', 'completed')
+                        ->latest()
+                        ->first();
+                    if ($latestSession && $latestSession->final_metrics) {
+                        $enriched = $this->mwMetricService->enrichSessionMetrics(
+                            $latestSession->final_metrics,
+                            $latestSession->simulation_version_id
+                        );
+                        $metricValues = $this->mwMetricService->getAllMetricValues($enriched);
+                        $base['health_point'] = $metricValues['health'];
+                        $base['resource_point'] = $metricValues['resource'];
+                        $base['ethics_point'] = $metricValues['ethics'];
+                        $base['adaptation_point'] = $metricValues['adaptation'];
+                    } else {
+                        $base['health_point'] = null;
+                        $base['resource_point'] = null;
+                        $base['ethics_point'] = null;
+                        $base['adaptation_point'] = null;
+                    }
+                } else {
+                    $base['health_point'] = null;
+                    $base['resource_point'] = null;
+                    $base['ethics_point'] = null;
+                    $base['adaptation_point'] = null;
+                }
             } elseif ($app->slug === 'way-startup') {
-                $base['startup_type'] = ['Technology','Health','Education','Finance'][$i % 4];
-                $base['deadline'] = now()->addDays(rand(5,30))->format('d.m.Y');
-                $base['teacher_score'] = rand(60,95);
+                // WS per-student stats from member data
+                $member = WsMember::where('user_id', $s->id)->first();
+                $base['startup_type'] = '-';
+                if ($member) {
+                    $completed = collect($member->step_progress ?? [])->where('status', 'completed')->count();
+                    $total = count($member->step_progress ?? []);
+                    $base['total'] = $total;
+                    $base['completed'] = $completed;
+                    $base['completion_rate'] = $total > 0 ? round(($completed / $total) * 100) : 0;
+                    $base['avg_score'] = $member->points ?? 0;
+                }
+                $base['deadline'] = '-';
+                $base['teacher_score'] = null;
             }
             return $base;
         })->values();
 
-        $moduleStats = collect([
-            'simulation' => ['type'=>'simulation','total'=>12,'completed'=>8,'in_progress'=>3,'avg_score'=>72.5,'avg_duration'=>1800],
-            'step'       => ['type'=>'step','total'=>18,'completed'=>14,'in_progress'=>3,'avg_score'=>68.0,'avg_duration'=>900],
-            'practice'   => ['type'=>'practice','total'=>8,'completed'=>5,'in_progress'=>2,'avg_score'=>81.2,'avg_duration'=>1200],
-        ]);
+        // ── Module Stats — Computed from DB ─────────
+        $totalSessions = 0;
+        $totalCompleted = 0;
+        $totalDuration = 0;
+        $avgScore = 0;
 
+        if ($app->slug === 'mission-way') {
+            $totalSessions = MwSimulationSession::count();
+            $totalCompleted = MwSimulationSession::where('status', 'completed')->count();
+        } elseif ($app->slug === 'way-startup') {
+            $totalSessions = WsSimulation::count();
+            $totalCompleted = 0;
+            // Count simulations that have any completed steps
+            foreach (WsSimulation::with('steps')->get() as $wsSim) {
+                $wsMembers = WsMember::where('application_id', $wsSim->application_id)->get();
+                $hasCompleted = $wsMembers->contains(fn($m) =>
+                    collect($m->step_progress ?? [])->contains('status', 'completed')
+                );
+                if ($hasCompleted) $totalCompleted++;
+            }
+        }
+
+        $moduleStats = collect();
         $sessionsByDay = collect();
         for ($d = 29; $d >= 0; $d--) {
             $date = now()->subDays($d)->format('Y-m-d');
-            $sessionsByDay[$date] = rand(0, 8);
+            if ($app->slug === 'mission-way') {
+                $sessionsByDay[$date] = MwSimulationSession::whereDate('created_at', $date)->count();
+            } else {
+                $sessionsByDay[$date] = 0;
+            }
         }
 
         $data = [
@@ -264,20 +334,25 @@ class PortalReportController extends Controller
             'user'             => $user,
             'missions'         => $missions,
             'startups'         => $startups,
-            'total_missions'   => 24,
-            'total_progress'   => 38,
-            'total_completed'  => 27,
-            'total_sessions'   => 64,
-            'total_duration'   => 45600,
-            'avg_score'        => 74.3,
+            'total_missions'   => $missions->count(),
+            'total_progress'   => $totalSessions,
+            'total_completed'  => $totalCompleted,
+            'total_sessions'   => $totalSessions,
+            'total_duration'   => $totalDuration,
+            'avg_score'        => $avgScore,
             'module_stats'     => $moduleStats,
             'user_stats'       => $userStats,
             'sessions_by_day'  => $sessionsByDay,
             'recent_sessions'  => collect(),
+            // Assignment modal data
+            'mw_simulations'   => RefSimulation::orderBy('name')->get(),
+            'ws_simulations'   => WsSimulation::orderBy('name')->get(),
+            'panel_students'   => $panelStudents ?? collect(),
         ];
 
         return view('portal.reports.app', $data);
     }
+
 
     /**
      * Student detailed report (all apps).
@@ -355,47 +430,123 @@ class PortalReportController extends Controller
      */
     public function missionDetail($id)
     {
-        $simModel = \App\Models\MissionWay\RefSimulation::with(['versions.paths'])->find($id);
+        $simModel = RefSimulation::with(['versions.paths'])->find($id);
 
         if (!$simModel) {
             abort(404, 'Mission not found in real database.');
         }
 
-        $mission = (object)[
-            'id' => $simModel->id,
-            'title' => $simModel->name ?? ('Simulation #' . $simModel->id),
-            'status' => 'Active',
-            'difficulty' => $simModel->difficulty ?? 'Normal',
-            'created' => $simModel->created_at?->format('d.m.Y') ?? now()->format('d.m.Y'),
-            'description' => $simModel->description ?? 'No description available.',
-            'result' => 'Awaiting completion data.',
-            'completion_rate' => 0,
-            'avg_score' => 0,
-            'health' => null, 'resource' => null, 'ethics' => null, 'adaptation' => null,
-            'image' => $simModel->background_image_path ?? 'https://images.unsplash.com/photo-1573648952826-b4f5e09c7370?w=1200&h=400&fit=crop',
-        ];
-
-        $sessions = \App\Models\MissionWay\MwSimulationSession::whereIn('simulation_version_id', $simModel->versions->pluck('id'))
+        $sessions = MwSimulationSession::whereIn('simulation_version_id', $simModel->versions->pluck('id'))
             ->with(['players.player.user', 'players.role'])
             ->get();
 
-        $students = $sessions->flatMap->players->map(function ($sp) {
+        // Metric enrichment from completed sessions
+        $completedSession = $sessions->where('status', 'completed')->first();
+        $enriched = $completedSession
+            ? $this->mwMetricService->enrichSessionMetrics($completedSession->final_metrics, $completedSession->simulation_version_id)
+            : [];
+        $metricValues = $this->mwMetricService->getAllMetricValues($enriched);
+
+        $completedCount = $sessions->where('status', 'completed')->count();
+        $totalCount = $sessions->count();
+
+        $mission = (object)[
+            'id' => $simModel->id,
+            'title' => $simModel->name ?? ('Simulation #' . $simModel->id),
+            'status' => $completedCount > 0 ? 'Active' : 'Pending',
+            'difficulty' => $simModel->difficulty ?? 'Normal',
+            'created' => $simModel->created_at?->format('d.m.Y') ?? now()->format('d.m.Y'),
+            'description' => $simModel->description ?? 'No description available.',
+            'result' => $completedCount > 0
+                ? "{$completedCount}/{$totalCount} session completed."
+                : 'Awaiting completion data.',
+            'completion_rate' => $totalCount > 0 ? round(($completedCount / $totalCount) * 100) : 0,
+            'avg_score' => $completedSession?->final_score ?? 0,
+            'health' => $metricValues['health'],
+            'resource' => $metricValues['resource'],
+            'ethics' => $metricValues['ethics'],
+            'adaptation' => $metricValues['adaptation'],
+            'image' => $simModel->background_image_path ?? 'https://images.unsplash.com/photo-1573648952826-b4f5e09c7370?w=1200&h=400&fit=crop',
+        ];
+
+        $students = $sessions->flatMap->players->map(function ($sp) use ($enriched) {
             $u = $sp->player->user ?? null;
+            // Per-student metrics from the session they participated in
+            $sessionMetrics = $sp->session?->final_metrics ?? [];
+            $studentEnriched = !empty($sessionMetrics)
+                ? $this->mwMetricService->enrichSessionMetrics($sessionMetrics, $sp->session?->simulation_version_id)
+                : $enriched;
+            $studentMetrics = $this->mwMetricService->getAllMetricValues($studentEnriched);
+
             return (object)[
                 'name' => $u ? $u->name : $sp->player->name,
                 'surname' => $u ? $u->surname : $sp->player->surname,
                 'role' => $sp->role->name ?? 'Participant',
                 'grade' => '-',
-                'completed' => $sp->session->status === 'completed' ? 1 : 0,
+                'completed' => $sp->session?->status === 'completed' ? 1 : 0,
                 'total_missions' => 1,
-                'health' => null,
-                'resource' => null,
-                'ethics' => null,
-                'adaptation' => null,
+                'health' => $studentMetrics['health'],
+                'resource' => $studentMetrics['resource'],
+                'ethics' => $studentMetrics['ethics'],
+                'adaptation' => $studentMetrics['adaptation'],
             ];
         })->unique(function ($s) { return $s->name . $s->surname; });
-        
+
+        // Group Flow: Build question cards from player choices
         $questions = collect();
+        if ($completedSession) {
+            $choices = MwPlayerChoice::where('simulation_session_id', $completedSession->id)
+                ->orderBy('id')
+                ->get();
+
+            $questions = $choices->map(function ($choice) {
+                $path = RefSimulationPath::with('childPaths')->find($choice->simulation_path_id);
+
+                // Get path text from translations
+                $pathTranslation = RefTranslation::where('entity_type', 'simulation_path')
+                    ->where('entity_id', $choice->simulation_path_id)
+                    ->first();
+                $questionText = null;
+                if ($pathTranslation && is_array($pathTranslation->fields)) {
+                    $questionText = $pathTranslation->fields['question'] ?? $pathTranslation->fields['text'] ?? $pathTranslation->fields['name'] ?? null;
+                }
+
+                // Build option list from child paths
+                $options = ($path?->childPaths ?? collect())->map(function ($child) use ($choice) {
+                    $childTranslation = RefTranslation::where('entity_type', 'simulation_path')
+                        ->where('entity_id', $child->id)
+                        ->first();
+                    $optionText = 'Option';
+                    if ($childTranslation && is_array($childTranslation->fields)) {
+                        $optionText = $childTranslation->fields['optionText'] ?? $childTranslation->fields['text'] ?? $childTranslation->fields['name'] ?? 'Option';
+                    }
+                    return (object)[
+                        'text' => $optionText,
+                        'selected' => $child->id === $choice->selected_path_id,
+                    ];
+                });
+
+                // Per-question metrics from metrics_after
+                $metricsAfter = $choice->metrics_after ?? [];
+                $extractMetric = function ($key) use ($metricsAfter) {
+                    $v = $metricsAfter[$key] ?? null;
+                    return is_array($v) ? ($v['current'] ?? null) : $v;
+                };
+
+                return (object)[
+                    'question' => $questionText ?? 'Decision Point',
+                    'unanimity' => $choice->response_time_seconds
+                        ? min(100, max(0, 100 - intval($choice->response_time_seconds)))
+                        : null,
+                    'options' => $options,
+                    'health' => $extractMetric('health'),
+                    'resource' => $extractMetric('resource'),
+                    'ethics' => $extractMetric('ethics'),
+                    'adaptation' => $extractMetric('adaptation'),
+                ];
+            });
+        }
+
         return view('portal.reports.mission-detail', compact('mission', 'students', 'questions'));
     }
 
@@ -404,21 +555,95 @@ class PortalReportController extends Controller
      */
     public function startupDetail($id)
     {
-        $project = (object)['id'=>$id,'name'=>'StudyFund / Fintech','steps_completed'=>6,'total_steps'=>12,'product_score'=>120,'max_score'=>2500];
-        $steps = collect([
-            (object)['title'=>'Team Formation & Roles','responsible'=>'John Doe','ai_score'=>150,'score'=>150,'difficulty'=>'Easy','completed'=>true],
-            (object)['title'=>'Idea Generation','responsible'=>'Sophia Wilson','ai_score'=>150,'score'=>150,'difficulty'=>'Easy','completed'=>true],
-            (object)['title'=>'User Research','responsible'=>'Terry Franci','ai_score'=>150,'score'=>145,'difficulty'=>'Easy','completed'=>true],
-            (object)['title'=>'Benchmark','responsible'=>'John Doe','ai_score'=>150,'score'=>50,'difficulty'=>'Easy','completed'=>false],
-            (object)['title'=>'Ideation','responsible'=>'Sophia Wilson','ai_score'=>150,'score'=>150,'difficulty'=>'Medium','completed'=>true],
-            (object)['title'=>'Business Model Canvas','responsible'=>'Terry Franci','ai_score'=>150,'score'=>0,'difficulty'=>'Medium','completed'=>false],
-        ]);
-        $team = collect([
-            (object)['name'=>'John','surname'=>'Doe','steps'=>'Step 1, 4, 7'],
-            (object)['name'=>'Sophia','surname'=>'Wilson','steps'=>'Step 2, 5, 8'],
-            (object)['name'=>'Terry','surname'=>'Franci','steps'=>'Step 3, 6, 9'],
-        ]);
-        return view('portal.reports.startup-detail', compact('project', 'steps', 'team'));
+        $wsSim = WsSimulation::with('steps')->find($id);
+
+        if (!$wsSim) {
+            abort(404, 'Startup project not found.');
+        }
+
+        $stepsCollection = $wsSim->steps;
+
+        // Real completion from member step_progress
+        $members = WsMember::where('application_id', $wsSim->application_id)->with('user')->get();
+        $allStepProgress = $members->flatMap(fn($m) => collect($m->step_progress ?? []));
+        $stepsCompleted = $allStepProgress->where('status', 'completed')->count();
+
+        $totalPoints = $stepsCollection->sum('points');
+        $maxPoints = $stepsCollection->sum('max_score');
+
+        // Per-step evaluation scores from member evaluations
+        $allEvaluations = $members->flatMap(fn($m) => collect($m->step_evaluations ?? []));
+
+        $project = (object)[
+            'id' => $wsSim->id,
+            'name' => $wsSim->name . ($wsSim->type ? ' / ' . $wsSim->type : ''),
+            'steps_completed' => $stepsCompleted,
+            'total_steps' => $stepsCollection->count(),
+            'product_score' => $totalPoints,
+            'max_score' => $maxPoints,
+        ];
+
+        $steps = $stepsCollection->map(function ($s) use ($allStepProgress, $allEvaluations) {
+            // Check if any member completed this step
+            $stepCompleted = $allStepProgress->contains(function ($sp) use ($s) {
+                return (($sp['stepId'] ?? $sp['step_id'] ?? null) == $s->external_id)
+                    && ($sp['status'] ?? '') === 'completed';
+            });
+
+            // Get AI score from evaluations
+            $stepEval = $allEvaluations->first(function ($ev) use ($s) {
+                return ($ev['stepId'] ?? $ev['step_id'] ?? null) == $s->external_id;
+            });
+            $aiScore = $stepEval['earnedPoint'] ?? $stepEval['score'] ?? $s->ai_score ?? 0;
+
+            return (object)[
+                'title' => $s->name,
+                'responsible' => $s->responsible_name ?? '-',
+                'ai_score' => $aiScore,
+                'score' => $s->points ?? 0,
+                'difficulty' => $s->difficulty ?? '-',
+                'completed' => $stepCompleted,
+            ];
+        });
+
+        // Team members with step mapping
+        $team = $members->map(function ($m) use ($stepsCollection) {
+            // Find which steps this member is responsible for
+            $responsibleSteps = $stepsCollection->filter(fn($s) => $s->responsible_name === ($m->user?->name ?? ''))
+                ->pluck('name')
+                ->join(', ');
+
+            return (object)[
+                'name' => $m->user?->name ?? '-',
+                'surname' => $m->user?->surname ?? '',
+                'steps' => $responsibleSteps ?: '-',
+            ];
+        });
+
+        // Extract submitted files and links from step_submissions
+        $files = [];
+        $links = [];
+        foreach ($members as $member) {
+            foreach (($member->step_submissions ?? []) as $sub) {
+                $stepIdx = $sub['stepIndex'] ?? $sub['step'] ?? $sub['stepId'] ?? null;
+                if (!empty($sub['file_name']) || !empty($sub['fileName'])) {
+                    $files[] = [
+                        'step' => $stepIdx,
+                        'name' => $sub['file_name'] ?? $sub['fileName'] ?? 'file',
+                        'size' => $sub['file_size'] ?? $sub['fileSize'] ?? '',
+                        'url'  => $sub['file_url'] ?? $sub['fileUrl'] ?? '',
+                    ];
+                }
+                if (!empty($sub['link']) || !empty($sub['url'])) {
+                    $links[] = [
+                        'step' => $stepIdx,
+                        'url'  => $sub['link'] ?? $sub['url'] ?? '',
+                    ];
+                }
+            }
+        }
+
+        return view('portal.reports.startup-detail', compact('project', 'steps', 'team', 'files', 'links'));
     }
 
     /**

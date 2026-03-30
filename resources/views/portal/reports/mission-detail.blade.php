@@ -37,19 +37,19 @@
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                         <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
                             <div style="font-size:10px;font-weight:600;color:#EF4444;text-transform:uppercase;margin-bottom:4px;">❤️ HEALTH POINT:</div>
-                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->health ?? 75 }}</div>
+                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->health ?? '-' }}</div>
                         </div>
                         <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
                             <div style="font-size:10px;font-weight:600;color:#3B82F6;text-transform:uppercase;margin-bottom:4px;">📦 RESOURCE POINT:</div>
-                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->resource ?? 40 }} <span style="font-size:16px;">👎</span></div>
+                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->resource ?? '-' }} @if($mission->resource !== null)<span style="font-size:16px;">{{ $mission->resource >= 50 ? '👍' : '👎' }}</span>@endif</div>
                         </div>
                         <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
                             <div style="font-size:10px;font-weight:600;color:#22C55E;text-transform:uppercase;margin-bottom:4px;">⚖️ ETHICS POINT:</div>
-                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->ethics ?? 85 }} <span style="font-size:16px;">👍</span></div>
+                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->ethics ?? '-' }} @if($mission->ethics !== null)<span style="font-size:16px;">{{ $mission->ethics >= 50 ? '👍' : '👎' }}</span>@endif</div>
                         </div>
                         <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
                             <div style="font-size:10px;font-weight:600;color:#8B5CF6;text-transform:uppercase;margin-bottom:4px;">✅ ADAPTATION POINT:</div>
-                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->adaptation ?? 100 }} <span style="font-size:16px;">👍</span></div>
+                            <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->adaptation ?? '-' }} @if($mission->adaptation !== null)<span style="font-size:16px;">{{ $mission->adaptation >= 50 ? '👍' : '👎' }}</span>@endif</div>
                         </div>
                     </div>
                 </div>
@@ -61,7 +61,7 @@
     <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;font-family:'Nunito',sans-serif;">Group Flow</h3>
 
     <div style="display:flex;gap:0;align-items:flex-start;overflow-x:auto;padding-bottom:16px;">
-        @foreach($questions as $qi => $q)
+        @forelse($questions as $qi => $q)
         <div style="flex:0 0 380px;position:relative;">
             {{-- Question Card --}}
             <div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:16px;margin:0 8px;">
@@ -70,7 +70,9 @@
                     <span style="background:{{ $qi === 0 ? '#22C55E' : ($qi === 1 ? '#3B82F6' : '#EF4444') }};color:#fff;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;">
                         Question {{ $qi + 1 }}
                     </span>
-                    <span style="font-size:12px;color:#6B7280;">Unanimity Rate: <strong style="color:#111;">{{ $q->unanimity ?? '75' }}/100</strong></span>
+                    @if($q->unanimity !== null)
+                    <span style="font-size:12px;color:#6B7280;">Unanimity Rate: <strong style="color:#111;">{{ $q->unanimity }}/100</strong></span>
+                    @endif
                 </div>
 
                 {{-- Question Text --}}
@@ -93,24 +95,24 @@
                     <div style="background:linear-gradient(135deg,#FCA5A5,#EF4444);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">❤️</span>
                         <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Health<br>Point:</span>
-                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->health ?? 45 }}</span>
-                        <span style="font-size:12px;">👎</span>
+                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->health ?? '-' }}</span>
+                        @if($q->health !== null)<span style="font-size:12px;">{{ $q->health >= 50 ? '👍' : '👎' }}</span>@endif
                     </div>
                     <div style="background:linear-gradient(135deg,#93C5FD,#3B82F6);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">📦</span>
                         <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Resource<br>Point:</span>
-                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->resource ?? 70 }}</span>
+                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->resource ?? '-' }}</span>
                     </div>
                     <div style="background:linear-gradient(135deg,#A7F3D0,#22C55E);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">⚖️</span>
                         <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Ethics<br>Point:</span>
-                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->ethics ?? 65 }}</span>
+                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->ethics ?? '-' }}</span>
                     </div>
                     <div style="background:linear-gradient(135deg,#C4B5FD,#8B5CF6);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">✅</span>
                         <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Adaptation<br>Point:</span>
-                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->adaptation ?? 100 }}</span>
-                        <span style="font-size:12px;">👍</span>
+                        <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->adaptation ?? '-' }}</span>
+                        @if($q->adaptation !== null)<span style="font-size:12px;">{{ $q->adaptation >= 50 ? '👍' : '👎' }}</span>@endif
                     </div>
                 </div>
             </div>
@@ -125,7 +127,13 @@
             </div>
             @endif
         </div>
-        @endforeach
+        @empty
+        <div class="dp-card" style="width:100%;text-align:center;padding:40px;">
+            <svg width="48" height="48" fill="none" stroke="#9CA3AF" viewBox="0 0 24 24" style="margin:0 auto 12px;display:block;opacity:0.5;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div style="font-size:14px;font-weight:600;color:#6B7280;">Henüz karar noktası verisi yok</div>
+            <div style="font-size:12px;color:#9CA3AF;margin-top:4px;">Bu görev tamamlandığında Group Flow burada gösterilecek.</div>
+        </div>
+        @endforelse
     </div>
 
 @endsection

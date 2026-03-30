@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('ref_roles')) return;
         Schema::create('ref_roles', function (Blueprint $table) {
             $table->id();
             $table->timestamp('deactivated_at')->nullable();

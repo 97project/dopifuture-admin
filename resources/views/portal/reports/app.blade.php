@@ -837,4 +837,121 @@ new Chart(document.getElementById('sessionsChart'), {
 @endif
 </script>
 @endif
+
+{{-- ═══ Add Assignment Modal ═══ --}}
+@if(!in_array($slug, ['role-galaxy', 'study-space', 'way-ai-coach']))
+<div id="addAssignmentModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);align-items:center;justify-content:center;"
+     onclick="if(event.target===this)this.classList.remove('show')">
+    <div style="background:#fff;border-radius:16px;padding:28px;max-width:520px;width:92%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);" onclick="event.stopPropagation()">
+        {{-- Header --}}
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+            <h3 style="font-size:18px;font-weight:700;color:#111;margin:0;font-family:'Nunito',sans-serif;">
+                @if($slug === 'mission-way')
+                    🎯 Yeni Görev Ata
+                @else
+                    🚀 Yeni Proje Ata
+                @endif
+            </h3>
+            <button type="button" onclick="document.getElementById('addAssignmentModal').classList.remove('show')"
+                    style="background:none;border:none;cursor:pointer;padding:4px;">
+                <svg width="20" height="20" fill="none" stroke="#6B7280" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        @if($slug === 'mission-way')
+        <form action="{{ route('portal.assignments.mw.store') }}" method="POST">
+            @csrf
+            <div style="margin-bottom:16px;">
+                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Simülasyon Seçin</label>
+                <select name="simulation_id" required
+                        style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;color:#111;background:#fff;">
+                    <option value="">— Bir simülasyon seçin —</option>
+                    @foreach($mw_simulations ?? [] as $sim)
+                        <option value="{{ $sim->id }}">{{ $sim->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Öğrenciler</label>
+                <div style="max-height:200px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;padding:8px;">
+                    @forelse($panel_students ?? [] as $student)
+                    <label style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;font-size:13px;">
+                        <input type="checkbox" name="user_ids[]" value="{{ $student->id }}" style="accent-color:#4364F7;">
+                        {{ $student->name }} {{ $student->surname }}
+                    </label>
+                    @empty
+                    <div style="padding:12px;text-align:center;color:#9CA3AF;font-size:12px;">Öğrenci bulunamadı</div>
+                    @endforelse
+                </div>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Son Tarih</label>
+                <input type="datetime-local" name="deadline" required min="{{ now()->format('Y-m-d\TH:i') }}"
+                       style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;color:#111;">
+            </div>
+
+            <button type="submit" class="dp-btn" style="width:100%;justify-content:center;padding:12px;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Görevi Ata
+            </button>
+        </form>
+        @else
+        <form action="{{ route('portal.assignments.ws.store') }}" method="POST">
+            @csrf
+            <div style="margin-bottom:16px;">
+                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Proje Seçin</label>
+                <select name="simulation_id" required
+                        style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;color:#111;background:#fff;">
+                    <option value="">— Bir proje seçin —</option>
+                    @foreach($ws_simulations ?? [] as $sim)
+                        <option value="{{ $sim->id }}">{{ $sim->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Öğrenciler</label>
+                <div style="max-height:200px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;padding:8px;">
+                    @forelse($panel_students ?? [] as $student)
+                    <label style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;font-size:13px;">
+                        <input type="checkbox" name="user_ids[]" value="{{ $student->id }}" style="accent-color:#4364F7;">
+                        {{ $student->name }} {{ $student->surname }}
+                    </label>
+                    @empty
+                    <div style="padding:12px;text-align:center;color:#9CA3AF;font-size:12px;">Öğrenci bulunamadı</div>
+                    @endforelse
+                </div>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Son Tarih</label>
+                <input type="datetime-local" name="due_date" required min="{{ now()->format('Y-m-d\TH:i') }}"
+                       style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;color:#111;">
+            </div>
+
+            <button type="submit" class="dp-btn" style="width:100%;justify-content:center;padding:12px;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Projeyi Ata
+            </button>
+        </form>
+        @endif
+
+        @if($errors->any())
+        <div style="margin-top:12px;padding:10px;background:#FEE2E2;border-radius:8px;font-size:12px;color:#DC2626;">
+            @foreach($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+        </div>
+        @endif
+    </div>
+</div>
+
+<style>
+#addAssignmentModal.show { display:flex !important; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+</style>
+@endif
+
 @endsection

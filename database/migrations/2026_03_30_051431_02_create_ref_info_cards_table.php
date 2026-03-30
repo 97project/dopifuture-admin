@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('ref_info_cards')) return;
         Schema::create('ref_info_cards', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('simulation_path_id');

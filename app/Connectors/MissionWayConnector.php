@@ -601,6 +601,233 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
         return is_array($result) ? $result : [];
     }
 
+    /* ═══════════════════════════════════════════════════════
+     *  Metric Definitions — GET /v1/metric-definitions
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/metric-definitions
+     *
+     * Response 200:
+     *   {
+     *     "data": [
+     *       {
+     *         "id": 1,
+     *         "key": "health",
+     *         "name": "Health",
+     *         "icon": "❤️",
+     *         "color": "#EF4444",
+     *         "unitLabel": "HP",
+     *         "createdAt": "2026-01-10T08:00:00.000Z"
+     *       }
+     *     ]
+     *   }
+     */
+    public function getMetricDefinitions(array $params = []): ?array
+    {
+        $result = $this->apiGet('/v1/metric-definitions', array_merge(['limit' => 100], $params));
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Simulation Versions — GET /v1/simulation-versions/simulation/:id
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/simulation-versions/simulation/:simulationId
+     * Returns array of version objects for a given simulation.
+     */
+    public function getSimulationVersions(int $simulationId): array
+    {
+        $result = $this->apiGet("/v1/simulation-versions/simulation/{$simulationId}");
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Metric Band Categories — GET /v1/metric-band-categories
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/metric-band-categories
+     *
+     * Response 200:
+     *   {
+     *     "data": [
+     *       {
+     *         "id": 1,
+     *         "key": "critical",
+     *         "label": "Critical",
+     *         "color": "#EF4444",
+     *         "scoringImpact": -2,
+     *         "createdAt": "2026-01-10T08:00:00.000Z"
+     *       }
+     *     ]
+     *   }
+     */
+    public function getMetricBandCategories(array $params = []): ?array
+    {
+        $result = $this->apiGet('/v1/metric-band-categories', array_merge(['limit' => 100], $params));
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Simulation Metric Bands — GET /v1/simulation-metric-bands
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/simulation-metric-bands?filter=simulationVersionId||eq||{versionId}
+     *
+     * Response 200:
+     *   {
+     *     "data": [
+     *       {
+     *         "id": 1,
+     *         "simulationVersionId": 5,
+     *         "metricId": 1,
+     *         "categoryId": 2,
+     *         "minValue": 0,
+     *         "maxValue": 30,
+     *         "createdAt": "2026-01-10T08:00:00.000Z"
+     *       }
+     *     ]
+     *   }
+     */
+    public function getSimulationMetricBands(int $simulationVersionId): array
+    {
+        $result = $this->apiGet('/v1/simulation-metric-bands', [
+            'filter' => "simulationVersionId||eq||{$simulationVersionId}",
+            'limit' => 200,
+        ]);
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Assignments — GET /v1/assignments
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/assignments
+     *
+     * Response 200:
+     *   {
+     *     "data": [
+     *       {
+     *         "id": 1,
+     *         "simulationId": 3,
+     *         "simulationSessionId": 10,
+     *         "grade": "A",
+     *         "deadline": "2026-04-15T23:59:59.000Z",
+     *         "status": "active",
+     *         "createdBy": "admin",
+     *         "createdAt": "2026-02-10T09:00:00.000Z"
+     *       }
+     *     ]
+     *   }
+     */
+    public function getAssignments(array $params = []): ?array
+    {
+        $result = $this->apiGet('/v1/assignments', array_merge(['limit' => 200], $params));
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /**
+     * GET /v1/assignments/{id}/players
+     * Assignment'a atanmış player ID listesi.
+     */
+    public function getAssignmentPlayers(int $assignmentId): array
+    {
+        $result = $this->apiGet("/v1/assignments/{$assignmentId}/players");
+        return is_array($result) ? $result : [];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Roles — GET /v1/roles
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/roles
+     *
+     * Response 200:
+     *   {
+     *     "data": [
+     *       {
+     *         "id": 1,
+     *         "name": "Diplomat",
+     *         "createdAt": "2026-01-10T08:00:00.000Z"
+     *       }
+     *     ]
+     *   }
+     */
+    public function getRoles(array $params = []): ?array
+    {
+        $result = $this->apiGet('/v1/roles', array_merge(['limit' => 100], $params));
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Translations — GET /v1/translations
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/translations?filter=entityType||eq||simulation_path&filter=entityId||eq||{id}
+     */
+    public function getTranslations(array $params = []): ?array
+    {
+        $result = $this->apiGet('/v1/translations', array_merge(['limit' => 500], $params));
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /**
+     * Belirli bir entity'nin çevirilerini getirir.
+     */
+    public function getTranslationsForEntity(string $entityType, int $entityId): array
+    {
+        return $this->getTranslations([
+            'filter' => "entityType||eq||{$entityType}",
+            'limit' => 200,
+        ]) ?? [];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Info Cards — GET /v1/info-cards
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/info-cards?filter=simulationPathId||eq||{pathId}
+     */
+    public function getInfoCards(int $simulationPathId): array
+    {
+        $result = $this->apiGet('/v1/info-cards', [
+            'filter' => "simulationPathId||eq||{$simulationPathId}",
+            'limit' => 50,
+        ]);
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
     /* ─── Helpers ──────────────────────────────────────── */
 
     private function slugify(mixed $name): string

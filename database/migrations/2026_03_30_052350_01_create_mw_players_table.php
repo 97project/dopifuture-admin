@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('mw_players')) return;
         Schema::create('mw_players', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable()->unique()->comment('panel26 users.id map');

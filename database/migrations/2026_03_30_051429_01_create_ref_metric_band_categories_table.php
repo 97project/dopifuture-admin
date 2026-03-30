@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('ref_metric_band_categories')) return;
         Schema::create('ref_metric_band_categories', function (Blueprint $table) {
             $table->id();
             $table->string('key', 50)->unique()->comment('Machine-readable key e.g. good, average, poor');

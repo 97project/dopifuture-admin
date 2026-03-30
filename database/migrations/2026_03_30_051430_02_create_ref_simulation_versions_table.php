@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('ref_simulation_versions')) return;
         Schema::create('ref_simulation_versions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('simulation_id');

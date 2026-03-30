@@ -21,9 +21,9 @@ Schedule::command('harvest:user-data')
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/harvest.log'));
 
-// Uygulama düzeyi veri toplama — günde 2×: 02:00 ve 14:00
+// Uygulama düzeyi veri toplama — her 2 saatte bir (1:1 PostgreSQL parite)
 Schedule::command('harvest:app-data')
-    ->twiceDaily(2, 14)
+    ->everyTwoHours()
     ->when(fn () => (bool) env('SYNC_ENABLED', true))
     ->withoutOverlapping()
     ->runInBackground()
