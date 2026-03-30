@@ -8,7 +8,7 @@
         {{-- Hero --}}
         <div style="text-align: center; margin-bottom: 2.5rem;">
             <div style="margin-bottom: 1.25rem;">
-                <img src="{{ asset('images/dopifuture-logo-gorsel.png') }}" alt="DopiFuture Icon" style="width: 72px; height: 72px; object-fit: contain; margin: 0 auto; display: block;" />
+                <img src="{{ asset('images/dopifuture-logo-gorsel.png') }}" alt="DopiFuture Icon" style="width: 72px; height: 72px; min-width: 55px; min-height: 55px; object-fit: contain; margin: 0 auto; display: block;" />
             </div>
             <div style="margin-bottom: 0.5rem;">
                 <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" style="height: 36px; object-fit: contain; margin: 0 auto; display: block; filter: invert(1) brightness(100);" />

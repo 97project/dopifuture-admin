@@ -174,7 +174,7 @@
             {{-- Logo mark --}}
             <div class="mb-6 relative group">
                 <div class="w-24 h-24 rounded-2xl bg-white/5 flex items-center justify-center shadow-2xl shadow-blue-800/10 backdrop-blur-md border border-white/10 rotate-3 group-hover:rotate-0 transition-transform duration-500">
-                    <img src="{{ asset('images/dopifuture-logo-gorsel.png') }}" alt="DopiFuture" class="w-16 h-16 object-contain drop-shadow-lg">
+                    <img src="{{ asset('images/dopifuture-logo-gorsel.png') }}" alt="DopiFuture" class="w-16 h-16 object-contain drop-shadow-lg" style="min-width: 55px; min-height: 55px;">
                 </div>
             </div>
 
