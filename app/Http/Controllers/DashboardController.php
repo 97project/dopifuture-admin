@@ -101,12 +101,23 @@ class DashboardController extends Controller
                 ->get();
 
             // Vega app summary (Role Galaxy / Study Space / WAY AI Coach)
-            $vegaService = app(\App\Services\VegaReportService::class);
-            $schoolStudentIds = \App\Models\User::whereHas('schools', fn($q) => $q->whereIn('schools.id', $schoolIds))
-                ->role('student')
-                ->pluck('id');
-            $vegaUserMap = $vegaService->resolveVegaUserIds($schoolStudentIds);
-            $vegaSummary = $vegaService->getDashboardSummary(array_values($vegaUserMap));
+            $vegaSummary = [];
+            try {
+                $vegaService = app(\App\Services\VegaReportService::class);
+                $schoolStudentIds = \App\Models\User::whereHas('schools', fn($q) => $q->whereIn('schools.id', $schoolIds))
+                    ->role('student')
+                    ->pluck('id');
+                $vegaUserMap = $vegaService->resolveVegaUserIds($schoolStudentIds);
+                $vegaSummary = $vegaService->getDashboardSummary(array_values($vegaUserMap));
+            } catch (\Exception $e) {
+                // Vega DB unavailable — prevent full dashboard crash
+                \Illuminate\Support\Facades\Log::error('Vega DB Dashboard Error: ' . $e->getMessage());
+                $vegaSummary = [
+                    'role_galaxy'  => ['sessions' => 0, 'avg_score' => null, 'active_students' => 0, 'completed' => 0],
+                    'study_space'  => ['sessions' => 0, 'active_students' => 0, 'total_messages' => 0],
+                    'way_ai_coach' => ['sessions' => 0, 'active_students' => 0, 'total_messages' => 0],
+                ];
+            }
 
             return view('portal.dashboard-school', [
                 'user' => $user,

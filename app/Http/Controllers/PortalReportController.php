@@ -98,7 +98,12 @@ class PortalReportController extends Controller
 
         // ── VEGA APPS: Direct SQL from Vega remote DB ──────────────
         if (in_array($app->slug, ['role-galaxy', 'way-ai-coach', 'study-space'])) {
-            $vegaUserMap = $this->vegaReportService->resolveVegaUserIds($panelUserIds);
+            try {
+                $vegaUserMap = $this->vegaReportService->resolveVegaUserIds($panelUserIds);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Vega DB App Report Error: ' . $e->getMessage());
+                $vegaUserMap = [];
+            }
 
             // Prepare panel user models as keyed collection
             $panelUsers = User::whereIn('id', array_keys($vegaUserMap))->get()->keyBy('id');
@@ -130,41 +135,44 @@ class PortalReportController extends Controller
             (object)['id'=>908,'name'=>'Deniz','surname'=>'Arslan','avatar'=>null,'classes'=>collect([(object)['name'=>'10-B']])],
         ]);
 
-        // ── MISSION WAY: Figma F-38 Assignments mock data ──────────
+        // ── MISSION WAY: Real Database Query ──────────
         $missions = collect();
         if ($app->slug === 'mission-way') {
-            $missionNames = [
-                'The Mystery of Göbeklitepe',
-                "The Sphinx's Code",
-                'The Trojan Horse Plan',
-                'Reinvent the Machine',
-                'After the Earthquake',
-                'The Village Choice',
-                'The Track Dilemma',
-                'The Quantum Lab Experiment',
-                'The Dinosaur Fossil',
-                'The Science Fair Decision',
-            ];
-            foreach ($missionNames as $idx => $name) {
-                $studentSlice = $mockStudents->random(rand(3, 5));
-                $hp = $idx === 1 || $idx === 4 ? null : rand(35, 100);
-                $rp = $idx === 1 || $idx === 5 ? null : rand(55, 100);
-                $ep = $idx === 1 || $idx === 5 ? null : rand(40, 100);
-                $ap = $idx === 1 || $idx === 2 || $idx === 3 || $idx === 5 || $idx === 7 || $idx === 9 ? null : rand(60, 100);
+            $simulations = \App\Models\MissionWay\RefSimulation::with('versions.paths')->get();
+            foreach ($simulations as $sim) {
+                $versionIds = $sim->versions->pluck('id');
+                $sessions = \App\Models\MissionWay\MwSimulationSession::whereIn('simulation_version_id', $versionIds)
+                    ->with('players.player.user')
+                    ->get();
+
+                $players = $sessions->flatMap->players->map(function ($sp) {
+                    $u = $sp->player->user ?? null;
+                    return (object)[
+                        'id' => $u ? $u->id : $sp->player_id,
+                        'name' => $u ? $u->name : $sp->player->name,
+                        'surname' => $u ? $u->surname : $sp->player->surname,
+                        'avatar' => null,
+                        'classes' => collect(),
+                    ];
+                })->unique('id');
+
+                $assignedDate = $sessions->min('created_at')?->format('d/m/Y') ?? '-';
+                $deadlineDate = \App\Models\MissionWay\MwAssignment::where('simulation_id', $sim->id)->min('deadline')?->format('d/m/Y') ?? '-';
+
                 $missions->push((object)[
-                    'id'             => $idx + 1,
-                    'name'           => $name,
-                    'students'       => $studentSlice,
-                    'assigned_date'  => '01/01/2026',
-                    'deadline'       => '03/01/2026',
-                    'health_point'   => $hp,
-                    'resource_point' => $rp,
-                    'ethics_point'   => $ep,
-                    'adaptation_point' => $ap,
-                    'health_trend'   => $hp !== null ? ($hp < 50 ? 'down' : 'up') : null,
-                    'resource_trend' => $rp !== null ? ($rp < 60 ? 'down' : 'up') : null,
-                    'ethics_trend'   => $ep !== null ? ($ep < 50 ? 'down' : 'up') : null,
-                    'adaptation_trend' => $ap !== null ? ($ap >= 0 ? 'up' : 'down') : null,
+                    'id'             => $sim->id,
+                    'name'           => $sim->name ?? ('Simulation #' . $sim->id),
+                    'students'       => $players,
+                    'assigned_date'  => $assignedDate,
+                    'deadline'       => $deadlineDate,
+                    'health_point'   => null,
+                    'resource_point' => null,
+                    'ethics_point'   => null,
+                    'adaptation_point' => null,
+                    'health_trend'   => null,
+                    'resource_trend' => null,
+                    'ethics_trend'   => null,
+                    'adaptation_trend' => null,
                 ]);
             }
         }
@@ -298,8 +306,13 @@ class PortalReportController extends Controller
         $activeApp = request('app');
 
         // Wings Points — accumulated theme-based scores from vega sessions
-        $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
-        $wingsPoints = $vegaUserId ? $this->vegaReportService->getWingsPoints($vegaUserId) : ['total_wings' => 0, 'categories' => []];
+        try {
+            $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+            $wingsPoints = $vegaUserId ? $this->vegaReportService->getWingsPoints($vegaUserId) : ['total_wings' => 0, 'categories' => []];
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Vega DB Student Report Error: ' . $e->getMessage());
+            $wingsPoints = ['total_wings' => 0, 'categories' => []];
+        }
 
         return view('portal.reports.student', [
             'student' => $student,
@@ -342,50 +355,47 @@ class PortalReportController extends Controller
      */
     public function missionDetail($id)
     {
+        $simModel = \App\Models\MissionWay\RefSimulation::with(['versions.paths'])->find($id);
+
+        if (!$simModel) {
+            abort(404, 'Mission not found in real database.');
+        }
+
         $mission = (object)[
-            'id' => $id, 'title' => 'After the Earthquake',
-            'status' => 'Completed', 'difficulty' => 'Easy', 'created' => '28.02.2026',
-            'description' => 'In this mission, students will learn and practice the digital map creation process.',
-            'result' => 'The people willingly carry stones and repair walls with the belief that "salvation is near." However, the difference between the reinforcement time (35 min) and the door endurance time determines the lifespan of the lie. If reinforcement does not arrive on time, the people will open the doors.',
-            'completion_rate' => 72, 'avg_score' => 74.3,
-            'health' => 75, 'resource' => 40, 'ethics' => 85, 'adaptation' => 100,
-            'image' => 'https://images.unsplash.com/photo-1573648952826-b4f5e09c7370?w=1200&h=400&fit=crop',
+            'id' => $simModel->id,
+            'title' => $simModel->name ?? ('Simulation #' . $simModel->id),
+            'status' => 'Active',
+            'difficulty' => $simModel->difficulty ?? 'Normal',
+            'created' => $simModel->created_at?->format('d.m.Y') ?? now()->format('d.m.Y'),
+            'description' => $simModel->description ?? 'No description available.',
+            'result' => 'Awaiting completion data.',
+            'completion_rate' => 0,
+            'avg_score' => 0,
+            'health' => null, 'resource' => null, 'ethics' => null, 'adaptation' => null,
+            'image' => $simModel->background_image_path ?? 'https://images.unsplash.com/photo-1573648952826-b4f5e09c7370?w=1200&h=400&fit=crop',
         ];
-        $students = collect([
-            (object)['name'=>'Chance','surname'=>'Rhiel Madsen','role'=>'Diplomat','grade'=>11,'completed'=>8,'total_missions'=>8,'health'=>7,'resource'=>8,'ethics'=>5,'adaptation'=>6],
-            (object)['name'=>'Emery','surname'=>'Dorwart','role'=>'Safety','grade'=>12,'completed'=>12,'total_missions'=>12,'health'=>9,'resource'=>12,'ethics'=>8,'adaptation'=>3],
-            (object)['name'=>'Kadin','surname'=>'Septimus','role'=>'Logistics','grade'=>10,'completed'=>5,'total_missions'=>5,'health'=>3,'resource'=>5,'ethics'=>2,'adaptation'=>5],
-            (object)['name'=>'Alena','surname'=>'Rosser','role'=>'Medic','grade'=>9,'completed'=>7,'total_missions'=>7,'health'=>4,'resource'=>6,'ethics'=>7,'adaptation'=>5],
-        ]);
-        $questions = collect([
-            (object)[
-                'question' => 'The earthquake has started! What should you do?',
-                'unanimity' => 75, 'health' => 45, 'resource' => 70, 'ethics' => 65, 'adaptation' => 100,
-                'options' => collect([
-                    (object)['text' => 'Get under the table (DUCK-COVER-HOLD ON)', 'correct' => true, 'selected' => true],
-                    (object)['text' => 'Run Outside', 'correct' => false, 'selected' => false],
-                    (object)['text' => 'Take the elevator down', 'correct' => false, 'selected' => false],
-                ]),
-            ],
-            (object)[
-                'question' => 'The earthquake has started! What should you do?',
-                'unanimity' => 100, 'health' => 45, 'resource' => 70, 'ethics' => 65, 'adaptation' => 100,
-                'options' => collect([
-                    (object)['text' => 'Get under the table (DUCK-COVER-HOLD ON)', 'correct' => true, 'selected' => false],
-                    (object)['text' => 'Run Outside', 'correct' => false, 'selected' => false],
-                    (object)['text' => 'Take the elevator down', 'correct' => false, 'selected' => true],
-                ]),
-            ],
-            (object)[
-                'question' => 'The earthquake has started! What should you do?',
-                'unanimity' => 75, 'health' => 45, 'resource' => 70, 'ethics' => 65, 'adaptation' => 100,
-                'options' => collect([
-                    (object)['text' => 'Get under the table (DUCK-COVER-HOLD ON)', 'correct' => true, 'selected' => false],
-                    (object)['text' => 'Run Outside', 'correct' => false, 'selected' => true],
-                    (object)['text' => 'Take the elevator down', 'correct' => false, 'selected' => false],
-                ]),
-            ],
-        ]);
+
+        $sessions = \App\Models\MissionWay\MwSimulationSession::whereIn('simulation_version_id', $simModel->versions->pluck('id'))
+            ->with(['players.player.user', 'players.role'])
+            ->get();
+
+        $students = $sessions->flatMap->players->map(function ($sp) {
+            $u = $sp->player->user ?? null;
+            return (object)[
+                'name' => $u ? $u->name : $sp->player->name,
+                'surname' => $u ? $u->surname : $sp->player->surname,
+                'role' => $sp->role->name ?? 'Participant',
+                'grade' => '-',
+                'completed' => $sp->session->status === 'completed' ? 1 : 0,
+                'total_missions' => 1,
+                'health' => null,
+                'resource' => null,
+                'ethics' => null,
+                'adaptation' => null,
+            ];
+        })->unique(function ($s) { return $s->name . $s->surname; });
+        
+        $questions = collect();
         return view('portal.reports.mission-detail', compact('mission', 'students', 'questions'));
     }
 
@@ -418,8 +428,13 @@ class PortalReportController extends Controller
     public function coachQuestions($id)
     {
         $student = User::findOrFail($id);
-        $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
-        $questions = $this->vegaReportService->getCoachFeedback($vegaUserId);
+        try {
+            $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+            $questions = $this->vegaReportService->getCoachFeedback($vegaUserId);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Vega DB Coach Questions Error: ' . $e->getMessage());
+            $questions = collect();
+        }
 
         return view('portal.reports.coach-questions', compact('student', 'questions'))
             ->with('activeApp', 'way-ai-coach');
@@ -432,7 +447,12 @@ class PortalReportController extends Controller
      */
     public function studentEnrichment(User $student)
     {
-        $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+        try {
+            $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Vega DB Enrichment Error: ' . $e->getMessage());
+            $vegaUserId = null;
+        }
 
         if (!$vegaUserId) {
             return response()->json([
@@ -458,7 +478,12 @@ class PortalReportController extends Controller
         $this->authorizeStudentAccess($student);
         $student->load(['roles', 'schools', 'classes']);
 
-        $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+        try {
+            $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Vega DB Role Galaxy Detail Error: ' . $e->getMessage());
+            $vegaUserId = null;
+        }
         $sessions = collect();
         $scenarioBreakdown = collect();
         $stats = ['total_sessions' => 0, 'completed' => 0, 'avg_score' => null, 'total_duration' => 0];
@@ -497,30 +522,43 @@ class PortalReportController extends Controller
         $this->authorizeStudentAccess($student);
         $student->load(['roles', 'schools', 'classes']);
 
-        $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+        try {
+            $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Vega DB Way AI Coach Detail Error: ' . $e->getMessage());
+            $vegaUserId = null;
+        }
         $sessions = collect();
         $themeBreakdown = collect();
         $stats = ['total_sessions' => 0, 'lecturer' => 0, 'chatbot' => 0, 'avg_score' => null, 'total_duration' => 0, 'total_messages' => 0];
 
         if ($vegaUserId) {
-            $sessions = \App\Models\Vega\VegaDbSession::forUser($vegaUserId)
-                ->whereIn('module', ['lecturer', 'chatbot'])
-                ->withCount(['lecturerMessages', 'chatMessages'])
-                ->orderByDesc('created_at')
-                ->get();
+            try {
+                $sessions = \App\Models\Vega\VegaDbSession::forUser($vegaUserId)
+                    ->whereIn('module', ['lecturer', 'chatbot'])
+                    ->withCount(['lecturerMessages', 'chatMessages'])
+                    ->orderByDesc('created_at')
+                    ->get();
 
-            $stats = [
-                'total_sessions'  => $sessions->count(),
-                'lecturer'        => $sessions->where('module', 'lecturer')->count(),
-                'chatbot'         => $sessions->where('module', 'chatbot')->count(),
-                'avg_score'       => $sessions->whereNotNull('score')->avg('score'),
-                'total_duration'  => $sessions->sum(fn($s) => $s->duration_seconds),
-                'total_messages'  => $sessions->sum('lecturer_messages_count') + $sessions->sum('chat_messages_count'),
-            ];
-            $themeBreakdown = $this->vegaReportService->getThemeBreakdown($vegaUserId);
+                $stats = [
+                    'total_sessions'  => $sessions->count(),
+                    'lecturer'        => $sessions->where('module', 'lecturer')->count(),
+                    'chatbot'         => $sessions->where('module', 'chatbot')->count(),
+                    'avg_score'       => $sessions->whereNotNull('score')->avg('score'),
+                    'total_duration'  => $sessions->sum(fn($s) => $s->duration_seconds),
+                    'total_messages'  => $sessions->sum('lecturer_messages_count') + $sessions->sum('chat_messages_count'),
+                ];
+                $themeBreakdown = $this->vegaReportService->getThemeBreakdown($vegaUserId);
+            } catch (\Exception $e) {
+                // Handled gracefully below
+            }
         }
 
-        $wingsPoints = $vegaUserId ? $this->vegaReportService->getWingsPoints($vegaUserId) : ['total_wings' => 0, 'categories' => []];
+        try {
+            $wingsPoints = $vegaUserId ? $this->vegaReportService->getWingsPoints($vegaUserId) : ['total_wings' => 0, 'categories' => []];
+        } catch (\Exception $e) {
+            $wingsPoints = ['total_wings' => 0, 'categories' => []];
+        }
 
         return view('portal.reports.way-ai-coach-detail', [
             'student'        => $student,
@@ -541,7 +579,12 @@ class PortalReportController extends Controller
         $this->authorizeStudentAccess($student);
         $student->load(['roles', 'schools', 'classes']);
 
-        $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+        try {
+            $vegaUserId = $this->vegaReportService->resolveVegaUserId($student->id);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Vega DB Study Space Detail Error: ' . $e->getMessage());
+            $vegaUserId = null;
+        }
         $sessions = collect();
         $themeBreakdown = collect();
         $stats = ['total_sessions' => 0, 'total_messages' => 0, 'total_duration' => 0];
@@ -584,9 +627,14 @@ class PortalReportController extends Controller
      */
     public function sessionDetail(string $sessionId)
     {
-        $session = \App\Models\Vega\VegaDbSession::on('vega_db')
-            ->with(['simulatorSteps', 'lecturerMessages', 'chatMessages'])
-            ->findOrFail($sessionId);
+        try {
+            $session = \App\Models\Vega\VegaDbSession::on('vega_db')
+                ->with(['simulatorSteps', 'lecturerMessages', 'chatMessages'])
+                ->findOrFail($sessionId);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Vega DB Session Detail Error: ' . $e->getMessage());
+            abort(404, 'Session not found or Vega database is unreachable.');
+        }
 
         $module = $session->module; // simulator, lecturer, chatbot
 
