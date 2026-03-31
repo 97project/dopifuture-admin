@@ -48,7 +48,7 @@ class VegaConnector implements AppConnectorInterface
      * 1. Email ile ara → varsa success dön
      * 2. Yoksa register endpoint'i ile oluştur
      */
-    public function syncUser(User $user): array
+    public function syncUser(User $user, ?string $plainPassword = null): array
     {
         try {
             // 1) Email ile kullanıcıyı ara
@@ -62,7 +62,8 @@ class VegaConnector implements AppConnectorInterface
             }
 
             // 2) Yoksa register ile oluştur
-            $password = 'Vg' . bin2hex(random_bytes(4)) . '!9';
+            // Manuel şifre verilmişse onu kullan, yoksa rastgele üret
+            $password = $plainPassword ?: ('Vg' . bin2hex(random_bytes(4)) . '!9');
             $name = trim($user->name ?? '') ?: 'Öğrenci';
             $surname = trim($user->surname ?? '') ?: 'Öğrenci';
             $payload = [

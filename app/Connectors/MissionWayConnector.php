@@ -64,7 +64,7 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
      * Response 400 (duplicate):
      *   { "message": "Username already exists: 1-admin", "error": "Bad Request", "statusCode": 400 }
      */
-    public function syncUser(User $user): array
+    public function syncUser(User $user, ?string $plainPassword = null): array
     {
         $name = is_array($user->name) ? ($user->name[app()->getLocale()] ?? reset($user->name) ?: 'User') : ($user->name ?? 'User');
         $surname = is_array($user->surname) ? ($user->surname[app()->getLocale()] ?? reset($user->surname) ?: '') : ($user->surname ?? '');

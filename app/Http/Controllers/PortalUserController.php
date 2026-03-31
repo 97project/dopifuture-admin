@@ -200,8 +200,8 @@ class PortalUserController extends Controller
             ]);
         }
 
-        // Auto-sync to connector applications
-        SyncUserToAppsJob::dispatch($newUser);
+        // Auto-sync to connector applications (plain password for Vega registration)
+        SyncUserToAppsJob::dispatch($newUser, $data['password']);
 
         return redirect()->route('portal.users.index')
             ->with('success', __('admin.user_created'));
@@ -358,6 +358,10 @@ class PortalUserController extends Controller
         $surnameIdx = array_search('surname', $header) ?? array_search('soyad', $header);
         $emailIdx   = array_search('email', $header) ?? array_search('e-posta', $header);
 
+        $passIdx = array_search('password', $header);
+        if ($passIdx === false) $passIdx = array_search('şifre', $header);
+        if ($passIdx === false) $passIdx = array_search('sifre', $header);
+
         if ($nameIdx === false || $emailIdx === false) {
             return back()->withErrors(['csv_file' => 'CSV dosyasında name/ad ve email/e-posta sütunları gereklidir.'])->withInput();
         }
@@ -376,6 +380,7 @@ class PortalUserController extends Controller
             $name    = trim($row[$nameIdx] ?? '');
             $surname = $surnameIdx !== false ? trim($row[$surnameIdx] ?? '') : '';
             $email   = trim($row[$emailIdx] ?? '');
+            $plainPassword = ($passIdx !== false && isset($row[$passIdx])) ? trim($row[$passIdx]) : null;
 
             if (!$name || !$email) {
                 $errors[] = "Satır " . ($idx + 2) . ": Ad veya e-posta eksik.";
@@ -402,11 +407,14 @@ class PortalUserController extends Controller
                 continue;
             }
 
+            // Şifre: CSV'den geldiyse onu kullan, yoksa rastgele üret
+            $passwordToStore = $plainPassword ?: ('Dopi' . rand(1000, 9999) . '!');
+
             $newUser = User::create([
                 'name'     => $name,
                 'surname'  => $surname,
                 'email'    => $email,
-                'password' => bcrypt('Dopi' . rand(1000, 9999) . '!'),
+                'password' => bcrypt($passwordToStore),
                 'status'   => 'active',
             ]);
 
@@ -418,7 +426,7 @@ class PortalUserController extends Controller
                 $availableSeats--;
             }
 
-            \App\Jobs\SyncUserToAppsJob::dispatch($newUser);
+            \App\Jobs\SyncUserToAppsJob::dispatch($newUser, $passwordToStore);
             $created++;
         }
 

@@ -69,7 +69,7 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
      * Response 400 (duplicate):
      *   { "message": "User already exists", "error": "Bad Request", "statusCode": 400 }
      */
-    public function syncUser(User $user): array
+    public function syncUser(User $user, ?string $plainPassword = null): array
     {
         $fullName = trim($user->full_name ?? '') ?: 'Öğrenci';
 

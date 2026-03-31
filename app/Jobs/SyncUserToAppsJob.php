@@ -28,7 +28,8 @@ class SyncUserToAppsJob implements ShouldQueue
     public int $backoff = 60;
 
     public function __construct(
-        public User $user
+        public User $user,
+        public ?string $plainPassword = null,
     ) {}
 
     public function handle(): void
@@ -59,7 +60,7 @@ class SyncUserToAppsJob implements ShouldQueue
             $seen[$class] = true;
 
             try {
-                $result = $connector->syncUser($this->user);
+                $result = $connector->syncUser($this->user, $this->plainPassword);
                 if ($result['success'] ?? false) {
                     $success++;
                 } else {

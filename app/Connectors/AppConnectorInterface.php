@@ -17,7 +17,7 @@ interface AppConnectorInterface
      *
      * @return array{success: bool, response: mixed, error: ?string}
      */
-    public function syncUser(User $user): array;
+    public function syncUser(User $user, ?string $plainPassword = null): array;
 
     /**
      * Kullanıcı bilgilerini harici sistemde güncelle.
