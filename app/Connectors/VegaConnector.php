@@ -63,15 +63,17 @@ class VegaConnector implements AppConnectorInterface
 
             // 2) Yoksa register ile oluştur
             // Manuel şifre verilmişse onu kullan, yoksa rastgele üret
-            $password = $plainPassword ?: ('Vg' . bin2hex(random_bytes(4)) . '!9');
+            $rawPassword = $plainPassword ?: ('Vg' . bin2hex(random_bytes(4)) . '!9');
+            // Vega backend şifreyi bcrypt hash olarak bekler
+            $hashedPassword = password_hash($rawPassword, PASSWORD_BCRYPT);
             $name = trim($user->name ?? '') ?: 'Öğrenci';
             $surname = trim($user->surname ?? '') ?: 'Öğrenci';
             $payload = [
                 'name' => $name,
                 'surname' => $surname,
                 'email' => $user->email,
-                'password' => $password,
-                'password_confirmation' => $password,
+                'password' => $hashedPassword,
+                'password_confirmation' => $hashedPassword,
             ];
 
             $response = $this->request('POST', '/api/v1/register', $payload);
