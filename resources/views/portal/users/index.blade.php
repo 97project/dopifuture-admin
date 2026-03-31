@@ -78,7 +78,7 @@
                     <th style="width:40px;">No</th>
                     <th>{{ $currentRole === 'student' ? 'Student Name' : 'Teacher Name' }}</th>
                     <th>E-mail</th>
-                    <th>{{ $currentRole === 'student' ? 'Class' : 'Branch' }}</th>
+                    <th>{{ $currentRole === 'student' ? 'Class & Teacher' : 'Assigned Classes' }}</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -93,7 +93,33 @@
                         </div>
                     </td>
                     <td class="muted">{{ $u->email }}</td>
-                    <td>{{ $u->grade ?? $u->branch ?? '—' }}</td>
+                    <td>
+                        @if($currentRole === 'student')
+                            @if($u->classes->count() > 0)
+                                @foreach($u->classes as $c)
+                                    <div style="font-weight:600;color:var(--color-txt);font-size:13px;">{{ $c->name }}</div>
+                                    @if($c->teachers->count() > 0)
+                                        <div style="font-size:12px;color:var(--color-txt-muted);display:flex;align-items:center;gap:4px;">
+                                            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg> 
+                                            {{ $c->teachers->pluck('full_name')->join(', ') }}
+                                        </div>
+                                    @endif
+                                @endforeach
+                            @else
+                                <span class="muted">—</span>
+                            @endif
+                        @else
+                            @if($u->classes->count() > 0)
+                                <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                                    @foreach($u->classes as $c)
+                                        <span class="dp-badge" style="background:#f3f4f6;color:#374151;font-size:11px;padding:2px 6px;">{{ $c->name }}</span>
+                                    @endforeach
+                                </div>
+                            @else
+                                <span class="muted">—</span>
+                            @endif
+                        @endif
+                    </td>
                     <td>
                         <div style="display:flex;gap:16px;align-items:center;white-space:nowrap;">
                             <a href="{{ route('portal.reports.student', $u) }}" style="background:none;border:none;cursor:pointer;color:#667eea;padding:0;display:inline-flex;align-items:center;gap:4px;font-size:13px;text-decoration:none;font-weight:500;">

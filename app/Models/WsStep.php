@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WsStep extends Model
 {
@@ -24,5 +25,15 @@ class WsStep extends Model
     public function simulation(): BelongsTo
     {
         return $this->belongsTo(WsSimulation::class, 'simulation_id');
+    }
+
+    public function stepQuestions(): HasMany
+    {
+        return $this->hasMany(WsStepQuestion::class, 'step_id')->orderBy('sort_order');
+    }
+
+    public function evaluations(): HasMany
+    {
+        return $this->hasMany(WsStepEvaluation::class, 'step_id');
     }
 }

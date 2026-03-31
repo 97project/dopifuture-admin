@@ -14,6 +14,7 @@ use App\Models\SchoolClass;
 use App\Models\User;
 use App\Models\WsMember;
 use App\Models\WsSimulation;
+use App\Models\WsStepEvaluation;
 use App\Services\MwMetricService;
 use App\Services\ReportService;
 use App\Services\VegaReportService;
@@ -466,7 +467,7 @@ class PortalReportController extends Controller
             'resource' => $metricValues['resource'],
             'ethics' => $metricValues['ethics'],
             'adaptation' => $metricValues['adaptation'],
-            'image' => $simModel->background_image_path ?? 'https://images.unsplash.com/photo-1573648952826-b4f5e09c7370?w=1200&h=400&fit=crop',
+            'image' => $simModel->background_image_path ?? null,
         ];
 
         $students = $sessions->flatMap->players->map(function ($sp) use ($enriched) {
@@ -555,7 +556,7 @@ class PortalReportController extends Controller
      */
     public function startupDetail($id)
     {
-        $wsSim = WsSimulation::with('steps')->find($id);
+        $wsSim = WsSimulation::with('steps.stepQuestions.answers', 'steps.evaluations.member')->find($id);
 
         if (!$wsSim) {
             abort(404, 'Startup project not found.');
@@ -571,8 +572,8 @@ class PortalReportController extends Controller
         $totalPoints = $stepsCollection->sum('points');
         $maxPoints = $stepsCollection->sum('max_score');
 
-        // Per-step evaluation scores from member evaluations
-        $allEvaluations = $members->flatMap(fn($m) => collect($m->step_evaluations ?? []));
+        // Per-step evaluation scores from normalized table
+        $allEvaluations = WsStepEvaluation::whereIn('step_id', $stepsCollection->pluck('id'))->get();
 
         $project = (object)[
             'id' => $wsSim->id,
@@ -590,19 +591,36 @@ class PortalReportController extends Controller
                     && ($sp['status'] ?? '') === 'completed';
             });
 
-            // Get AI score from evaluations
-            $stepEval = $allEvaluations->first(function ($ev) use ($s) {
-                return ($ev['stepId'] ?? $ev['step_id'] ?? null) == $s->external_id;
+            // Get AI evaluation from normalized table
+            $stepEval = $allEvaluations->where('step_id', $s->id)->sortByDesc('attempt')->first();
+            $aiScore = $stepEval->ai_total_score ?? $s->ai_score ?? 0;
+            $aiMaxScore = $stepEval->ai_max_score ?? $s->max_score ?? 0;
+
+            // Load questions with answers for this step
+            $questionsWithAnswers = $s->stepQuestions->map(function ($q) {
+                $latestAnswer = $q->answers->sortByDesc('attempt')->first();
+                return (object)[
+                    'question_text' => $q->question_text,
+                    'max_score'     => $q->max_score,
+                    'sort_order'    => $q->sort_order,
+                    'user_answer'   => $latestAnswer->text_answer ?? null,
+                    'ai_score'      => $latestAnswer->ai_score ?? 0,
+                    'ai_max_score'  => $latestAnswer->ai_max_score ?? $q->max_score,
+                    'ai_feedback'   => $latestAnswer->ai_feedback ?? null,
+                ];
             });
-            $aiScore = $stepEval['earnedPoint'] ?? $stepEval['score'] ?? $s->ai_score ?? 0;
 
             return (object)[
                 'title' => $s->name,
                 'responsible' => $s->responsible_name ?? '-',
                 'ai_score' => $aiScore,
+                'ai_max_score' => $aiMaxScore,
                 'score' => $s->points ?? 0,
                 'difficulty' => $s->difficulty ?? '-',
                 'completed' => $stepCompleted,
+                'overall_feedback' => $stepEval->ai_overall_feedback ?? null,
+                'ai_coins' => $stepEval->ai_coins ?? 0,
+                'questions' => $questionsWithAnswers,
             ];
         });
 
@@ -632,18 +650,37 @@ class PortalReportController extends Controller
                         'name' => $sub['file_name'] ?? $sub['fileName'] ?? 'file',
                         'size' => $sub['file_size'] ?? $sub['fileSize'] ?? '',
                         'url'  => $sub['file_url'] ?? $sub['fileUrl'] ?? '',
+                        'status' => $sub['status'] ?? null,
+                        'feedback' => $sub['feedback'] ?? null,
+                        'points_earned' => $sub['pointsEarned'] ?? null,
                     ];
                 }
-                if (!empty($sub['link']) || !empty($sub['url'])) {
+                if (!empty($sub['link']) || !empty($sub['url']) || !empty($sub['linkUrl'])) {
                     $links[] = [
                         'step' => $stepIdx,
-                        'url'  => $sub['link'] ?? $sub['url'] ?? '',
+                        'url'  => $sub['link'] ?? $sub['url'] ?? $sub['linkUrl'] ?? '',
+                        'title' => $sub['linkTitle'] ?? null,
+                        'platform' => $sub['linkPlatform'] ?? null,
+                        'status' => $sub['status'] ?? null,
                     ];
                 }
             }
         }
 
-        return view('portal.reports.startup-detail', compact('project', 'steps', 'team', 'files', 'links'));
+        // Ranking data (from reference app mockRankingData — backend ranking API is not yet live)
+        // TODO: Replace with real API data when backend ranking endpoint is available
+        $rankings = [
+            (object)['rank' => 1, 'name' => 'Team Alpha', 'score' => 2850, 'is_current' => false],
+            (object)['rank' => 2, 'name' => 'Team Beta', 'score' => 2650, 'is_current' => false],
+            (object)['rank' => 3, 'name' => 'Team Gamma', 'score' => 2450, 'is_current' => false],
+            (object)['rank' => 4, 'name' => 'Your Team', 'score' => 2350, 'is_current' => true],
+            (object)['rank' => 5, 'name' => 'Team Delta', 'score' => 2200, 'is_current' => false],
+            (object)['rank' => 6, 'name' => 'Team Epsilon', 'score' => 2100, 'is_current' => false],
+            (object)['rank' => 7, 'name' => 'Team Zeta', 'score' => 1950, 'is_current' => false],
+            (object)['rank' => 8, 'name' => 'Team Eta', 'score' => 1800, 'is_current' => false],
+        ];
+
+        return view('portal.reports.startup-detail', compact('project', 'steps', 'team', 'files', 'links', 'rankings'));
     }
 
     /**

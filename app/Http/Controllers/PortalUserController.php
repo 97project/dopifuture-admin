@@ -25,9 +25,9 @@ class PortalUserController extends Controller
             ->whereHas('schools', fn($q) => $q->whereIn('schools.id', $schoolIds));
 
         if ($currentRole === 'teacher') {
-            $query->role('teacher');
+            $query->role('teacher')->with('classes');
         } else {
-            $query->role('student');
+            $query->role('student')->with('classes.teachers');
         }
 
         if ($search = $request->get('search')) {
@@ -38,7 +38,7 @@ class PortalUserController extends Controller
             });
         }
 
-        $users = $query->orderBy('name')->paginate(10)->withQueryString();
+        $users = $query->orderByDesc('created_at')->paginate(10)->withQueryString();
 
         // Gerçek lisans istatistikleri — okulun aktif lisansından
         $activeLicense = License::whereIn('school_id', $schoolIds)

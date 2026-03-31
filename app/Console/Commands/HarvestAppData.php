@@ -25,6 +25,9 @@ use App\Models\MissionWay\RefTranslation;
 use App\Models\WsMember;
 use App\Models\WsSimulation;
 use App\Models\WsStep;
+use App\Models\WsStepEvaluation;
+use App\Models\WsStepQuestion;
+use App\Models\WsStepQuestionAnswer;
 use App\Models\WsTool;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -175,14 +178,18 @@ class HarvestAppData extends Command
                         if (!$existingVersion) {
                             $simId = $this->resolveSimulationIdForVersion($versionId, $connector);
                             \DB::statement('SET FOREIGN_KEY_CHECKS=0');
-                            RefSimulationVersion::create([
-                                'id'             => $versionId,
-                                'simulation_id'  => $simId,
-                                'version_number' => $versionId,
-                                'version_code'   => "v{$versionId}",
-                                'status'         => 'published',
-                                'is_default'     => true,
-                            ]);
+                            RefSimulationVersion::updateOrCreate(
+                                [
+                                    'simulation_id'  => $simId,
+                                    'version_number' => $versionId
+                                ],
+                                [
+                                    // Make sure we update/create with the passed ID if it's new
+                                    'version_code'   => "v{$versionId}",
+                                    'status'         => 'published',
+                                    'is_default'     => true,
+                                ]
+                            );
                             \DB::statement('SET FOREIGN_KEY_CHECKS=1');
                             $this->synced++;
                         }
@@ -443,8 +450,8 @@ class HarvestAppData extends Command
                             'email'           => $player['email'] ?? "{$extId}@missionway.local",
                             'name'            => $player['name'] ?? 'Oyuncu',
                             'surname'         => $player['surname'] ?? '',
-                            'user_id'         => $userId,
-                            'organization_id' => $organizationId,
+                            'user_id'         => $userId ?: null,
+                            'organization_id' => $organizationId ?: null,
                             'avatar_media_id' => $player['avatarMediaId'] ?? $player['avatarId'] ?? null,
                             'avatar_id'       => $player['avatarId'] ?? null,
                             'preferred_language_id' => $player['preferredLanguageId'] ?? $player['languageId'] ?? null,
@@ -820,7 +827,7 @@ class HarvestAppData extends Command
                     }
                 } catch (\Throwable $e) {}
 
-                WsStep::updateOrCreate(
+                $wsStep = WsStep::updateOrCreate(
                     ['external_id' => $stepExtId],
                     [
                         'simulation_id'   => $wsSim->id,
@@ -838,6 +845,32 @@ class HarvestAppData extends Command
                     ]
                 );
                 $this->synced++;
+
+                // Write questions to normalized table
+                try {
+                    if (method_exists($connector, 'getStepQuestions')) {
+                        $rawQuestions = $connector->getStepQuestions($stepExtId);
+                        if (is_array($rawQuestions)) {
+                            foreach ($rawQuestions as $q) {
+                                $qExtId = $q['id'] ?? null;
+                                if (!$qExtId) continue;
+
+                                WsStepQuestion::updateOrCreate(
+                                    ['external_id' => $qExtId],
+                                    [
+                                        'step_id'       => $wsStep->id,
+                                        'question_text' => $q['questionText'] ?? $q['question'] ?? '-',
+                                        'max_score'     => $q['maxScore'] ?? 0,
+                                        'sort_order'    => $q['sortOrder'] ?? 0,
+                                        'is_required'   => $q['isRequired'] ?? true,
+                                        'synced_at'     => now(),
+                                    ]
+                                );
+                                $this->synced++;
+                            }
+                        }
+                    }
+                } catch (\Throwable $e) {}
             }
         } catch (\Throwable $e) {
             $this->failed++;
@@ -872,19 +905,11 @@ class HarvestAppData extends Command
                         }
                     } catch (\Throwable $e) {}
 
-                    try {
-                        $evals = $connector->getStepQuestionEvaluations($extId);
-                        if (is_array($evals)) {
-                            $stepEvaluations = $evals;
-                        }
-                    } catch (\Throwable $e) {}
-
                     // Step submissions — her simülasyon için
                     foreach ($wsSimulations as $wsSim) {
                         try {
                             $subs = $connector->getStepSubmissions($wsSim->external_id);
                             if (is_array($subs)) {
-                                // Bu member'a ait submission'ları filtrele
                                 foreach ($subs as $sub) {
                                     if (($sub['memberId'] ?? null) == $extId) {
                                         $stepSubmissions[] = $sub;
@@ -894,20 +919,90 @@ class HarvestAppData extends Command
                         } catch (\Throwable $e) {}
                     }
 
-                    WsMember::updateOrCreate(
+                    // ── MEMBER KAYDI — evaluations'dan ÖNCE oluşturulmalı ──
+                    $localMember = WsMember::updateOrCreate(
                         ['external_id' => $extId],
                         [
                             'user_id'          => $user->id,
                             'application_id'   => $app->id,
                             'points'           => $memberData['points'] ?? 0,
                             'step_progress'    => $stepProgress,
-                            'step_evaluations' => $stepEvaluations,
                             'step_submissions' => $stepSubmissions,
                             'synced_at'        => now(),
                         ]
                     );
                     $membersHarvested++;
                     $this->synced++;
+
+                    // ── EVALUATIONS (member artık DB'de var) ──
+
+                    try {
+                        $evals = $connector->getStepQuestionEvaluations($extId);
+                        if (is_array($evals)) {
+                            $stepEvaluations = $evals;
+
+                            // Write evaluations to normalized table
+                            foreach ($evals as $ev) {
+                                $evStepId = $ev['stepId'] ?? $ev['step_id'] ?? null;
+                                if (!$evStepId) continue;
+
+                                $localStep = WsStep::where('external_id', $evStepId)->first();
+                                if (!$localStep) continue;
+
+                                $wsEval = WsStepEvaluation::updateOrCreate(
+                                    ['step_id' => $localStep->id, 'member_id' => $localMember->id, 'attempt' => $ev['attempt'] ?? 1],
+                                    [
+                                        'external_id'         => $ev['id'] ?? null,
+                                        'ai_total_score'      => $ev['aiTotalScore'] ?? $ev['earnedPoint'] ?? 0,
+                                        'ai_max_score'        => $ev['aiMaxScore'] ?? $ev['maxScore'] ?? 0,
+                                        'ai_coins'            => $ev['aiCoins'] ?? $ev['earnedCoin'] ?? 0,
+                                        'ai_overall_feedback' => $ev['aiOverallFeedback'] ?? null,
+                                        'status'              => $ev['status'] ?? 'COMPLETED',
+                                        'ai_evaluated_at'     => isset($ev['aiEvaluatedAt']) ? \Carbon\Carbon::parse($ev['aiEvaluatedAt']) : null,
+                                        'synced_at'           => now(),
+                                    ]
+                                );
+                                $this->synced++;
+
+                                // Write per-question answers if evaluation has questions detail
+                                $evalQuestions = $ev['questions'] ?? [];
+                                foreach ($evalQuestions as $eq) {
+                                    $questionNumber = $eq['questionNumber'] ?? $eq['sortOrder'] ?? null;
+                                    if ($questionNumber === null) continue;
+
+                                    // Find the local question by step + sort_order
+                                    $localQuestion = WsStepQuestion::where('step_id', $localStep->id)
+                                        ->where('sort_order', $questionNumber - 1)
+                                        ->first();
+                                    // Fallback: try by sort_order matching questionNumber directly
+                                    if (!$localQuestion) {
+                                        $localQuestion = WsStepQuestion::where('step_id', $localStep->id)
+                                            ->where('sort_order', $questionNumber)
+                                            ->first();
+                                    }
+                                    if (!$localQuestion) continue;
+
+                                    WsStepQuestionAnswer::updateOrCreate(
+                                        ['question_id' => $localQuestion->id, 'member_id' => $localMember->id, 'attempt' => $ev['attempt'] ?? 1],
+                                        [
+                                            'text_answer'  => $eq['userAnswer'] ?? $eq['textAnswer'] ?? '',
+                                            'ai_score'     => $eq['score'] ?? $eq['aiScore'] ?? 0,
+                                            'ai_max_score' => $eq['maxScore'] ?? $eq['aiMaxScore'] ?? 0,
+                                            'ai_feedback'  => $eq['feedback'] ?? $eq['aiFeedback'] ?? null,
+                                            'synced_at'    => now(),
+                                        ]
+                                    );
+                                    $this->synced++;
+                                }
+                            }
+                        }
+                    } catch (\Throwable $e) {}
+
+                    // stepEvaluations JSON'u da member'a kaydet
+                    if (!empty($stepEvaluations)) {
+                        $localMember->update(['step_evaluations' => $stepEvaluations]);
+                    }
+
                 } catch (\Throwable $e) {
                     // Kullanıcı WS'de yoksa devam et
                     continue;

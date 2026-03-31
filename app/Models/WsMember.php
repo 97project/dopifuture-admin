@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WsMember extends Model
 {
@@ -29,6 +30,16 @@ class WsMember extends Model
     public function application(): BelongsTo
     {
         return $this->belongsTo(Application::class);
+    }
+
+    public function evaluations(): HasMany
+    {
+        return $this->hasMany(WsStepEvaluation::class, 'member_id');
+    }
+
+    public function questionAnswers(): HasMany
+    {
+        return $this->hasMany(WsStepQuestionAnswer::class, 'member_id');
     }
 
     /**

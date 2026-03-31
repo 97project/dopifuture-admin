@@ -4,7 +4,7 @@
 @section('content')
 
     {{-- ═══ HERO BANNER — Figma F-62: dark bg image with mission title ═══ --}}
-    <div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:24px;min-height:300px;background:url('{{ $mission->image ?? 'https://images.unsplash.com/photo-1573648952826-b4f5e09c7370?w=1200&h=400&fit=crop' }}') center/cover no-repeat;">
+    <div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:24px;min-height:300px;{{ $mission->image ? "background:url('" . $mission->image . "') center/cover no-repeat;" : 'background:linear-gradient(135deg, #0F2740 0%, #1E3A5F 40%, #4364F7 100%);' }}">
         <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.6) 100%);"></div>
         <div style="position:relative;z-index:1;padding:24px 28px;">
             {{-- Mission Title --}}
