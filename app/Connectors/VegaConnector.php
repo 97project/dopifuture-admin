@@ -58,22 +58,35 @@ class VegaConnector implements AppConnectorInterface
                     'userId' => $user->id,
                     'vegaId' => $existing['id'] ?? null,
                 ]);
+
+                // Ensure premium and b2b status via direct DB connection
+                try {
+                    \Illuminate\Support\Facades\DB::connection('vega_db')->table('users')
+                        ->where('email', $user->email)
+                        ->update([
+                            'is_premium' => 1,
+                            'is_lifetime_premium' => 1,
+                            'login_type' => 'dopifuture',
+                        ]);
+                } catch (\Exception $dbEx) {
+                    Log::channel('daily')->error('[Vega] DB update error (existing)', ['email' => $user->email, 'error' => $dbEx->getMessage()]);
+                }
+
                 return ['success' => true, 'response' => $existing, 'error' => null];
             }
 
             // 2) Yoksa register ile oluştur
             // Manuel şifre verilmişse onu kullan, yoksa rastgele üret
             $rawPassword = $plainPassword ?: ('Vg' . bin2hex(random_bytes(4)) . '!9');
-            // Vega backend şifreyi bcrypt hash olarak bekler
-            $hashedPassword = password_hash($rawPassword, PASSWORD_BCRYPT);
             $name = trim($user->name ?? '') ?: 'Öğrenci';
             $surname = trim($user->surname ?? '') ?: 'Öğrenci';
+            
             $payload = [
                 'name' => $name,
                 'surname' => $surname,
                 'email' => $user->email,
-                'password' => $hashedPassword,
-                'password_confirmation' => $hashedPassword,
+                'password' => $rawPassword,
+                'password_confirmation' => $rawPassword,
             ];
 
             $response = $this->request('POST', '/api/v1/register', $payload);
@@ -83,6 +96,20 @@ class VegaConnector implements AppConnectorInterface
                     'userId' => $user->id,
                     'email' => $user->email,
                 ]);
+
+                // Ensure premium and b2b status via direct DB connection
+                try {
+                    \Illuminate\Support\Facades\DB::connection('vega_db')->table('users')
+                        ->where('email', $user->email)
+                        ->update([
+                            'is_premium' => 1,
+                            'is_lifetime_premium' => 1,
+                            'login_type' => 'dopifuture',
+                        ]);
+                } catch (\Exception $dbEx) {
+                    Log::channel('daily')->error('[Vega] DB update error (new)', ['email' => $user->email, 'error' => $dbEx->getMessage()]);
+                }
+
                 return ['success' => true, 'response' => $response->json(), 'error' => null];
             }
 

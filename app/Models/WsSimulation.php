@@ -11,8 +11,9 @@ class WsSimulation extends Model
     protected $table = 'ws_simulations';
 
     protected $fillable = [
-        'external_id', 'application_id', 'name', 'type', 'category',
-        'status', 'metadata', 'synced_at',
+        'external_id', 'application_id', 'name', 'description',
+        'total_step', 'icon_url', 'color_code', 'background_color',
+        'type', 'category', 'status', 'metadata', 'synced_at',
     ];
 
     protected $casts = [

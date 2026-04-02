@@ -1,0 +1,444 @@
+﻿=== PostgreSQL Tables ===
+  assignment
+  assignment_player
+  databasechangelog
+  databasechangeloglock
+  media_asset
+  media_asset_file
+  player
+  player_choice
+  player_profile
+  player_progress
+  ref_info_card
+  ref_language
+  ref_metric_band_category
+  ref_metric_definition
+  ref_objective
+  ref_path_objective
+  ref_role
+  ref_simulation
+  ref_simulation_metric_band
+  ref_simulation_path
+  ref_simulation_version
+  ref_simulation_version_role
+  ref_simulation_wing
+  ref_translation
+  simulation_session
+  simulation_session_player
+  startup_assignment
+  startup_assignment_member
+  startup_member
+  startup_simulation
+  startup_step
+  startup_step_question
+  startup_step_question_answer
+  startup_step_question_evaluation
+  startup_step_submission
+  startup_step_tool
+  startup_step_wing
+  startup_tool
+  startup_user_progress
+  startup_user_step_progress
+
+=== Local MySQL Tables (MW/WS/Ref) ===
+  mw_assignment_players
+  mw_assignments
+  mw_player_choices
+  mw_player_profiles
+  mw_player_progress
+  mw_players
+  mw_session_players
+  mw_simulation_sessions
+  ref_info_cards
+  ref_languages
+  ref_metric_band_categories
+  ref_metric_definitions
+  ref_roles
+  ref_simulation_metric_bands
+  ref_simulation_paths
+  ref_simulation_version_roles
+  ref_simulation_versions
+  ref_simulations
+  ref_translations
+  ws_assignment_members
+  ws_assignments
+  ws_members
+  ws_simulations
+  ws_step_evaluations
+  ws_step_progress
+  ws_step_question_answers
+  ws_step_questions
+  ws_steps
+  ws_tools
+
+
+========== COLUMN COMPARISON ==========
+
+ÔöîÔöÇÔöÇÔöÇ ref_info_cards ÔåÉ ref_info_card ÔöÇÔöÇÔöÇ
+Ôöé Common columns (10): id, simulation_path_id, role_id, display_order, icon_asset_id, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    uk_ref_info_card_p_r_o: simulation_path_id, role_id, display_order
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ref_languages ÔåÉ ref_language ÔöÇÔöÇÔöÇ
+Ôöé Common columns (9): id, code, name, is_default, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    ref_languages_code_unique: code
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ref_metric_band_categories ÔåÉ ref_metric_band_category ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: label(varchar(100),NULL,no-default) scoring_impact(int(11),NOT NULL,def=0) 
+Ôöé Common columns (10): id, key, color, order_index, score_multiplier, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    ref_metric_band_categories_key_unique: key
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ref_metric_definitions ÔåÉ ref_metric_definition ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: key(varchar(50),NULL,no-default) name(varchar(100),NULL,no-default) unit_label(varchar(50),NULL,no-default) 
+Ôöé Common columns (13): id, metric_key, data_type, min_value, max_value, default_value, icon, color, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    ref_metric_definitions_metric_key_unique: metric_key
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ref_roles ÔåÉ ref_role ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: name(varchar(100),NULL,no-default) key(varchar(50),NULL,no-default) icon(varchar(100),NULL,no-default) color(varchar(20),NULL,no-default) 
+Ôöé Common columns (6): id, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ref_simulations ÔåÉ ref_simulation ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: name(varchar(255),NULL,no-default) description(text,NULL,no-default) difficulty(varchar(50),NULL,no-default) cover_image(int(11),NULL,no-default) background_image(int(11),NULL,no-default) background_image_path(varchar(500),NULL,no-default) 
+Ôöé PG-only: cover_image_asset_id(integer) background_image_asset_id(integer) 
+Ôöé Common columns (10): id, difficulty_level, estimated_duration, min_players, max_players, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ref_simulation_metric_bands ÔåÉ ref_simulation_metric_band ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: metric_id(bigint(20) unsigned,NULL,no-default) 
+Ôöé Common columns (12): id, simulation_version_id, metric_key, category_id, min_value, max_value, order_index, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ref_simulation_paths ÔåÉ ref_simulation_path ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: wait_time_min(int(11),NULL,no-default) wait_time_max(int(11),NULL,no-default) 
+Ôöé Common columns (17): id, simulation_version_id, parent_path_id, media_asset_id, order_index, points, metrics, path_type, max_wait_time, min_wait_time, path_points, is_ended, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ref_simulation_versions ÔåÉ ref_simulation_version ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: version_code(varchar(50),NULL,no-default) is_default(tinyint(1),NOT NULL,def=0) 
+Ôöé Common columns (13): id, simulation_id, version_number, status, is_active, changelog, published_at, published_by, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    uk_ref_sim_version_sim_num: simulation_id, version_number
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ref_simulation_version_roles ÔåÉ ref_simulation_version_role ÔöÇÔöÇÔöÇ
+Ôöé Common columns (9): id, simulation_version_id, role_id, priority_order, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    uk_ref_sim_version_role_v_r: simulation_version_id, role_id
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ref_translations ÔåÉ ref_translation ÔöÇÔöÇÔöÇ
+Ôöé Common columns (10): id, entity_type, entity_id, language_id, fields, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    uk_ref_trans_e_l: entity_type, entity_id, language_id
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ mw_players ÔåÉ player ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: avatar_id(bigint(20) unsigned,NULL,no-default) language_id(bigint(20) unsigned,NULL,no-default) 
+Ôöé Common columns (14): id, user_id, username, email, name, surname, organization_id, avatar_media_id, preferred_language_id, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    mw_players_username_unique: username
+Ôöé    mw_players_email_unique: email
+Ôöé    mw_players_user_id_unique: user_id
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ mw_player_profiles ÔåÉ player_profile ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: games_played(int(11),NOT NULL,def=0) games_won(int(11),NOT NULL,def=0) 
+Ôöé Common columns (14): id, player_id, total_score, total_simulations_completed, total_play_time_minutes, last_completed_simulation_id, achievements, statistics, metric_stats, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    mw_player_profiles_player_id_unique: player_id
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ mw_simulation_sessions ÔåÉ simulation_session ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: abandoned_at(timestamp,NULL,no-default) 
+Ôöé Common columns (15): id, simulation_version_id, session_code, status, game_mode, started_at, completed_at, final_path_id, final_score, final_metrics, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ mw_session_players ÔåÉ simulation_session_player ÔöÇÔöÇÔöÇ
+Ôöé Common columns (10): id, simulation_session_id, player_id, role_id, joined_at, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    uk_mw_session_player: simulation_session_id, player_id
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ mw_player_choices ÔåÉ player_choice ÔöÇÔöÇÔöÇ
+Ôöé Common columns (17): id, player_id, simulation_session_id, previous_path_id, simulation_path_id, selected_path_id, decided_path_id, response_time_seconds, points_earned, is_correct, metrics_before, metrics_after, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ mw_player_progress ÔåÉ player_progress ÔöÇÔöÇÔöÇ
+Ôöé Common columns (14): id, player_id, simulation_session_id, simulation_version_id, current_path_id, current_score, current_metrics, started_at, completed_at, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ mw_assignments ÔåÉ assignment ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: status(varchar(20),NOT NULL,def=active) 
+Ôöé Common columns (10): id, simulation_id, grade, deadline, simulation_session_id, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ mw_assignment_players ÔåÉ assignment_player ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: status(varchar(20),NOT NULL,def=assigned) 
+Ôöé Common columns (8): id, assignment_id, player_id, deactivated_at, created_at, updated_at, created_by, updated_by
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ws_simulations ÔåÉ startup_simulation ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: external_id(int(10) unsigned,NOT NULL,no-default) application_id(bigint(20) unsigned,NOT NULL,no-default) background_color(varchar(7),NULL,no-default) type(varchar(50),NULL,no-default) category(varchar(50),NULL,no-default) status(varchar(20),NOT NULL,def=active) metadata(longtext,NULL,no-default) synced_at(timestamp,NOT NULL,def=current_timestamp()) 
+Ôöé PG-only: created_by(character varying) updated_by(character varying) deactivated_at(timestamp with time zone) background_color_code(character varying) 
+Ôöé Common columns (8): id, name, description, total_step, icon_url, color_code, created_at, updated_at
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé    ­şö┤ external_id (int(10) unsigned) ÔÇö MUST be provided!
+Ôöé    ­şö┤ application_id (bigint(20) unsigned) ÔÇö MUST be provided!
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    ws_simulations_external_id_unique: external_id
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ws_steps ÔåÉ startup_step ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: external_id(int(10) unsigned,NOT NULL,no-default) responsible_name(varchar(255),NULL,no-default) max_score(int(10) unsigned,NOT NULL,def=150) ai_score(int(10) unsigned,NULL,no-default) order_index(smallint(5) unsigned,NOT NULL,def=0) tools(longtext,NULL,no-default) questions(longtext,NULL,no-default) synced_at(timestamp,NOT NULL,def=current_timestamp()) 
+Ôöé PG-only: sort_order(integer) created_by(character varying) updated_by(character varying) deactivated_at(timestamp with time zone) 
+Ôöé Common columns (15): id, simulation_id, name, step_number, description, task_description, suggested_duration, is_locked, icon_url, has_file_upload, difficulty, skill, points, created_at, updated_at
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé    ­şö┤ external_id (int(10) unsigned) ÔÇö MUST be provided!
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    ws_steps_external_id_unique: external_id
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ws_tools ÔåÉ startup_tool ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: application_id(bigint(20) unsigned,NOT NULL,no-default) synced_at(timestamp,NOT NULL,def=current_timestamp()) 
+Ôöé PG-only: tool_type(character varying) created_by(character varying) updated_by(character varying) deactivated_at(timestamp with time zone) 
+Ôöé Common columns (8): id, name, description, icon_url, website_url, category, created_at, updated_at
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé    ­şö┤ application_id (bigint(20) unsigned) ÔÇö MUST be provided!
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ws_members ÔåÉ startup_member ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: external_id(int(10) unsigned,NOT NULL,no-default) application_id(bigint(20) unsigned,NOT NULL,no-default) step_progress(longtext,NULL,no-default) step_evaluations(longtext,NULL,no-default) step_submissions(longtext,NULL,no-default) synced_at(timestamp,NOT NULL,def=current_timestamp()) 
+Ôöé PG-only: created_by(character varying) updated_by(character varying) deactivated_at(timestamp with time zone) 
+Ôöé Common columns (8): id, user_id, name, email, avatar_url, points, created_at, updated_at
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé    ­şö┤ external_id (int(10) unsigned) ÔÇö MUST be provided!
+Ôöé    ­şö┤ application_id (bigint(20) unsigned) ÔÇö MUST be provided!
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    ws_members_user_id_application_id_unique: user_id, application_id
+Ôöé    ws_members_external_id_unique: external_id
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ws_step_progress ÔåÉ startup_user_step_progress ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: step_external_id(int(10) unsigned,NOT NULL,no-default) synced_at(timestamp,NOT NULL,def=current_timestamp()) 
+Ôöé PG-only: step_id(bigint) created_by(character varying) updated_by(character varying) deactivated_at(timestamp with time zone) assigned_member_id(bigint) 
+Ôöé Common columns (10): id, member_id, assignment_id, status, started_at, completed_at, earned_point, earned_coin, created_at, updated_at
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé    ­şö┤ step_external_id (int(10) unsigned) ÔÇö MUST be provided!
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ws_step_questions ÔåÉ startup_step_question ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: external_id(bigint(20) unsigned,NOT NULL,no-default) synced_at(timestamp,NULL,no-default) 
+Ôöé PG-only: created_by(character varying) updated_by(character varying) deactivated_at(timestamp with time zone) 
+Ôöé Common columns (8): id, step_id, question_text, max_score, sort_order, is_required, created_at, updated_at
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé    ­şö┤ external_id (bigint(20) unsigned) ÔÇö MUST be provided!
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    ws_step_questions_external_id_unique: external_id
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ws_step_question_answers ÔåÉ startup_step_question_answer ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: external_id(bigint(20) unsigned,NULL,no-default) synced_at(timestamp,NULL,no-default) 
+Ôöé PG-only: created_by(character varying) updated_by(character varying) deactivated_at(timestamp with time zone) assignment_id(bigint) 
+Ôöé Common columns (10): id, question_id, member_id, attempt, text_answer, ai_score, ai_max_score, ai_feedback, created_at, updated_at
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    ws_step_question_answers_external_id_unique: external_id
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ws_step_evaluations ÔåÉ startup_step_question_evaluation ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: external_id(bigint(20) unsigned,NULL,no-default) synced_at(timestamp,NULL,no-default) 
+Ôöé PG-only: created_by(character varying) updated_by(character varying) deactivated_at(timestamp with time zone) assignment_id(bigint) 
+Ôöé Common columns (12): id, step_id, member_id, attempt, ai_total_score, ai_max_score, ai_coins, ai_overall_feedback, status, ai_evaluated_at, created_at, updated_at
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    ws_step_evaluations_external_id_unique: external_id
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ws_assignments ÔåÉ startup_assignment ÔöÇÔöÇÔöÇ
+Ôöé MySQL-only: external_id(int(10) unsigned,NOT NULL,no-default) synced_at(timestamp,NOT NULL,def=current_timestamp()) 
+Ôöé PG-only: created_by(character varying) updated_by(character varying) deactivated_at(timestamp with time zone) 
+Ôöé Common columns (8): id, simulation_id, name, description, due_date, status, created_at, updated_at
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé    ­şö┤ external_id (int(10) unsigned) ÔÇö MUST be provided!
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    ws_assignments_external_id_unique: external_id
+ÔööÔöÇÔöÇÔöÇ
+
+ÔöîÔöÇÔöÇÔöÇ ws_assignment_members ÔåÉ startup_assignment_member ÔöÇÔöÇÔöÇ
+Ôöé PG-only: joined_at(timestamp with time zone) created_by(character varying) updated_by(character varying) deactivated_at(timestamp with time zone) 
+Ôöé Common columns (5): id, assignment_id, member_id, created_at, updated_at
+Ôöé ÔÜá´©Å  REQUIRED MySQL fields (NOT NULL, no default, not in PG):
+Ôöé ­şöæ UNIQUE indexes:
+Ôöé    ws_assignment_members_assignment_id_member_id_unique: assignment_id, member_id
+ÔööÔöÇÔöÇÔöÇ
+
+
+========== SAMPLE DATA ==========
+
+--- player (first 2 rows) ---
+  id = 1
+  username = 'test'
+  email = 'john.doe@example.com'
+  name = 'test'
+  surname = 'test'
+  avatar_media_id = NULL
+  preferred_language_id = NULL
+  deactivated_at = NULL
+  created_at = '2026-02-18 11:26:46.723699+00'
+  created_by = -1
+  updated_at = '2026-02-18 11:26:46.723699+00'
+  updated_by = -1
+  user_id = 12
+  organization_id = NULL
+  ---
+  id = 2
+  username = '69-ertug'
+  email = '69-ertug@temp.local'
+  name = NULL
+  surname = NULL
+  avatar_media_id = NULL
+  preferred_language_id = NULL
+  deactivated_at = NULL
+  created_at = '2026-02-18 15:42:55.075267+00'
+  created_by = -1
+  updated_at = '2026-02-18 15:42:55.075267+00'
+  updated_by = -1
+  user_id = NULL
+  organization_id = NULL
+  ---
+
+--- startup_simulation (first 2 rows) ---
+  id = 1
+  name = 'Your Idea'
+  description = 'Your Idea'
+  total_step = 12
+  created_by = '-1'
+  updated_by = '-1'
+  deactivated_at = NULL
+  created_at = '2026-02-05 14:57:38.379+00'
+  updated_at = '2026-02-05 14:57:38.379+00'
+  icon_url = 'https://d3d1gc5i2cjako.cloudfront.net/startup/system/sim-1.png'
+  background_color_code = '#FFD177'
+  color_code = '#F9A400'
+  ---
+  id = 2
+  name = 'Edtech'
+  description = 'Edtech'
+  total_step = 12
+  created_by = '-1'
+  updated_by = '-1'
+  deactivated_at = NULL
+  created_at = '2026-02-10 09:14:13.414+00'
+  updated_at = '2026-02-10 09:14:13.414+00'
+  icon_url = 'https://d3d1gc5i2cjako.cloudfront.net/startup/system/sim-2.png'
+  background_color_code = '#AEC6EC'
+  color_code = '#3F83F8'
+  ---
+
+--- startup_member (first 2 rows) ---
+  id = 1
+  user_id = '67'
+  name = 'doping test'
+  email = 'test@dopingtech.net'
+  avatar_url = NULL
+  points = 0
+  created_by = '-1'
+  updated_by = '-1'
+  deactivated_at = NULL
+  created_at = '2026-02-17 12:45:43.885483+00'
+  updated_at = '2026-02-17 12:45:43.885483+00'
+  ---
+  id = 2
+  user_id = '2'
+  name = 'Admin DopiFuture'
+  email = 'admin@dopifuture.com'
+  avatar_url = ''
+  points = 0
+  created_by = '-1'
+  updated_by = '-1'
+  deactivated_at = NULL
+  created_at = '2026-02-23 09:10:45.191023+00'
+  updated_at = '2026-02-23 09:10:45.191023+00'
+  ---
+
+--- assignment (first 2 rows) ---
+  id = 1
+  simulation_id = 1
+  grade = NULL
+  deadline = '2026-04-30 23:59:59+00'
+  simulation_session_id = 145
+  created_by = '-1'
+  updated_by = NULL
+  deactivated_at = NULL
+  created_at = '2026-03-27 09:59:45.902951+00'
+  updated_at = '2026-03-27 11:53:09.453315+00'
+  ---
+
+--- startup_step (first 2 rows) ---
+  id = 7
+  simulation_id = 1
+  step_number = 6
+  name = 'Prototype Design'
+  description = 'ÔÇó Prototype the selected solution (sketches, mockups, or models)'
+  task_description = 'ÔÇó Prototype the selected solution (sketches, mockups, or models)'
+  suggested_duration = 172800000
+  difficulty = 'medium'
+  sort_order = 7
+  is_locked = false
+  icon_url = 'https://d3d1gc5i2cjako.cloudfront.net/startup/system/step-7.png'
+  created_by = '-1'
+  updated_by = '-1'
+  deactivated_at = NULL
+  created_at = '2026-02-05 17:45:35.149+00'
+  updated_at = '2026-02-05 17:45:35.149+00'
+  points = 150
+  has_file_upload = false
+  skill = 'Design & Prototyping, Creativity, User-Centered Thinking, Communication & Presen...'
+  ---
+  id = 29
+  simulation_id = 3
+  step_number = 6
+  name = 'Prototype Design'
+  description = 'ÔÇó Prototype the selected solution (sketches, mockups, or models)'
+  task_description = 'ÔÇó Prototype the selected solution (sketches, mockups, or models)'
+  suggested_duration = 172800000
+  difficulty = 'medium'
+  sort_order = 7
+  is_locked = false
+  icon_url = 'https://d3d1gc5i2cjako.cloudfront.net/startup/system/step-7.png'
+  created_by = '-1'
+  updated_by = '-1'
+  deactivated_at = NULL
+  created_at = '2026-02-05 17:45:35.149+00'
+  updated_at = '2026-02-05 17:45:35.149+00'
+  points = 150
+  has_file_upload = false
+  skill = 'Design & Prototyping, Creativity, User-Centered Thinking, Communication & Presen...'
+  ---

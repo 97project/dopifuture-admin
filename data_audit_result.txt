@@ -1,0 +1,55 @@
+﻿=== Duplicate user_ids in PG player ===
+
+=== Duplicate usernames in PG player ===
+
+=== Duplicate emails in PG player ===
+
+=== Row counts in PG ===
+  ref_info_card: 850
+  ref_language: 3
+  ref_metric_band_category: 3
+  ref_metric_definition: 5
+  ref_role: 23
+  ref_simulation: 17
+  ref_simulation_metric_band: 37
+  ref_simulation_path: 400
+  ref_simulation_version: 17
+  ref_simulation_version_role: 40
+  ref_translation: 4741
+  player: 123
+  player_profile: 123
+  simulation_session: 182
+  simulation_session_player: 254
+  player_choice: 318
+  player_progress: 254
+  assignment: 1
+  assignment_player: 4
+  startup_simulation: 12
+  startup_step: 132
+  startup_tool: 0
+  startup_member: 287
+  startup_user_step_progress: 39
+  startup_step_question: 660
+  startup_step_question_answer: 150
+  startup_step_question_evaluation: 29
+  startup_assignment: 1
+  startup_assignment_member: 2
+
+=== PG startup_step.simulation_id values ===
+  simulation_id=12
+  simulation_id=3
+  simulation_id=11
+  simulation_id=8
+  simulation_id=10
+  simulation_id=7
+  simulation_id=9
+  simulation_id=1
+  simulation_id=5
+  simulation_id=4
+  simulation_id=2
+  simulation_id=6
+
+=== PG startup_user_step_progress sample ===
+  {"id":1,"member_id":209,"step_id":101,"status":"completed","started_at":"2026-03-05 05:58:00.056+00","completed_at":"2026-03-05 05:58:00.056+00","created_by":"-1","updated_by":"-1","deactivated_at":null,"created_at":"2026-03-05 05:58:00.037884+00","updated_at":"2026-03-05 05:58:00.037884+00","earned_point":0,"earned_coin":0,"assignment_id":null,"assigned_member_id":null}
+  {"id":2,"member_id":211,"step_id":24,"status":"completed","started_at":"2026-03-09 05:39:55.12+00","completed_at":"2026-03-09 05:39:55.12+00","created_by":"-1","updated_by":"-1","deactivated_at":null,"created_at":"2026-03-09 05:39:55.108427+00","updated_at":"2026-03-09 05:39:55.108427+00","earned_point":0,"earned_coin":0,"assignment_id":null,"assigned_member_id":null}
+  {"id":3,"member_id":210,"step_id":13,"status":"completed","started_at":null,"completed_at":"2026-03-10 06:09:43.011+00","created_by":"-1","updated_by":"-1","deactivated_at":null,"created_at":"2026-03-10 06:09:42.985033+00","updated_at":"2026-03-10 06:09:42.985033+00","earned_point":0,"earned_coin":0,"assignment_id":null,"assigned_member_id":null}

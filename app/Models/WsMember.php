@@ -11,8 +11,9 @@ class WsMember extends Model
     protected $table = 'ws_members';
 
     protected $fillable = [
-        'external_id', 'user_id', 'application_id', 'points',
-        'step_progress', 'step_evaluations', 'step_submissions', 'synced_at',
+        'external_id', 'user_id', 'application_id', 'name', 'email',
+        'avatar_url', 'points', 'step_progress', 'step_evaluations',
+        'step_submissions', 'synced_at',
     ];
 
     protected $casts = [
@@ -40,6 +41,16 @@ class WsMember extends Model
     public function questionAnswers(): HasMany
     {
         return $this->hasMany(WsStepQuestionAnswer::class, 'member_id');
+    }
+
+    public function progress(): HasMany
+    {
+        return $this->hasMany(WsStepProgress::class, 'member_id');
+    }
+
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(WsStepSubmission::class, 'member_id');
     }
 
     /**

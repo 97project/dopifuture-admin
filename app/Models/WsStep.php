@@ -11,9 +11,11 @@ class WsStep extends Model
     protected $table = 'ws_steps';
 
     protected $fillable = [
-        'external_id', 'simulation_id', 'name', 'difficulty', 'skill',
-        'responsible_name', 'points', 'max_score', 'ai_score',
-        'order_index', 'tools', 'questions', 'synced_at',
+        'external_id', 'simulation_id', 'name', 'step_number',
+        'description', 'task_description', 'suggested_duration',
+        'difficulty', 'skill', 'responsible_name', 'points', 'max_score',
+        'ai_score', 'order_index', 'is_locked', 'icon_url',
+        'has_file_upload', 'tools', 'questions', 'synced_at',
     ];
 
     protected $casts = [

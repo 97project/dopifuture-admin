@@ -195,11 +195,11 @@ class PortalReportController extends Controller
                 $stepCount = $wsSim->steps->count();
 
                 // Real completion from member step_progress
-                $members = WsMember::where('application_id', $wsSim->application_id)->with('user')->get();
+                $members = WsMember::where('application_id', $wsSim->application_id)->with(['user', 'progress'])->get();
                 $completedSteps = 0;
                 foreach ($members as $m) {
-                    foreach (($m->step_progress ?? []) as $sp) {
-                        if (($sp['status'] ?? '') === 'completed') $completedSteps++;
+                    foreach ($m->progress as $sp) {
+                        if ($sp->status === 'completed') $completedSteps++;
                     }
                 }
                 $totalPoints = $wsSim->steps->sum('points');
@@ -281,11 +281,11 @@ class PortalReportController extends Controller
                 }
             } elseif ($app->slug === 'way-startup') {
                 // WS per-student stats from member data
-                $member = WsMember::where('user_id', $s->id)->first();
+                $member = WsMember::where('user_id', $s->id)->with('progress')->first();
                 $base['startup_type'] = '-';
                 if ($member) {
-                    $completed = collect($member->step_progress ?? [])->where('status', 'completed')->count();
-                    $total = count($member->step_progress ?? []);
+                    $completed = $member->progress->where('status', 'completed')->count();
+                    $total = $member->progress->count();
                     $base['total'] = $total;
                     $base['completed'] = $completed;
                     $base['completion_rate'] = $total > 0 ? round(($completed / $total) * 100) : 0;
@@ -311,9 +311,9 @@ class PortalReportController extends Controller
             $totalCompleted = 0;
             // Count simulations that have any completed steps
             foreach (WsSimulation::with('steps')->get() as $wsSim) {
-                $wsMembers = WsMember::where('application_id', $wsSim->application_id)->get();
+                $wsMembers = WsMember::where('application_id', $wsSim->application_id)->with('progress')->get();
                 $hasCompleted = $wsMembers->contains(fn($m) =>
-                    collect($m->step_progress ?? [])->contains('status', 'completed')
+                    $m->progress->contains('status', 'completed')
                 );
                 if ($hasCompleted) $totalCompleted++;
             }
@@ -565,8 +565,8 @@ class PortalReportController extends Controller
         $stepsCollection = $wsSim->steps;
 
         // Real completion from member step_progress
-        $members = WsMember::where('application_id', $wsSim->application_id)->with('user')->get();
-        $allStepProgress = $members->flatMap(fn($m) => collect($m->step_progress ?? []));
+        $members = WsMember::where('application_id', $wsSim->application_id)->with(['user', 'progress', 'submissions'])->get();
+        $allStepProgress = $members->flatMap->progress;
         $stepsCompleted = $allStepProgress->where('status', 'completed')->count();
 
         $totalPoints = $stepsCollection->sum('points');
@@ -587,8 +587,7 @@ class PortalReportController extends Controller
         $steps = $stepsCollection->map(function ($s) use ($allStepProgress, $allEvaluations) {
             // Check if any member completed this step
             $stepCompleted = $allStepProgress->contains(function ($sp) use ($s) {
-                return (($sp['stepId'] ?? $sp['step_id'] ?? null) == $s->external_id)
-                    && ($sp['status'] ?? '') === 'completed';
+                return $sp->step_external_id == $s->external_id && $sp->status === 'completed';
             });
 
             // Get AI evaluation from normalized table
@@ -642,26 +641,26 @@ class PortalReportController extends Controller
         $files = [];
         $links = [];
         foreach ($members as $member) {
-            foreach (($member->step_submissions ?? []) as $sub) {
-                $stepIdx = $sub['stepIndex'] ?? $sub['step'] ?? $sub['stepId'] ?? null;
-                if (!empty($sub['file_name']) || !empty($sub['fileName'])) {
+            foreach ($member->submissions as $sub) {
+                $stepIdx = $sub->step_external_id;
+                if (!empty($sub->file_name)) {
                     $files[] = [
                         'step' => $stepIdx,
-                        'name' => $sub['file_name'] ?? $sub['fileName'] ?? 'file',
-                        'size' => $sub['file_size'] ?? $sub['fileSize'] ?? '',
-                        'url'  => $sub['file_url'] ?? $sub['fileUrl'] ?? '',
-                        'status' => $sub['status'] ?? null,
-                        'feedback' => $sub['feedback'] ?? null,
-                        'points_earned' => $sub['pointsEarned'] ?? null,
+                        'name' => $sub->file_name ?? 'file',
+                        'size' => $sub->file_size ?? '',
+                        'url'  => $sub->file_url ?? '',
+                        'status' => $sub->status ?? null,
+                        'feedback' => $sub->feedback ?? null,
+                        'points_earned' => $sub->points_earned ?? null,
                     ];
                 }
-                if (!empty($sub['link']) || !empty($sub['url']) || !empty($sub['linkUrl'])) {
+                if (!empty($sub->link_url)) {
                     $links[] = [
                         'step' => $stepIdx,
-                        'url'  => $sub['link'] ?? $sub['url'] ?? $sub['linkUrl'] ?? '',
-                        'title' => $sub['linkTitle'] ?? null,
-                        'platform' => $sub['linkPlatform'] ?? null,
-                        'status' => $sub['status'] ?? null,
+                        'url'  => $sub->link_url ?? '',
+                        'title' => $sub->link_title ?? null,
+                        'platform' => $sub->link_platform ?? null,
+                        'status' => $sub->status ?? null,
                     ];
                 }
             }

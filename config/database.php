@@ -136,6 +136,25 @@ return [
             ]) : [],
         ],
 
+        /*
+         * Way Backend (PostgreSQL)
+         * Data Harvest için doğrudan AWS RDS üzerinden DB verilerini okur.
+         */
+        'way_backend' => [
+            'driver' => 'pgsql',
+            'url' => env('WAY_DB_URL'),
+            'host' => env('WAY_DB_HOST', '127.0.0.1'),
+            'port' => env('WAY_DB_PORT', '5432'),
+            'database' => env('WAY_DB_DATABASE', 'postgres'),
+            'username' => env('WAY_DB_USERNAME', 'forge'),
+            'password' => env('WAY_DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => env('WAY_DB_SCHEMA', 'way_backend'),
+            'sslmode' => 'prefer',
+        ],
+
     ],
 
     /*
