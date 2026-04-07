@@ -6,6 +6,7 @@ use App\Connectors\MissionWayConnector;
 use App\Connectors\WayStartupConnector;
 use App\Models\MissionWay\MwPlayer;
 use App\Models\MissionWay\RefSimulation;
+use App\Models\User;
 use App\Models\WsMember;
 use App\Models\WsSimulation;
 use Illuminate\Http\RedirectResponse;
@@ -41,44 +42,49 @@ class PortalAssignmentController extends Controller
         ]);
 
         try {
-            // Step 1: Resolve panel user_ids → local MW player IDs
-            $localPlayerIds = MwPlayer::whereIn('user_id', $validated['user_ids'])
-                ->pluck('id')
-                ->toArray();
+            // Step 1: Get selected students' emails
+            $connector = app(MissionWayConnector::class);
+            $selectedStudents = User::whereIn('id', $validated['user_ids'])->get(['id', 'email']);
 
-            if (empty($localPlayerIds)) {
-                return redirect()->back()->withErrors(['user_ids' => 'Seçili öğrencilerin Mission WAY hesabı bulunamadı.']);
+            if ($selectedStudents->isEmpty()) {
+                return redirect()->back()->withErrors(['user_ids' => 'Seçili öğrenciler bulunamadı.']);
             }
 
-            // Step 2: Fetch ALL API players (paginated) and build playerId → userId map
-            $connector = app(MissionWayConnector::class);
-            $playerIdToUserId = [];
+            // Step 2: Fetch ALL API players and build email → API userId map
+            $emailToApiUserId = [];
             $page = 1;
             do {
                 $resp = $connector->getPlayers(['page' => $page, 'limit' => 100]);
                 $batch = $resp['data'] ?? $resp;
                 if (!is_array($batch) || empty($batch)) break;
                 foreach ($batch as $p) {
-                    if (isset($p['id'], $p['userId'])) {
-                        $playerIdToUserId[(int) $p['id']] = (int) $p['userId'];
+                    if (isset($p['email'], $p['userId'])) {
+                        $emailToApiUserId[strtolower($p['email'])] = (int) $p['userId'];
                     }
                 }
                 $page++;
             } while (count($batch) >= 100);
 
-            // Step 3: Map local player IDs → backend userIds
+            // Step 3: Resolve panel students → API userIds via email matching
             $backendUserIds = [];
-            foreach ($localPlayerIds as $pid) {
-                if (isset($playerIdToUserId[$pid])) {
-                    $backendUserIds[] = $playerIdToUserId[$pid];
+            $unmapped = [];
+            foreach ($selectedStudents as $student) {
+                $key = strtolower($student->email);
+                if (isset($emailToApiUserId[$key])) {
+                    $backendUserIds[] = $emailToApiUserId[$key];
+                } else {
+                    $unmapped[] = $student->email;
                 }
             }
 
             if (empty($backendUserIds)) {
-                return redirect()->back()->withErrors(['user_ids' => 'Seçili öğrencilerin backend hesabı eşleştirilemedi.']);
+                return redirect()->back()->withErrors(['user_ids' => 'Seçili öğrencilerin MW backend hesabı eşleştirilemedi.']);
+            }
+            if (!empty($unmapped)) {
+                Log::warning('[PortalAssignment] MW unmapped students', ['emails' => $unmapped]);
             }
 
-            // Step 4: Build API payload (simulationId, userIds[], deadline?)
+            // Step 4: Build API payload
             $data = [
                 'simulationId' => (int) $validated['simulation_id'],
                 'userIds'      => $backendUserIds,
