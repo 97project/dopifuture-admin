@@ -375,9 +375,12 @@ class PortalReportController extends Controller
             'sessions_by_day'  => $sessionsByDay,
             'recent_sessions'  => collect(),
             // Assignment modal data
-            'mw_simulations'   => RefSimulation::orderBy('name')->get(),
-            'ws_simulations'   => WsSimulation::orderBy('name')->get(),
+            'mw_simulations'   => RefSimulation::where('name', 'not like', 'Simülasyon #%')->orderBy('name')->get(),
+            'ws_simulations'   => WsSimulation::where('name', 'not like', 'Simülasyon #%')->orderBy('name')->get(),
             'panel_students'   => $panelStudents ?? collect(),
+            // Filtered: only students with active platform accounts
+            'mw_students'      => isset($panelUserIds) ? User::whereIn('id', MwPlayer::whereIn('user_id', $panelUserIds)->whereNotNull('user_id')->pluck('user_id'))->orderBy('name')->get() : collect(),
+            'ws_students'      => isset($panelUserIds) ? User::whereIn('id', WsMember::whereIn('user_id', $panelUserIds)->whereNotNull('user_id')->pluck('user_id'))->orderBy('name')->get() : collect(),
         ];
 
         // ── Anlık API ile ek veriler (MW) ──

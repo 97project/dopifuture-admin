@@ -292,8 +292,8 @@
             </div>
             {{-- Pagination --}}
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);">Showing {{ ($missions ?? collect())->count() }} missions</span>
-                <span style="color:var(--color-txt-muted);">{{ ($missions ?? collect())->count() }} total</span>
+                <span style="color:var(--color-txt-muted);">Showing {{ ($startups ?? collect())->count() }} startups</span>
+                <span style="color:var(--color-txt-muted);">{{ ($startups ?? collect())->count() }} total</span>
             </div>
         </div>
 
@@ -1019,14 +1019,23 @@ new Chart(document.getElementById('sessionsChart'), {
             </button>
         </div>
 
+        @if(session('success'))
+        <div style="margin-bottom:12px;padding:10px;background:#D1FAE5;border-radius:8px;font-size:12px;color:#065F46;">
+            ✅ {{ session('success') }}
+        </div>
+        @endif
+
+        @if($errors->any())
+        <div style="margin-bottom:12px;padding:10px;background:#FEE2E2;border-radius:8px;font-size:12px;color:#DC2626;">
+            @foreach($errors->all() as $error)
+                <div>⚠️ {{ $error }}</div>
+            @endforeach
+        </div>
+        @endif
+
         @if($slug === 'mission-way')
         <form action="{{ route('portal.assignments.mw.store') }}" method="POST">
             @csrf
-            <div style="margin-bottom:16px;">
-                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Görev Adı</label>
-                <input type="text" name="name" required placeholder="Ör: Hafta 1 - Deprem Simülasyonu"
-                       style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;color:#111;background:#fff;">
-            </div>
             <div style="margin-bottom:16px;">
                 <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Simülasyon Seçin</label>
                 <select name="simulation_id" required
@@ -1039,15 +1048,15 @@ new Chart(document.getElementById('sessionsChart'), {
             </div>
 
             <div style="margin-bottom:16px;">
-                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Öğrenciler</label>
+                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Öğrenciler <span style="font-weight:400;color:#9CA3AF;">(MW hesabı olanlar)</span></label>
                 <div style="max-height:200px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;padding:8px;">
-                    @forelse($panel_students ?? [] as $student)
+                    @forelse($mw_students ?? [] as $student)
                     <label style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;font-size:13px;">
                         <input type="checkbox" name="user_ids[]" value="{{ $student->id }}" style="accent-color:#4364F7;">
                         {{ $student->name }} {{ $student->surname }}
                     </label>
                     @empty
-                    <div style="padding:12px;text-align:center;color:#9CA3AF;font-size:12px;">Öğrenci bulunamadı</div>
+                    <div style="padding:12px;text-align:center;color:#9CA3AF;font-size:12px;">MW hesabı olan öğrenci bulunamadı</div>
                     @endforelse
                 </div>
             </div>
@@ -1083,15 +1092,15 @@ new Chart(document.getElementById('sessionsChart'), {
             </div>
 
             <div style="margin-bottom:16px;">
-                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Öğrenciler</label>
+                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Öğrenciler <span style="font-weight:400;color:#9CA3AF;">(WS hesabı olanlar)</span></label>
                 <div style="max-height:200px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;padding:8px;">
-                    @forelse($panel_students ?? [] as $student)
+                    @forelse($ws_students ?? [] as $student)
                     <label style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;font-size:13px;">
                         <input type="checkbox" name="user_ids[]" value="{{ $student->id }}" style="accent-color:#4364F7;">
                         {{ $student->name }} {{ $student->surname }}
                     </label>
                     @empty
-                    <div style="padding:12px;text-align:center;color:#9CA3AF;font-size:12px;">Öğrenci bulunamadı</div>
+                    <div style="padding:12px;text-align:center;color:#9CA3AF;font-size:12px;">WS hesabı olan öğrenci bulunamadı</div>
                     @endforelse
                 </div>
             </div>
@@ -1108,14 +1117,6 @@ new Chart(document.getElementById('sessionsChart'), {
             </button>
         </form>
         @endif
-
-        @if($errors->any())
-        <div style="margin-top:12px;padding:10px;background:#FEE2E2;border-radius:8px;font-size:12px;color:#DC2626;">
-            @foreach($errors->all() as $error)
-                <div>{{ $error }}</div>
-            @endforeach
-        </div>
-        @endif
     </div>
 </div>
 
@@ -1123,6 +1124,15 @@ new Chart(document.getElementById('sessionsChart'), {
 #addAssignmentModal.show { display:flex !important; animation: fadeIn 0.2s ease; }
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 </style>
+
+@if($errors->any() || session('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var modal = document.getElementById('addAssignmentModal');
+        if (modal) modal.classList.add('show');
+    });
+</script>
+@endif
 @endif
 
 @endsection

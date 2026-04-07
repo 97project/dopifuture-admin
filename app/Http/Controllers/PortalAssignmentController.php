@@ -28,58 +28,84 @@ class PortalAssignmentController extends Controller
      */
     public function storeMwAssignment(Request $request): RedirectResponse
     {
-        // Yetki kontrolü: admin, teacher veya school_admin
         $user = auth()->user();
-        if (!$user->hasAnyRole(['admin', 'super-admin', 'teacher', 'school_admin'])) {
+        if (!$user->hasAnyRole(['admin', 'super-admin', 'teacher', 'school-admin', 'school-principal'])) {
             abort(403, 'Bu işlem için yetkiniz yok.');
         }
 
         $validated = $request->validate([
             'simulation_id' => 'required|integer',
-            'name'          => 'required|string|max:255',
             'user_ids'      => 'required|array|min:1',
             'user_ids.*'    => 'exists:users,id',
-            'description'   => 'nullable|string|max:1000',
             'deadline'      => 'nullable|date|after:now',
         ]);
 
         try {
-            // Resolve portal user_ids → MW player_ids
-            $playerIds = MwPlayer::whereIn('user_id', $validated['user_ids'])
+            // Step 1: Resolve panel user_ids → local MW player IDs
+            $localPlayerIds = MwPlayer::whereIn('user_id', $validated['user_ids'])
                 ->pluck('id')
-                ->map(fn($id) => (string) $id)
                 ->toArray();
 
-            if (empty($playerIds)) {
+            if (empty($localPlayerIds)) {
                 return redirect()->back()->withErrors(['user_ids' => 'Seçili öğrencilerin Mission WAY hesabı bulunamadı.']);
             }
 
+            // Step 2: Fetch ALL API players (paginated) and build playerId → userId map
             $connector = app(MissionWayConnector::class);
+            $playerIdToUserId = [];
+            $page = 1;
+            do {
+                $resp = $connector->getPlayers(['page' => $page, 'limit' => 100]);
+                $batch = $resp['data'] ?? $resp;
+                if (!is_array($batch) || empty($batch)) break;
+                foreach ($batch as $p) {
+                    if (isset($p['id'], $p['userId'])) {
+                        $playerIdToUserId[(int) $p['id']] = (int) $p['userId'];
+                    }
+                }
+                $page++;
+            } while (count($batch) >= 100);
 
+            // Step 3: Map local player IDs → backend userIds
+            $backendUserIds = [];
+            foreach ($localPlayerIds as $pid) {
+                if (isset($playerIdToUserId[$pid])) {
+                    $backendUserIds[] = $playerIdToUserId[$pid];
+                }
+            }
+
+            if (empty($backendUserIds)) {
+                return redirect()->back()->withErrors(['user_ids' => 'Seçili öğrencilerin backend hesabı eşleştirilemedi.']);
+            }
+
+            // Step 4: Build API payload (simulationId, userIds[], deadline?)
             $data = [
                 'simulationId' => (int) $validated['simulation_id'],
-                'name'         => $validated['name'],
-                'memberIds'    => $playerIds,
+                'userIds'      => $backendUserIds,
             ];
-
-            if (!empty($validated['description'])) {
-                $data['description'] = $validated['description'];
-            }
             if (!empty($validated['deadline'])) {
-                $data['dueDate'] = \Carbon\Carbon::parse($validated['deadline'])->toISOString();
+                $data['deadline'] = \Carbon\Carbon::parse($validated['deadline'])->toISOString();
             }
 
+            Log::info('[PortalAssignment] MW creating assignment', $data);
             $response = $connector->createAssignment($data);
 
             if ($response->successful()) {
                 return redirect()->back()->with('success', 'Mission WAY görevi başarıyla atandı.');
             }
 
-            $errorMsg = $response->json('message', 'Bilinmeyen hata');
+            $errorMsg = $response->json('message') ?? $response->body();
+            if (is_array($errorMsg)) {
+                $errorMsg = json_encode($errorMsg, JSON_UNESCAPED_UNICODE);
+            }
             return redirect()->back()->withErrors(['api' => "Görev oluşturulamadı: {$errorMsg} (HTTP {$response->status()})"]);
 
         } catch (\Throwable $e) {
-            Log::error('[PortalAssignment] MW store error', ['error' => $e->getMessage()]);
+            Log::error('[PortalAssignment] MW store error', [
+                'error' => $e->getMessage(),
+                'file'  => $e->getFile() . ':' . $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return redirect()->back()->withErrors(['api' => 'Görev atanırken hata oluştu: ' . $e->getMessage()]);
         }
     }
@@ -95,7 +121,7 @@ class PortalAssignmentController extends Controller
     {
         // Yetki kontrolü: admin, teacher veya school_admin
         $user = auth()->user();
-        if (!$user->hasAnyRole(['admin', 'super-admin', 'teacher', 'school_admin'])) {
+        if (!$user->hasAnyRole(['admin', 'super-admin', 'teacher', 'school-admin', 'school-principal'])) {
             abort(403, 'Bu işlem için yetkiniz yok.');
         }
 
@@ -112,7 +138,7 @@ class PortalAssignmentController extends Controller
             // Resolve portal user_ids → WS member_ids
             $memberIds = WsMember::whereIn('user_id', $validated['user_ids'])
                 ->pluck('external_id')
-                ->map(fn($id) => (string) $id)
+                ->map(fn($id) => (int) $id)
                 ->toArray();
 
             if (empty($memberIds)) {
@@ -134,17 +160,25 @@ class PortalAssignmentController extends Controller
                 $data['dueDate'] = \Carbon\Carbon::parse($validated['due_date'])->toISOString();
             }
 
+            Log::info('[PortalAssignment] WS creating assignment', $data);
             $response = $connector->createAssignment($data);
 
             if ($response->successful()) {
                 return redirect()->back()->with('success', 'Way Startup projesi başarıyla atandı.');
             }
 
-            $errorMsg = $response->json('message', 'Bilinmeyen hata');
+            $errorMsg = $response->json('message') ?? $response->body();
+            if (is_array($errorMsg)) {
+                $errorMsg = json_encode($errorMsg, JSON_UNESCAPED_UNICODE);
+            }
             return redirect()->back()->withErrors(['api' => "Proje oluşturulamadı: {$errorMsg} (HTTP {$response->status()})"]);
 
         } catch (\Throwable $e) {
-            Log::error('[PortalAssignment] WS store error', ['error' => $e->getMessage()]);
+            Log::error('[PortalAssignment] WS store error', [
+                'error' => $e->getMessage(),
+                'file'  => $e->getFile() . ':' . $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return redirect()->back()->withErrors(['api' => 'Proje atanırken hata oluştu: ' . $e->getMessage()]);
         }
     }
@@ -156,7 +190,7 @@ class PortalAssignmentController extends Controller
     public function removeMwMember(Request $request, int $assignmentId, int $memberId): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->hasAnyRole(['admin', 'super-admin', 'teacher', 'school_admin'])) {
+        if (!$user->hasAnyRole(['admin', 'super-admin', 'teacher', 'school-admin', 'school-principal'])) {
             abort(403, 'Bu işlem için yetkiniz yok.');
         }
 
@@ -180,7 +214,7 @@ class PortalAssignmentController extends Controller
     public function removeWsMember(Request $request, int $assignmentId, int $memberId): RedirectResponse
     {
         $user = auth()->user();
-        if (!$user->hasAnyRole(['admin', 'super-admin', 'teacher', 'school_admin'])) {
+        if (!$user->hasAnyRole(['admin', 'super-admin', 'teacher', 'school-admin', 'school-principal'])) {
             abort(403, 'Bu işlem için yetkiniz yok.');
         }
 

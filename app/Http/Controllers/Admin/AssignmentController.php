@@ -77,31 +77,52 @@ class AssignmentController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'platform'      => 'required|in:mission_way,way_startup',
-            'simulationId'  => 'required|integer',
-            'name'          => 'required|string|max:255',
-            'memberIds'     => 'required|array|min:1',
-            'memberIds.*'   => 'string',
-            'description'   => 'nullable|string|max:1000',
-            'dueDate'       => 'nullable|date',
-        ]);
+        $platform = $request->input('platform');
 
-        $data = [
-            'simulationId' => (int) $request->input('simulationId'),
-            'name'         => $request->input('name'),
-            'memberIds'    => $request->input('memberIds'),
-        ];
+        if ($platform === 'mission_way') {
+            $request->validate([
+                'platform'      => 'required|in:mission_way,way_startup',
+                'simulationId'  => 'required|integer',
+                'memberIds'     => 'required|array|min:1',
+                'memberIds.*'   => 'integer',
+                'dueDate'       => 'nullable|date',
+            ]);
 
-        if ($request->filled('description')) {
-            $data['description'] = $request->input('description');
-        }
-        if ($request->filled('dueDate')) {
-            $data['dueDate'] = \Carbon\Carbon::parse($request->input('dueDate'))->toISOString();
+            // MW API expects: { simulationId, userIds[], deadline? }
+            $data = [
+                'simulationId' => (int) $request->input('simulationId'),
+                'userIds'      => array_map('intval', $request->input('memberIds')),
+            ];
+            if ($request->filled('dueDate')) {
+                $data['deadline'] = \Carbon\Carbon::parse($request->input('dueDate'))->toISOString();
+            }
+        } else {
+            $request->validate([
+                'platform'      => 'required|in:mission_way,way_startup',
+                'simulationId'  => 'required|integer',
+                'name'          => 'required|string|max:255',
+                'memberIds'     => 'required|array|min:1',
+                'memberIds.*'   => 'integer',
+                'description'   => 'nullable|string|max:1000',
+                'dueDate'       => 'nullable|date',
+            ]);
+
+            // WS API expects: { simulationId, name, memberIds[], description?, dueDate? }
+            $data = [
+                'simulationId' => (int) $request->input('simulationId'),
+                'name'         => $request->input('name'),
+                'memberIds'    => array_map('intval', $request->input('memberIds')),
+            ];
+            if ($request->filled('description')) {
+                $data['description'] = $request->input('description');
+            }
+            if ($request->filled('dueDate')) {
+                $data['dueDate'] = \Carbon\Carbon::parse($request->input('dueDate'))->toISOString();
+            }
         }
 
         try {
-            if ($request->input('platform') === 'mission_way') {
+            if ($platform === 'mission_way') {
                 $connector = new MissionWayConnector();
             } else {
                 $connector = new WayStartupConnector();
@@ -114,7 +135,10 @@ class AssignmentController extends Controller
                     ->with('success', 'Görev başarıyla oluşturuldu.');
             }
 
-            $errorBody = $response->json('message', 'Bilinmeyen hata');
+            $errorBody = $response->json('message') ?? $response->body();
+            if (is_array($errorBody)) {
+                $errorBody = json_encode($errorBody, JSON_UNESCAPED_UNICODE);
+            }
             return back()->withInput()
                 ->with('error', "Görev oluşturulamadı: {$errorBody} (HTTP {$response->status()})");
 
