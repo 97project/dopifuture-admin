@@ -763,4 +763,47 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
     {
         return $this->apiGet("/v1/startup/step-question-answers/{$id}");
     }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Assignments — /startup/assignments
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /startup/assignments
+     * Tüm assignment'ları listeler.
+     */
+    public function getAssignments(array $params = []): array
+    {
+        $result = $this->apiGet('/startup/assignments', array_merge(['limit' => 200], $params));
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /**
+     * POST /startup/assignments
+     * Yeni assignment oluşturur.
+     *
+     * @param array $data {
+     *   simulationId: int (required),
+     *   name: string (required),
+     *   memberIds: string[] (required),
+     *   description?: string,
+     *   dueDate?: string (ISO 8601)
+     * }
+     */
+    public function createAssignment(array $data): \Illuminate\Http\Client\Response
+    {
+        return $this->apiPost('/startup/assignments', $data);
+    }
+
+    /**
+     * DELETE /startup/assignments/{id}/members/{memberId}
+     * Assignment'tan bir üyeyi çıkarır.
+     */
+    public function removeAssignmentMember(int $assignmentId, int $memberId): \Illuminate\Http\Client\Response
+    {
+        return $this->apiDelete("/startup/assignments/{$assignmentId}/members/{$memberId}");
+    }
 }

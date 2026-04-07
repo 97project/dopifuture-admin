@@ -755,6 +755,32 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
         return is_array($result) ? $result : [];
     }
 
+    /**
+     * POST /v1/assignments
+     * Yeni assignment oluşturur.
+     *
+     * @param array $data {
+     *   simulationId: int (required),
+     *   name: string (required),
+     *   memberIds: string[] (required),
+     *   description?: string,
+     *   dueDate?: string (ISO 8601)
+     * }
+     */
+    public function createAssignment(array $data): \Illuminate\Http\Client\Response
+    {
+        return $this->apiPost('/v1/assignments', $data);
+    }
+
+    /**
+     * DELETE /v1/assignments/{id}/members/{memberId}
+     * Assignment'tan bir üyeyi/oyuncuyu çıkarır.
+     */
+    public function removeAssignmentMember(int $assignmentId, int $memberId): \Illuminate\Http\Client\Response
+    {
+        return $this->apiDelete("/v1/assignments/{$assignmentId}/members/{$memberId}");
+    }
+
     /* ═══════════════════════════════════════════════════════
      *  Roles — GET /v1/roles
      * ═══════════════════════════════════════════════════════ */

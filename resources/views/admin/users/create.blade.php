@@ -101,6 +101,17 @@
                    class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 dark:file:bg-blue-900/50 dark:file:text-blue-300 hover:file:bg-blue-100">
             @error('avatar') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
         </div>
+        {{-- Hoş Geldin E-postası --}}
+        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+            <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" name="send_credentials" value="1" checked
+                       class="rounded border-gray-300 text-[#0B6AB2] focus:ring-[#0B6AB2] w-5 h-5">
+                <div>
+                    <span class="text-sm font-medium text-gray-900 dark:text-white">📧 Giriş bilgilerini e-posta ile gönder</span>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Kullanıcıya e-posta adresi ve şifresi SendGrid üzerinden gönderilir</p>
+                </div>
+            </label>
+        </div>
 
         <div class="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-[#1A3A5C]">
             <button type="submit" class="px-6 py-2 bg-[#0B6AB2] hover:bg-[#13398E] text-white text-sm font-medium rounded-lg transition-colors">

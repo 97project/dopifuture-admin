@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\ClassController;
 use App\Http\Controllers\Admin\LicenseController;
 use App\Http\Controllers\Admin\RegistrationRequestController;
 use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\AssignmentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -217,6 +218,13 @@ Route::prefix('admin')->name('admin.')->middleware(['web', \App\Http\Middleware\
         Route::get('reports/school/{school}', [\App\Http\Controllers\Admin\ReportController::class, 'schoolReport'])->name('reports.school');
         Route::get('reports/student/{student}', [\App\Http\Controllers\Admin\ReportController::class, 'studentReport'])->name('reports.student');
 
+        // ── DopiFuture: Assignments ──────────────────────────
+
+        Route::get('assignments', [AssignmentController::class, 'index'])->name('assignments.index');
+        Route::get('assignments/create', [AssignmentController::class, 'create'])->name('assignments.create');
+        Route::post('assignments', [AssignmentController::class, 'store'])->name('assignments.store');
+        Route::delete('assignments/{assignmentId}/members/{memberId}', [AssignmentController::class, 'removeMember'])->name('assignments.remove-member');
+
         // ── Seat Requests (admin approval workflow) ──────
         Route::get('seat-requests', [\App\Http\Controllers\SeatRequestController::class, 'adminIndex'])->name('seat-requests.index');
         Route::post('seat-requests/{seatRequest}/approve', [\App\Http\Controllers\SeatRequestController::class, 'approve'])->name('seat-requests.approve');
@@ -284,6 +292,9 @@ Route::middleware(['auth', \App\Http\Middleware\SetLocale::class, \App\Http\Midd
     // Assignment creation — MW & WS
     Route::post('reports/mission-way/assignments', [\App\Http\Controllers\PortalAssignmentController::class, 'storeMwAssignment'])->name('portal.assignments.mw.store');
     Route::post('reports/way-startup/assignments', [\App\Http\Controllers\PortalAssignmentController::class, 'storeWsAssignment'])->name('portal.assignments.ws.store');
+    // Assignment member removal — MW & WS
+    Route::delete('reports/mission-way/assignments/{assignmentId}/members/{memberId}', [\App\Http\Controllers\PortalAssignmentController::class, 'removeMwMember'])->name('portal.assignments.mw.remove-member');
+    Route::delete('reports/way-startup/assignments/{assignmentId}/members/{memberId}', [\App\Http\Controllers\PortalAssignmentController::class, 'removeWsMember'])->name('portal.assignments.ws.remove-member');
 
     // Schools: school-admin can only view and edit their own school (NO create/delete)
     Route::resource('schools', \App\Http\Controllers\PortalSchoolController::class)

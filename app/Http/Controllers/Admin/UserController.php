@@ -66,8 +66,9 @@ class UserController extends Controller
         $this->authorize('create', User::class);
 
         $data = $request->validated();
+        $plainPassword = $data['password'];
 
-        $user = User::create(collect($data)->except(['roles', 'avatar', 'password_confirmation'])->toArray());
+        $user = User::create(collect($data)->except(['roles', 'avatar', 'password_confirmation', 'send_credentials'])->toArray());
 
         if ($request->filled('roles')) {
             $user->syncRoles($request->input('roles'));
@@ -75,6 +76,20 @@ class UserController extends Controller
 
         if ($request->hasFile('avatar')) {
             $this->avatarService->upload($user, $request->file('avatar'));
+        }
+
+        // Hoş geldin e-postası gönder
+        if ($request->boolean('send_credentials', true)) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($user->email)
+                    ->send(new \App\Mail\WelcomeCredentials($user, $plainPassword));
+            } catch (\Throwable $e) {
+                \Log::channel('daily')->error('[UserController] Hoş geldin maili gönderilemedi', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         return redirect()->route('admin.users.index')

@@ -203,6 +203,17 @@ class PortalUserController extends Controller
         // Auto-sync to connector applications (plain password for Vega registration)
         SyncUserToAppsJob::dispatch($newUser, $data['password']);
 
+        // Hoş geldin e-postası gönder
+        try {
+            \Illuminate\Support\Facades\Mail::to($newUser->email)
+                ->send(new \App\Mail\WelcomeCredentials($newUser, $data['password']));
+        } catch (\Throwable $e) {
+            \Log::channel('daily')->error('[PortalUser] Hoş geldin maili gönderilemedi', [
+                'user_id' => $newUser->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         return redirect()->route('portal.users.index')
             ->with('success', __('admin.user_created'));
     }
@@ -427,6 +438,15 @@ class PortalUserController extends Controller
             }
 
             \App\Jobs\SyncUserToAppsJob::dispatch($newUser, $passwordToStore);
+
+            // Hoş geldin e-postası
+            try {
+                \Illuminate\Support\Facades\Mail::to($newUser->email)
+                    ->send(new \App\Mail\WelcomeCredentials($newUser, $passwordToStore));
+            } catch (\Throwable $e) {
+                // Mail hatası import'u durdurmamalı
+            }
+
             $created++;
         }
 
