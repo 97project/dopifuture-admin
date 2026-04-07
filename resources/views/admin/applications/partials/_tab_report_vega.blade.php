@@ -276,4 +276,97 @@
         @endif
     </div>
 
+    {{-- ═══ API CATALOG DATA ═══ --}}
+
+    {{-- Wings --}}
+    @if(!empty($reportData['wings']) && count($reportData['wings']) > 0)
+    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">🦋 Wing Badges</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            @foreach($reportData['wings'] as $wing)
+            <div class="bg-gray-50 dark:bg-gray-800/40 rounded-lg p-3 text-center">
+                <div class="text-lg mb-1">🦋</div>
+                <p class="text-xs font-semibold text-gray-900 dark:text-white">{{ $wing['name'] ?? $wing['title'] ?? 'Wing' }}</p>
+                <p class="text-[10px] text-gray-400">{{ $wing['pointsRequired'] ?? $wing['points'] ?? 0 }} pts</p>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Lessons (way-ai-coach) --}}
+    @if(!empty($reportData['lessons']) && count($reportData['lessons']) > 0)
+    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">📚 Ders Kataloğu</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left border-b border-gray-100 dark:border-gray-700">
+                        <th class="pb-3 font-semibold text-gray-500">#</th>
+                        <th class="pb-3 font-semibold text-gray-500">Başlık</th>
+                        <th class="pb-3 font-semibold text-gray-500">Kategori</th>
+                        <th class="pb-3 font-semibold text-gray-500">Seviye</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+                    @foreach($reportData['lessons'] as $i => $lesson)
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                        <td class="py-2 text-xs text-gray-400">{{ $i + 1 }}</td>
+                        <td class="py-2 text-xs font-medium text-gray-900 dark:text-white">{{ $lesson['title'] ?? $lesson['name'] ?? '-' }}</td>
+                        <td class="py-2"><span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400">{{ $lesson['category'] ?? $lesson['type'] ?? '-' }}</span></td>
+                        <td class="py-2 text-xs text-gray-400">{{ $lesson['difficulty'] ?? $lesson['level'] ?? '-' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    {{-- Scenarios (role-galaxy) --}}
+    @if(!empty($reportData['scenarios']) && count($reportData['scenarios']) > 0)
+    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">🎮 Senaryo Kataloğu</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            @foreach($reportData['scenarios'] as $scenario)
+            <div class="bg-gray-50 dark:bg-gray-800/40 rounded-lg p-3">
+                <p class="text-xs font-semibold text-gray-900 dark:text-white mb-1">🎭 {{ $scenario['title'] ?? $scenario['name'] ?? 'Senaryo' }}</p>
+                @if(!empty($scenario['description']))
+                    <p class="text-[10px] text-gray-400 line-clamp-2">{{ Str::limit($scenario['description'], 60) }}</p>
+                @endif
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Chat Sessions --}}
+    @if(!empty($reportData['chatSessions']) && count($reportData['chatSessions']) > 0)
+    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">💬 Chat Oturumları</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left border-b border-gray-100 dark:border-gray-700">
+                        <th class="pb-3 font-semibold text-gray-500">#</th>
+                        <th class="pb-3 font-semibold text-gray-500">Konu</th>
+                        <th class="pb-3 font-semibold text-gray-500 text-center">Durum</th>
+                        <th class="pb-3 font-semibold text-gray-500 text-right">Tarih</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+                    @foreach(collect($reportData['chatSessions'])->take(20) as $i => $chat)
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                        <td class="py-2 text-xs text-gray-400">{{ $i + 1 }}</td>
+                        <td class="py-2 text-xs font-medium text-gray-900 dark:text-white">{{ $chat['title'] ?? $chat['topic'] ?? '-' }}</td>
+                        <td class="py-2 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-violet-100 text-violet-700">{{ $chat['status'] ?? 'active' }}</span></td>
+                        <td class="py-2 text-right text-xs text-gray-400">{{ isset($chat['created_at']) ? \Carbon\Carbon::parse($chat['created_at'])->format('d.m.Y') : '-' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
 </div>

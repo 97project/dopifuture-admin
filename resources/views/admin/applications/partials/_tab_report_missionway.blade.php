@@ -311,4 +311,79 @@
         @endif
     </div>
 
+    {{-- ═══ API CATALOG DATA ═══ --}}
+
+    {{-- Objectives --}}
+    @if(!empty($reportData['objectives']) && count($reportData['objectives']) > 0)
+    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">🎯 Simulation Objectives</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left border-b border-gray-100 dark:border-gray-700">
+                        <th class="pb-3 font-semibold text-gray-500">#</th>
+                        <th class="pb-3 font-semibold text-gray-500">Ad</th>
+                        <th class="pb-3 font-semibold text-gray-500">Anahtar</th>
+                        <th class="pb-3 font-semibold text-gray-500">Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+                    @foreach(collect($reportData['objectives'])->take(20) as $i => $obj)
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                        <td class="py-2 text-xs text-gray-400">{{ $i + 1 }}</td>
+                        <td class="py-2 text-xs font-medium text-gray-900 dark:text-white">{{ $obj['name'] ?? $obj['title'] ?? '-' }}</td>
+                        <td class="py-2"><code class="text-[10px] bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">{{ $obj['key'] ?? $obj['slug'] ?? '-' }}</code></td>
+                        <td class="py-2 text-xs text-gray-400 max-w-xs truncate">{{ $obj['description'] ?? '-' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    {{-- Media Assets --}}
+    @if(!empty($reportData['mediaAssets']) && count($reportData['mediaAssets']) > 0)
+    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">🖼️ Media Assets ({{ count($reportData['mediaAssets']) }})</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            @foreach(collect($reportData['mediaAssets'])->take(12) as $asset)
+            <div class="bg-gray-50 dark:bg-gray-800/40 rounded-lg p-3 text-center">
+                <div class="text-lg mb-1">📁</div>
+                <p class="text-xs font-medium text-gray-900 dark:text-white truncate">{{ $asset['name'] ?? $asset['title'] ?? 'Asset' }}</p>
+                <p class="text-[10px] text-gray-400">{{ $asset['type'] ?? $asset['assetType'] ?? '' }}</p>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Version Roles --}}
+    @if(!empty($reportData['simVersionRoles']) && count($reportData['simVersionRoles']) > 0)
+    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">🎭 Simulation Version Roles</h3>
+        <div class="flex flex-wrap gap-2">
+            @foreach($reportData['simVersionRoles'] as $role)
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border border-blue-100 dark:border-blue-800/30">
+                🎭 {{ $role['name'] ?? $role['roleName'] ?? 'Role #' . ($role['id'] ?? '') }}
+            </span>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Languages --}}
+    @if(!empty($reportData['languages']) && count($reportData['languages']) > 0)
+    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">🌐 Desteklenen Diller</h3>
+        <div class="flex flex-wrap gap-2">
+            @foreach($reportData['languages'] as $lang)
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r from-cyan-50 to-purple-50 dark:from-cyan-900/20 dark:to-purple-900/20 text-cyan-700 dark:text-cyan-300 border border-cyan-100 dark:border-cyan-800/30">
+                🌍 {{ $lang['name'] ?? $lang['code'] ?? 'Language' }}
+            </span>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
 </div>

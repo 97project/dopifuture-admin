@@ -322,4 +322,55 @@
         @endif
     </div>
 
+    {{-- ═══ API CATALOG DATA ═══ --}}
+
+    {{-- Step Question Answers --}}
+    @if(!empty($reportData['stepQuestionAnswers']) && count($reportData['stepQuestionAnswers']) > 0)
+    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">📝 Soru Cevapları ({{ count($reportData['stepQuestionAnswers']) }})</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left border-b border-gray-100 dark:border-gray-700">
+                        <th class="pb-3 font-semibold text-gray-500">#</th>
+                        <th class="pb-3 font-semibold text-gray-500">Soru</th>
+                        <th class="pb-3 font-semibold text-gray-500">Cevap</th>
+                        <th class="pb-3 font-semibold text-gray-500 text-right">Tarih</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+                    @foreach(collect($reportData['stepQuestionAnswers'])->take(20) as $i => $answer)
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                        <td class="py-2 text-xs text-gray-400">{{ $i + 1 }}</td>
+                        <td class="py-2 text-xs font-medium text-gray-900 dark:text-white max-w-xs truncate">{{ $answer['question'] ?? $answer['questionText'] ?? '-' }}</td>
+                        <td class="py-2 text-xs text-gray-600 dark:text-gray-400 max-w-xs truncate">{{ $answer['answer'] ?? $answer['answerText'] ?? '-' }}</td>
+                        <td class="py-2 text-right text-xs text-gray-400">{{ isset($answer['created_at']) ? \Carbon\Carbon::parse($answer['created_at'])->format('d.m.Y') : '-' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    {{-- All Members --}}
+    @if(!empty($reportData['allMembers']) && count($reportData['allMembers']) > 0)
+    <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">👥 Tüm Startup Üyeleri ({{ count($reportData['allMembers']) }})</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            @foreach(collect($reportData['allMembers'])->take(16) as $member)
+            <div class="bg-gray-50 dark:bg-gray-800/40 rounded-lg p-3 flex items-center gap-2">
+                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                    {{ mb_strtoupper(mb_substr($member['name'] ?? 'U', 0, 1)) }}
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs font-medium text-gray-900 dark:text-white truncate">{{ $member['name'] ?? $member['email'] ?? 'Üye' }}</p>
+                    <p class="text-[10px] text-gray-400 truncate">{{ $member['email'] ?? '' }}</p>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
 </div>

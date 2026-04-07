@@ -780,6 +780,194 @@
     @endif
 @endif
 
+{{-- ═══ API CATALOG DATA — Anlık API Verileri ═══ --}}
+
+{{-- ── Wings / Rozetler (tüm Vega apps) ────────────────── --}}
+@if(!empty($wings) && $wings->count() > 0)
+<div class="dp-card" style="margin-top:24px;">
+    <div class="dp-card-title">🦋 Way Wings (Badges)</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:12px;">
+        @foreach($wings as $wing)
+        <div style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:10px;background:var(--color-input-bg);border:1px solid var(--color-row-border);">
+            @if(!empty($wing['iconUrl'] ?? $wing['icon']))
+                <img src="{{ $wing['iconUrl'] ?? $wing['icon'] }}" alt="" style="width:36px;height:36px;border-radius:8px;">
+            @else
+                <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#8B5CF6,#06B6D4);display:flex;align-items:center;justify-content:center;font-size:16px;">🦋</div>
+            @endif
+            <div>
+                <div style="font-weight:600;font-size:13px;">{{ $wing['name'] ?? $wing['title'] ?? 'Wing' }}</div>
+                <div style="font-size:11px;color:var(--color-txt-muted);">{{ $wing['pointsRequired'] ?? $wing['points'] ?? 0 }} pts</div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
+{{-- ── Lessons / Ders Kataloğu (way-ai-coach) ────────── --}}
+@if(!empty($lessons) && $lessons->count() > 0)
+<div class="dp-card" style="margin-top:24px;">
+    <div class="dp-card-title">📚 Lesson Catalog</div>
+    <div style="overflow-x:auto;margin-top:12px;">
+        <table class="dp-table">
+            <thead>
+                <tr>
+                    <th style="width:40px;">#</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Difficulty</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($lessons as $i => $lesson)
+                <tr>
+                    <td class="muted">{{ $i + 1 }}</td>
+                    <td style="font-weight:500;">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            @if(!empty($lesson['iconUrl'] ?? $lesson['icon']))
+                                <img src="{{ $lesson['iconUrl'] ?? $lesson['icon'] }}" alt="" style="width:28px;height:28px;border-radius:6px;">
+                            @endif
+                            {{ $lesson['title'] ?? $lesson['name'] ?? 'Lesson' }}
+                        </div>
+                    </td>
+                    <td><span class="dp-badge dp-badge-pending">{{ $lesson['category'] ?? $lesson['type'] ?? '-' }}</span></td>
+                    <td class="muted">{{ $lesson['difficulty'] ?? $lesson['level'] ?? '-' }}</td>
+                    <td class="muted">{{ ($lesson['duration'] ?? $lesson['durationMinutes'] ?? '-') }} min</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
+
+{{-- ── Scenarios / Senaryolar (role-galaxy) ─────────── --}}
+@if(!empty($scenarios) && $scenarios->count() > 0)
+<div class="dp-card" style="margin-top:24px;">
+    <div class="dp-card-title">🎮 Scenario Catalog</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:12px;">
+        @foreach($scenarios as $scenario)
+        <div style="padding:16px;border-radius:12px;background:var(--color-input-bg);border:1px solid var(--color-row-border);transition:transform 0.15s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                @if(!empty($scenario['iconUrl'] ?? $scenario['icon']))
+                    <img src="{{ $scenario['iconUrl'] ?? $scenario['icon'] }}" alt="" style="width:32px;height:32px;border-radius:8px;">
+                @else
+                    <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#4364F7,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:14px;">🎭</div>
+                @endif
+                <div style="font-weight:600;font-size:13px;">{{ $scenario['title'] ?? $scenario['name'] ?? 'Scenario' }}</div>
+            </div>
+            @if(!empty($scenario['description']))
+                <div style="font-size:11px;color:var(--color-txt-muted);line-height:1.4;">{{ Str::limit($scenario['description'], 80) }}</div>
+            @endif
+            <div style="display:flex;gap:8px;margin-top:8px;">
+                @if(!empty($scenario['category'] ?? $scenario['type']))
+                    <span class="dp-badge dp-badge-pending" style="font-size:10px;">{{ $scenario['category'] ?? $scenario['type'] }}</span>
+                @endif
+                @if(!empty($scenario['difficulty'] ?? $scenario['level']))
+                    <span class="dp-badge" style="font-size:10px;background:rgba(139,92,246,0.1);color:#8b5cf6;">{{ $scenario['difficulty'] ?? $scenario['level'] }}</span>
+                @endif
+            </div>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
+{{-- ── Objectives / Hedefler (mission-way) ──────────── --}}
+@if(!empty($objectives) && $objectives->count() > 0)
+<div class="dp-card" style="margin-top:24px;">
+    <div class="dp-card-title">🎯 Simulation Objectives</div>
+    <div style="overflow-x:auto;margin-top:12px;">
+        <table class="dp-table">
+            <thead>
+                <tr>
+                    <th style="width:40px;">#</th>
+                    <th>Name</th>
+                    <th>Key</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($objectives as $i => $obj)
+                <tr>
+                    <td class="muted">{{ $i + 1 }}</td>
+                    <td style="font-weight:500;">{{ $obj['name'] ?? $obj['title'] ?? 'Objective' }}</td>
+                    <td><code style="font-size:11px;background:var(--color-input-bg);padding:2px 6px;border-radius:4px;">{{ $obj['key'] ?? $obj['slug'] ?? '-' }}</code></td>
+                    <td class="muted" style="max-width:300px;">{{ Str::limit($obj['description'] ?? '-', 60) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
+
+{{-- ── Media Assets (mission-way) ──────────────────── --}}
+@if(!empty($mediaAssets) && $mediaAssets->count() > 0)
+<div class="dp-card" style="margin-top:24px;">
+    <div class="dp-card-title">🖼️ Media Assets</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:12px;">
+        @foreach($mediaAssets as $asset)
+        <div style="padding:12px;border-radius:10px;background:var(--color-input-bg);border:1px solid var(--color-row-border);text-align:center;">
+            @if(Str::startsWith($asset['mimeType'] ?? $asset['contentType'] ?? '', 'image'))
+                <img src="{{ $asset['fileUrl'] ?? $asset['url'] ?? '' }}" alt="" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:8px;">
+            @else
+                <div style="width:100%;height:80px;border-radius:6px;background:linear-gradient(135deg,#1e293b,#334155);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:8px;">📁</div>
+            @endif
+            <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $asset['name'] ?? $asset['title'] ?? 'Asset' }}</div>
+            <div style="font-size:10px;color:var(--color-txt-muted);">{{ $asset['type'] ?? $asset['assetType'] ?? '' }}</div>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
+{{-- ── SimulationWing Stats (mission-way) ──────────── --}}
+@if(!empty($simWingStats))
+<div class="dp-card" style="margin-top:24px;">
+    <div class="dp-card-title">📊 SimulationWing Statistics</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:12px;">
+        @foreach((array)$simWingStats as $key => $value)
+            @if(!is_array($value))
+            <div class="dp-stat-card">
+                <div class="s-value">{{ is_numeric($value) ? number_format($value) : $value }}</div>
+                <div class="s-label">{{ Str::headline($key) }}</div>
+            </div>
+            @endif
+        @endforeach
+    </div>
+</div>
+@endif
+
+{{-- ── Simulation Version Roles (mission-way) ────── --}}
+@if(!empty($simVersionRoles) && $simVersionRoles->count() > 0)
+<div class="dp-card" style="margin-top:24px;">
+    <div class="dp-card-title">🎭 Version Roles</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">
+        @foreach($simVersionRoles as $role)
+        <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:var(--color-input-bg);border:1px solid var(--color-row-border);font-size:12px;font-weight:500;">
+            🎭 {{ $role['name'] ?? $role['roleName'] ?? 'Role #' . ($role['id'] ?? '') }}
+        </span>
+        @endforeach
+    </div>
+</div>
+@endif
+
+{{-- ── Languages (mission-way) ─────────────────────── --}}
+@if(!empty($languages) && $languages->count() > 0)
+<div class="dp-card" style="margin-top:24px;">
+    <div class="dp-card-title">🌐 Supported Languages</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">
+        @foreach($languages as $lang)
+        <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:linear-gradient(135deg,rgba(6,182,212,0.1),rgba(139,92,246,0.1));border:1px solid rgba(6,182,212,0.2);font-size:12px;font-weight:500;">
+            🌍 {{ $lang['name'] ?? $lang['code'] ?? 'Language' }}
+        </span>
+        @endforeach
+    </div>
+</div>
+@endif
+
 {{-- ═══ ADD ASSIGNMENT MODAL — Figma node 1260-34190 ═══ --}}
 @include('portal.partials._modal', [
     'id' => 'addAssignmentModal',

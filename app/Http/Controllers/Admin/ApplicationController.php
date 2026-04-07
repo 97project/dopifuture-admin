@@ -279,6 +279,21 @@ class ApplicationController extends Controller
 
         // API health
         $data['api_health'] = $connector->getHealth();
+
+        // Anlık API: Katalog verileri
+        try {
+            if ($application->slug === 'way-ai-coach') {
+                $data['lessons'] = $connector->getLecturerLessons();
+            }
+            if ($application->slug === 'role-galaxy') {
+                $data['scenarios'] = $connector->getSimulatorScenarios();
+            }
+            $data['wings'] = $connector->getWings();
+            $data['wingPoints'] = $connector->getWingPoints();
+            $data['chatSessions'] = $connector->getChatSessions();
+        } catch (\Throwable $e) {
+            \Log::warning('Vega API catalog in admin: ' . $e->getMessage());
+        }
     };
         // MissionWay — simülasyonlar + oturumlar + player composition
         if ($connector instanceof \App\Connectors\MissionWayConnector) {
@@ -313,6 +328,17 @@ class ApplicationController extends Controller
 
             // API health
             $data['api_health'] = $connector->getHealthCheck();
+
+            // Anlık API: Katalog verileri
+            try {
+                $data['objectives'] = $connector->getObjectives();
+                $data['mediaAssets'] = $connector->getMediaAssets();
+                $data['languages'] = $connector->getLanguages();
+                $data['simWingStats'] = $connector->getSimulationWingStats();
+                $data['simVersionRoles'] = $connector->getSimVersionRoles();
+            } catch (\Throwable $e) {
+                \Log::warning('MW API catalog in admin: ' . $e->getMessage());
+            }
         }
 
         // WayStartup — simülasyonlar + genel ilerleme
@@ -340,6 +366,14 @@ class ApplicationController extends Controller
 
             // API health
             $data['api_health'] = $connector->getHealthCheck();
+
+            // Anlık API: Ek veriler
+            try {
+                $data['stepQuestionAnswers'] = $connector->getStepQuestionAnswers();
+                $data['allMembers'] = $connector->getMembers();
+            } catch (\Throwable $e) {
+                \Log::warning('WS API catalog in admin: ' . $e->getMessage());
+            }
         }
 
         return $data;

@@ -101,6 +101,39 @@
 </div>
 @endif
 
+{{-- ═══ WING BADGES (API Catalog) ═══ --}}
+@if(!empty($wingBadges) && $wingBadges->count() > 0)
+<div class="dp-card" style="margin-bottom:24px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <span style="font-size:24px;">🦋</span>
+        <div>
+            <div style="font-size:16px;font-weight:700;">Available Wing Badges</div>
+            <div style="font-size:12px;color:var(--color-txt-muted);">All collectible badges from the platform</div>
+        </div>
+        @if(!empty($premiumStatus))
+        <div style="margin-left:auto;">
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:linear-gradient(135deg,#F59E0B,#EF4444);color:#fff;font-size:12px;font-weight:600;">
+                ⭐ {{ is_array($premiumStatus) ? ($premiumStatus['plan'] ?? ($premiumStatus['status'] ?? 'Premium')) : ($premiumStatus === true ? 'Premium' : $premiumStatus) }}
+            </span>
+        </div>
+        @endif
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;">
+        @foreach($wingBadges as $badge)
+        <div style="background:var(--color-input-bg);border-radius:10px;padding:12px;text-align:center;transition:transform .15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+            @if(!empty($badge['iconUrl'] ?? $badge['icon']))
+                <img src="{{ $badge['iconUrl'] ?? $badge['icon'] }}" alt="" style="width:40px;height:40px;border-radius:8px;margin-bottom:6px;">
+            @else
+                <div style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#8B5CF6,#06B6D4);display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 6px;">🦋</div>
+            @endif
+            <div style="font-size:11px;font-weight:600;">{{ $badge['name'] ?? $badge['title'] ?? 'Badge' }}</div>
+            <div style="font-size:10px;color:var(--color-txt-muted);">{{ $badge['pointsRequired'] ?? $badge['points'] ?? 0 }} pts</div>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
 {{-- ═══ ENRICHMENT (Score Trend + Breakdowns — loaded via AJAX) ═══ --}}
 <div id="enrichment-section"></div>
 

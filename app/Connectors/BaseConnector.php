@@ -65,10 +65,17 @@ abstract class BaseConnector
                 return $response->json();
             }
 
-            Log::channel('daily')->warning("[{$this->logPrefix}] GET yanıt hatası", [
-                'path' => $path,
-                'status' => $response->status(),
-            ]);
+            // 404 beklenen durumlar için (üye bulunamadı vb.) DEBUG seviyesi
+            if ($response->status() === 404) {
+                Log::channel('daily')->debug("[{$this->logPrefix}] GET 404", [
+                    'path' => $path,
+                ]);
+            } else {
+                Log::channel('daily')->warning("[{$this->logPrefix}] GET yanıt hatası", [
+                    'path' => $path,
+                    'status' => $response->status(),
+                ]);
+            }
             return null;
         } catch (\Throwable $e) {
             Log::channel('daily')->error("[{$this->logPrefix}] API GET hatası", [

@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class RefSimulationVersionRole extends Model
 {
     protected $table = 'ref_simulation_version_roles';
-    protected $guarded = ['id'];
+    public $incrementing = false;
+    protected $guarded = [];
 
     public function version()
     {

@@ -828,6 +828,122 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
         return is_array($result) ? $result : [];
     }
 
+    /* ═══════════════════════════════════════════════════════
+     *  Languages — GET /v1/languages
+     * ═══════════════════════════════════════════════════════ */
+
+    public function getLanguages(array $params = []): array
+    {
+        $result = $this->apiGet('/v1/languages', array_merge(['limit' => 100], $params));
+        return isset($result['data']) ? $result['data'] : (is_array($result) ? $result : []);
+    }
+
+    public function getLanguage(int $id): ?array
+    {
+        return $this->apiGet("/v1/languages/{$id}");
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Objectives — GET /v1/objectives
+     * ═══════════════════════════════════════════════════════ */
+
+    public function getObjectives(array $params = []): array
+    {
+        $result = $this->apiGet('/v1/objectives', array_merge(['limit' => 200], $params));
+        return isset($result['data']) ? $result['data'] : (is_array($result) ? $result : []);
+    }
+
+    public function getObjective(int $id): ?array
+    {
+        return $this->apiGet("/v1/objectives/{$id}");
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Path Objectives — GET /v1/path-objectives
+     * ═══════════════════════════════════════════════════════ */
+
+    public function getPathObjectives(array $params = []): array
+    {
+        $result = $this->apiGet('/v1/path-objectives', array_merge(['limit' => 500], $params));
+        return isset($result['data']) ? $result['data'] : (is_array($result) ? $result : []);
+    }
+
+    public function getPathObjective(int $id): ?array
+    {
+        return $this->apiGet("/v1/path-objectives/{$id}");
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Media Assets — GET /v1/media-assets
+     * ═══════════════════════════════════════════════════════ */
+
+    public function getMediaAssets(array $params = []): array
+    {
+        $result = $this->apiGet('/v1/media-assets', array_merge(['limit' => 200], $params));
+        return isset($result['data']) ? $result['data'] : (is_array($result) ? $result : []);
+    }
+
+    public function getMediaAsset(int $id): ?array
+    {
+        return $this->apiGet("/v1/media-assets/{$id}");
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Media Asset Files — GET /v1/media-asset-files
+     * ═══════════════════════════════════════════════════════ */
+
+    public function getMediaAssetFiles(array $params = []): array
+    {
+        $result = $this->apiGet('/v1/media-asset-files', array_merge(['limit' => 200], $params));
+        return isset($result['data']) ? $result['data'] : (is_array($result) ? $result : []);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Simulation Version Roles — GET /v1/simulation-version-roles
+     * ═══════════════════════════════════════════════════════ */
+
+    public function getSimVersionRoles(array $params = []): array
+    {
+        $result = $this->apiGet('/v1/simulation-version-roles', array_merge(['limit' => 200], $params));
+        return isset($result['data']) ? $result['data'] : (is_array($result) ? $result : []);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  SimulationWing — GET /v1/simulation-wing/*
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/simulation-wing/stats
+     * Genel oturum ve simülasyon istatistikleri.
+     */
+    public function getSimulationWingStats(): ?array
+    {
+        return $this->apiGet('/v1/simulation-wing/stats');
+    }
+
+    /**
+     * GET /v1/simulation-wing/sessions
+     * SimulationWing oturum listesi.
+     */
+    public function getSimulationWingSessions(array $params = []): ?array
+    {
+        return $this->apiGet('/v1/simulation-wing/sessions', $params);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Player Compositions — GET /v1/player-compositions (liste)
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/player-compositions
+     * Tüm player composition kayıtları (sayfalı).
+     */
+    public function getPlayerCompositions(array $params = []): array
+    {
+        $result = $this->apiGet('/v1/player-compositions', array_merge(['limit' => 100], $params));
+        return isset($result['data']) ? $result['data'] : (is_array($result) ? $result : []);
+    }
+
     /* ─── Helpers ──────────────────────────────────────── */
 
     private function slugify(mixed $name): string

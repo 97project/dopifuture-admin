@@ -132,6 +132,29 @@ class PortalReportController extends Controller
             $data['startups'] = collect();
             $data['total_missions'] = 0;
 
+            // ── Anlık API ile katalog verileri (harvest gerekmez) ──
+            try {
+                $vegaConnector = app(\App\Connectors\VegaConnector::class);
+
+                // Ders kataloğu (Way AI Coach)
+                if ($app->slug === 'way-ai-coach') {
+                    $data['lessons'] = collect($vegaConnector->getLecturerLessons());
+                }
+                // Senaryo kataloğu (Role Galaxy)
+                if ($app->slug === 'role-galaxy') {
+                    $data['scenarios'] = collect($vegaConnector->getSimulatorScenarios());
+                }
+                // Wing rozetleri (tüm Vega apps)
+                $data['wings'] = collect($vegaConnector->getWings());
+                $data['wingPoints'] = $vegaConnector->getWingPoints();
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Vega API catalog fetch error: ' . $e->getMessage());
+                $data['lessons'] = $data['lessons'] ?? collect();
+                $data['scenarios'] = $data['scenarios'] ?? collect();
+                $data['wings'] = $data['wings'] ?? collect();
+                $data['wingPoints'] = $data['wingPoints'] ?? [];
+            }
+
             return view('portal.reports.app', $data);
         }
 
@@ -144,7 +167,10 @@ class PortalReportController extends Controller
             foreach ($simulations as $sim) {
                 $versionIds = $sim->versions->pluck('id');
                 $sessions = MwSimulationSession::whereIn('simulation_version_id', $versionIds)
-                    ->with('players.player.user')
+                    ->whereHas('players.player', function ($q) use ($panelUserIds) {
+                        $q->whereIn('user_id', $panelUserIds);
+                    })
+                    ->with(['players.player.user'])
                     ->get();
 
                 $players = $sessions->flatMap->players->map(function ($sp) {
@@ -194,8 +220,11 @@ class PortalReportController extends Controller
             foreach ($wsSims as $wsSim) {
                 $stepCount = $wsSim->steps->count();
 
-                // Real completion from member step_progress
-                $members = WsMember::where('application_id', $wsSim->application_id)->with(['user', 'progress'])->get();
+                // Real completion from member step_progress for this specific class
+                $members = WsMember::where('application_id', $wsSim->application_id)
+                    ->whereIn('user_id', $panelUserIds)
+                    ->with(['user', 'progress'])
+                    ->get();
                 $completedSteps = 0;
                 foreach ($members as $m) {
                     foreach ($m->progress as $sp) {
@@ -351,6 +380,38 @@ class PortalReportController extends Controller
             'panel_students'   => $panelStudents ?? collect(),
         ];
 
+        // ── Anlık API ile ek veriler (MW) ──
+        if ($app->slug === 'mission-way') {
+            try {
+                $mwConnector = app(\App\Connectors\MissionWayConnector::class);
+                $data['objectives'] = collect($mwConnector->getObjectives());
+                $data['mediaAssets'] = collect($mwConnector->getMediaAssets());
+                $data['languages'] = collect($mwConnector->getLanguages());
+                $data['simWingStats'] = $mwConnector->getSimulationWingStats();
+                $data['simVersionRoles'] = collect($mwConnector->getSimVersionRoles());
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('MW API catalog fetch: ' . $e->getMessage());
+                $data['objectives'] = collect();
+                $data['mediaAssets'] = collect();
+                $data['languages'] = collect();
+                $data['simWingStats'] = null;
+                $data['simVersionRoles'] = collect();
+            }
+        }
+
+        // ── Anlık API ile ek veriler (WS) ──
+        if ($app->slug === 'way-startup') {
+            try {
+                $wsConnector = app(\App\Connectors\WayStartupConnector::class);
+                $data['stepQuestionAnswers'] = collect($wsConnector->getStepQuestionAnswers());
+                $data['wsMembers'] = collect($wsConnector->getMembers());
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('WS API catalog fetch: ' . $e->getMessage());
+                $data['stepQuestionAnswers'] = collect();
+                $data['wsMembers'] = collect();
+            }
+        }
+
         return view('portal.reports.app', $data);
     }
 
@@ -389,6 +450,16 @@ class PortalReportController extends Controller
             \Illuminate\Support\Facades\Log::error('Vega DB Student Report Error: ' . $e->getMessage());
             $wingsPoints = ['total_wings' => 0, 'categories' => []];
         }
+        // Anlık API ile rozet verileri
+        $wingBadges = collect();
+        $premiumStatus = null;
+        try {
+            $vegaConnector = app(\App\Connectors\VegaConnector::class);
+            $wingBadges = collect($vegaConnector->getWings());
+            $premiumStatus = $vegaConnector->getPremiumStatus();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Vega API student enrichment: ' . $e->getMessage());
+        }
 
         return view('portal.reports.student', [
             'student' => $student,
@@ -396,6 +467,8 @@ class PortalReportController extends Controller
             'apps' => Application::active()->ordered()->get(),
             'activeApp' => $activeApp,
             'wingsPoints' => $wingsPoints,
+            'wingBadges' => $wingBadges,
+            'premiumStatus' => $premiumStatus,
         ]);
     }
 
@@ -431,6 +504,9 @@ class PortalReportController extends Controller
      */
     public function missionDetail($id)
     {
+        $user = auth()->user();
+        $panelUserIds = empty($user) ? [] : $user->getPanelStudents()->pluck('id')->toArray();
+
         $simModel = RefSimulation::with(['versions.paths'])->find($id);
 
         if (!$simModel) {
@@ -438,17 +514,18 @@ class PortalReportController extends Controller
         }
 
         $sessions = MwSimulationSession::whereIn('simulation_version_id', $simModel->versions->pluck('id'))
+            ->whereHas('players.player', function ($q) use ($panelUserIds) {
+                $q->whereIn('user_id', $panelUserIds);
+            })
             ->with(['players.player.user', 'players.role'])
             ->get();
 
-        // Metric enrichment from completed sessions
-        $completedSession = $sessions->where('status', 'completed')->first();
-        $enriched = $completedSession
-            ? $this->mwMetricService->enrichSessionMetrics($completedSession->final_metrics, $completedSession->simulation_version_id)
-            : [];
+        // Metric enrichment from ALL completed sessions
+        $completedSessions = $sessions->where('status', 'completed');
+        $enriched = $completedSessions->isEmpty() ? [] : $this->mwMetricService->aggregateSessionMetrics($completedSessions, $simModel->versions->first()?->id);
         $metricValues = $this->mwMetricService->getAllMetricValues($enriched);
 
-        $completedCount = $sessions->where('status', 'completed')->count();
+        $completedCount = $completedSessions->count();
         $totalCount = $sessions->count();
 
         $mission = (object)[
@@ -462,7 +539,7 @@ class PortalReportController extends Controller
                 ? "{$completedCount}/{$totalCount} session completed."
                 : 'Awaiting completion data.',
             'completion_rate' => $totalCount > 0 ? round(($completedCount / $totalCount) * 100) : 0,
-            'avg_score' => $completedSession?->final_score ?? 0,
+            'avg_score' => $completedCount > 0 ? round($completedSessions->avg('final_score') ?? 0) : 0,
             'health' => $metricValues['health'],
             'resource' => $metricValues['resource'],
             'ethics' => $metricValues['ethics'],
@@ -493,27 +570,41 @@ class PortalReportController extends Controller
             ];
         })->unique(function ($s) { return $s->name . $s->surname; });
 
-        // Group Flow: Build question cards from player choices
+        // Group Flow: Build question cards from ALL completed sessions choices
         $questions = collect();
-        if ($completedSession) {
-            $choices = MwPlayerChoice::where('simulation_session_id', $completedSession->id)
+        if ($completedCount > 0) {
+            $choices = \App\Models\MissionWay\MwPlayerChoice::whereIn('simulation_session_id', $completedSessions->pluck('id'))
                 ->orderBy('id')
                 ->get();
 
-            $questions = $choices->map(function ($choice) {
-                $path = RefSimulationPath::with('childPaths')->find($choice->simulation_path_id);
+            // Group by path ID to find the most popular options
+            $groupedChoices = $choices->groupBy('simulation_path_id');
 
+            $questions = $groupedChoices->map(function ($pathChoices, $pathId) use ($completedCount) {
+                $path = RefSimulationPath::with('childPaths')->find($pathId);
+                
                 // Get path text from translations
                 $pathTranslation = RefTranslation::where('entity_type', 'simulation_path')
-                    ->where('entity_id', $choice->simulation_path_id)
+                    ->where('entity_id', $pathId)
                     ->first();
                 $questionText = null;
                 if ($pathTranslation && is_array($pathTranslation->fields)) {
                     $questionText = $pathTranslation->fields['question'] ?? $pathTranslation->fields['text'] ?? $pathTranslation->fields['name'] ?? null;
                 }
 
+                // Calculate unanimity based on the most frequent response
+                $responseCounts = $pathChoices->countBy('selected_path_id');
+                $mostFrequentCount = $responseCounts->max() ?? 0;
+                $unanimity = $pathChoices->count() > 0 ? round(($mostFrequentCount / $pathChoices->count()) * 100) : null;
+                
+                // The option selected by the class is the most frequent one
+                $classSelectedPathId = $responseCounts->keys()->first() ?? null;
+                if ($mostFrequentCount > 0 && $pathChoices->count() > 0) {
+                     $classSelectedPathId = $responseCounts->sortDesc()->keys()->first();
+                }
+
                 // Build option list from child paths
-                $options = ($path?->childPaths ?? collect())->map(function ($child) use ($choice) {
+                $options = ($path?->childPaths ?? collect())->map(function ($child) use ($classSelectedPathId) {
                     $childTranslation = RefTranslation::where('entity_type', 'simulation_path')
                         ->where('entity_id', $child->id)
                         ->first();
@@ -523,29 +614,30 @@ class PortalReportController extends Controller
                     }
                     return (object)[
                         'text' => $optionText,
-                        'selected' => $child->id === $choice->selected_path_id,
+                        'selected' => $child->id === $classSelectedPathId,
                     ];
                 });
 
-                // Per-question metrics from metrics_after
-                $metricsAfter = $choice->metrics_after ?? [];
-                $extractMetric = function ($key) use ($metricsAfter) {
-                    $v = $metricsAfter[$key] ?? null;
-                    return is_array($v) ? ($v['current'] ?? null) : $v;
+                // Average numeric metrics from the most popular choice
+                $popularChoices = $pathChoices->where('selected_path_id', $classSelectedPathId);
+                $avgMetric = function ($key) use ($popularChoices) {
+                    $vals = $popularChoices->map(function($c) use ($key) {
+                       $v = $c->metrics_after[$key] ?? null;
+                       return is_array($v) ? ($v['current'] ?? null) : $v; 
+                    })->filter(fn($v) => is_numeric($v));
+                    return $vals->count() > 0 ? round($vals->avg()) : null;
                 };
 
                 return (object)[
                     'question' => $questionText ?? 'Decision Point',
-                    'unanimity' => $choice->response_time_seconds
-                        ? min(100, max(0, 100 - intval($choice->response_time_seconds)))
-                        : null,
+                    'unanimity' => $unanimity,
                     'options' => $options,
-                    'health' => $extractMetric('health'),
-                    'resource' => $extractMetric('resource'),
-                    'ethics' => $extractMetric('ethics'),
-                    'adaptation' => $extractMetric('adaptation'),
+                    'health' => $avgMetric('health'),
+                    'resource' => $avgMetric('resource'),
+                    'ethics' => $avgMetric('ethics'),
+                    'adaptation' => $avgMetric('adaptation'),
                 ];
-            });
+            })->values();
         }
 
         return view('portal.reports.mission-detail', compact('mission', 'students', 'questions'));
@@ -556,6 +648,9 @@ class PortalReportController extends Controller
      */
     public function startupDetail($id)
     {
+        $user = auth()->user();
+        $panelUserIds = empty($user) ? [] : $user->getPanelStudents()->pluck('id')->toArray();
+
         $wsSim = WsSimulation::with('steps.stepQuestions.answers', 'steps.evaluations.member')->find($id);
 
         if (!$wsSim) {
@@ -564,8 +659,11 @@ class PortalReportController extends Controller
 
         $stepsCollection = $wsSim->steps;
 
-        // Real completion from member step_progress
-        $members = WsMember::where('application_id', $wsSim->application_id)->with(['user', 'progress', 'submissions'])->get();
+        // Real completion from member step_progress for this specific class
+        $members = WsMember::where('application_id', $wsSim->application_id)
+            ->whereIn('user_id', $panelUserIds)
+            ->with(['user', 'progress', 'submissions'])
+            ->get();
         $allStepProgress = $members->flatMap->progress;
         $stepsCompleted = $allStepProgress->where('status', 'completed')->count();
 

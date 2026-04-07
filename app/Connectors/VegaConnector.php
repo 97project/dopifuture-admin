@@ -669,4 +669,256 @@ class VegaConnector implements AppConnectorInterface
             return null;
         });
     }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Ban Yönetimi — POST /api/v1/user/ban
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * POST /api/v1/user/ban
+     * Kullanıcıyı Vega platformunda engeller.
+     */
+    public function banUser(User $user): bool
+    {
+        try {
+            $vegaUser = $this->findByEmail($user->email);
+            if (!$vegaUser || !isset($vegaUser['id'])) {
+                Log::channel('daily')->warning('[Vega] Ban: kullanıcı bulunamadı', ['email' => $user->email]);
+                return false;
+            }
+
+            $response = $this->request('POST', '/api/v1/user/ban', [
+                'user_id' => $vegaUser['id'],
+            ]);
+
+            if ($response->successful()) {
+                Log::channel('daily')->info('[Vega] Kullanıcı engellendi', ['vegaId' => $vegaUser['id']]);
+                return true;
+            }
+
+            Log::channel('daily')->error('[Vega] Ban hatası', [
+                'vegaId' => $vegaUser['id'],
+                'status' => $response->status(),
+            ]);
+            return false;
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[Vega] banUser hatası', ['message' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Lecturer — GET /api/v1/lecturer/lessons
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /api/v1/lecturer/lessons
+     * WAY AI Coach ders kataloğu.
+     */
+    public function getLecturerLessons(): array
+    {
+        try {
+            $response = $this->request('GET', '/api/v1/lecturer/lessons');
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['data'] ?? $data['lessons'] ?? (is_array($data) ? $data : []);
+            }
+            return [];
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[Vega] getLecturerLessons hatası', ['message' => $e->getMessage()]);
+            return [];
+        }
+    }
+
+    /**
+     * GET /api/v1/lecturer/lessons/{lessonId}
+     * Tekil ders detayı.
+     */
+    public function getLecturerLesson(int $lessonId): ?array
+    {
+        try {
+            $response = $this->request('GET', "/api/v1/lecturer/lessons/{$lessonId}");
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['data'] ?? $data;
+            }
+            return null;
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[Vega] getLecturerLesson hatası', ['message' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Simulator — GET /api/v1/simulator/scenarios
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /api/v1/simulator/scenarios
+     * Role Galaxy senaryo kataloğu.
+     */
+    public function getSimulatorScenarios(): array
+    {
+        try {
+            $response = $this->request('GET', '/api/v1/simulator/scenarios');
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['data'] ?? $data['scenarios'] ?? (is_array($data) ? $data : []);
+            }
+            return [];
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[Vega] getSimulatorScenarios hatası', ['message' => $e->getMessage()]);
+            return [];
+        }
+    }
+
+    /**
+     * GET /api/v1/simulator/scenarios/{scenarioId}
+     * Tekil senaryo detayı.
+     */
+    public function getSimulatorScenario(int $scenarioId): ?array
+    {
+        try {
+            $response = $this->request('GET', "/api/v1/simulator/scenarios/{$scenarioId}");
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['data'] ?? $data;
+            }
+            return null;
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[Vega] getSimulatorScenario hatası', ['message' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  WayWing — GET /api/v1/wings
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /api/v1/wings
+     * Tüm kanatlar/rozetler listesi.
+     */
+    public function getWings(): array
+    {
+        try {
+            $response = $this->request('GET', '/api/v1/wings');
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['data'] ?? $data['wings'] ?? (is_array($data) ? $data : []);
+            }
+            return [];
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[Vega] getWings hatası', ['message' => $e->getMessage()]);
+            return [];
+        }
+    }
+
+    /**
+     * GET /api/v1/wings/by-ids
+     * Belirli ID'lere göre kanatları getirir.
+     */
+    public function getWingsByIds(array $ids): array
+    {
+        try {
+            $response = $this->request('GET', '/api/v1/wings/by-ids', [
+                'ids' => implode(',', $ids),
+            ]);
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['data'] ?? (is_array($data) ? $data : []);
+            }
+            return [];
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[Vega] getWingsByIds hatası', ['message' => $e->getMessage()]);
+            return [];
+        }
+    }
+
+    /**
+     * GET /api/v1/wings/points
+     * Kanat puan istatistikleri.
+     */
+    public function getWingPoints(): array
+    {
+        try {
+            $response = $this->request('GET', '/api/v1/wings/points');
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['data'] ?? (is_array($data) ? $data : []);
+            }
+            return [];
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[Vega] getWingPoints hatası', ['message' => $e->getMessage()]);
+            return [];
+        }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Chat / Study Space — GET /api/v1/chat/*
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /api/v1/chat/sessions
+     * Chat oturumlarını listeler (API key ile çalışırsa).
+     */
+    public function getChatSessions(array $params = []): array
+    {
+        try {
+            $response = $this->request('GET', '/api/v1/chat/sessions', $params);
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['data'] ?? $data['sessions'] ?? (is_array($data) ? $data : []);
+            }
+            Log::channel('daily')->debug('[Vega] getChatSessions: API key ile erişilemedi', [
+                'status' => $response->status(),
+            ]);
+            return [];
+        } catch (\Throwable $e) {
+            Log::channel('daily')->warning('[Vega] getChatSessions hatası', ['message' => $e->getMessage()]);
+            return [];
+        }
+    }
+
+    /**
+     * GET /api/v1/chat/session/{sessionId}
+     * Tekil chat oturum detayı.
+     */
+    public function getChatSession(string $sessionId): ?array
+    {
+        try {
+            $response = $this->request('GET', "/api/v1/chat/session/{$sessionId}");
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['data'] ?? $data;
+            }
+            return null;
+        } catch (\Throwable $e) {
+            Log::channel('daily')->warning('[Vega] getChatSession hatası', ['message' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Premium — GET /api/v1/premium/status
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /api/v1/premium/status
+     * Kullanıcının premium durumunu sorgular (okuma amaçlı).
+     */
+    public function getPremiumStatus(): ?array
+    {
+        try {
+            $response = $this->request('GET', '/api/v1/premium/status');
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['data'] ?? $data;
+            }
+            return null;
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[Vega] getPremiumStatus hatası', ['message' => $e->getMessage()]);
+            return null;
+        }
+    }
 }

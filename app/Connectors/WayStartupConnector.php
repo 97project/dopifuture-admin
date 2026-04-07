@@ -721,4 +721,46 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
     {
         return $this->apiGet("/v1/startup/members/{$memberId}");
     }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Members Listesi — GET /v1/startup/members
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/startup/members
+     * Tüm startup üyelerini sayfalı olarak listeler.
+     */
+    public function getMembers(array $params = []): array
+    {
+        $result = $this->apiGet('/v1/startup/members', array_merge(['limit' => 100], $params));
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /* ═══════════════════════════════════════════════════════
+     *  Step Question Answers — GET /v1/startup/step-question-answers
+     * ═══════════════════════════════════════════════════════ */
+
+    /**
+     * GET /v1/startup/step-question-answers
+     * Tüm soru cevaplarını çeker (member bazlı filtre opsiyonel).
+     */
+    public function getStepQuestionAnswers(array $params = []): array
+    {
+        $result = $this->apiGet('/v1/startup/step-question-answers', array_merge(['limit' => 200], $params));
+        if (isset($result['data'])) {
+            return $result['data'];
+        }
+        return is_array($result) ? $result : [];
+    }
+
+    /**
+     * GET /v1/startup/step-question-answers/{id}
+     */
+    public function getStepQuestionAnswer(int $id): ?array
+    {
+        return $this->apiGet("/v1/startup/step-question-answers/{$id}");
+    }
 }
