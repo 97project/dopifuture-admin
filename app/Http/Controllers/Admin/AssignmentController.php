@@ -54,13 +54,16 @@ class AssignmentController extends Controller
         try {
             if ($platform === 'mission_way') {
                 $connector = new MissionWayConnector();
-                $simulations = $connector->getSimulations() ?? [];
-                // Players as members
-                $members = $connector->getPlayers() ?? [];
+                $raw = $connector->getSimulations() ?? [];
+                $simulations = $raw['data'] ?? (is_array($raw) && !isset($raw['data']) ? $raw : []);
+                $rawPlayers = $connector->getPlayers() ?? [];
+                $members = $rawPlayers['data'] ?? (is_array($rawPlayers) && !isset($rawPlayers['data']) ? $rawPlayers : []);
             } else {
                 $connector = new WayStartupConnector();
-                $simulations = $connector->getSimulations() ?? [];
-                $members = $connector->getMembers() ?? [];
+                $raw = $connector->getSimulations() ?? [];
+                $simulations = $raw['data'] ?? (is_array($raw) && !isset($raw['data']) ? $raw : []);
+                $rawMembers = $connector->getMembers() ?? [];
+                $members = is_array($rawMembers) ? $rawMembers : [];
             }
         } catch (\Throwable $e) {
             \Log::channel('daily')->warning('[Assignment] Create form veri alınamadı', ['error' => $e->getMessage()]);

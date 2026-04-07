@@ -44,9 +44,12 @@
                     class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#1A3A5C] bg-white dark:bg-[#0A1628] text-sm focus:ring-[#0B6AB2] focus:border-[#0B6AB2]">
                 <option value="">Simülasyon seçin...</option>
                 @foreach($simulations as $sim)
-                <option value="{{ $sim['id'] }}" {{ old('simulationId') == $sim['id'] ? 'selected' : '' }}>
-                    {{ $sim['name'] ?? $sim['title'] ?? 'Simülasyon #'.$sim['id'] }}
+                @php $simId = $sim['id'] ?? $sim['simulationId'] ?? null; @endphp
+                @if($simId)
+                <option value="{{ $simId }}" {{ old('simulationId') == $simId ? 'selected' : '' }}>
+                    {{ $sim['name'] ?? $sim['title'] ?? 'Simülasyon #'.$simId }}
                 </option>
+                @endif
                 @endforeach
             </select>
             @else
@@ -87,9 +90,9 @@
                 @foreach($members as $member)
                 <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/30 cursor-pointer transition-colors">
                     <input type="checkbox" name="memberIds[]"
-                           value="{{ $member['id'] ?? $member['userId'] ?? '' }}"
+                           value="{{ $member['id'] ?? $member['userId'] ?? $member['playerId'] ?? '' }}"
                            class="rounded border-gray-300 text-[#0B6AB2] focus:ring-[#0B6AB2]"
-                           {{ in_array($member['id'] ?? '', old('memberIds', [])) ? 'checked' : '' }}>
+                           {{ in_array($member['id'] ?? $member['userId'] ?? '', old('memberIds', [])) ? 'checked' : '' }}>
                     <div class="flex items-center gap-2">
                         <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
                             {{ mb_strtoupper(mb_substr($member['name'] ?? $member['email'] ?? 'U', 0, 1)) }}
