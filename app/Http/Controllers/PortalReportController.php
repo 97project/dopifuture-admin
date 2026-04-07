@@ -374,8 +374,17 @@ class PortalReportController extends Controller
             'user_stats'       => $userStats,
             'sessions_by_day'  => $sessionsByDay,
             'recent_sessions'  => collect(),
-            // Assignment modal data
-            'mw_simulations'   => RefSimulation::where('name', 'not like', 'Simülasyon #%')->orderBy('name')->get(),
+            // Assignment modal data — MW simulations with role counts
+            'mw_simulations'   => RefSimulation::where('name', 'not like', 'Simülasyon #%')->orderBy('name')->get()->map(function ($sim) {
+                $activeVersion = \DB::table('ref_simulation_versions')
+                    ->where('simulation_id', $sim->id)
+                    ->where('is_active', true)
+                    ->first();
+                $sim->role_count = $activeVersion
+                    ? \DB::table('ref_simulation_version_roles')->where('simulation_version_id', $activeVersion->id)->count()
+                    : 4; // default fallback
+                return $sim;
+            }),
             'ws_simulations'   => WsSimulation::where('name', 'not like', 'Simülasyon #%')->orderBy('name')->get(),
             'panel_students'   => $panelStudents ?? collect(),
             // Filtered: only students with active platform accounts

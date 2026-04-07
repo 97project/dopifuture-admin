@@ -1038,26 +1038,32 @@ new Chart(document.getElementById('sessionsChart'), {
             @csrf
             <div style="margin-bottom:16px;">
                 <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Simülasyon Seçin</label>
-                <select name="simulation_id" required
+                <select name="simulation_id" required id="mwSimSelect"
                         style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;color:#111;background:#fff;">
-                    <option value="">— Bir simülasyon seçin —</option>
+                    <option value="" data-role-count="0">— Bir simülasyon seçin —</option>
                     @foreach($mw_simulations ?? [] as $sim)
-                        <option value="{{ $sim->id }}">{{ $sim->name }}</option>
+                        <option value="{{ $sim->id }}" data-role-count="{{ $sim->role_count }}">{{ $sim->name }} ({{ $sim->role_count }} oyuncu)</option>
                     @endforeach
                 </select>
+                <div id="mwRoleHint" style="display:none;margin-top:6px;padding:6px 10px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;font-size:11px;color:#1E40AF;">
+                    ℹ️ Bu simülasyon için tam olarak <strong id="mwRoleCount">4</strong> öğrenci seçmelisiniz.
+                </div>
             </div>
 
             <div style="margin-bottom:16px;">
-                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Öğrenciler <span style="font-weight:400;color:#9CA3AF;">(MW hesabı olanlar)</span></label>
-                <div style="max-height:200px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;padding:8px;">
+                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Öğrenciler <span style="font-weight:400;color:#9CA3AF;">(MW hesabı olanlar)</span> <span id="mwSelectedCount" style="font-weight:500;color:#4364F7;"></span></label>
+                <div style="max-height:200px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;padding:8px;" id="mwStudentList">
                     @forelse($mw_students ?? [] as $student)
                     <label style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;font-size:13px;">
-                        <input type="checkbox" name="user_ids[]" value="{{ $student->id }}" style="accent-color:#4364F7;">
+                        <input type="checkbox" name="user_ids[]" value="{{ $student->id }}" class="mw-student-cb" style="accent-color:#4364F7;">
                         {{ $student->name }} {{ $student->surname }}
                     </label>
                     @empty
                     <div style="padding:12px;text-align:center;color:#9CA3AF;font-size:12px;">MW hesabı olan öğrenci bulunamadı</div>
                     @endforelse
+                </div>
+                <div id="mwCountWarning" style="display:none;margin-top:6px;padding:6px 10px;background:#FEF3C7;border:1px solid #FCD34D;border-radius:6px;font-size:11px;color:#92400E;">
+                    ⚠️ <span id="mwCountWarningText"></span>
                 </div>
             </div>
 
@@ -1067,7 +1073,7 @@ new Chart(document.getElementById('sessionsChart'), {
                        style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;color:#111;">
             </div>
 
-            <button type="submit" class="dp-btn" style="width:100%;justify-content:center;padding:12px;">
+            <button type="submit" id="mwSubmitBtn" class="dp-btn" style="width:100%;justify-content:center;padding:12px;">
                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 Görevi Ata
             </button>
@@ -1124,6 +1130,75 @@ new Chart(document.getElementById('sessionsChart'), {
 #addAssignmentModal.show { display:flex !important; animation: fadeIn 0.2s ease; }
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 </style>
+
+@if($slug === 'mission-way')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var simSelect = document.getElementById('mwSimSelect');
+    var hint = document.getElementById('mwRoleHint');
+    var roleCountEl = document.getElementById('mwRoleCount');
+    var selectedCountEl = document.getElementById('mwSelectedCount');
+    var warningEl = document.getElementById('mwCountWarning');
+    var warningText = document.getElementById('mwCountWarningText');
+    var submitBtn = document.getElementById('mwSubmitBtn');
+    var checkboxes = document.querySelectorAll('.mw-student-cb');
+
+    if (!simSelect) return;
+
+    function getRequiredCount() {
+        var opt = simSelect.options[simSelect.selectedIndex];
+        return parseInt(opt.getAttribute('data-role-count') || '0');
+    }
+
+    function getCheckedCount() {
+        return document.querySelectorAll('.mw-student-cb:checked').length;
+    }
+
+    function updateUI() {
+        var required = getRequiredCount();
+        var checked = getCheckedCount();
+
+        // Show/hide hint
+        if (required > 0) {
+            hint.style.display = 'block';
+            roleCountEl.textContent = required;
+        } else {
+            hint.style.display = 'none';
+        }
+
+        // Show selected count
+        if (checked > 0) {
+            selectedCountEl.textContent = '— ' + checked + ' seçili';
+        } else {
+            selectedCountEl.textContent = '';
+        }
+
+        // Warning
+        if (required > 0 && checked > 0 && checked !== required) {
+            warningEl.style.display = 'block';
+            warningText.textContent = checked + ' öğrenci seçtiniz, bu simülasyon tam olarak ' + required + ' öğrenci gerektiriyor.';
+            submitBtn.style.opacity = '0.5';
+        } else {
+            warningEl.style.display = 'none';
+            submitBtn.style.opacity = '1';
+        }
+    }
+
+    simSelect.addEventListener('change', updateUI);
+    checkboxes.forEach(function(cb) { cb.addEventListener('change', updateUI); });
+
+    // Form submit validation
+    simSelect.closest('form').addEventListener('submit', function(e) {
+        var required = getRequiredCount();
+        var checked = getCheckedCount();
+        if (required > 0 && checked !== required) {
+            e.preventDefault();
+            alert('Bu simülasyon tam olarak ' + required + ' öğrenci gerektiriyor. Şu an ' + checked + ' seçili.');
+        }
+    });
+});
+</script>
+@endif
 
 @if($errors->any() || session('success'))
 <script>
