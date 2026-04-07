@@ -581,8 +581,8 @@ class HarvestAppData extends Command
                 RefMetricDefinition::updateOrCreate(
                     ['id' => $id],
                     [
-                        'metric_key' => $item['key'] ?? 'unknown',
-                        'key'        => $item['key'] ?? 'unknown',
+                        'metric_key' => $item['key'] ?? ('unknown_' . $id),
+                        'key'        => $item['key'] ?? ('unknown_' . $id),
                         'name'       => $item['name'] ?? ucfirst($item['key'] ?? 'Metric'),
                         'icon'       => $item['icon'] ?? '📊',
                         'color'      => $item['color'] ?? '#6B7280',
