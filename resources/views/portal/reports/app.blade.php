@@ -968,34 +968,7 @@
 </div>
 @endif
 
-{{-- ═══ ADD ASSIGNMENT MODAL — Figma node 1260-34190 ═══ --}}
-@include('portal.partials._modal', [
-    'id' => 'addAssignmentModal',
-    'title' => $slug === 'mission-way' ? 'Add New Mission' : 'Add New Assignment',
-    'subtitle' => 'Create a new assignment for students.',
-])
-@section('modal-addAssignmentModal-body')
-<form method="POST" action="#">
-    @csrf
-    <div class="dp-form-group">
-        <label class="dp-form-label">Grade</label>
-        <select class="dp-form-select"><option value="">Select</option></select>
-    </div>
-    <div class="dp-form-group">
-        <label class="dp-form-label">Student</label>
-        <select class="dp-form-select"><option value="">Select</option></select>
-    </div>
-    <div class="dp-form-group">
-        <label class="dp-form-label">Mission / Application</label>
-        <select class="dp-form-select"><option value="">Select</option></select>
-    </div>
-    <div class="dp-form-group">
-        <label class="dp-form-label">Deadline</label>
-        <input type="date" class="dp-form-input">
-    </div>
-    <button type="submit" class="dp-btn-submit" disabled>Save</button>
-</form>
-@endsection
+{{-- Assignment modal is rendered inline below in @section('scripts') --}}
 
 @endsection
 
@@ -1050,6 +1023,11 @@ new Chart(document.getElementById('sessionsChart'), {
         <form action="{{ route('portal.assignments.mw.store') }}" method="POST">
             @csrf
             <div style="margin-bottom:16px;">
+                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Görev Adı</label>
+                <input type="text" name="name" required placeholder="Ör: Hafta 1 - Deprem Simülasyonu"
+                       style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;color:#111;background:#fff;">
+            </div>
+            <div style="margin-bottom:16px;">
                 <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Simülasyon Seçin</label>
                 <select name="simulation_id" required
                         style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;color:#111;background:#fff;">
@@ -1088,6 +1066,11 @@ new Chart(document.getElementById('sessionsChart'), {
         @else
         <form action="{{ route('portal.assignments.ws.store') }}" method="POST">
             @csrf
+            <div style="margin-bottom:16px;">
+                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Proje Adı</label>
+                <input type="text" name="name" required placeholder="Ör: Hafta 1 - E-Ticaret Projesi"
+                       style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;color:#111;background:#fff;">
+            </div>
             <div style="margin-bottom:16px;">
                 <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Proje Seçin</label>
                 <select name="simulation_id" required
