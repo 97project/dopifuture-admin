@@ -1,0 +1,1 @@
+<?php require __DIR__.'/vendor/autoload.php'; \ = require_once __DIR__.'/bootstrap/app.php'; \->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); \ = new \App\Connectors\MissionWayConnector(); echo json_encode(['health' => \->getHealthCheck(), 'metrics' => \->getMetricDefinitions(), 'players' => \->getPlayers(['limit' => 2])], JSON_PRETTY_PRINT);

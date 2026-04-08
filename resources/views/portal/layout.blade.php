@@ -8,7 +8,7 @@
     <meta name="description" content="@yield('meta_description', 'DopiFuture — Digital Education Platform')">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <style>
         *,
@@ -43,7 +43,7 @@
         }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Nunito', system-ui, -apple-system, sans-serif;
             background: linear-gradient(135deg, var(--gray-950) 0%, #0f172a 50%, var(--gray-900) 100%);
             color: var(--gray-200);
             min-height: 100vh;

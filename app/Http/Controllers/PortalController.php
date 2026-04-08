@@ -19,8 +19,13 @@ class PortalController extends Controller
         }
 
         return view('portal.home', [
-            'appCount' => \App\Models\Application::count(),
-            'schoolCount' => \App\Models\School::count(),
+            'appCount'        => \App\Models\Application::count(),
+            'schoolCount'     => \App\Models\School::count(),
+            'studentCount'    => \App\Models\User::role('student')->count(),
+            'simulationCount' => \Illuminate\Support\Facades\DB::table('ref_simulations')
+                                    ->where('name', 'not like', 'Simülasyon #%')->count(),
+            'sessionCount'    => \Illuminate\Support\Facades\DB::table('mw_simulation_sessions')->count(),
+            'applications'    => \App\Models\Application::active()->ordered()->get(),
         ]);
     }
 
