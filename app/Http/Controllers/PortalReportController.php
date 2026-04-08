@@ -529,7 +529,7 @@ class PortalReportController extends Controller
     public function missionDetail($id)
     {
         $user = auth()->user();
-        $panelUserIds = empty($user) ? [] : $user->getPanelStudents()->pluck('id')->toArray();
+        $panelUserIds = $this->getScopedUserIds($user)->toArray();
 
         $simModel = RefSimulation::with(['versions.paths'])->find($id);
 
@@ -673,7 +673,7 @@ class PortalReportController extends Controller
     public function startupDetail($id)
     {
         $user = auth()->user();
-        $panelUserIds = empty($user) ? [] : $user->getPanelStudents()->pluck('id')->toArray();
+        $panelUserIds = $this->getScopedUserIds($user)->toArray();
 
         $wsSim = WsSimulation::with('steps.stepQuestions.answers', 'steps.evaluations.member')->find($id);
 
