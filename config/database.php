@@ -134,10 +134,7 @@ return [
             'options' => array_filter([
                 \PDO::ATTR_TIMEOUT => 5,
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-                extension_loaded('pdo_mysql')
-                    ? (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA)
-                    : null => env('MYSQL_ATTR_SSL_CA'),
-            ], fn($v, $k) => $k !== null, ARRAY_FILTER_USE_BOTH),
+            ]),
         ],
 
         /*

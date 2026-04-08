@@ -1083,6 +1083,11 @@ class PortalReportController extends Controller
 
     private function getScopedUserIds(User $user): \Illuminate\Support\Collection
     {
+        // Admin & super-admin see ALL students
+        if ($user->hasAnyRole(['admin', 'super-admin'])) {
+            return DB::table('users')->pluck('id');
+        }
+
         if ($user->hasAnyRole(['school-admin', 'school-principal'])) {
             $schoolIds = $user->schools()->pluck('schools.id');
             return DB::table('school_user')
