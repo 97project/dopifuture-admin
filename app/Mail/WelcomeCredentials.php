@@ -34,7 +34,7 @@ class WelcomeCredentials extends Mailable
         return $this->view('emails.welcome-credentials', [
             'user' => $this->user,
             'plainPassword' => $this->plainPassword,
-            'loginUrl' => config('app.url') . '/login',
+            'loginUrl' => 'https://dopifuture.97.team/login',
             'locale' => $this->userLocale,
         ]);
     }

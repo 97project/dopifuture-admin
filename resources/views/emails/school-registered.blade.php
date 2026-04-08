@@ -22,7 +22,7 @@
 </div>
 
 <div class="cta-wrap">
-    <a href="{{ config('app.url') }}/admin/schools/{{ $school->id }}" class="cta-btn">
+    <a href="https://dopifuture.97.team/admin/schools/{{ $school->id }}" class="cta-btn">
         {{ __('mail.school_view_button', [], $locale) }}
     </a>
 </div>

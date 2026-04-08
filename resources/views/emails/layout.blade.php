@@ -41,8 +41,7 @@
 
   /* CTA Button */
   .cta-wrap { text-align: center; margin: 32px 0; }
-  .cta-btn { display: inline-block; background: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%); color: #ffffff !important; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 48px; border-radius: 50px; box-shadow: 0 4px 15px rgba(6,182,212,0.4); transition: all 0.3s; }
-  .cta-btn:hover { box-shadow: 0 6px 20px rgba(6,182,212,0.6); transform: translateY(-1px); }
+  .cta-btn { display: inline-block; background: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%); color: #ffffff !important; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 48px; border-radius: 50px; box-shadow: 0 4px 15px rgba(6,182,212,0.4); }
 
   /* Warning */
   .warning { background: #fefce8; border-left: 4px solid #eab308; border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 24px 0; font-size: 13px; color: #854d0e; line-height: 1.5; }
@@ -66,6 +65,7 @@
 </style>
 </head>
 <body>
+@php $prodUrl = 'https://dopifuture.97.team'; @endphp
 <div class="wrapper">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
     <tr>
@@ -73,8 +73,8 @@
         <div class="card">
           {{-- Header --}}
           <div class="header">
-            <img src="{{ config('app.url') }}/images/dopifuture-logo-gorsel.png" alt="DopiFuture" class="logo-icon"><br>
-            <img src="{{ config('app.url') }}/images/dopifuture-logo-yazi.png" alt="dopifuture" class="logo-text">
+            <img src="{{ $message->embed(public_path('images/dopifuture-logo-gorsel.png')) }}" alt="DopiFuture" class="logo-icon"><br>
+            <img src="{{ $message->embed(public_path('images/dopifuture-logo-yazi.png')) }}" alt="dopifuture" class="logo-text">
           </div>
 
           {{-- Content --}}
@@ -85,7 +85,7 @@
           {{-- Footer --}}
           <div class="footer">
             <p>© {{ date('Y') }} DopiFuture — {{ __('mail.footer_tagline', [], $locale ?? 'en') }}</p>
-            <p><a href="{{ config('app.url') }}">{{ config('app.url') }}</a></p>
+            <p><a href="{{ $prodUrl }}">dopifuture.97.team</a></p>
           </div>
         </div>
       </td>

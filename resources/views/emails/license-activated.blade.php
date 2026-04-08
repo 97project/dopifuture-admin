@@ -30,7 +30,7 @@
 </div>
 
 <div class="cta-wrap">
-    <a href="{{ config('app.url') }}/login" class="cta-btn">
+    <a href="https://dopifuture.97.team/login" class="cta-btn">
         {{ __('mail.start_using_button', [], $locale) }}
     </a>
 </div>

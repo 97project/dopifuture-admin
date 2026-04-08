@@ -27,7 +27,7 @@
 </table>
 
 <div class="cta-wrap">
-    <a href="{{ config('app.url') }}/users?role=student" class="cta-btn">
+    <a href="https://dopifuture.97.team/users?role=student" class="cta-btn">
         {{ __('mail.add_students_button', [], $locale) }}
     </a>
 </div>
