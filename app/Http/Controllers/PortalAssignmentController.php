@@ -38,7 +38,7 @@ class PortalAssignmentController extends Controller
             'simulation_id' => 'required|integer',
             'user_ids'      => 'required|array|min:1',
             'user_ids.*'    => 'exists:users,id',
-            'deadline'      => 'nullable|date|after:now',
+            'deadline'      => 'nullable|date|after_or_equal:today',
         ]);
 
         try {
@@ -85,12 +85,15 @@ class PortalAssignmentController extends Controller
             }
 
             // Step 4: Build API payload
+            // API spec: simulationId, name (required), memberIds[] (required), description?, dueDate?
+            $sim = RefSimulation::find($validated['simulation_id']);
             $data = [
                 'simulationId' => (int) $validated['simulation_id'],
-                'userIds'      => $backendUserIds,
+                'name'         => ($sim->name ?? 'Mission') . ' - ' . now()->format('d/m/Y'),
+                'memberIds'    => $backendUserIds,
             ];
             if (!empty($validated['deadline'])) {
-                $data['deadline'] = \Carbon\Carbon::parse($validated['deadline'])->toISOString();
+                $data['dueDate'] = \Carbon\Carbon::parse($validated['deadline'])->toISOString();
             }
 
             Log::info('[PortalAssignment] MW creating assignment', $data);
@@ -137,7 +140,7 @@ class PortalAssignmentController extends Controller
             'user_ids'      => 'required|array|min:1',
             'user_ids.*'    => 'exists:users,id',
             'description'   => 'nullable|string|max:1000',
-            'due_date'      => 'nullable|date|after:now',
+            'due_date'      => 'nullable|date|after_or_equal:today',
         ]);
 
         // Auto-generate name from simulation if not provided (Figma design removed manual name input)

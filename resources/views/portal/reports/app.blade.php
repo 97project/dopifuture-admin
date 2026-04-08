@@ -1034,15 +1034,22 @@ new Chart(document.getElementById('sessionsChart'), {
                 </select>
             </div>
 
-            {{-- Student (single select) --}}
+            {{-- Student (multi-select — MW requires exact player count) --}}
             <div class="figma-field">
-                <label class="figma-label">Student</label>
-                <select name="user_ids[]" class="figma-select" id="mwStudentSelect" required>
-                    <option value="">Please select</option>
-                    @foreach($mw_students ?? [] as $student)
-                        <option value="{{ $student->id }}" data-grade="{{ $student->grade ?? '' }}">{{ $student->name }} {{ $student->surname }}</option>
-                    @endforeach
-                </select>
+                <label class="figma-label">Student <span id="mwSelectedCount" style="font-weight:500;color:#3B5BDB;font-size:12px;"></span></label>
+                <div class="figma-student-list" id="mwStudentList">
+                    @forelse($mw_students ?? [] as $student)
+                    <label class="figma-student-item">
+                        <input type="checkbox" name="user_ids[]" value="{{ $student->id }}" class="mw-student-cb" data-grade="{{ $student->grade ?? '' }}">
+                        <span>{{ $student->name }} {{ $student->surname }}</span>
+                    </label>
+                    @empty
+                    <div style="padding:16px;text-align:center;color:#9CA3AF;font-size:13px;">No students with MW account found</div>
+                    @endforelse
+                </div>
+                <div id="mwCountWarning" class="figma-warning" style="display:none;">
+                    ⚠️ <span id="mwCountWarningText"></span>
+                </div>
             </div>
 
             {{-- Mission (simulation) --}}
@@ -1308,17 +1315,53 @@ new Chart(document.getElementById('sessionsChart'), {
     from { transform: translateY(20px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
+
+/* ═══ MW Student Checkbox List ═══ */
+.figma-student-list {
+    max-height: 180px;
+    overflow-y: auto;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 6px;
+    background: #F9FAFB;
+}
+.figma-student-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Nunito', sans-serif;
+    color: #111827;
+    border-radius: 6px;
+    transition: background 0.1s;
+}
+.figma-student-item:hover { background: #EFF6FF; }
+.figma-student-item input[type="checkbox"] { accent-color: #3B5BDB; width: 16px; height: 16px; }
+
+.figma-warning {
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: #FEF3C7;
+    border: 1px solid #FCD34D;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #92400E;
+    font-family: 'Nunito', sans-serif;
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ═══ Grade → Student filter logic ═══
-    function setupGradeFilter(gradeId, studentId) {
-        var gradeSelect = document.getElementById(gradeId);
-        var studentSelect = document.getElementById(studentId);
+
+    // ═══ WS: Grade → Student filter (select dropdown) ═══
+    (function() {
+        var gradeSelect = document.getElementById('wsGradeSelect');
+        var studentSelect = document.getElementById('wsStudentSelect');
         if (!gradeSelect || !studentSelect) return;
 
-        var allOptions = Array.from(studentSelect.options).slice(1); // skip "Please select"
+        var allOptions = Array.from(studentSelect.options).slice(1);
 
         gradeSelect.addEventListener('change', function() {
             var grade = this.value;
@@ -1334,25 +1377,104 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
-    }
+    })();
 
-    setupGradeFilter('mwGradeSelect', 'mwStudentSelect');
-    setupGradeFilter('wsGradeSelect', 'wsStudentSelect');
+    // ═══ MW: Grade → Student filter (checkbox list) ═══
+    (function() {
+        var gradeSelect = document.getElementById('mwGradeSelect');
+        var studentList = document.getElementById('mwStudentList');
+        if (!gradeSelect || !studentList) return;
 
-    // ═══ MW Role count hint ═══
+        var allItems = Array.from(studentList.querySelectorAll('.figma-student-item'));
+
+        gradeSelect.addEventListener('change', function() {
+            var grade = this.value;
+            allItems.forEach(function(item) {
+                var cb = item.querySelector('input[type="checkbox"]');
+                var cbGrade = cb ? cb.getAttribute('data-grade') : '';
+                if (!grade || cbGrade === grade || !cbGrade) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                    if (cb) cb.checked = false; // Uncheck hidden
+                }
+            });
+            updateMwUI();
+        });
+    })();
+
+    // ═══ MW: Role count validation ═══
     var simSelect = document.getElementById('mwSimSelect');
     var hint = document.getElementById('mwRoleHint');
     var roleCountEl = document.getElementById('mwRoleCount');
+    var selectedCountEl = document.getElementById('mwSelectedCount');
+    var warningEl = document.getElementById('mwCountWarning');
+    var warningText = document.getElementById('mwCountWarningText');
+    var submitBtn = document.getElementById('mwSubmitBtn');
 
-    if (simSelect) {
-        simSelect.addEventListener('change', function() {
-            var opt = this.options[this.selectedIndex];
-            var rc = parseInt(opt.getAttribute('data-role-count') || '0');
-            if (rc > 0) {
+    function getRequiredCount() {
+        if (!simSelect) return 0;
+        var opt = simSelect.options[simSelect.selectedIndex];
+        return parseInt(opt.getAttribute('data-role-count') || '0');
+    }
+
+    function getCheckedCount() {
+        return document.querySelectorAll('.mw-student-cb:checked').length;
+    }
+
+    function updateMwUI() {
+        var required = getRequiredCount();
+        var checked = getCheckedCount();
+
+        // Hint
+        if (hint) {
+            if (required > 0) {
                 hint.style.display = 'block';
-                roleCountEl.textContent = rc;
+                roleCountEl.textContent = required;
             } else {
                 hint.style.display = 'none';
+            }
+        }
+
+        // Selected count
+        if (selectedCountEl) {
+            selectedCountEl.textContent = checked > 0 ? '— ' + checked + ' selected' : '';
+        }
+
+        // Warning
+        if (warningEl && warningText) {
+            if (required > 0 && checked > 0 && checked !== required) {
+                warningEl.style.display = 'block';
+                warningText.textContent = 'You selected ' + checked + ' students, this mission requires exactly ' + required + ' players.';
+                if (submitBtn) submitBtn.style.opacity = '0.5';
+            } else {
+                warningEl.style.display = 'none';
+                if (submitBtn) submitBtn.style.opacity = '1';
+            }
+        }
+    }
+
+    if (simSelect) {
+        simSelect.addEventListener('change', updateMwUI);
+    }
+
+    var checkboxes = document.querySelectorAll('.mw-student-cb');
+    checkboxes.forEach(function(cb) { cb.addEventListener('change', updateMwUI); });
+
+    // MW form submit validation
+    var mwForm = document.getElementById('mwAssignForm');
+    if (mwForm) {
+        mwForm.addEventListener('submit', function(e) {
+            var required = getRequiredCount();
+            var checked = getCheckedCount();
+            if (checked === 0) {
+                e.preventDefault();
+                alert('Please select at least one student.');
+                return;
+            }
+            if (required > 0 && checked !== required) {
+                e.preventDefault();
+                alert('This mission requires exactly ' + required + ' players. You selected ' + checked + '.');
             }
         });
     }
