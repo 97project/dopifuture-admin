@@ -30,6 +30,8 @@ use App\Models\MissionWay\RefTranslation;
 use App\Models\Vega\VegaLesson;
 use App\Models\Vega\VegaScenario;
 use App\Models\Vega\VegaWing;
+use App\Models\VegaSession;
+use App\Models\VegaSessionMessage;
 use App\Models\WsMember;
 use App\Models\WsSimulation;
 use App\Models\WsStep;
@@ -1270,18 +1272,9 @@ class HarvestAppData extends Command
             $this->warn("    ⚠️ Wings: {$e->getMessage()}");
         }
 
-        // 4. Chat Sessions (Study Space) — deneysel
+        // 4. Chat Sessions (Study Space) — API → DB fallback
         $this->line('  💬 Chat oturumları (Study Space)...');
-        try {
-            $chatSessions = $connector->getChatSessions();
-            if (!empty($chatSessions)) {
-                $this->info('    ✅ ChatSessions: ' . count($chatSessions) . ' (API key ile erişilebilir)');
-            } else {
-                $this->warn('    ⚠️ ChatSessions: API key ile alınamadı (bearer auth gerekebilir)');
-            }
-        } catch (\Throwable $e) {
-            $this->warn("    ⚠️ ChatSessions: {$e->getMessage()}");
-        }
+        $this->harvestVegaChatSessions($app);
 
         // 5. Wing Points (istatistik)
         $this->line('  📊 Kanat puanları...');
@@ -1294,5 +1287,145 @@ class HarvestAppData extends Command
         } catch (\Throwable $e) {
             $this->warn("    ⚠️ WingPoints: {$e->getMessage()}");
         }
+    }
+
+    /**
+     * Chat Sessions (Study Space) harvest:
+     * 1. Önce API ile dener (getChatSessions)
+     * 2. API boş dönerse Vega DB'ye doğrudan bağlanıp vega_sessions + vega_chat_messages çeker
+     * 3. Email ile local user eşleştirmesi yapar
+     */
+    private function harvestVegaChatSessions(Application $app): void
+    {
+        // 1. Önce API'yi dene
+        try {
+            $connector = new VegaConnector();
+            $chatSessions = $connector->getChatSessions();
+            if (!empty($chatSessions)) {
+                $this->info('    ✅ ChatSessions via API: ' . count($chatSessions));
+                // API'den veri geldiyse local'e kaydet
+                foreach ($chatSessions as $cs) {
+                    $this->upsertVegaChatSession($app, $cs);
+                }
+                return;
+            }
+        } catch (\Throwable $e) {
+            // API başarısız — DB fallback'e devam
+        }
+
+        // 2. DB Fallback — Vega SQL'e doğrudan bağlan
+        $this->line('    🔄 API boş, Vega DB fallback...');
+        try {
+            // Vega DB bağlantısını kontrol et
+            $vegaDb = DB::connection('vega_db');
+            $vegaDb->getPdo(); // test connection
+
+            // Email → local user_id mapping cache'i oluştur
+            $localUsers = \App\Models\User::pluck('id', 'email')
+                ->mapWithKeys(fn($id, $email) => [mb_strtolower($email) => $id]);
+
+            // Vega DB'den chatbot oturumlarını çek
+            // vega_sessions tablosunda module = 'chatbot' olanlar Study Space'e ait
+            $remoteSessions = $vegaDb->table('vega_sessions')
+                ->where('module', 'chatbot')
+                ->orderBy('id')
+                ->get();
+
+            if ($remoteSessions->isEmpty()) {
+                $this->info('    ℹ️  ChatSessions: Vega DB\'de chatbot oturumu yok');
+                return;
+            }
+
+            // Vega users tablosundan user_id → email mapping
+            $vegaUserIds = $remoteSessions->pluck('user_id')->unique()->filter();
+            $vegaUsers = $vegaDb->table('users')
+                ->whereIn('id', $vegaUserIds)
+                ->pluck('email', 'id')
+                ->mapWithKeys(fn($email, $id) => [(string) $id => mb_strtolower($email ?? '')]);
+
+            $sessionsSynced = 0;
+            $messagesSynced = 0;
+
+            foreach ($remoteSessions as $rs) {
+                // Vega user_id → email → local user_id
+                $vegaEmail = $vegaUsers[(string) $rs->user_id] ?? null;
+                $localUserId = $vegaEmail ? ($localUsers[$vegaEmail] ?? null) : null;
+
+                $localSession = VegaSession::updateOrCreate(
+                    ['external_id' => $rs->external_session_id ?? ('vega_chat_' . $rs->id)],
+                    [
+                        'user_id'        => $localUserId,
+                        'application_id' => $app->id,
+                        'module'         => 'chatbot',
+                        'user_name'      => null,
+                        'user_surname'   => null,
+                        'score'          => $rs->score,
+                        'duration_minutes' => null,
+                        'summary'        => [
+                            'subject' => $rs->subject,
+                            'topic'   => $rs->topic,
+                            'grade'   => $rs->grade,
+                            'title'   => $rs->title,
+                            'status'  => $rs->status,
+                        ],
+                        'started_at'     => $rs->created_at_ext ?? $rs->created_at,
+                        'ended_at'       => $rs->updated_at_ext ?? $rs->updated_at,
+                        'synced_at'      => now(),
+                    ]
+                );
+                $sessionsSynced++;
+                $this->synced++;
+
+                // Chat mesajlarını çek
+                try {
+                    $remoteMessages = $vegaDb->table('vega_chat_messages')
+                        ->where('session_id', $rs->id)
+                        ->orderBy('created_at')
+                        ->get();
+
+                    foreach ($remoteMessages as $idx => $rm) {
+                        VegaSessionMessage::updateOrCreate(
+                            ['session_id' => $localSession->id, 'order_index' => $idx],
+                            [
+                                'role'    => $rm->role ?? 'user',
+                                'content' => $rm->content,
+                                'score'   => null,
+                            ]
+                        );
+                        $messagesSynced++;
+                        $this->synced++;
+                    }
+                } catch (\Throwable $e) {
+                    // Mesajlar opsiyonel — devam et
+                }
+            }
+
+            $this->info("    ✅ ChatSessions via DB: {$sessionsSynced} sessions, {$messagesSynced} messages");
+        } catch (\Throwable $e) {
+            $this->failed++;
+            $this->warn("    ⚠️ ChatSessions DB fallback hatası: {$e->getMessage()}");
+        }
+    }
+
+    /**
+     * API'den gelen tek bir chat session'ı local'e kaydet.
+     */
+    private function upsertVegaChatSession(Application $app, array $cs): void
+    {
+        $extId = $cs['id'] ?? $cs['sessionId'] ?? null;
+        if (!$extId) return;
+
+        VegaSession::updateOrCreate(
+            ['external_id' => (string) $extId],
+            [
+                'application_id' => $app->id,
+                'module'         => 'chatbot',
+                'summary'        => $cs,
+                'started_at'     => isset($cs['createdAt']) ? \Carbon\Carbon::parse($cs['createdAt']) : null,
+                'ended_at'       => isset($cs['updatedAt']) ? \Carbon\Carbon::parse($cs['updatedAt']) : null,
+                'synced_at'      => now(),
+            ]
+        );
+        $this->synced++;
     }
 }
