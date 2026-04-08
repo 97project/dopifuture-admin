@@ -387,9 +387,21 @@ class PortalReportController extends Controller
             }),
             'ws_simulations'   => WsSimulation::where('name', 'not like', 'Simülasyon #%')->orderBy('name')->get(),
             'panel_students'   => $panelStudents ?? collect(),
-            // Filtered: only students with active platform accounts
-            'mw_students'      => isset($panelUserIds) ? User::whereIn('id', MwPlayer::whereIn('user_id', $panelUserIds)->whereNotNull('user_id')->pluck('user_id'))->orderBy('name')->get() : collect(),
-            'ws_students'      => isset($panelUserIds) ? User::whereIn('id', WsMember::whereIn('user_id', $panelUserIds)->whereNotNull('user_id')->pluck('user_id'))->orderBy('name')->get() : collect(),
+            // Filtered: only students with active platform accounts (with grade info)
+            'mw_students'      => isset($panelUserIds) ? User::whereIn('id', MwPlayer::whereIn('user_id', $panelUserIds)->whereNotNull('user_id')->pluck('user_id'))->orderBy('name')->get()->map(function($u) {
+                $u->grade = \DB::table('class_user')
+                    ->join('school_classes', 'school_classes.id', '=', 'class_user.class_id')
+                    ->where('class_user.user_id', $u->id)
+                    ->value('school_classes.grade_level');
+                return $u;
+            }) : collect(),
+            'ws_students'      => isset($panelUserIds) ? User::whereIn('id', WsMember::whereIn('user_id', $panelUserIds)->whereNotNull('user_id')->pluck('user_id'))->orderBy('name')->get()->map(function($u) {
+                $u->grade = \DB::table('class_user')
+                    ->join('school_classes', 'school_classes.id', '=', 'class_user.class_id')
+                    ->where('class_user.user_id', $u->id)
+                    ->value('school_classes.grade_level');
+                return $u;
+            }) : collect(),
         ];
 
         // ── Anlık API ile ek veriler (MW) ──

@@ -97,14 +97,14 @@ class PortalAssignmentController extends Controller
             $response = $connector->createAssignment($data);
 
             if ($response->successful()) {
-                return redirect()->back()->with('success', 'Mission WAY görevi başarıyla atandı.');
+                return redirect()->back()->with('success', 'New Mission added successfully.');
             }
 
             $errorMsg = $response->json('message') ?? $response->body();
             if (is_array($errorMsg)) {
                 $errorMsg = json_encode($errorMsg, JSON_UNESCAPED_UNICODE);
             }
-            return redirect()->back()->withErrors(['api' => "Görev oluşturulamadı: {$errorMsg} (HTTP {$response->status()})"]);
+            return redirect()->back()->withErrors(['api' => "Could not create mission: {$errorMsg} (HTTP {$response->status()})."]);
 
         } catch (\Throwable $e) {
             Log::error('[PortalAssignment] MW store error', [
@@ -112,7 +112,7 @@ class PortalAssignmentController extends Controller
                 'file'  => $e->getFile() . ':' . $e->getLine(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return redirect()->back()->withErrors(['api' => 'Görev atanırken hata oluştu: ' . $e->getMessage()]);
+            return redirect()->back()->withErrors(['api' => 'Error creating mission: ' . $e->getMessage()]);
         }
     }
 
@@ -133,12 +133,18 @@ class PortalAssignmentController extends Controller
 
         $validated = $request->validate([
             'simulation_id' => 'required|integer',
-            'name'          => 'required|string|max:255',
+            'name'          => 'nullable|string|max:255',
             'user_ids'      => 'required|array|min:1',
             'user_ids.*'    => 'exists:users,id',
             'description'   => 'nullable|string|max:1000',
             'due_date'      => 'nullable|date|after:now',
         ]);
+
+        // Auto-generate name from simulation if not provided (Figma design removed manual name input)
+        if (empty($validated['name'])) {
+            $sim = WsSimulation::find($validated['simulation_id']);
+            $validated['name'] = ($sim->name ?? 'Assignment') . ' - ' . now()->format('d/m/Y');
+        }
 
         try {
             // Resolve portal user_ids → WS member_ids
@@ -170,14 +176,14 @@ class PortalAssignmentController extends Controller
             $response = $connector->createAssignment($data);
 
             if ($response->successful()) {
-                return redirect()->back()->with('success', 'Way Startup projesi başarıyla atandı.');
+                return redirect()->back()->with('success', 'New Assignment added successfully.');
             }
 
             $errorMsg = $response->json('message') ?? $response->body();
             if (is_array($errorMsg)) {
                 $errorMsg = json_encode($errorMsg, JSON_UNESCAPED_UNICODE);
             }
-            return redirect()->back()->withErrors(['api' => "Proje oluşturulamadı: {$errorMsg} (HTTP {$response->status()})"]);
+            return redirect()->back()->withErrors(['api' => "Could not create assignment: {$errorMsg} (HTTP {$response->status()})."]);
 
         } catch (\Throwable $e) {
             Log::error('[PortalAssignment] WS store error', [
@@ -185,7 +191,7 @@ class PortalAssignmentController extends Controller
                 'file'  => $e->getFile() . ':' . $e->getLine(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return redirect()->back()->withErrors(['api' => 'Proje atanırken hata oluştu: ' . $e->getMessage()]);
+            return redirect()->back()->withErrors(['api' => 'Error creating assignment: ' . $e->getMessage()]);
         }
     }
 

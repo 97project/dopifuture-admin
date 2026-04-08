@@ -999,208 +999,376 @@ new Chart(document.getElementById('sessionsChart'), {
 </script>
 @endif
 
-{{-- ═══ Add Assignment Modal ═══ --}}
+{{-- ═══ Add Assignment / Mission Modal — Figma Design ═══ --}}
 @if(!in_array($slug, ['role-galaxy', 'study-space', 'way-ai-coach']))
-<div id="addAssignmentModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);align-items:center;justify-content:center;"
-     onclick="if(event.target===this)this.classList.remove('show')">
-    <div style="background:#fff;border-radius:16px;padding:28px;max-width:520px;width:92%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);" onclick="event.stopPropagation()">
-        {{-- Header --}}
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-            <h3 style="font-size:18px;font-weight:700;color:#111;margin:0;font-family:'Nunito',sans-serif;">
-                @if($slug === 'mission-way')
-                    🎯 Yeni Görev Ata
-                @else
-                    🚀 Yeni Proje Ata
-                @endif
-            </h3>
-            <button type="button" onclick="document.getElementById('addAssignmentModal').classList.remove('show')"
-                    style="background:none;border:none;cursor:pointer;padding:4px;">
-                <svg width="20" height="20" fill="none" stroke="#6B7280" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
+<div id="addAssignmentModal" class="figma-modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="figma-modal" onclick="event.stopPropagation()">
+        {{-- Close button --}}
+        <button type="button" class="figma-modal-close" onclick="document.getElementById('addAssignmentModal').classList.remove('show')">
+            <svg width="20" height="20" fill="none" stroke="#6B7280" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
 
-        @if(session('success'))
-        <div style="margin-bottom:12px;padding:10px;background:#D1FAE5;border-radius:8px;font-size:12px;color:#065F46;">
-            ✅ {{ session('success') }}
-        </div>
-        @endif
-
-        @if($errors->any())
-        <div style="margin-bottom:12px;padding:10px;background:#FEE2E2;border-radius:8px;font-size:12px;color:#DC2626;">
-            @foreach($errors->all() as $error)
-                <div>⚠️ {{ $error }}</div>
-            @endforeach
-        </div>
-        @endif
+        {{-- Title --}}
+        <h3 class="figma-modal-title">
+            @if($slug === 'mission-way')
+                Add New Mission
+            @else
+                Add New Assignment
+            @endif
+        </h3>
+        <p class="figma-modal-subtitle">Prepare a new assignment and assign it to your student.</p>
 
         @if($slug === 'mission-way')
-        <form action="{{ route('portal.assignments.mw.store') }}" method="POST">
+        {{-- ═══ MISSION WAY FORM ═══ --}}
+        <form action="{{ route('portal.assignments.mw.store') }}" method="POST" id="mwAssignForm">
             @csrf
-            <div style="margin-bottom:16px;">
-                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Simülasyon Seçin</label>
-                <select name="simulation_id" required id="mwSimSelect"
-                        style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;color:#111;background:#fff;">
-                    <option value="" data-role-count="0">— Bir simülasyon seçin —</option>
-                    @foreach($mw_simulations ?? [] as $sim)
-                        <option value="{{ $sim->id }}" data-role-count="{{ $sim->role_count }}">{{ $sim->name }} ({{ $sim->role_count }} oyuncu)</option>
+
+            {{-- Grade --}}
+            <div class="figma-field">
+                <label class="figma-label">Grade</label>
+                <select name="grade" class="figma-select" id="mwGradeSelect">
+                    <option value="">Please select</option>
+                    @foreach(range(1, 12) as $g)
+                        <option value="{{ $g }}">{{ $g }}</option>
                     @endforeach
                 </select>
-                <div id="mwRoleHint" style="display:none;margin-top:6px;padding:6px 10px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;font-size:11px;color:#1E40AF;">
-                    ℹ️ Bu simülasyon için tam olarak <strong id="mwRoleCount">4</strong> öğrenci seçmelisiniz.
+            </div>
+
+            {{-- Student (single select) --}}
+            <div class="figma-field">
+                <label class="figma-label">Student</label>
+                <select name="user_ids[]" class="figma-select" id="mwStudentSelect" required>
+                    <option value="">Please select</option>
+                    @foreach($mw_students ?? [] as $student)
+                        <option value="{{ $student->id }}" data-grade="{{ $student->grade ?? '' }}">{{ $student->name }} {{ $student->surname }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Mission (simulation) --}}
+            <div class="figma-field">
+                <label class="figma-label">Mission</label>
+                <select name="simulation_id" required class="figma-select" id="mwSimSelect">
+                    <option value="" data-role-count="0">Please select</option>
+                    @foreach($mw_simulations ?? [] as $sim)
+                        <option value="{{ $sim->id }}" data-role-count="{{ $sim->role_count }}">{{ $sim->name }}</option>
+                    @endforeach
+                </select>
+                <div id="mwRoleHint" class="figma-hint" style="display:none;">
+                    ℹ️ This mission requires exactly <strong id="mwRoleCount">4</strong> players.
                 </div>
             </div>
 
-            <div style="margin-bottom:16px;">
-                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Öğrenciler <span style="font-weight:400;color:#9CA3AF;">(MW hesabı olanlar)</span> <span id="mwSelectedCount" style="font-weight:500;color:#4364F7;"></span></label>
-                <div style="max-height:200px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;padding:8px;" id="mwStudentList">
-                    @forelse($mw_students ?? [] as $student)
-                    <label style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;font-size:13px;">
-                        <input type="checkbox" name="user_ids[]" value="{{ $student->id }}" class="mw-student-cb" style="accent-color:#4364F7;">
-                        {{ $student->name }} {{ $student->surname }}
-                    </label>
-                    @empty
-                    <div style="padding:12px;text-align:center;color:#9CA3AF;font-size:12px;">MW hesabı olan öğrenci bulunamadı</div>
-                    @endforelse
-                </div>
-                <div id="mwCountWarning" style="display:none;margin-top:6px;padding:6px 10px;background:#FEF3C7;border:1px solid #FCD34D;border-radius:6px;font-size:11px;color:#92400E;">
-                    ⚠️ <span id="mwCountWarningText"></span>
-                </div>
+            {{-- Deadline --}}
+            <div class="figma-field">
+                <label class="figma-label">Deadline</label>
+                <input type="date" name="deadline" required min="{{ now()->format('Y-m-d') }}" class="figma-input" placeholder="Please select">
             </div>
 
-            <div style="margin-bottom:20px;">
-                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Son Tarih</label>
-                <input type="datetime-local" name="deadline" required min="{{ now()->format('Y-m-d\TH:i') }}"
-                       style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;color:#111;">
-            </div>
-
-            <button type="submit" id="mwSubmitBtn" class="dp-btn" style="width:100%;justify-content:center;padding:12px;">
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                Görevi Ata
+            <button type="submit" id="mwSubmitBtn" class="figma-submit-btn">
+                Save Information
             </button>
         </form>
+
         @else
-        <form action="{{ route('portal.assignments.ws.store') }}" method="POST">
+        {{-- ═══ WAY STARTUP FORM ═══ --}}
+        <form action="{{ route('portal.assignments.ws.store') }}" method="POST" id="wsAssignForm">
             @csrf
-            <div style="margin-bottom:16px;">
-                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Proje Adı</label>
-                <input type="text" name="name" required placeholder="Ör: Hafta 1 - E-Ticaret Projesi"
-                       style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;color:#111;background:#fff;">
+
+            {{-- Grade --}}
+            <div class="figma-field">
+                <label class="figma-label">Grade</label>
+                <select name="grade" class="figma-select" id="wsGradeSelect">
+                    <option value="">Please select</option>
+                    @foreach(range(1, 12) as $g)
+                        <option value="{{ $g }}">{{ $g }}</option>
+                    @endforeach
+                </select>
             </div>
-            <div style="margin-bottom:16px;">
-                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Proje Seçin</label>
-                <select name="simulation_id" required
-                        style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;color:#111;background:#fff;">
-                    <option value="">— Bir proje seçin —</option>
+
+            {{-- Student (single select) --}}
+            <div class="figma-field">
+                <label class="figma-label">Student</label>
+                <select name="user_ids[]" class="figma-select" id="wsStudentSelect" required>
+                    <option value="">Please select</option>
+                    @foreach($ws_students ?? [] as $student)
+                        <option value="{{ $student->id }}" data-grade="{{ $student->grade ?? '' }}">{{ $student->name }} {{ $student->surname }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Business (simulation) --}}
+            <div class="figma-field">
+                <label class="figma-label">Business</label>
+                <select name="simulation_id" required class="figma-select">
+                    <option value="">Please select</option>
                     @foreach($ws_simulations ?? [] as $sim)
                         <option value="{{ $sim->id }}">{{ $sim->name }}</option>
                     @endforeach
                 </select>
             </div>
 
-            <div style="margin-bottom:16px;">
-                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Öğrenciler <span style="font-weight:400;color:#9CA3AF;">(WS hesabı olanlar)</span></label>
-                <div style="max-height:200px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;padding:8px;">
-                    @forelse($ws_students ?? [] as $student)
-                    <label style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;font-size:13px;">
-                        <input type="checkbox" name="user_ids[]" value="{{ $student->id }}" style="accent-color:#4364F7;">
-                        {{ $student->name }} {{ $student->surname }}
-                    </label>
-                    @empty
-                    <div style="padding:12px;text-align:center;color:#9CA3AF;font-size:12px;">WS hesabı olan öğrenci bulunamadı</div>
-                    @endforelse
-                </div>
+            {{-- Deadline --}}
+            <div class="figma-field">
+                <label class="figma-label">Deadline</label>
+                <input type="date" name="due_date" required min="{{ now()->format('Y-m-d') }}" class="figma-input" placeholder="Please select">
             </div>
 
-            <div style="margin-bottom:20px;">
-                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Son Tarih</label>
-                <input type="datetime-local" name="due_date" required min="{{ now()->format('Y-m-d\TH:i') }}"
-                       style="width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;color:#111;">
-            </div>
-
-            <button type="submit" class="dp-btn" style="width:100%;justify-content:center;padding:12px;">
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                Projeyi Ata
+            <button type="submit" class="figma-submit-btn">
+                Save Information
             </button>
         </form>
         @endif
     </div>
 </div>
 
+{{-- ═══ Success / Error Toast ═══ --}}
+@if(session('success'))
+<div id="successToast" class="figma-toast figma-toast-success">
+    <span class="figma-toast-icon">✅</span>
+    <span>{{ session('success') }}</span>
+    <button onclick="this.parentElement.remove()" class="figma-toast-close">✕</button>
+</div>
+@endif
+@if($errors->any())
+<div id="errorToast" class="figma-toast figma-toast-error">
+    <span class="figma-toast-icon">⚠️</span>
+    <span>{{ $errors->first() }}</span>
+    <button onclick="this.parentElement.remove()" class="figma-toast-close">✕</button>
+</div>
+@endif
+
 <style>
-#addAssignmentModal.show { display:flex !important; animation: fadeIn 0.2s ease; }
-@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+/* ═══ Figma Modal Styles ═══ */
+.figma-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+}
+.figma-modal-overlay.show {
+    display: flex !important;
+    animation: figmaFadeIn 0.25s ease;
+}
+@keyframes figmaFadeIn { from { opacity:0; transform:scale(0.96); } to { opacity:1; transform:scale(1); } }
+
+.figma-modal {
+    background: #fff;
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 460px;
+    width: 92%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+    position: relative;
+}
+
+.figma-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+.figma-modal-close:hover { background: #F3F4F6; }
+
+.figma-modal-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111827;
+    margin: 0 0 4px 0;
+    font-family: 'Nunito', sans-serif;
+    letter-spacing: -0.3px;
+}
+
+.figma-modal-subtitle {
+    font-size: 13px;
+    color: #6B7280;
+    margin: 0 0 24px 0;
+    font-family: 'Nunito', sans-serif;
+}
+
+.figma-field {
+    margin-bottom: 18px;
+}
+
+.figma-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 8px;
+    font-family: 'Nunito', sans-serif;
+}
+
+.figma-select,
+.figma-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #111827;
+    background: #F9FAFB;
+    font-family: 'Nunito', sans-serif;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: auto;
+    -webkit-appearance: auto;
+    outline: none;
+    box-sizing: border-box;
+}
+.figma-select:focus,
+.figma-input:focus {
+    border-color: #3B5BDB;
+    box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.08);
+    background: #fff;
+}
+
+.figma-hint {
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #1E40AF;
+    font-family: 'Nunito', sans-serif;
+}
+
+.figma-submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #3B5BDB 0%, #2B4ACB 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-top: 6px;
+}
+.figma-submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(59, 91, 219, 0.35);
+}
+.figma-submit-btn:active {
+    transform: translateY(0);
+}
+
+/* ═══ Toast Notification ═══ */
+.figma-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Nunito', sans-serif;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    animation: toastSlideIn 0.4s ease;
+    max-width: 400px;
+}
+.figma-toast-success {
+    background: #10B981;
+    color: #fff;
+}
+.figma-toast-error {
+    background: #EF4444;
+    color: #fff;
+}
+.figma-toast-icon { font-size: 16px; }
+.figma-toast-close {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.8);
+    font-size: 16px;
+    cursor: pointer;
+    margin-left: 8px;
+    padding: 0 2px;
+}
+.figma-toast-close:hover { color: #fff; }
+
+@keyframes toastSlideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
 </style>
 
-@if($slug === 'mission-way')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // ═══ Grade → Student filter logic ═══
+    function setupGradeFilter(gradeId, studentId) {
+        var gradeSelect = document.getElementById(gradeId);
+        var studentSelect = document.getElementById(studentId);
+        if (!gradeSelect || !studentSelect) return;
+
+        var allOptions = Array.from(studentSelect.options).slice(1); // skip "Please select"
+
+        gradeSelect.addEventListener('change', function() {
+            var grade = this.value;
+            studentSelect.innerHTML = '';
+            var placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'Please select';
+            studentSelect.appendChild(placeholder);
+
+            allOptions.forEach(function(opt) {
+                if (!grade || opt.getAttribute('data-grade') === grade || !opt.getAttribute('data-grade')) {
+                    studentSelect.appendChild(opt.cloneNode(true));
+                }
+            });
+        });
+    }
+
+    setupGradeFilter('mwGradeSelect', 'mwStudentSelect');
+    setupGradeFilter('wsGradeSelect', 'wsStudentSelect');
+
+    // ═══ MW Role count hint ═══
     var simSelect = document.getElementById('mwSimSelect');
     var hint = document.getElementById('mwRoleHint');
     var roleCountEl = document.getElementById('mwRoleCount');
-    var selectedCountEl = document.getElementById('mwSelectedCount');
-    var warningEl = document.getElementById('mwCountWarning');
-    var warningText = document.getElementById('mwCountWarningText');
-    var submitBtn = document.getElementById('mwSubmitBtn');
-    var checkboxes = document.querySelectorAll('.mw-student-cb');
 
-    if (!simSelect) return;
-
-    function getRequiredCount() {
-        var opt = simSelect.options[simSelect.selectedIndex];
-        return parseInt(opt.getAttribute('data-role-count') || '0');
+    if (simSelect) {
+        simSelect.addEventListener('change', function() {
+            var opt = this.options[this.selectedIndex];
+            var rc = parseInt(opt.getAttribute('data-role-count') || '0');
+            if (rc > 0) {
+                hint.style.display = 'block';
+                roleCountEl.textContent = rc;
+            } else {
+                hint.style.display = 'none';
+            }
+        });
     }
 
-    function getCheckedCount() {
-        return document.querySelectorAll('.mw-student-cb:checked').length;
-    }
-
-    function updateUI() {
-        var required = getRequiredCount();
-        var checked = getCheckedCount();
-
-        // Show/hide hint
-        if (required > 0) {
-            hint.style.display = 'block';
-            roleCountEl.textContent = required;
-        } else {
-            hint.style.display = 'none';
-        }
-
-        // Show selected count
-        if (checked > 0) {
-            selectedCountEl.textContent = '— ' + checked + ' seçili';
-        } else {
-            selectedCountEl.textContent = '';
-        }
-
-        // Warning
-        if (required > 0 && checked > 0 && checked !== required) {
-            warningEl.style.display = 'block';
-            warningText.textContent = checked + ' öğrenci seçtiniz, bu simülasyon tam olarak ' + required + ' öğrenci gerektiriyor.';
-            submitBtn.style.opacity = '0.5';
-        } else {
-            warningEl.style.display = 'none';
-            submitBtn.style.opacity = '1';
-        }
-    }
-
-    simSelect.addEventListener('change', updateUI);
-    checkboxes.forEach(function(cb) { cb.addEventListener('change', updateUI); });
-
-    // Form submit validation
-    simSelect.closest('form').addEventListener('submit', function(e) {
-        var required = getRequiredCount();
-        var checked = getCheckedCount();
-        if (required > 0 && checked !== required) {
-            e.preventDefault();
-            alert('Bu simülasyon tam olarak ' + required + ' öğrenci gerektiriyor. Şu an ' + checked + ' seçili.');
-        }
+    // ═══ Auto-dismiss toasts ═══
+    var toasts = document.querySelectorAll('.figma-toast');
+    toasts.forEach(function(t) {
+        setTimeout(function() {
+            t.style.animation = 'toastSlideIn 0.3s ease reverse forwards';
+            setTimeout(function() { t.remove(); }, 300);
+        }, 5000);
     });
 });
 </script>
-@endif
 
-@if($errors->any() || session('success'))
+@if($errors->any())
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var modal = document.getElementById('addAssignmentModal');
