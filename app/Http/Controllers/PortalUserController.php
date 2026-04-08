@@ -296,6 +296,17 @@ class PortalUserController extends Controller
         // Sync password change to external applications
         UpdateUserInAppsJob::dispatch($user);
 
+        // Send new password to user via email
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)
+                ->send(new \App\Mail\WelcomeCredentials($user, $newPassword));
+        } catch (\Throwable $e) {
+            \Log::channel('daily')->error('[PortalUser] Password reset mail failed', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         return back()->with('success', 'Password reset for ' . $user->name . '. New password: ' . $newPassword);
     }
 
