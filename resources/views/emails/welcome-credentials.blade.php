@@ -1,23 +1,27 @@
-<x-mail::message>
-# 🎓 Hoş Geldiniz!
+@extends('emails.layout', ['locale' => $locale, 'subject' => __('mail.welcome_subject', [], $locale)])
 
-Merhaba **{{ $user->name }}**,
+@section('content')
+<h1>{{ __('mail.welcome_title', [], $locale) }} 🎓</h1>
+<p class="subtitle">{{ __('mail.welcome_subtitle', ['name' => $user->name], $locale) }}</p>
 
-DopiFuture platformuna kaydınız başarıyla oluşturuldu. Aşağıdaki bilgilerle giriş yapabilirsiniz:
+<p>{{ __('mail.welcome_body', [], $locale) }}</p>
 
-<x-mail::panel>
-**E-posta:** {{ $user->email }}
-**Şifre:** {{ $plainPassword }}
-</x-mail::panel>
+<div class="info-card">
+    <p class="label">{{ __('mail.email_label', [], $locale) }}</p>
+    <p class="value">{{ $user->email }}</p>
 
-<x-mail::button :url="$loginUrl" color="primary">
-Giriş Yap
-</x-mail::button>
+    <p class="label">{{ __('mail.password_label', [], $locale) }}</p>
+    <p class="value"><span class="password">{{ $plainPassword }}</span></p>
+</div>
 
-> ⚠️ Güvenliğiniz için ilk girişte şifrenizi değiştirmenizi öneriyoruz.
+<div class="cta-wrap">
+    <a href="{{ $loginUrl }}" class="cta-btn">{{ __('mail.login_button', [], $locale) }}</a>
+</div>
 
-Herhangi bir sorunuz varsa destek ekibimizle iletişime geçebilirsiniz.
+<div class="warning">
+    ⚠️ {{ __('mail.welcome_warning', [], $locale) }}
+</div>
 
-Saygılarımızla,<br>
-**{{ config('app.name') }}**
-</x-mail::message>
+<p>{{ __('mail.welcome_support', [], $locale) }}</p>
+<p>{{ __('mail.regards', [], $locale) }},<br><strong>{{ config('app.name') }}</strong></p>
+@endsection

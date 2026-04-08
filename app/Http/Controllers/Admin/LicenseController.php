@@ -90,6 +90,18 @@ class LicenseController extends Controller
 
         ActivityLog::log('created', 'licenses', $license);
 
+        // Send license activation email to school admin
+        try {
+            $school = $license->school;
+            $schoolAdmin = $school->admins->first() ?? $school->users->first();
+            if ($schoolAdmin) {
+                \Illuminate\Support\Facades\Mail::to($schoolAdmin->email)
+                    ->send(new \App\Mail\LicenseActivated($license, $school, $schoolAdmin->locale ?? 'en'));
+            }
+        } catch (\Throwable $e) {
+            \Log::channel('daily')->error('[License] Activation mail failed', ['error' => $e->getMessage()]);
+        }
+
         return redirect()->route('admin.licenses.index')
             ->with('success', __('admin.license_created'));
     }
@@ -149,12 +161,31 @@ class LicenseController extends Controller
             'notes' => $request->input('notes'),
         ]);
 
+        $freshLicense = $license->fresh();
         ActivityLog::log('purchase_added', 'licenses', $license, [], [
             'old_total_seats' => $oldTotal,
-            'new_total_seats' => $license->fresh()->totalSeats(),
+            'new_total_seats' => $freshLicense->totalSeats(),
             'added_seats' => $purchase->seat_count,
             'amount' => $purchase->amount,
         ]);
+
+        // Send seats added email to school admin
+        try {
+            $school = $license->school;
+            $schoolAdmin = $school->admins->first() ?? $school->users->first();
+            if ($schoolAdmin) {
+                \Illuminate\Support\Facades\Mail::to($schoolAdmin->email)
+                    ->send(new \App\Mail\LicenseSeatsAdded(
+                        $school,
+                        $purchase->seat_count,
+                        $freshLicense->totalSeats(),
+                        $freshLicense->used_seats ?? 0,
+                        $schoolAdmin->locale ?? 'en'
+                    ));
+            }
+        } catch (\Throwable $e) {
+            \Log::channel('daily')->error('[License] Seats added mail failed', ['error' => $e->getMessage()]);
+        }
 
         return redirect()->route('admin.licenses.show', $license)
             ->with('success', __('admin.purchase_added'));

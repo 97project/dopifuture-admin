@@ -82,6 +82,16 @@ class SchoolController extends Controller
 
         ActivityLog::log('created', 'schools', $school);
 
+        // Send school registration notification
+        try {
+            $admin = auth()->user();
+            $recipient = $school->email ?: $admin->email;
+            \Illuminate\Support\Facades\Mail::to($recipient)
+                ->send(new \App\Mail\SchoolRegistered($school, $admin->name, $admin->locale ?? 'en'));
+        } catch (\Throwable $e) {
+            \Log::channel('daily')->error('[School] Registration mail failed', ['error' => $e->getMessage()]);
+        }
+
         return redirect()->route('admin.schools.index')
             ->with('success', __('admin.school_created'));
     }

@@ -5,7 +5,6 @@ namespace App\Mail;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
@@ -13,27 +12,30 @@ class WelcomeCredentials extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public string $userLocale;
+
     public function __construct(
         public User $user,
         public string $plainPassword
-    ) {}
+    ) {
+        $this->userLocale = $user->locale ?? 'en';
+        $this->locale($this->userLocale);
+    }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'DopiFuture — Hesap Bilgileriniz',
+            subject: __('mail.welcome_subject', [], $this->userLocale),
         );
     }
 
-    public function content(): Content
+    public function build()
     {
-        return new Content(
-            markdown: 'emails.welcome-credentials',
-            with: [
-                'user' => $this->user,
-                'plainPassword' => $this->plainPassword,
-                'loginUrl' => config('app.url') . '/login',
-            ],
-        );
+        return $this->view('emails.welcome-credentials', [
+            'user' => $this->user,
+            'plainPassword' => $this->plainPassword,
+            'loginUrl' => config('app.url') . '/login',
+            'locale' => $this->userLocale,
+        ]);
     }
 }
