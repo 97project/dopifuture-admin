@@ -761,10 +761,8 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
      *
      * @param array $data {
      *   simulationId: int (required),
-     *   name: string (required),
-     *   memberIds: string[] (required),
-     *   description?: string,
-     *   dueDate?: string (ISO 8601)
+     *   userIds: int[] (required) — backend user IDs,
+     *   deadline?: string (ISO 8601)
      * }
      */
     public function createAssignment(array $data): \Illuminate\Http\Client\Response

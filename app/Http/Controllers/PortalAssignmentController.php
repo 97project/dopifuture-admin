@@ -85,15 +85,14 @@ class PortalAssignmentController extends Controller
             }
 
             // Step 4: Build API payload
-            // API spec: simulationId, name (required), memberIds[] (required), description?, dueDate?
-            $sim = RefSimulation::find($validated['simulation_id']);
+            // API expects: simulationId (int), userIds (int[]), deadline? (ISO 8601)
+            // NO name, NO memberIds, NO dueDate
             $data = [
                 'simulationId' => (int) $validated['simulation_id'],
-                'name'         => ($sim->name ?? 'Mission') . ' - ' . now()->format('d/m/Y'),
-                'memberIds'    => $backendUserIds,
+                'userIds'      => array_map('intval', $backendUserIds),
             ];
             if (!empty($validated['deadline'])) {
-                $data['dueDate'] = \Carbon\Carbon::parse($validated['deadline'])->toISOString();
+                $data['deadline'] = \Carbon\Carbon::parse($validated['deadline'])->toISOString();
             }
 
             Log::info('[PortalAssignment] MW creating assignment', $data);
