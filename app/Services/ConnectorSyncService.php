@@ -261,10 +261,9 @@ class ConnectorSyncService
                     }
 
                     WsMember::updateOrCreate(
-                        ['external_id' => $memberId],
+                        ['user_id' => $user->id, 'application_id' => $app->id],
                         [
-                            'user_id'          => $user->id,
-                            'application_id'   => $app->id,
+                            'external_id'      => $memberId,
                             'points'           => $memberData['points'] ?? $memberData['totalPoints'] ?? 0,
                             'step_progress'    => is_array($stepProgress) ? $stepProgress : [],
                             'step_evaluations' => is_array($evaluations) ? $evaluations : [],
