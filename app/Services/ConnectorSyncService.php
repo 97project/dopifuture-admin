@@ -238,7 +238,12 @@ class ConnectorSyncService
         // ── WsMember: üye bilgisi + step_progress + evaluations + submissions ──
         if ($connector instanceof WayStartupConnector) {
             try {
+                // Önce userId ile dene, eşleşmezse email ile ara
+                // (Way Backend'in userId'si Panel26 user.id ile farklı olabiliyor)
                 $memberData = $connector->getMemberByUserId((string) $user->id);
+                if (!$memberData || !isset($memberData['id'])) {
+                    $memberData = $connector->getMemberByEmail($user->email);
+                }
                 $memberId = $memberData['id'] ?? null;
 
                 if ($memberId) {

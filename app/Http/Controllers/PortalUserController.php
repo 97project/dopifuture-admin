@@ -157,7 +157,27 @@ class PortalUserController extends Controller
             }
         }
 
+        // Call Vega API FIRST to generate Master ID
+        $dummyUser = new User([
+            'name' => $data['name'],
+            'surname' => $data['surname'] ?? null,
+            'email' => $data['email'],
+        ]);
+        
+        $vegaResult = app(\App\Connectors\VegaConnector::class)->syncUser($dummyUser, $data['password']);
+        if (!$vegaResult['success']) {
+            return back()
+                ->withInput()
+                ->withErrors(['email' => 'Vega API ile bağlantı kurulamadı veya kullanıcı oluşturulamadı: ' . $vegaResult['error']]);
+        }
+
+        $vegaId = $vegaResult['response']['id'] ?? $vegaResult['response']['user']['id'] ?? null;
+        if (!$vegaId) {
+            return back()->withInput()->withErrors(['email' => 'Vega sisteminden Master ID alınamadı.']);
+        }
+
         $newUser = User::create([
+            'id' => $vegaId,
             'name' => $data['name'],
             'surname' => $data['surname'] ?? null,
             'email' => $data['email'],
@@ -200,7 +220,8 @@ class PortalUserController extends Controller
             ]);
         }
 
-        // Auto-sync to connector applications (plain password for Vega registration)
+        // Auto-sync to connector applications (MissionWay, WayStartup limits etc.)
+        // Vega is already synced above!
         SyncUserToAppsJob::dispatch($newUser, $data['password']);
 
         // Hoş geldin e-postası gönder
@@ -432,7 +453,29 @@ class PortalUserController extends Controller
             // Şifre: CSV'den geldiyse onu kullan, yoksa rastgele üret
             $passwordToStore = $plainPassword ?: ('Dopi' . rand(1000, 9999) . '!');
 
+            // 1. Vega'da kullanıcı oluştur ve ID al
+            $dummyUser = new User([
+                'name'    => $name,
+                'surname' => $surname,
+                'email'   => $email,
+            ]);
+            
+            $vegaResult = app(\App\Connectors\VegaConnector::class)->syncUser($dummyUser, $passwordToStore);
+            if (!$vegaResult['success']) {
+                $errors[] = "Satır " . ($idx + 2) . ": Vega API Hatası: " . ($vegaResult['error'] ?? 'Bilinmeyen Hata');
+                $skipped++;
+                continue;
+            }
+
+            $vegaId = $vegaResult['response']['id'] ?? $vegaResult['response']['user']['id'] ?? null;
+            if (!$vegaId) {
+                $errors[] = "Satır " . ($idx + 2) . ": Vega'dan geçerli bir ID alınamadı.";
+                $skipped++;
+                continue;
+            }
+
             $newUser = User::create([
+                'id'       => $vegaId,
                 'name'     => $name,
                 'surname'  => $surname,
                 'email'    => $email,

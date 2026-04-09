@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Connectors\MissionWayConnector;
-use App\Connectors\VegaConnector;
 use App\Connectors\WayStartupConnector;
 use App\Models\Application;
 use App\Models\MissionWay\MwAssignment;
@@ -15,23 +14,14 @@ use App\Models\MissionWay\MwPlayerProgress;
 use App\Models\MissionWay\MwSessionPlayer;
 use App\Models\MissionWay\MwSimulationSession;
 use App\Models\MissionWay\RefInfoCard;
-use App\Models\MissionWay\RefMediaAsset;
 use App\Models\MissionWay\RefMetricBandCategory;
 use App\Models\MissionWay\RefMetricDefinition;
-use App\Models\MissionWay\RefObjective;
-use App\Models\MissionWay\RefPathObjective;
 use App\Models\MissionWay\RefRole;
 use App\Models\MissionWay\RefSimulation;
 use App\Models\MissionWay\RefSimulationMetricBand;
 use App\Models\MissionWay\RefSimulationPath;
 use App\Models\MissionWay\RefSimulationVersion;
-use App\Models\MissionWay\RefSimulationVersionRole;
 use App\Models\MissionWay\RefTranslation;
-use App\Models\Vega\VegaLesson;
-use App\Models\Vega\VegaScenario;
-use App\Models\Vega\VegaWing;
-use App\Models\VegaSession;
-use App\Models\VegaSessionMessage;
 use App\Models\WsMember;
 use App\Models\WsSimulation;
 use App\Models\WsStep;
@@ -82,7 +72,6 @@ class HarvestAppData extends Command
                 match ($connectorClass) {
                     'MissionWayConnector' => $this->harvestMissionWay($app, $connector),
                     'WayStartupConnector' => $this->harvestWayStartup($app, $connector),
-                    'VegaConnector'       => $this->harvestVega($app, $connector),
                     default => $this->line("  ⏭️  Harvest desteği yok (connector: {$connectorClass})"),
                 };
             } catch (\Throwable $e) {
@@ -158,22 +147,6 @@ class HarvestAppData extends Command
         // 6. Translations (tüm simulation_path'ler için)
         $this->line('  🌐 Çeviriler...');
         $this->harvestMwTranslations($connector);
-
-        // 7. Objectives & Path Objectives
-        $this->line('  🎯 Hedefler...');
-        $this->harvestMwObjectives($connector);
-
-        // 8. Media Assets
-        $this->line('  🖼️ Medya varlıkları...');
-        $this->harvestMwMediaAssets($connector);
-
-        // 9. Simulation Version Roles
-        $this->line('  🎭 Versiyon rolleri...');
-        $this->harvestMwSimVersionRoles($connector);
-
-        // 10. SimulationWing Stats (cache/log)
-        $this->line('  📊 SimulationWing...');
-        $this->harvestMwSimWingStats($connector);
     }
 
     /**
@@ -472,11 +445,10 @@ class HarvestAppData extends Command
                     $email = $player['email'] ?? "{$extId}@missionway.local";
                     $username = $player['username'] ?? $email;
 
-                    // ── EMAIL-BASED user matching ──
-                    // Way Backend'in userId'si Vega'nın iç ID'sidir, panel26 user ID'si DEĞİLDİR.
-                    // Doğru eşleştirme: email üzerinden portal users tablosundan resolve et.
-                    $portalUser = \App\Models\User::where('email', $email)->first();
-                    $localUserId = $portalUser?->id;
+                    // Email-based user eşleştirme: Way Backend'in userId'si Panel26 user.id ile
+                    // eşleşmediği için (farklı ID alanları) email üzerinden eşleştir
+                    $localUser = \App\Models\User::where('email', $email)->first();
+                    $userId = $localUser?->id;
 
                     // Önce id ile bul, yoksa email/username ile eşleştir (harvest:way-db pattern)
                     $mwPlayer = MwPlayer::find($extId)
@@ -488,7 +460,7 @@ class HarvestAppData extends Command
                         'email'           => $email,
                         'name'            => $player['name'] ?? 'Oyuncu',
                         'surname'         => $player['surname'] ?? '',
-                        'user_id'         => $localUserId,
+                        'user_id'         => $userId,
                         'organization_id' => $organizationId ?: null,
                         'avatar_media_id' => $player['avatarMediaId'] ?? $player['avatarId'] ?? null,
                         'avatar_id'       => $player['avatarId'] ?? null,
@@ -498,10 +470,7 @@ class HarvestAppData extends Command
                     ];
 
                     if ($mwPlayer) {
-                        // user_id her zaman açıkça güncellenmeli (null dahil — eski yanlış Vega ID'leri temizlenir)
-                        $updateData = array_filter($data, fn($v) => $v !== null);
-                        $updateData['user_id'] = $localUserId; // null olsa bile yaz
-                        $mwPlayer->update($updateData);
+                        $mwPlayer->update(array_filter($data, fn($v) => $v !== null));
                     } else {
                         $mwPlayer = MwPlayer::create(array_merge(['id' => $extId], $data));
                     }
@@ -583,8 +552,8 @@ class HarvestAppData extends Command
                 RefMetricDefinition::updateOrCreate(
                     ['id' => $id],
                     [
-                        'metric_key' => $item['key'] ?? ('unknown_' . $id),
-                        'key'        => $item['key'] ?? ('unknown_' . $id),
+                        'metric_key' => $item['key'] ?? 'unknown',
+                        'key'        => $item['key'] ?? 'unknown',
                         'name'       => $item['name'] ?? ucfirst($item['key'] ?? 'Metric'),
                         'icon'       => $item['icon'] ?? '📊',
                         'color'      => $item['color'] ?? '#6B7280',
@@ -770,117 +739,6 @@ class HarvestAppData extends Command
         }
     }
 
-    private function harvestMwObjectives(MissionWayConnector $connector): void
-    {
-        try {
-            $items = $connector->getObjectives(['limit' => 500]);
-            foreach ($items as $item) {
-                $id = $item['id'] ?? null;
-                if (!$id) continue;
-                RefObjective::updateOrCreate(
-                    ['id' => $id],
-                    [
-                        'name'        => $item['name'] ?? $item['title'] ?? "Objective #{$id}",
-                        'description' => $item['description'] ?? null,
-                        'key'         => $item['key'] ?? $item['slug'] ?? null,
-                    ]
-                );
-                $this->synced++;
-            }
-
-            // Path Objectives
-            $pathItems = $connector->getPathObjectives(['limit' => 1000]);
-            foreach ($pathItems as $po) {
-                $poId = $po['id'] ?? null;
-                if (!$poId) continue;
-                RefPathObjective::updateOrCreate(
-                    ['id' => $poId],
-                    [
-                        'simulation_path_id' => $po['simulationPathId'] ?? $po['simulation_path_id'] ?? null,
-                        'objective_id'       => $po['objectiveId'] ?? $po['objective_id'] ?? null,
-                        'target_value'       => $po['targetValue'] ?? $po['target_value'] ?? null,
-                        'weight'             => $po['weight'] ?? null,
-                    ]
-                );
-                $this->synced++;
-            }
-            $this->info('    ✅ Objectives: ' . count($items) . ', PathObjectives: ' . count($pathItems));
-        } catch (\Throwable $e) {
-            $this->failed++;
-            $this->warn("    ⚠️ Objectives: {$e->getMessage()}");
-        }
-    }
-
-    private function harvestMwMediaAssets(MissionWayConnector $connector): void
-    {
-        try {
-            $items = $connector->getMediaAssets(['limit' => 500]);
-            foreach ($items as $item) {
-                $id = $item['id'] ?? null;
-                if (!$id) continue;
-                RefMediaAsset::updateOrCreate(
-                    ['id' => $id],
-                    [
-                        'name'      => $item['name'] ?? $item['title'] ?? null,
-                        'type'      => $item['type'] ?? $item['assetType'] ?? null,
-                        'file_url'  => $item['fileUrl'] ?? $item['url'] ?? null,
-                        'file_key'  => $item['fileKey'] ?? $item['key'] ?? null,
-                        'mime_type' => $item['mimeType'] ?? $item['contentType'] ?? null,
-                        'file_size' => $item['fileSize'] ?? $item['size'] ?? null,
-                        'metadata'  => $item,
-                    ]
-                );
-                $this->synced++;
-            }
-            $this->info('    ✅ MediaAssets: ' . count($items));
-        } catch (\Throwable $e) {
-            $this->failed++;
-            $this->warn("    ⚠️ MediaAssets: {$e->getMessage()}");
-        }
-    }
-
-    private function harvestMwSimVersionRoles(MissionWayConnector $connector): void
-    {
-        try {
-            $items = $connector->getSimVersionRoles(['limit' => 500]);
-            foreach ($items as $item) {
-                $id = $item['id'] ?? null;
-                if (!$id) continue;
-                RefSimulationVersionRole::updateOrCreate(
-                    ['id' => $id],
-                    [
-                        'simulation_version_id' => $item['simulationVersionId'] ?? $item['simulation_version_id'] ?? null,
-                        'role_id'               => $item['roleId'] ?? $item['role_id'] ?? null,
-                        'name'                  => $item['name'] ?? $item['roleName'] ?? null,
-                    ]
-                );
-                $this->synced++;
-            }
-            $this->info('    ✅ VersionRoles: ' . count($items));
-        } catch (\Throwable $e) {
-            $this->failed++;
-            $this->warn("    ⚠️ VersionRoles: {$e->getMessage()}");
-        }
-    }
-
-    private function harvestMwSimWingStats(MissionWayConnector $connector): void
-    {
-        try {
-            $stats = $connector->getSimulationWingStats();
-            if ($stats) {
-                // Cache to settings or log for dashboard use
-                \Cache::put('simulation_wing_stats', $stats, now()->addMinutes(30));
-                $this->info('    ✅ SimulationWing stats cached');
-                $this->synced++;
-            } else {
-                $this->warn('    ⚠️ SimulationWing stats boş döndü');
-            }
-        } catch (\Throwable $e) {
-            $this->failed++;
-            $this->warn("    ⚠️ SimWingStats: {$e->getMessage()}");
-        }
-    }
-
     // ═══════════════════════════════════════════
     //  WayStartup
     // ═══════════════════════════════════════════
@@ -1048,7 +906,8 @@ class HarvestAppData extends Command
     private function harvestWsMembers(Application $app, WayStartupConnector $connector, $wsSimulations): void
     {
         try {
-            // Sadece bu uygulamaya atanmış kullanıcıları sorgula (tüm user tablosunu sorgulamak 404 spam'ine neden olur)
+            // Per-user: getMemberByUserId çalışıyor çünkü SyncUserToAppsJob panel user.id gönderdi.
+            // Not: getMembers bulk endpoint 401 veriyor, bu yüzden per-user yaklaşım kullanıyoruz.
             $portalUsers = $app->users()->get();
             if ($portalUsers->isEmpty()) {
                 $portalUsers = \App\Models\User::all();
@@ -1183,249 +1042,5 @@ class HarvestAppData extends Command
             $this->failed++;
             $this->warn("    ⚠️ Members: {$e->getMessage()}");
         }
-    }
-
-    // ═══════════════════════════════════════════
-    //  Vega (Way AI Coach / Role Galaxy)
-    // ═══════════════════════════════════════════
-
-    private function harvestVega(Application $app, VegaConnector $connector): void
-    {
-        // 1. Lecturer Lessons
-        $this->line('  📚 Dersler (Lecturer)...');
-        try {
-            $lessons = $connector->getLecturerLessons();
-            foreach ($lessons as $lesson) {
-                $extId = $lesson['id'] ?? null;
-                if (!$extId) continue;
-                VegaLesson::updateOrCreate(
-                    ['external_id' => $extId],
-                    [
-                        'title'            => $lesson['title'] ?? $lesson['name'] ?? "Ders #{$extId}",
-                        'description'      => $lesson['description'] ?? null,
-                        'category'         => $lesson['category'] ?? $lesson['type'] ?? null,
-                        'difficulty'       => $lesson['difficulty'] ?? $lesson['level'] ?? null,
-                        'duration_minutes' => $lesson['duration'] ?? $lesson['durationMinutes'] ?? null,
-                        'icon_url'         => $lesson['iconUrl'] ?? $lesson['icon'] ?? null,
-                        'metadata'         => $lesson,
-                        'synced_at'        => now(),
-                    ]
-                );
-                $this->synced++;
-            }
-            $this->info('    ✅ Lessons: ' . count($lessons));
-        } catch (\Throwable $e) {
-            $this->failed++;
-            $this->warn("    ⚠️ Lessons: {$e->getMessage()}");
-        }
-
-        // 2. Simulator Scenarios
-        $this->line('  🎮 Senaryolar (Simulator)...');
-        try {
-            $scenarios = $connector->getSimulatorScenarios();
-            foreach ($scenarios as $scenario) {
-                $extId = $scenario['id'] ?? null;
-                if (!$extId) continue;
-                VegaScenario::updateOrCreate(
-                    ['external_id' => $extId],
-                    [
-                        'title'       => $scenario['title'] ?? $scenario['name'] ?? "Senaryo #{$extId}",
-                        'description' => $scenario['description'] ?? null,
-                        'category'    => $scenario['category'] ?? $scenario['type'] ?? null,
-                        'difficulty'  => $scenario['difficulty'] ?? $scenario['level'] ?? null,
-                        'icon_url'    => $scenario['iconUrl'] ?? $scenario['icon'] ?? null,
-                        'metadata'    => $scenario,
-                        'synced_at'   => now(),
-                    ]
-                );
-                $this->synced++;
-            }
-            $this->info('    ✅ Scenarios: ' . count($scenarios));
-        } catch (\Throwable $e) {
-            $this->failed++;
-            $this->warn("    ⚠️ Scenarios: {$e->getMessage()}");
-        }
-
-        // 3. WayWing Badges
-        $this->line('  🦋 Kanatlar (WayWing)...');
-        try {
-            $wings = $connector->getWings();
-            foreach ($wings as $wing) {
-                $extId = $wing['id'] ?? null;
-                if (!$extId) continue;
-                VegaWing::updateOrCreate(
-                    ['external_id' => $extId],
-                    [
-                        'name'             => $wing['name'] ?? $wing['title'] ?? "Wing #{$extId}",
-                        'description'      => $wing['description'] ?? null,
-                        'icon_url'         => $wing['iconUrl'] ?? $wing['icon'] ?? null,
-                        'points_required'  => $wing['pointsRequired'] ?? $wing['points'] ?? 0,
-                        'metadata'         => $wing,
-                        'synced_at'        => now(),
-                    ]
-                );
-                $this->synced++;
-            }
-            $this->info('    ✅ Wings: ' . count($wings));
-        } catch (\Throwable $e) {
-            $this->failed++;
-            $this->warn("    ⚠️ Wings: {$e->getMessage()}");
-        }
-
-        // 4. Chat Sessions (Study Space) — API → DB fallback
-        $this->line('  💬 Chat oturumları (Study Space)...');
-        $this->harvestVegaChatSessions($app);
-
-        // 5. Wing Points (istatistik)
-        $this->line('  📊 Kanat puanları...');
-        try {
-            $points = $connector->getWingPoints();
-            if (!empty($points)) {
-                \Cache::put('vega_wing_points', $points, now()->addMinutes(30));
-                $this->info('    ✅ WingPoints cached');
-            }
-        } catch (\Throwable $e) {
-            $this->warn("    ⚠️ WingPoints: {$e->getMessage()}");
-        }
-    }
-
-    /**
-     * Chat Sessions (Study Space) harvest:
-     * 1. Önce API ile dener (getChatSessions)
-     * 2. API boş dönerse Vega DB'ye doğrudan bağlanıp vega_sessions + vega_chat_messages çeker
-     * 3. Email ile local user eşleştirmesi yapar
-     */
-    private function harvestVegaChatSessions(Application $app): void
-    {
-        // 1. Önce API'yi dene
-        try {
-            $connector = new VegaConnector();
-            $chatSessions = $connector->getChatSessions();
-            if (!empty($chatSessions)) {
-                $this->info('    ✅ ChatSessions via API: ' . count($chatSessions));
-                // API'den veri geldiyse local'e kaydet
-                foreach ($chatSessions as $cs) {
-                    $this->upsertVegaChatSession($app, $cs);
-                }
-                return;
-            }
-        } catch (\Throwable $e) {
-            // API başarısız — DB fallback'e devam
-        }
-
-        // 2. DB Fallback — Vega SQL'e doğrudan bağlan
-        $this->line('    🔄 API boş, Vega DB fallback...');
-        try {
-            // Vega DB bağlantısını kontrol et
-            $vegaDb = DB::connection('vega_db');
-            $vegaDb->getPdo(); // test connection
-
-            // Email → local user_id mapping cache'i oluştur
-            $localUsers = \App\Models\User::pluck('id', 'email')
-                ->mapWithKeys(fn($id, $email) => [mb_strtolower($email) => $id]);
-
-            // Vega DB'den chatbot oturumlarını çek
-            // vega_sessions tablosunda module = 'chatbot' olanlar Study Space'e ait
-            $remoteSessions = $vegaDb->table('vega_sessions')
-                ->where('module', 'chatbot')
-                ->orderBy('id')
-                ->get();
-
-            if ($remoteSessions->isEmpty()) {
-                $this->info('    ℹ️  ChatSessions: Vega DB\'de chatbot oturumu yok');
-                return;
-            }
-
-            // Vega users tablosundan user_id → email mapping
-            $vegaUserIds = $remoteSessions->pluck('user_id')->unique()->filter();
-            $vegaUsers = $vegaDb->table('users')
-                ->whereIn('id', $vegaUserIds)
-                ->pluck('email', 'id')
-                ->mapWithKeys(fn($email, $id) => [(string) $id => mb_strtolower($email ?? '')]);
-
-            $sessionsSynced = 0;
-            $messagesSynced = 0;
-
-            foreach ($remoteSessions as $rs) {
-                // Vega user_id → email → local user_id
-                $vegaEmail = $vegaUsers[(string) $rs->user_id] ?? null;
-                $localUserId = $vegaEmail ? ($localUsers[$vegaEmail] ?? null) : null;
-
-                $localSession = VegaSession::updateOrCreate(
-                    ['external_id' => $rs->external_session_id ?? ('vega_chat_' . $rs->id)],
-                    [
-                        'user_id'        => $localUserId,
-                        'application_id' => $app->id,
-                        'module'         => 'chatbot',
-                        'user_name'      => null,
-                        'user_surname'   => null,
-                        'score'          => $rs->score,
-                        'duration_minutes' => null,
-                        'summary'        => [
-                            'subject' => $rs->subject,
-                            'topic'   => $rs->topic,
-                            'grade'   => $rs->grade,
-                            'title'   => $rs->title,
-                            'status'  => $rs->status,
-                        ],
-                        'started_at'     => $rs->created_at_ext ?? $rs->created_at,
-                        'ended_at'       => $rs->updated_at_ext ?? $rs->updated_at,
-                        'synced_at'      => now(),
-                    ]
-                );
-                $sessionsSynced++;
-                $this->synced++;
-
-                // Chat mesajlarını çek
-                try {
-                    $remoteMessages = $vegaDb->table('vega_chat_messages')
-                        ->where('session_id', $rs->id)
-                        ->orderBy('created_at')
-                        ->get();
-
-                    foreach ($remoteMessages as $idx => $rm) {
-                        VegaSessionMessage::updateOrCreate(
-                            ['session_id' => $localSession->id, 'order_index' => $idx],
-                            [
-                                'role'    => $rm->role ?? 'user',
-                                'content' => $rm->content,
-                                'score'   => null,
-                            ]
-                        );
-                        $messagesSynced++;
-                        $this->synced++;
-                    }
-                } catch (\Throwable $e) {
-                    // Mesajlar opsiyonel — devam et
-                }
-            }
-
-            $this->info("    ✅ ChatSessions via DB: {$sessionsSynced} sessions, {$messagesSynced} messages");
-        } catch (\Throwable $e) {
-            $this->failed++;
-            $this->warn("    ⚠️ ChatSessions DB fallback hatası: {$e->getMessage()}");
-        }
-    }
-
-    /**
-     * API'den gelen tek bir chat session'ı local'e kaydet.
-     */
-    private function upsertVegaChatSession(Application $app, array $cs): void
-    {
-        $extId = $cs['id'] ?? $cs['sessionId'] ?? null;
-        if (!$extId) return;
-
-        VegaSession::updateOrCreate(
-            ['external_id' => (string) $extId],
-            [
-                'application_id' => $app->id,
-                'module'         => 'chatbot',
-                'summary'        => $cs,
-                'started_at'     => isset($cs['createdAt']) ? \Carbon\Carbon::parse($cs['createdAt']) : null,
-                'ended_at'       => isset($cs['updatedAt']) ? \Carbon\Carbon::parse($cs['updatedAt']) : null,
-                'synced_at'      => now(),
-            ]
-        );
-        $this->synced++;
     }
 }

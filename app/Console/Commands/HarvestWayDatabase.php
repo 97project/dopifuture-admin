@@ -459,17 +459,18 @@ class HarvestWayDatabase extends Command
                         'deactivated_at'      => $this->dt($row->deactivated_at),
                     ], fn($v) => $v !== null));
                 } else {
-                    // Create new — email üzerinden portal user_id'sini resolve et
-                    // PG'nin user_id'si Vega'nın iç ID'si, panel26 user ID'si DEĞİL
-                    $portalUser = \App\Models\User::where('email', $email)->first();
-                    $localUserId = $portalUser?->id;
+                    // Create new — use PG's user_id only if not already taken locally
+                    $userId = $row->user_id;
+                    if ($userId && MwPlayer::where('user_id', $userId)->exists()) {
+                        $userId = null;
+                    }
 
                     $local = new MwPlayer();
                     $local->username = $username;
                     $local->email = $email;
                     $local->name = $row->name ?? 'Oyuncu';
                     $local->surname = $row->surname ?? '';
-                    $local->user_id = $localUserId;
+                    $local->user_id = $userId;
                     $local->organization_id = $row->organization_id ?? null;
                     $local->avatar_media_id = $row->avatar_media_id ?? null;
                     $local->preferred_language_id = $row->preferred_language_id ?? null;
@@ -846,19 +847,13 @@ class HarvestWayDatabase extends Command
         $count = 0;
 
         foreach ($pgRows as $row) {
-            // Email üzerinden portal user_id'sini resolve et
-            // PG'nin user_id'si Vega'nın iç ID'si, panel26 user ID'si DEĞİL
-            $email = $row->email ?? null;
-            $portalUser = $email ? \App\Models\User::where('email', $email)->first() : null;
-            $localUserId = $portalUser?->id ?? $row->user_id;
-
             $local = WsMember::updateOrCreate(
                 ['external_id' => $row->id],
                 [
                     'application_id' => $appId,
-                    'user_id'        => $localUserId,
+                    'user_id'        => $row->user_id ?? 1,
                     'name'           => $row->name ?? '-',
-                    'email'          => $email ?? '-',
+                    'email'          => $row->email ?? '-',
                     'avatar_url'     => $row->avatar_url ?? null,
                     'points'         => $row->points ?? 0,
                     'synced_at'      => now(),

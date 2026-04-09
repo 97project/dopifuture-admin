@@ -98,7 +98,27 @@ class UserController extends Controller
     public function store(UserStoreRequest $request)
     {
         $data = $request->validated();
-        $user = User::create(collect($data)->except(['roles', 'avatar', 'password_confirmation'])->toArray());
+        
+        // Call Vega API FIRST to generate Master ID
+        $dummyUser = new User([
+            'name' => $data['name'],
+            'surname' => $data['surname'] ?? null,
+            'email' => $data['email'],
+        ]);
+        
+        $vegaResult = app(\App\Connectors\VegaConnector::class)->syncUser($dummyUser, $data['password'] ?? null);
+        if (!$vegaResult['success']) {
+            return response()->json(['message' => 'Vega API ile senkronizasyon başarısız: ' . $vegaResult['error']], 500);
+        }
+        
+        $vegaId = $vegaResult['response']['id'] ?? $vegaResult['response']['user']['id'] ?? null;
+        if (!$vegaId) {
+            return response()->json(['message' => 'Vega API Master ID alınamadı'], 500);
+        }
+
+        $createData = collect($data)->except(['roles', 'avatar', 'password_confirmation'])->toArray();
+        $createData['id'] = $vegaId;
+        $user = User::create($createData);
 
         if ($request->filled('roles')) {
             $user->syncRoles($request->input('roles'));

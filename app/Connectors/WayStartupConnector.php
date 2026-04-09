@@ -120,6 +120,45 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
         }
     }
 
+    /* ─── Interface: removeUser ─────────────────────────── */
+
+    /**
+     * DELETE /v1/startup/members/{memberId}
+     * Önce userId ile member'ı bul, sonra ID ile sil.
+     */
+    public function removeUser(User $user): bool
+    {
+        try {
+            $member = $this->getMemberByUserId((string) $user->id);
+            $memberId = $member['id'] ?? null;
+
+            if (!$memberId) {
+                Log::channel('daily')->info('[WayStartup] Silinecek üye bulunamadı', ['userId' => $user->id]);
+                return true; // Zaten yok
+            }
+
+            $response = $this->apiDelete("/v1/startup/members/{$memberId}");
+
+            if ($response->status() === 204 || $response->status() === 200 || $response->status() === 404) {
+                Log::channel('daily')->info('[WayStartup] Üye silindi', ['userId' => $user->id, 'memberId' => $memberId]);
+                return true;
+            }
+
+            Log::channel('daily')->error('[WayStartup] Silme hatası', [
+                'userId' => $user->id,
+                'memberId' => $memberId,
+                'status' => $response->status(),
+            ]);
+            return false;
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[WayStartup] Silme bağlantı hatası', [
+                'userId' => $user->id,
+                'message' => $e->getMessage(),
+            ]);
+            return false;
+        }
+    }
+
     /* ─── Interface: updateUser ─────────────────────────── */
 
     /**
@@ -167,51 +206,6 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
                 'message' => $e->getMessage(),
             ]);
             return ['success' => false, 'response' => null, 'error' => $e->getMessage()];
-        }
-    }
-
-    /* ─── Interface: removeUser ─────────────────────────── */
-
-    /**
-     * DELETE /v1/startup/members/{memberId}
-     * Önce by-user'dan member id bulunur, sonra silinir.
-     *
-     * Response 200/204: (başarılı silme)
-     * Response 404: (zaten yok)
-     */
-    public function removeUser(User $user): bool
-    {
-        try {
-            $member = $this->getUser($user);
-            $memberId = $member['id'] ?? null;
-
-            if (!$memberId) {
-                Log::channel('daily')->info('[WayStartup] Silinecek üye bulunamadı', ['userId' => $user->id]);
-                return true;
-            }
-
-            $response = $this->apiDelete("/v1/startup/members/{$memberId}");
-
-            if (in_array($response->status(), [200, 204, 404, 401])) {
-                Log::channel('daily')->info('[WayStartup] Üye silindi', [
-                    'userId'   => $user->id,
-                    'memberId' => $memberId,
-                    'status'   => $response->status(),
-                ]);
-                return true;
-            }
-
-            Log::channel('daily')->error('[WayStartup] Silme hatası', [
-                'userId' => $user->id,
-                'status' => $response->status(),
-            ]);
-            return false;
-        } catch (\Throwable $e) {
-            Log::channel('daily')->error('[WayStartup] Silme bağlantı hatası', [
-                'userId' => $user->id,
-                'message' => $e->getMessage(),
-            ]);
-            return false;
         }
     }
 
@@ -712,6 +706,21 @@ class WayStartupConnector extends BaseConnector implements AppConnectorInterface
     {
         $result = $this->apiGet("/v1/startup/members/by-user/{$userId}");
         return is_array($result) ? $result : null;
+    }
+
+    /**
+     * Email ile üye ara — Way Backend'in userId'si Panel26 user.id ile eşleşmediğinde kullanılır.
+     * Tüm member'ları çekip email ile filtreler.
+     */
+    public function getMemberByEmail(string $email): ?array
+    {
+        $allMembers = $this->getMembers(['limit' => 1000]);
+        foreach ($allMembers as $m) {
+            if (strcasecmp($m['email'] ?? '', $email) === 0) {
+                return $m;
+            }
+        }
+        return null;
     }
 
     /**
