@@ -68,17 +68,7 @@ class UserController extends Controller
         $data = $request->validated();
         $plainPassword = $data['password'];
 
-        // Check if a soft-deleted user with same email exists → restore
-        $trashedUser = User::withTrashed()->where('email', $data['email'])->whereNotNull('deleted_at')->first();
-        $createData = collect($data)->except(['roles', 'avatar', 'password_confirmation', 'send_credentials'])->toArray();
-
-        if ($trashedUser) {
-            $trashedUser->restore();
-            $trashedUser->update($createData);
-            $user = $trashedUser;
-        } else {
-            $user = User::create($createData);
-        }
+        $user = User::create(collect($data)->except(['roles', 'avatar', 'password_confirmation', 'send_credentials'])->toArray());
 
         if ($request->filled('roles')) {
             $roleNames = \Spatie\Permission\Models\Role::whereIn('id', (array) $request->input('roles'))->pluck('name')->toArray();
