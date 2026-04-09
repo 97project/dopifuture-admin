@@ -71,7 +71,8 @@ class UserController extends Controller
         $user = User::create(collect($data)->except(['roles', 'avatar', 'password_confirmation', 'send_credentials'])->toArray());
 
         if ($request->filled('roles')) {
-            $user->syncRoles($request->input('roles'));
+            $roleNames = \Spatie\Permission\Models\Role::whereIn('id', (array) $request->input('roles'))->pluck('name')->toArray();
+            $user->syncRoles($roleNames);
         }
 
         if ($request->hasFile('avatar')) {
@@ -216,7 +217,8 @@ class UserController extends Controller
         $user->update(collect($data)->except(['roles', 'avatar', 'password_confirmation'])->toArray());
 
         if ($request->has('roles')) {
-            $user->syncRoles($request->input('roles'));
+            $roleNames = \Spatie\Permission\Models\Role::whereIn('id', (array) $request->input('roles'))->pluck('name')->toArray();
+            $user->syncRoles($roleNames);
         }
 
         if ($request->hasFile('avatar')) {
