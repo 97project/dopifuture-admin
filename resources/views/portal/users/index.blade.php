@@ -173,7 +173,7 @@
     </div>
 
     {{-- ═══ ADD USER MODAL ═══ --}}
-    <div id="addUserModal" class="dp-modal-overlay" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
+    <div id="addUserModal" class="dp-modal-overlay" style="display:{{ $errors->any() ? 'flex' : 'none' }};" onclick="if(event.target===this)this.style.display='none'">
         <div class="dp-modal-card">
             <button type="button" class="dp-modal-close" onclick="document.getElementById('addUserModal').style.display='none'">
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -181,6 +181,18 @@
 
             <div class="dp-modal-title">{{ $currentRole === 'teacher' ? 'Add New Teacher' : 'Add New Student' }}</div>
             <p class="dp-modal-subtitle">Fill in the details below to add a new {{ $currentRole }}.</p>
+
+            @if($errors->any())
+            <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                    <svg width="16" height="16" fill="none" stroke="#dc2626" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <strong style="font-size:13px;color:#dc2626;">Please fix the errors below:</strong>
+                </div>
+                @foreach($errors->all() as $err)
+                    <div style="font-size:12px;color:#b91c1c;padding-left:24px;">• {{ $err }}</div>
+                @endforeach
+            </div>
+            @endif
 
             <form method="POST" action="{{ route('portal.users.store') }}">
                 @csrf
@@ -192,22 +204,25 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
                     <div>
                         <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">First Name *</label>
-                        <input type="text" name="name" class="dp-form-input" placeholder="Enter first name" required>
+                        <input type="text" name="name" value="{{ old('name') }}" class="dp-form-input" placeholder="Enter first name" required style="{{ $errors->has('name') ? 'border-color:#ef4444;' : '' }}">
+                        @error('name') <p style="font-size:11px;color:#ef4444;margin:4px 0 0 0;">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">Last Name</label>
-                        <input type="text" name="surname" class="dp-form-input" placeholder="Enter last name">
+                        <input type="text" name="surname" value="{{ old('surname') }}" class="dp-form-input" placeholder="Enter last name">
                     </div>
                 </div>
 
                 <div style="margin-bottom:16px;">
                     <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">E-mail *</label>
-                    <input type="email" name="email" class="dp-form-input" placeholder="name@example.com" required>
+                    <input type="email" name="email" value="{{ old('email') }}" class="dp-form-input" placeholder="name@example.com" required style="{{ $errors->has('email') ? 'border-color:#ef4444;' : '' }}">
+                    @error('email') <p style="font-size:11px;color:#ef4444;margin:4px 0 0 0;">{{ $message }}</p> @enderror
                 </div>
 
                 <div style="margin-bottom:16px;">
                     <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">Password *</label>
-                    <input type="password" name="password" class="dp-form-input" placeholder="Minimum 6 characters" required minlength="6">
+                    <input type="password" name="password" class="dp-form-input" placeholder="Minimum 6 characters" required minlength="6" style="{{ $errors->has('password') ? 'border-color:#ef4444;' : '' }}">
+                    @error('password') <p style="font-size:11px;color:#ef4444;margin:4px 0 0 0;">{{ $message }}</p> @enderror
                 </div>
 
                 <button type="submit" class="dp-btn" style="width:100%;justify-content:center;padding:14px;">
