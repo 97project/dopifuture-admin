@@ -135,7 +135,7 @@ class PortalUserController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:60',
             'surname' => 'nullable|string|max:60',
-            'email' => 'required|email|unique:users,email',
+            'email' => ['required', 'email', \Illuminate\Validation\Rule::unique('users', 'email')->whereNull('deleted_at')],
             'password' => 'required|string|min:6',
             'role' => 'nullable|string|in:student,teacher,school-principal',
         ]);
@@ -157,16 +157,33 @@ class PortalUserController extends Controller
             }
         }
 
-        $newUser = User::create([
-            'name' => $data['name'],
-            'surname' => $data['surname'] ?? null,
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'status' => 'active',
-            'locale' => 'tr',
-            'timezone' => 'Europe/Istanbul',
-            'email_verified_at' => now(),
-        ]);
+        // Check if a soft-deleted user with same email exists → restore
+        $trashedUser = User::withTrashed()->where('email', $data['email'])->whereNotNull('deleted_at')->first();
+
+        if ($trashedUser) {
+            $trashedUser->restore();
+            $trashedUser->update([
+                'name' => $data['name'],
+                'surname' => $data['surname'] ?? null,
+                'password' => \Illuminate\Support\Facades\Hash::make($data['password']),
+                'status' => 'active',
+                'locale' => 'tr',
+                'timezone' => 'Europe/Istanbul',
+                'email_verified_at' => now(),
+            ]);
+            $newUser = $trashedUser;
+        } else {
+            $newUser = User::create([
+                'name' => $data['name'],
+                'surname' => $data['surname'] ?? null,
+                'email' => $data['email'],
+                'password' => \Illuminate\Support\Facades\Hash::make($data['password']),
+                'status' => 'active',
+                'locale' => 'tr',
+                'timezone' => 'Europe/Istanbul',
+                'email_verified_at' => now(),
+            ]);
+        }
 
         $newUser->assignRole($role);
 
