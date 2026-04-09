@@ -94,7 +94,7 @@ class VegaReportService
         $totalSessions = $sessions->count();
         $completedSessions = $sessions->where('status', 'COMPLETED')->count();
         $totalDuration = $sessions->sum(fn($s) => $s->duration_seconds);
-        $avgScore = $sessions->whereNotNull('score')->avg('score');
+        $avgScore = (float) $sessions->whereNotNull('score')->avg('score');
 
         // Per-user stats
         $perUser = $sessions->groupBy('user_id');
@@ -240,11 +240,11 @@ class VegaReportService
         )->whereNotNull('score')->avg('score');
 
         return [
-            'total_progress'   => $empathyScore !== null ? round($empathyScore, 1) : 0,
+            'total_progress'   => $empathyScore !== null ? round((float) $empathyScore, 1) : 0,
             'total_completed'  => $sessions->where('status', 'COMPLETED')->count(),
             'total_sessions'   => $totalSessions,
             'total_duration'   => $totalDuration,
-            'avg_score'        => $empathyScore ? round($empathyScore, 1) : null,
+            'avg_score'        => $empathyScore ? round((float) $empathyScore, 1) : null,
             'user_stats'       => $userStats,
             'module_stats'     => collect(),
             'sessions_by_day'  => $this->getSessionsByDay($vegaUserIds, 'lecturer'),
@@ -634,7 +634,7 @@ class VegaReportService
         return [
             'role_galaxy' => [
                 'sessions'        => $simSessions->count(),
-                'avg_score'       => $simAvgScore ? round($simAvgScore, 1) : null,
+                'avg_score'       => $simAvgScore ? round((float) $simAvgScore, 1) : null,
                 'active_students' => $simSessions->pluck('user_id')->unique()->count(),
                 'completed'       => $simSessions->where('status', 'COMPLETED')->count(),
             ],
