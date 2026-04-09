@@ -25,4 +25,9 @@ class WsStepProgress extends Model
     {
         return $this->belongsTo(WsMember::class, 'member_id');
     }
+
+    public function step(): BelongsTo
+    {
+        return $this->belongsTo(WsStep::class, 'step_external_id', 'external_id');
+    }
 }
