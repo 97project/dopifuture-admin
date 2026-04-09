@@ -1093,11 +1093,10 @@ new Chart(document.getElementById('sessionsChart'), {
                 </select>
             </div>
 
-            {{-- Student (single select) --}}
+            {{-- Student (multiple select) --}}
             <div class="figma-field">
                 <label class="figma-label">Student</label>
-                <select name="user_ids[]" class="figma-select" id="wsStudentSelect" required>
-                    <option value="">Please select</option>
+                <select name="user_ids[]" class="figma-select" id="wsStudentSelect" required multiple>
                     @foreach($ws_students ?? [] as $student)
                         <option value="{{ $student->id }}" data-grade="{{ $student->grade ?? '' }}">{{ $student->name }} {{ $student->surname }}</option>
                     @endforeach
