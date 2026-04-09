@@ -173,7 +173,7 @@ class PortalReportController extends Controller
                     ->with(['players.player.user'])
                     ->get();
 
-                $players = $sessions->flatMap->players->map(function ($sp) {
+                $activeSessionPlayers = $sessions->flatMap->players->map(function ($sp) {
                     $u = $sp->player->user ?? null;
                     return (object)[
                         'id' => $u ? $u->id : $sp->player_id,
@@ -182,7 +182,25 @@ class PortalReportController extends Controller
                         'avatar' => null,
                         'classes' => $u ? $u->classes->map(fn($c) => (object)['name' => $c->name]) : collect(),
                     ];
-                })->unique('id');
+                });
+
+                // Atanıp henüz seansa başlamayanları da dahil et
+                $assignedPlayers = \App\Models\MissionWay\MwAssignmentPlayer::whereHas('assignment', fn($q) => $q->where('simulation_id', $sim->id))
+                    ->with('player.user.classes')
+                    ->whereHas('player', fn($q) => $q->whereIn('user_id', $panelUserIds))
+                    ->get()
+                    ->map(function ($ap) {
+                        $u = $ap->player->user ?? null;
+                        return (object)[
+                            'id' => $u ? $u->id : $ap->player_id,
+                            'name' => $u ? $u->name : $ap->player->name,
+                            'surname' => $u ? $u->surname : $ap->player->surname,
+                            'avatar' => null,
+                            'classes' => $u ? $u->classes->map(fn($c) => (object)['name' => $c->name]) : collect(),
+                        ];
+                    });
+
+                $players = $activeSessionPlayers->concat($assignedPlayers)->unique('id');
 
                 $minCreated = $sessions->min('created_at');
                 $assignedDate = $minCreated ? \Carbon\Carbon::parse($minCreated)->format('d/m/Y') : '-';
@@ -220,8 +238,12 @@ class PortalReportController extends Controller
             foreach ($wsSims as $wsSim) {
                 $stepCount = $wsSim->steps->count();
 
-                // Real completion from member step_progress for this specific class
-                $members = WsMember::where('application_id', $wsSim->application_id)
+                // Fix: Sadece bu simülasyona atanmış veya simülasyonda adım ilerlemesi olan öğrencileri getir (eski kod tüm öğrencileri getiriyordu)
+                $wsAssignedMemberIds = \App\Models\WsAssignmentMember::whereHas('assignment', fn($q) => $q->where('simulation_id', $wsSim->id))->pluck('member_id');
+                $wsPlayedMemberIds = \App\Models\WsStepProgress::whereHas('step', fn($q) => $q->where('simulation_id', $wsSim->id))->pluck('member_id');
+                $targetMemberIds = $wsAssignedMemberIds->concat($wsPlayedMemberIds)->unique();
+
+                $members = WsMember::whereIn('id', $targetMemberIds)
                     ->whereIn('user_id', $panelUserIds)
                     ->with(['user', 'progress'])
                     ->get();
