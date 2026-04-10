@@ -140,9 +140,13 @@ class HarvestAppData extends Command
         $this->line('  👥 Oyuncular...');
         $this->harvestMwPlayers($app, $connector);
 
-        // 4. Tüm session'ları toplu çek (session+session_players only — paths/choices are separate bulk ops)
+        // 4. Tüm session'ları toplu çek
         $this->line('  🎮 Oturumlar...');
         $this->harvestMwAllSessions($connector);
+
+        // 4.5 BULK: Tüm session player'ları (tek paginated çağrı)
+        $this->line('  🎭 Oturum Oyuncuları...');
+        $this->harvestMwAllSessionPlayers($connector);
 
         // 5. BULK: Tüm paths (filtresiz, tek paginated çağrı)
         $this->line('  🛤️  Yollar...');
@@ -378,30 +382,6 @@ class HarvestAppData extends Command
                     ]
                 );
                 $this->synced++;
-
-                // Session players → mw_session_players
-                $sessionPlayers = [];
-                try {
-                    $sessionPlayers = $connector->getSessionPlayers($sessExtId) ?? [];
-                } catch (\Throwable $e) {}
-
-                foreach ($sessionPlayers as $sp) {
-                    $playerId = $sp['playerId'] ?? null;
-                    if (!$playerId) continue;
-
-                    $mwPlayer = MwPlayer::find($playerId);
-                    if (!$mwPlayer) continue;
-
-                    $roleId = $sp['roleId'] ?? null;
-
-                    MwSessionPlayer::updateOrCreate(
-                        ['simulation_session_id' => $mwSession->id, 'player_id' => $mwPlayer->id],
-                        [
-                            'role_id'   => $roleId,
-                            'joined_at' => isset($sp['joinedAt']) ? \Carbon\Carbon::parse($sp['joinedAt']) : now(),
-                        ]
-                    );
-                }
             }
         } catch (\Throwable $e) {
             $this->failed++;
