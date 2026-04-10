@@ -20,19 +20,6 @@ class MwMetricService
     /**
      * Enrich a session's final_metrics JSON to display-ready metric array.
      *
-     * Input:  {"health":{"base":100,"change":-25,"current":75}, "resource":{...}, ...}
-     *   or:   {"health":75, "resource":60, ...}
-     *
-     * Output: [
-     *   ['key'=>'health', 'name'=>'Health Point', 'current'=>75, 'base'=>100,
-     *    'change'=>-25, 'icon'=>'❤️', 'color'=>'#EF4444', 'trend'=>'down',
-     *    'categoryKey'=>'moderate', 'categoryColor'=>'#F59E0B'],
-     *   ...
-     * ]
-     */
-    /**
-     * Enrich a session's final_metrics JSON to display-ready metric array.
-     *
      * Input:  [{key:"health", base:100, current:75, change:-25}, ...]  (array-of-objects from API)
      *   or:   {"health":{base:100, current:75, change:-25}, ...}        (associative)
      *   or:   {"health":75, ...}                                        (scalar)

@@ -1093,14 +1093,19 @@ new Chart(document.getElementById('sessionsChart'), {
                 </select>
             </div>
 
-            {{-- Student (multiple select) --}}
+            {{-- Student (checkbox list — same design as MW) --}}
             <div class="figma-field">
-                <label class="figma-label">Student</label>
-                <select name="user_ids[]" class="figma-select" id="wsStudentSelect" required multiple>
-                    @foreach($ws_students ?? [] as $student)
-                        <option value="{{ $student->id }}" data-grade="{{ $student->grade ?? '' }}">{{ $student->name }} {{ $student->surname }}</option>
-                    @endforeach
-                </select>
+                <label class="figma-label">Student <span id="wsSelectedCount" style="font-weight:500;color:#3B5BDB;font-size:12px;"></span></label>
+                <div class="figma-student-list" id="wsStudentList">
+                    @forelse($ws_students ?? [] as $student)
+                    <label class="figma-student-item">
+                        <input type="checkbox" name="user_ids[]" value="{{ $student->id }}" class="ws-student-cb" data-grade="{{ $student->grade ?? '' }}">
+                        <span>{{ $student->name }} {{ $student->surname }}</span>
+                    </label>
+                    @empty
+                    <div style="padding:16px;text-align:center;color:#9CA3AF;font-size:13px;">No students with WS account found</div>
+                    @endforelse
+                </div>
             </div>
 
             {{-- Business (simulation) --}}
@@ -1354,29 +1359,51 @@ new Chart(document.getElementById('sessionsChart'), {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
-    // ═══ WS: Grade → Student filter (select dropdown) ═══
+    // ═══ WS: Grade → Student filter (checkbox list — same as MW) ═══
     (function() {
         var gradeSelect = document.getElementById('wsGradeSelect');
-        var studentSelect = document.getElementById('wsStudentSelect');
-        if (!gradeSelect || !studentSelect) return;
+        var studentList = document.getElementById('wsStudentList');
+        if (!gradeSelect || !studentList) return;
 
-        var allOptions = Array.from(studentSelect.options).slice(1);
+        var allItems = Array.from(studentList.querySelectorAll('.figma-student-item'));
 
         gradeSelect.addEventListener('change', function() {
             var grade = this.value;
-            studentSelect.innerHTML = '';
-            var placeholder = document.createElement('option');
-            placeholder.value = '';
-            placeholder.textContent = 'Please select';
-            studentSelect.appendChild(placeholder);
-
-            allOptions.forEach(function(opt) {
-                if (!grade || opt.getAttribute('data-grade') === grade || !opt.getAttribute('data-grade')) {
-                    studentSelect.appendChild(opt.cloneNode(true));
+            allItems.forEach(function(item) {
+                var cb = item.querySelector('input[type="checkbox"]');
+                var cbGrade = cb ? cb.getAttribute('data-grade') : '';
+                if (!grade || cbGrade === grade || !cbGrade) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                    if (cb) cb.checked = false;
                 }
             });
+            updateWsSelectedCount();
         });
     })();
+
+    // ═══ WS: Selected count display ═══
+    function updateWsSelectedCount() {
+        var count = document.querySelectorAll('.ws-student-cb:checked').length;
+        var el = document.getElementById('wsSelectedCount');
+        if (el) el.textContent = count > 0 ? '— ' + count + ' selected' : '';
+    }
+    document.querySelectorAll('.ws-student-cb').forEach(function(cb) {
+        cb.addEventListener('change', updateWsSelectedCount);
+    });
+
+    // WS form submit validation
+    var wsForm = document.getElementById('wsAssignForm');
+    if (wsForm) {
+        wsForm.addEventListener('submit', function(e) {
+            var checked = document.querySelectorAll('.ws-student-cb:checked').length;
+            if (checked === 0) {
+                e.preventDefault();
+                alert('Please select at least one student.');
+            }
+        });
+    }
 
     // ═══ MW: Grade → Student filter (checkbox list) ═══
     (function() {
