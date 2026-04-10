@@ -189,14 +189,13 @@ class HarvestAppData extends Command
                             $simId = $this->resolveSimulationIdForVersion($versionId, $connector);
                             DB::statement('SET FOREIGN_KEY_CHECKS=0');
                             RefSimulationVersion::updateOrCreate(
+                                ['id' => $versionId],
                                 [
                                     'simulation_id'  => $simId,
-                                    'version_number' => $versionId
-                                ],
-                                [
+                                    'version_number' => $versionId,
                                     'version_code'   => "v{$versionId}",
                                     'status'         => 'published',
-                                    'is_default'     => true,
+                                    'is_default'     => false,
                                 ]
                             );
                             DB::statement('SET FOREIGN_KEY_CHECKS=1');

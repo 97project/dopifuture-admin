@@ -30,11 +30,24 @@ class MwMetricService
      *   ...
      * ]
      */
+    /**
+     * Enrich a session's final_metrics JSON to display-ready metric array.
+     *
+     * Input:  [{key:"health", base:100, current:75, change:-25}, ...]  (array-of-objects from API)
+     *   or:   {"health":{base:100, current:75, change:-25}, ...}        (associative)
+     *   or:   {"health":75, ...}                                        (scalar)
+     *
+     * Output: [['key'=>'health', 'name'=>'Health Point', 'current'=>75, ...], ...]
+     */
     public function enrichSessionMetrics(?array $finalMetrics, ?int $versionId = null): array
     {
         if (!$finalMetrics || empty($finalMetrics)) {
             return [];
         }
+
+        // Normalize: if array-of-objects (numeric keys with 'key' inside), re-key by key
+        $normalized = $this->normalizeMetrics($finalMetrics);
+        if (empty($normalized)) return [];
 
         $definitions = $this->getDefinitions();
 
@@ -45,7 +58,10 @@ class MwMetricService
             : collect();
 
         $result = [];
-        foreach ($finalMetrics as $key => $metricData) {
+        foreach ($normalized as $key => $metricData) {
+            // Map 'compliance' → 'adaptation' for UI consistency
+            $displayKey = ($key === 'compliance') ? 'adaptation' : $key;
+
             // Normalize: value can be array {base, change, current} or scalar
             if (is_array($metricData)) {
                 $current = $metricData['current'] ?? $metricData['value'] ?? 0;
@@ -57,7 +73,7 @@ class MwMetricService
                 $change = 0;
             }
 
-            $def = $definitions->get($key);
+            $def = $definitions->get($key) ?? $definitions->get($displayKey);
 
             // Band matching: find band where current falls within [minValue, maxValue]
             $matchedBand = $bands->first(function ($band) use ($key, $current) {
@@ -68,22 +84,46 @@ class MwMetricService
             });
 
             $result[] = [
-                'key'           => $key,
-                'name'          => $def?->name ?? (ucfirst($key) . ' Point'),
+                'key'           => $displayKey,
+                'name'          => $metricData['name'] ?? $def?->name ?? (ucfirst($displayKey) . ' Point'),
                 'current'       => round($current),
                 'base'          => round($base),
                 'change'        => round($change),
-                'icon'          => $def?->icon ?? '📊',
-                'color'         => $def?->color ?? '#6B7280',
-                'unitLabel'     => $def?->unit_label ?? null,
+                'icon'          => $metricData['icon'] ?? $def?->icon ?? '📊',
+                'color'         => $metricData['color'] ?? $def?->color ?? '#6B7280',
+                'unitLabel'     => $metricData['unitLabel'] ?? $def?->unit_label ?? null,
                 'trend'         => $change >= 0 ? 'up' : 'down',
-                'categoryKey'   => $matchedBand?->category?->key ?? null,
-                'categoryColor' => $matchedBand?->category?->color ?? null,
+                'categoryKey'   => $metricData['categoryKey'] ?? $matchedBand?->category?->key ?? null,
+                'categoryColor' => $metricData['categoryColor'] ?? $matchedBand?->category?->color ?? null,
                 'categoryLabel' => $matchedBand?->category?->label ?? null,
             ];
         }
 
         return $result;
+    }
+
+    /**
+     * Normalize metric data from any format to associative {key => data}.
+     *
+     * Handles:
+     *   [{key:"health", current:75, ...}, ...]  → {health: {current:75,...}, ...}
+     *   {health: {current:75}, ...}              → passthrough
+     *   {health: 75, ...}                        → passthrough
+     */
+    private function normalizeMetrics(array $metrics): array
+    {
+        // Check if it's array-of-objects (numeric keys, each item has 'key')
+        if (isset($metrics[0]) && is_array($metrics[0]) && isset($metrics[0]['key'])) {
+            $normalized = [];
+            foreach ($metrics as $item) {
+                $key = $item['key'] ?? null;
+                if (!$key) continue;
+                $normalized[$key] = $item;
+            }
+            return $normalized;
+        }
+
+        return $metrics;
     }
 
     /**
@@ -129,12 +169,20 @@ class MwMetricService
             $fm = $session->final_metrics ?? [];
             if (empty($fm)) continue;
 
+            // Normalize from any format
+            $normalized = $this->normalizeMetrics($fm);
+            if (empty($normalized)) continue;
+
             $count++;
-            foreach (['health', 'resource', 'ethics', 'adaptation'] as $mk) {
-                $val = is_array($fm[$mk] ?? null)
-                    ? ($fm[$mk]['current'] ?? 0)
-                    : ($fm[$mk] ?? 0);
-                $accumulator[$mk][] = $val;
+            foreach (['health', 'resource', 'ethics', 'compliance', 'adaptation', 'overall'] as $mk) {
+                if (!isset($normalized[$mk])) continue;
+                $val = is_array($normalized[$mk])
+                    ? ($normalized[$mk]['current'] ?? 0)
+                    : ($normalized[$mk] ?? 0);
+
+                // Map compliance → adaptation
+                $displayKey = ($mk === 'compliance') ? 'adaptation' : $mk;
+                $accumulator[$displayKey][] = $val;
             }
         }
 
