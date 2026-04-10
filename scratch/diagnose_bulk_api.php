@@ -1,0 +1,14 @@
+<?php
+require __DIR__ . '/../vendor/autoload.php';
+$app = require_once __DIR__ . '/../bootstrap/app.php';
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel->bootstrap();
+
+$apiKey = config('connectors.mission_way.api_key');
+$baseUrl = config('connectors.mission_way.base_url');
+
+$resProfile = \Illuminate\Support\Facades\Http::withToken($apiKey)->withHeaders(['x-api-key'=>$apiKey])->get($baseUrl . '/v1/player-profiles', ['limit'=>2]);
+echo "Profiles: " . $resProfile->status() . "\n";
+
+$resProg = \Illuminate\Support\Facades\Http::withToken($apiKey)->withHeaders(['x-api-key'=>$apiKey])->get($baseUrl . '/v1/player-progresses', ['limit'=>2]);
+echo "Progresses: " . $resProg->status() . "\n";
