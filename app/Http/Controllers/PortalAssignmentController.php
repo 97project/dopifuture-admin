@@ -4,13 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Connectors\MissionWayConnector;
 use App\Connectors\WayStartupConnector;
+use App\Models\MissionWay\MwAssignment;
+use App\Models\MissionWay\MwAssignmentPlayer;
 use App\Models\MissionWay\MwPlayer;
 use App\Models\MissionWay\RefSimulation;
 use App\Models\User;
+use App\Models\WsAssignment;
+use App\Models\WsAssignmentMember;
 use App\Models\WsMember;
 use App\Models\WsSimulation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -99,6 +104,9 @@ class PortalAssignmentController extends Controller
             $response = $connector->createAssignment($data);
 
             if ($response->successful()) {
+                // Sync: re-fetch ALL assignments from API → local DB (single source of truth)
+                $this->syncMwAssignmentsFromApi($connector);
+
                 return redirect()->back()->with('success', 'New Mission added successfully.');
             }
 
@@ -178,6 +186,9 @@ class PortalAssignmentController extends Controller
             $response = $connector->createAssignment($data);
 
             if ($response->successful()) {
+                // Sync: re-fetch ALL assignments from API → local DB (single source of truth)
+                $this->syncWsAssignmentsFromApi($connector);
+
                 return redirect()->back()->with('success', 'New Assignment added successfully.');
             }
 
@@ -242,6 +253,99 @@ class PortalAssignmentController extends Controller
             return redirect()->back()->with('error', "Üye çıkarılamadı (HTTP {$response->status()})");
         } catch (\Throwable $e) {
             return redirect()->back()->with('error', 'İşlem hatası: ' . $e->getMessage());
+        }
+    }
+
+    /* ── API-driven sync helpers ─────────────────────── */
+
+    /**
+     * Fetch ALL MW assignments from the API and sync to local DB.
+     * Used after creating/deleting assignments to ensure local DB reflects API truth.
+     */
+    private function syncMwAssignmentsFromApi(MissionWayConnector $connector): void
+    {
+        try {
+            $items = $connector->getAssignments();
+            if (!is_array($items)) return;
+
+            foreach ($items as $item) {
+                $id = $item['id'] ?? null;
+                if (!$id) continue;
+
+                $sessionId = $item['simulationSessionId'] ?? null;
+                if ($sessionId && !\App\Models\MissionWay\MwSimulationSession::find($sessionId)) {
+                    $sessionId = null;
+                }
+
+                $assignment = MwAssignment::updateOrCreate(
+                    ['id' => $id],
+                    [
+                        'simulation_id'          => $item['simulationId'] ?? null,
+                        'simulation_session_id'  => $sessionId,
+                        'grade'                  => $item['grade'] ?? null,
+                        'deadline'               => isset($item['deadline']) ? \Carbon\Carbon::parse($item['deadline']) : null,
+                        'status'                 => $item['status'] ?? 'active',
+                        'created_by'             => $item['createdBy'] ?? null,
+                    ]
+                );
+
+                // Sync assignment players
+                $players = $item['players'] ?? [];
+                if (is_array($players)) {
+                    foreach ($players as $ap) {
+                        $playerId = $ap['playerId'] ?? $ap['id'] ?? null;
+                        if (!$playerId) continue;
+                        MwAssignmentPlayer::updateOrCreate(
+                            ['assignment_id' => $assignment->id, 'player_id' => $playerId],
+                            ['status' => $ap['status'] ?? 'assigned']
+                        );
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('[PortalAssignment] MW sync from API failed', ['e' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Fetch ALL WS assignments from the API and sync to local DB.
+     */
+    private function syncWsAssignmentsFromApi(WayStartupConnector $connector): void
+    {
+        try {
+            $items = $connector->getAssignments();
+            if (!is_array($items)) return;
+
+            foreach ($items as $item) {
+                $id = $item['id'] ?? null;
+                if (!$id) continue;
+
+                $assignment = WsAssignment::updateOrCreate(
+                    ['id' => $id],
+                    [
+                        'simulation_id' => $item['simulationId'] ?? null,
+                        'name'          => $item['name'] ?? 'Assignment',
+                        'description'   => $item['description'] ?? null,
+                        'due_date'      => isset($item['dueDate']) ? \Carbon\Carbon::parse($item['dueDate']) : null,
+                        'status'        => $item['status'] ?? 'active',
+                    ]
+                );
+
+                // Sync assignment members
+                $members = $item['members'] ?? [];
+                if (is_array($members)) {
+                    foreach ($members as $am) {
+                        $memberId = $am['memberId'] ?? $am['id'] ?? null;
+                        if (!$memberId) continue;
+                        WsAssignmentMember::updateOrCreate(
+                            ['assignment_id' => $assignment->id, 'member_id' => $memberId],
+                            ['status' => $am['status'] ?? 'assigned']
+                        );
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('[PortalAssignment] WS sync from API failed', ['e' => $e->getMessage()]);
         }
     }
 }

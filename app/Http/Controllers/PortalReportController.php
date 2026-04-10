@@ -174,11 +174,11 @@ class PortalReportController extends Controller
                     ->get();
 
                 $activeSessionPlayers = $sessions->flatMap->players->map(function ($sp) {
-                    $u = $sp->player->user ?? null;
+                    $u = $sp->player?->user ?? null;
                     return (object)[
                         'id' => $u ? $u->id : $sp->player_id,
-                        'name' => $u ? $u->name : $sp->player->name,
-                        'surname' => $u ? $u->surname : $sp->player->surname,
+                        'name' => $u ? $u->name : ($sp->player?->name ?? 'Unknown'),
+                        'surname' => $u ? $u->surname : ($sp->player?->surname ?? ''),
                         'avatar' => null,
                         'classes' => $u ? $u->classes->map(fn($c) => (object)['name' => $c->name]) : collect(),
                     ];
@@ -190,11 +190,11 @@ class PortalReportController extends Controller
                     ->whereHas('player', fn($q) => $q->whereIn('user_id', $panelUserIds))
                     ->get()
                     ->map(function ($ap) {
-                        $u = $ap->player->user ?? null;
+                        $u = $ap->player?->user ?? null;
                         return (object)[
                             'id' => $u ? $u->id : $ap->player_id,
-                            'name' => $u ? $u->name : $ap->player->name,
-                            'surname' => $u ? $u->surname : $ap->player->surname,
+                            'name' => $u ? $u->name : ($ap->player?->name ?? 'Unknown'),
+                            'surname' => $u ? $u->surname : ($ap->player?->surname ?? ''),
                             'avatar' => null,
                             'classes' => $u ? $u->classes->map(fn($c) => (object)['name' => $c->name]) : collect(),
                         ];
@@ -594,7 +594,7 @@ class PortalReportController extends Controller
         ];
 
         $students = $sessions->flatMap->players->map(function ($sp) use ($enriched) {
-            $u = $sp->player->user ?? null;
+            $u = $sp->player?->user ?? null;
             // Per-student metrics from the session they participated in
             $sessionMetrics = $sp->session?->final_metrics ?? [];
             $studentEnriched = !empty($sessionMetrics)
@@ -603,9 +603,9 @@ class PortalReportController extends Controller
             $studentMetrics = $this->mwMetricService->getAllMetricValues($studentEnriched);
 
             return (object)[
-                'name' => $u ? $u->name : $sp->player->name,
-                'surname' => $u ? $u->surname : $sp->player->surname,
-                'role' => $sp->role->name ?? 'Participant',
+                'name' => $u ? $u->name : ($sp->player?->name ?? 'Unknown'),
+                'surname' => $u ? $u->surname : ($sp->player?->surname ?? ''),
+                'role' => $sp->role?->name ?? 'Participant',
                 'grade' => '-',
                 'completed' => $sp->session?->status === 'completed' ? 1 : 0,
                 'total_missions' => 1,
