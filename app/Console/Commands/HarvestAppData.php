@@ -51,7 +51,7 @@ class HarvestAppData extends Command
 
     public function handle(): int
     {
-        $startTime = now();
+        $startTime = microtime(true);
         $this->info('🏗️ Uygulama verileri toplanıyor...');
         $this->newLine();
 
@@ -86,7 +86,7 @@ class HarvestAppData extends Command
             $this->newLine();
         }
 
-        $elapsed = now()->diffInSeconds($startTime);
+        $elapsed = round(microtime(true) - $startTime, 1);
         $this->table(['Metrik', 'Değer'], [
             ['Sync edilen', $this->synced],
             ['Başarısız', $this->failed],
@@ -107,6 +107,7 @@ class HarvestAppData extends Command
         $this->harvestMwMetricDefinitions($connector);
         $this->harvestMwMetricBandCategories($connector);
         $this->harvestMwRoles($connector);
+        $this->harvestMwLanguages($connector);
 
         // 2. Simülasyonları çek → ref_simulations
         $this->line('  📋 Simülasyonlar...');
@@ -132,19 +133,27 @@ class HarvestAppData extends Command
             $this->synced++;
         }
 
-        // 3. Tüm oyuncuları çek (+ profile + progress) — ÖNCE oyuncular, sonra session player eşleşmesi
+        // 3. Tüm oyuncuları çek (+ profile + progress)
         $this->line('  👥 Oyuncular...');
         $this->harvestMwPlayers($app, $connector);
 
-        // 4. Tüm session'ları toplu çek
+        // 4. Tüm session'ları toplu çek (session+session_players only — paths/choices are separate bulk ops)
         $this->line('  🎮 Oturumlar...');
         $this->harvestMwAllSessions($connector);
 
-        // 5. Assignments
+        // 5. BULK: Tüm paths (filtresiz, tek paginated çağrı)
+        $this->line('  🛤️  Yollar...');
+        $this->harvestMwAllPaths($connector);
+
+        // 6. BULK: Tüm choices (filtresiz, tek paginated çağrı)
+        $this->line('  🎯 Seçimler...');
+        $this->harvestMwAllChoices($connector);
+
+        // 7. Assignments
         $this->line('  📝 Görevler...');
         $this->harvestMwAssignments($connector);
 
-        // 6. Translations (tüm simulation_path'ler için)
+        // 8. Translations
         $this->line('  🌐 Çeviriler...');
         $this->harvestMwTranslations($connector);
     }
@@ -158,6 +167,7 @@ class HarvestAppData extends Command
             $page = 1;
             $totalSessions = 0;
             $discoveredVersionIds = [];
+            $allSessionPlayers = [];
 
             do {
                 $sessionsResp = $connector->getSimulationSessions([
@@ -177,27 +187,26 @@ class HarvestAppData extends Command
                         $existingVersion = RefSimulationVersion::find($versionId);
                         if (!$existingVersion) {
                             $simId = $this->resolveSimulationIdForVersion($versionId, $connector);
-                            \DB::statement('SET FOREIGN_KEY_CHECKS=0');
+                            DB::statement('SET FOREIGN_KEY_CHECKS=0');
                             RefSimulationVersion::updateOrCreate(
                                 [
                                     'simulation_id'  => $simId,
                                     'version_number' => $versionId
                                 ],
                                 [
-                                    // Make sure we update/create with the passed ID if it's new
                                     'version_code'   => "v{$versionId}",
                                     'status'         => 'published',
                                     'is_default'     => true,
                                 ]
                             );
-                            \DB::statement('SET FOREIGN_KEY_CHECKS=1');
+                            DB::statement('SET FOREIGN_KEY_CHECKS=1');
                             $this->synced++;
                         }
                         $discoveredVersionIds[$versionId] = true;
                     }
 
-                    \DB::statement('SET FOREIGN_KEY_CHECKS=0');
-                    $mwSession = MwSimulationSession::updateOrCreate(
+                    DB::statement('SET FOREIGN_KEY_CHECKS=0');
+                    MwSimulationSession::updateOrCreate(
                         ['id' => $sessExtId],
                         [
                             'simulation_version_id' => $versionId,
@@ -212,61 +221,27 @@ class HarvestAppData extends Command
                             'abandoned_at'          => isset($sess['abandonedAt']) ? \Carbon\Carbon::parse($sess['abandonedAt']) : null,
                         ]
                     );
-                    \DB::statement('SET FOREIGN_KEY_CHECKS=1');
+                    DB::statement('SET FOREIGN_KEY_CHECKS=1');
                     $this->synced++;
                     $totalSessions++;
 
-                    // Session players
+                    // Collect session players for batch upsert
                     try {
                         $sessionPlayers = $connector->getSessionPlayers($sessExtId) ?? [];
                         foreach ($sessionPlayers as $sp) {
                             $playerId = $sp['playerId'] ?? null;
                             if (!$playerId) continue;
-
-                            $mwPlayer = MwPlayer::find($playerId);
-                            if (!$mwPlayer) continue;
-
-                            MwSessionPlayer::updateOrCreate(
-                                ['simulation_session_id' => $mwSession->id, 'player_id' => $mwPlayer->id],
-                                [
-                                    'role_id'   => $sp['roleId'] ?? null,
-                                    'joined_at' => isset($sp['joinedAt']) ? \Carbon\Carbon::parse($sp['joinedAt']) : now(),
-                                ]
-                            );
+                            $allSessionPlayers[] = [
+                                'simulation_session_id' => $sessExtId,
+                                'player_id'             => $playerId,
+                                'role_id'               => $sp['roleId'] ?? null,
+                                'joined_at'             => isset($sp['joinedAt']) ? \Carbon\Carbon::parse($sp['joinedAt'])->toDateTimeString() : now()->toDateTimeString(),
+                                'created_at'            => now()->toDateTimeString(),
+                                'updated_at'            => now()->toDateTimeString(),
+                            ];
                         }
-                    } catch (\Throwable $e) {}
-
-                    // Player choices
-                    try {
-                        $choices = $connector->getPlayerChoices($sessExtId);
-                        if (is_array($choices)) {
-                            foreach ($choices as $choice) {
-                                $choicePlayerId = $choice['playerId'] ?? null;
-                                if (!$choicePlayerId) continue;
-
-                                MwPlayerChoice::updateOrCreate(
-                                    ['id' => $choice['id'] ?? null],
-                                    [
-                                        'player_id'              => $choicePlayerId,
-                                        'simulation_session_id'  => $mwSession->id,
-                                        'previous_path_id'       => $choice['previousPathId'] ?? null,
-                                        'simulation_path_id'     => $choice['simulationPathId'] ?? null,
-                                        'selected_path_id'       => $choice['selectedPathId'] ?? null,
-                                        'decided_path_id'        => $choice['decidedPathId'] ?? null,
-                                        'response_time_seconds'  => $choice['responseTimeSeconds'] ?? null,
-                                        'points_earned'          => $choice['pointsEarned'] ?? 0,
-                                        'is_correct'             => $choice['isCorrect'] ?? null,
-                                        'metrics_before'         => $choice['metricsBefore'] ?? null,
-                                        'metrics_after'          => $choice['metricsAfter'] ?? null,
-                                    ]
-                                );
-                            }
-                        }
-                    } catch (\Throwable $e) {}
-
-                    // Simulation paths (once per version)
-                    if ($versionId && !RefSimulationPath::where('simulation_version_id', $versionId)->exists()) {
-                        $this->harvestMwPaths($connector, $versionId);
+                    } catch (\Throwable $e) {
+                        // Log but don't fail
                     }
                 }
 
@@ -274,10 +249,75 @@ class HarvestAppData extends Command
                 $pageCount = $sessionsResp['pageCount'] ?? 1;
             } while ($page <= $pageCount && count($sessions) > 0);
 
+            // Batch upsert all session players
+            if (!empty($allSessionPlayers)) {
+                DB::statement('SET FOREIGN_KEY_CHECKS=0');
+                foreach (array_chunk($allSessionPlayers, 100) as $chunk) {
+                    DB::table('mw_session_players')->upsert(
+                        $chunk,
+                        ['simulation_session_id', 'player_id'],
+                        ['role_id', 'joined_at', 'updated_at']
+                    );
+                }
+                DB::statement('SET FOREIGN_KEY_CHECKS=1');
+                $spCount = count($allSessionPlayers);
+                $this->synced += $spCount;
+                $this->info("    ✅ SessionPlayers: {$spCount}");
+            }
+
             $this->info("    ✅ Sessions: {$totalSessions}");
         } catch (\Throwable $e) {
             $this->failed++;
             $this->warn("    ⚠️ Sessions: {$e->getMessage()}");
+        }
+    }
+
+    /**
+     * Bulk fetch ALL session-players and upsert.
+     */
+    private function harvestMwAllSessionPlayers(MissionWayConnector $connector): void
+    {
+        try {
+            $page = 1;
+            $total = 0;
+            do {
+                $result = $connector->apiGetPublic('/v1/session-players', ['limit' => 500, 'page' => $page]);
+                $items = $result['data'] ?? [];
+
+                $batch = [];
+                foreach ($items as $sp) {
+                    $playerId = $sp['playerId'] ?? null;
+                    $sessionId = $sp['simulationSessionId'] ?? null;
+                    if (!$playerId || !$sessionId) continue;
+
+                    $batch[] = [
+                        'simulation_session_id' => $sessionId,
+                        'player_id'             => $playerId,
+                        'role_id'               => $sp['roleId'] ?? null,
+                        'joined_at'             => isset($sp['joinedAt']) ? \Carbon\Carbon::parse($sp['joinedAt']) : now(),
+                        'created_at'            => now(),
+                        'updated_at'            => now(),
+                    ];
+                }
+
+                if (!empty($batch)) {
+                    DB::statement('SET FOREIGN_KEY_CHECKS=0');
+                    DB::table('mw_session_players')->upsert(
+                        $batch,
+                        ['simulation_session_id', 'player_id'],
+                        ['role_id', 'joined_at', 'updated_at']
+                    );
+                    DB::statement('SET FOREIGN_KEY_CHECKS=1');
+                    $total += count($batch);
+                }
+
+                $pageCount = $result['pageCount'] ?? 1;
+                $page++;
+            } while ($page <= $pageCount && count($items) > 0);
+
+            $this->synced += $total;
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('[HarvestAppData] SessionPlayers bulk error', ['e' => $e->getMessage()]);
         }
     }
 
@@ -356,39 +396,6 @@ class HarvestAppData extends Command
                         ]
                     );
                 }
-
-                // Player choices → mw_player_choices
-                try {
-                    $choices = $connector->getPlayerChoices($sessExtId);
-                    if (is_array($choices)) {
-                        foreach ($choices as $choice) {
-                            $choicePlayerId = $choice['playerId'] ?? null;
-                            if (!$choicePlayerId) continue;
-
-                            MwPlayerChoice::updateOrCreate(
-                                ['id' => $choice['id'] ?? null],
-                                [
-                                    'player_id'              => $choicePlayerId,
-                                    'simulation_session_id'  => $mwSession->id,
-                                    'previous_path_id'       => $choice['previousPathId'] ?? null,
-                                    'simulation_path_id'     => $choice['simulationPathId'] ?? null,
-                                    'selected_path_id'       => $choice['selectedPathId'] ?? null,
-                                    'decided_path_id'        => $choice['decidedPathId'] ?? null,
-                                    'response_time_seconds'  => $choice['responseTimeSeconds'] ?? null,
-                                    'points_earned'          => $choice['pointsEarned'] ?? 0,
-                                    'is_correct'             => $choice['isCorrect'] ?? null,
-                                    'metrics_before'         => $choice['metricsBefore'] ?? null,
-                                    'metrics_after'          => $choice['metricsAfter'] ?? null,
-                                ]
-                            );
-                        }
-                    }
-                } catch (\Throwable $e) {}
-
-                // Simulation paths (bir kez version başına)
-                if ($versionId && !RefSimulationPath::where('simulation_version_id', $versionId)->exists()) {
-                    $this->harvestMwPaths($connector, $versionId);
-                }
             }
         } catch (\Throwable $e) {
             $this->failed++;
@@ -399,32 +406,188 @@ class HarvestAppData extends Command
         }
     }
 
-    private function harvestMwPaths(MissionWayConnector $connector, int $versionId): void
+    /**
+     * BULK: Tüm simulation paths'ı filtresiz tek paginated çağrı ile çek.
+     * ~900 API çağrısı yerine ~10 çağrı (1000 per page).
+     */
+    private function harvestMwAllPaths(MissionWayConnector $connector): void
     {
         try {
-            $paths = $connector->getSimulationPaths($versionId);
-            foreach ($paths as $path) {
-                $pathExtId = $path['id'] ?? null;
-                if (!$pathExtId) continue;
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
 
-                RefSimulationPath::updateOrCreate(
-                    ['id' => $pathExtId],
-                    [
-                        'simulation_version_id' => $versionId,
-                        'parent_path_id'        => $path['parentPathId'] ?? $path['parent_path_id'] ?? null,
-                        'path_type'             => $path['pathType'] ?? $path['path_type'] ?? 'narrative',
+            $page = 1;
+            $totalPaths = 0;
+            do {
+                $result = $connector->apiGetPublic('/v1/simulation-paths', [
+                    'limit' => 500,
+                    'page'  => $page,
+                ]);
+                $paths = $result['data'] ?? [];
+                $pagePathCount = count($paths);
+
+                $batch = [];
+                $now = now()->toDateTimeString();
+                foreach ($paths as $path) {
+                    $pathExtId = $path['id'] ?? null;
+                    if (!$pathExtId) continue;
+
+                    $metrics = $path['metrics'] ?? null;
+                    if (is_array($metrics)) {
+                        $metrics = json_encode($metrics, JSON_UNESCAPED_UNICODE);
+                        if (strlen($metrics) > 16000) {
+                            $metrics = mb_substr($metrics, 0, 16000);
+                        }
+                    }
+
+                    $batch[] = [
+                        'id'                    => $pathExtId,
+                        'simulation_version_id' => $path['simulationVersionId'] ?? null,
+                        'parent_path_id'        => $path['parentPathId'] ?? null,
+                        'path_type'             => $path['pathType'] ?? 'narrative',
                         'order_index'           => $path['orderIndex'] ?? 0,
                         'points'                => $path['points'] ?? $path['pathPoints'] ?? 0,
-                        'metrics'               => $path['metrics'] ?? null,
+                        'metrics'               => $metrics,
                         'is_ended'              => $path['isEnded'] ?? false,
                         'wait_time_min'         => $path['waitTimeMin'] ?? null,
                         'wait_time_max'         => $path['waitTimeMax'] ?? null,
-                    ]
-                );
-                $this->synced++;
+                        'created_at'            => $now,
+                        'updated_at'            => $now,
+                    ];
+                }
+
+                if (!empty($batch)) {
+                    // Chunk in groups of 100 for upsert
+                    foreach (array_chunk($batch, 100) as $chunk) {
+                        DB::table('ref_simulation_paths')->upsert(
+                            $chunk,
+                            ['id'],
+                            ['simulation_version_id', 'parent_path_id', 'path_type', 'order_index', 'points', 'metrics', 'is_ended', 'wait_time_min', 'wait_time_max', 'updated_at']
+                        );
+                    }
+                    $totalPaths += count($batch);
+                    $this->synced += count($batch);
+                }
+
+                unset($paths, $batch);
+                $pageCount = $result['pageCount'] ?? 1;
+                $page++;
+            } while ($page <= $pageCount && $pagePathCount > 0);
+
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+            $this->info("    ✅ Paths: {$totalPaths} (" . ($page - 1) . " sayfa)");
+        } catch (\Throwable $e) {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+            $this->failed++;
+            $this->warn("    ⚠️ Paths: {$e->getMessage()}");
+            Log::channel('daily')->error('[HarvestAppData] Bulk paths error', ['e' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * BULK: Tüm player choices'ı filtresiz tek paginated çağrı ile çek.
+     */
+    private function harvestMwAllChoices(MissionWayConnector $connector): void
+    {
+        try {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
+
+            $page = 1;
+            $totalChoices = 0;
+            do {
+                $result = $connector->apiGetPublic('/v1/player-choices', [
+                    'limit' => 500,
+                    'page'  => $page,
+                ]);
+                $choices = $result['data'] ?? [];
+                $pageCount = $result['pageCount'] ?? 1;
+                $choiceCount = count($choices);
+
+                $batch = [];
+                $now = now()->toDateTimeString();
+                foreach ($choices as $choice) {
+                    $choiceId = $choice['id'] ?? null;
+                    if (!$choiceId) continue;
+
+                    $metricsBefore = $choice['metricsBefore'] ?? null;
+                    $metricsAfter = $choice['metricsAfter'] ?? null;
+                    if (is_array($metricsBefore)) $metricsBefore = json_encode($metricsBefore, JSON_UNESCAPED_UNICODE);
+                    if (is_array($metricsAfter)) $metricsAfter = json_encode($metricsAfter, JSON_UNESCAPED_UNICODE);
+
+                    $batch[] = [
+                        'id'                     => $choiceId,
+                        'player_id'              => $choice['playerId'] ?? null,
+                        'simulation_session_id'  => $choice['simulationSessionId'] ?? null,
+                        'previous_path_id'       => $choice['previousPathId'] ?? null,
+                        'simulation_path_id'     => $choice['simulationPathId'] ?? null,
+                        'selected_path_id'       => $choice['selectedPathId'] ?? null,
+                        'decided_path_id'        => $choice['decidedPathId'] ?? null,
+                        'response_time_seconds'  => $choice['responseTimeSeconds'] ?? null,
+                        'points_earned'          => $choice['pointsEarned'] ?? 0,
+                        'is_correct'             => $choice['isCorrect'] ?? null,
+                        'metrics_before'         => $metricsBefore,
+                        'metrics_after'          => $metricsAfter,
+                        'created_at'             => $now,
+                        'updated_at'             => $now,
+                    ];
+                }
+
+                if (!empty($batch)) {
+                    foreach (array_chunk($batch, 100) as $chunk) {
+                        DB::table('mw_player_choices')->upsert(
+                            $chunk,
+                            ['id'],
+                            ['player_id', 'simulation_session_id', 'previous_path_id', 'simulation_path_id', 'selected_path_id', 'decided_path_id', 'response_time_seconds', 'points_earned', 'is_correct', 'metrics_before', 'metrics_after', 'updated_at']
+                        );
+                    }
+                    $totalChoices += count($batch);
+                    $this->synced += count($batch);
+                }
+
+                unset($choices, $batch);
+                $page++;
+            } while ($page <= $pageCount && $choiceCount > 0);
+
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+            $this->info("    ✅ Choices: {$totalChoices} (" . ($page - 1) . " sayfa)");
+        } catch (\Throwable $e) {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+            $this->failed++;
+            $this->warn("    ⚠️ Choices: {$e->getMessage()}");
+            Log::channel('daily')->error('[HarvestAppData] Bulk choices error', ['e' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Harvest languages from /v1/languages.
+     */
+    private function harvestMwLanguages(MissionWayConnector $connector): void
+    {
+        try {
+            $result = $connector->apiGetPublic('/v1/languages', ['limit' => 100]);
+            $languages = $result['data'] ?? [];
+            if (empty($languages)) return;
+
+            $batch = [];
+            $now = now()->toDateTimeString();
+            foreach ($languages as $lang) {
+                $langId = $lang['id'] ?? null;
+                if (!$langId) continue;
+                $batch[] = [
+                    'id'         => $langId,
+                    'code'       => $lang['code'] ?? $lang['languageCode'] ?? 'unknown',
+                    'name'       => $lang['name'] ?? $lang['code'] ?? 'Unknown',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+
+            if (!empty($batch)) {
+                DB::table('ref_languages')->upsert($batch, ['id'], ['code', 'name', 'updated_at']);
+                $this->synced += count($batch);
+                $this->info("    ✅ Languages: " . count($batch));
             }
         } catch (\Throwable $e) {
-            $this->failed++;
+            $this->warn("    ⚠️ Languages: {$e->getMessage()}");
         }
     }
 
@@ -549,12 +712,15 @@ class HarvestAppData extends Command
                 $id = $item['id'] ?? null;
                 if (!$id) continue;
 
+                $key = $item['key'] ?? null;
+                $metricKey = $key ?: "metric_{$id}";
+
                 RefMetricDefinition::updateOrCreate(
                     ['id' => $id],
                     [
-                        'metric_key' => $item['key'] ?? 'unknown',
-                        'key'        => $item['key'] ?? 'unknown',
-                        'name'       => $item['name'] ?? ucfirst($item['key'] ?? 'Metric'),
+                        'metric_key' => $metricKey,
+                        'key'        => $key ?: $metricKey,
+                        'name'       => $item['name'] ?? ucfirst($key ?? 'Metric'),
                         'icon'       => $item['icon'] ?? '📊',
                         'color'      => $item['color'] ?? '#6B7280',
                         'unit_label' => $item['unitLabel'] ?? null,
@@ -714,25 +880,54 @@ class HarvestAppData extends Command
     private function harvestMwTranslations(MissionWayConnector $connector): void
     {
         try {
-            $items = $connector->getTranslations(['limit' => 1000]);
-            if (!is_array($items)) return;
+            $page = 1;
+            $total = 0;
 
-            foreach ($items as $item) {
-                $id = $item['id'] ?? null;
-                if (!$id) continue;
+            do {
+                $result = $connector->apiGetPublic('/v1/translations', ['limit' => 500, 'page' => $page]);
+                $items = $result['data'] ?? [];
+                $itemCount = count($items);
 
-                RefTranslation::updateOrCreate(
-                    ['id' => $id],
-                    [
-                        'entity_type' => $item['entityType'] ?? 'unknown',
-                        'entity_id'   => $item['entityId'] ?? 0,
-                        'language_id' => $item['languageId'] ?? null,
-                        'fields'      => $item['fields'] ?? $item['content'] ?? null,
-                    ]
-                );
-                $this->synced++;
-            }
-            $this->info("    ✅ Translations: " . count($items));
+                $batch = [];
+                $now = now()->toDateTimeString();
+                foreach ($items as $item) {
+                    $entityType = $item['entityType'] ?? 'unknown';
+                    $entityId = $item['entityId'] ?? 0;
+                    $languageId = $item['languageId'] ?? null;
+                    if (!$languageId) continue;
+
+                    $fields = $item['fields'] ?? $item['content'] ?? null;
+                    if (is_array($fields)) {
+                        $fields = json_encode($fields, JSON_UNESCAPED_UNICODE);
+                    }
+
+                    $batch[] = [
+                        'entity_type' => $entityType,
+                        'entity_id'   => $entityId,
+                        'language_id' => $languageId,
+                        'fields'      => $fields,
+                        'created_at'  => $now,
+                        'updated_at'  => $now,
+                    ];
+                }
+
+                if (!empty($batch)) {
+                    foreach (array_chunk($batch, 100) as $chunk) {
+                        DB::table('ref_translations')->upsert(
+                            $chunk,
+                            ['entity_type', 'entity_id', 'language_id'],
+                            ['fields', 'updated_at']
+                        );
+                    }
+                    $total += count($batch);
+                    $this->synced += count($batch);
+                }
+
+                $pageCount = $result['pageCount'] ?? 1;
+                $page++;
+            } while ($page <= $pageCount && $itemCount > 0);
+
+            $this->info("    ✅ Translations: {$total}");
         } catch (\Throwable $e) {
             $this->failed++;
             $this->warn("    ⚠️ Translations: {$e->getMessage()}");

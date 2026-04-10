@@ -50,6 +50,14 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
         parent::__construct('mission_way');
     }
 
+    /**
+     * Public wrapper for apiGet — used by harvest bulk operations.
+     */
+    public function apiGetPublic(string $path, array $params = []): ?array
+    {
+        return $this->apiGet($path, $params);
+    }
+
     /* ─── Interface: syncUser ──────────────────────────── */
 
     /**
@@ -551,11 +559,12 @@ class MissionWayConnector extends BaseConnector implements AppConnectorInterface
      *     ]
      *   }
      */
-    public function getSimulationPaths(int $simulationVersionId): array
+    public function getSimulationPaths(int $simulationVersionId, int $page = 1): array
     {
         $result = $this->apiGet('/v1/simulation-paths', [
             'filter' => "simulationVersionId||eq||{$simulationVersionId}",
             'limit' => 200,
+            'page'  => $page,
         ]);
         if (isset($result['data'])) {
             return $result['data'];
