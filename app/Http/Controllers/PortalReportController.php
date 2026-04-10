@@ -629,8 +629,8 @@ class PortalReportController extends Controller
             $questions = $groupedChoices->map(function ($pathChoices, $pathId) use ($completedCount) {
                 $path = RefSimulationPath::with('childPaths')->find($pathId);
                 
-                // Get path text from translations
-                $pathTranslation = RefTranslation::where('entity_type', 'simulation_path')
+                // Get path text from translations (entity_type uses hyphen)
+                $pathTranslation = RefTranslation::where('entity_type', 'simulation-path')
                     ->where('entity_id', $pathId)
                     ->first();
                 $questionText = null;
@@ -651,7 +651,7 @@ class PortalReportController extends Controller
 
                 // Build option list from child paths
                 $options = ($path?->childPaths ?? collect())->map(function ($child) use ($classSelectedPathId) {
-                    $childTranslation = RefTranslation::where('entity_type', 'simulation_path')
+                    $childTranslation = RefTranslation::where('entity_type', 'simulation-path')
                         ->where('entity_id', $child->id)
                         ->first();
                     $optionText = 'Option';

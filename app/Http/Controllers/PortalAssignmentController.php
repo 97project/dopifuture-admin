@@ -63,8 +63,8 @@ class PortalAssignmentController extends Controller
                 $batch = $resp['data'] ?? $resp;
                 if (!is_array($batch) || empty($batch)) break;
                 foreach ($batch as $p) {
-                    if (isset($p['email'], $p['id'])) {
-                        $emailToApiUserId[strtolower($p['email'])] = (int) $p['id'];
+                    if (isset($p['email'], $p['userId'])) {
+                        $emailToApiUserId[strtolower($p['email'])] = (int) $p['userId'];
                     }
                 }
                 $page++;

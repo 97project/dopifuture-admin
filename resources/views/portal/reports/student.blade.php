@@ -225,8 +225,9 @@
         </tr></thead>
         <tbody>
         @foreach($appData['progress'] as $p)
+        @php $pObj = (object) $p; @endphp
         <tr>
-            <td style="font-weight:500;">{{ $p->module_name ?: $p->module_id }}</td>
+            <td style="font-weight:500;">{{ $pObj->module_name ?? $pObj->module_id ?? '-' }}</td>
             <td>
                 @php
                     $typeColors = [
@@ -234,24 +235,34 @@
                         'lecturer'  => ['bg' => 'rgba(59,130,246,0.1)', 'color' => '#3b82f6'],
                         'chatbot'   => ['bg' => 'rgba(245,158,11,0.1)', 'color' => '#f59e0b'],
                     ];
-                    $tc = $typeColors[$p->module_type] ?? ['bg' => 'rgba(40,68,225,0.1)', 'color' => 'var(--primary)'];
+                    $mType = $pObj->module_type ?? 'module';
+                    $tc = $typeColors[$mType] ?? ['bg' => 'rgba(40,68,225,0.1)', 'color' => 'var(--primary)'];
                 @endphp
-                <span class="dp-badge" style="background:{{ $tc['bg'] }};color:{{ $tc['color'] }};">{{ ucfirst($p->module_type) }}</span>
+                <span class="dp-badge" style="background:{{ $tc['bg'] }};color:{{ $tc['color'] }};">{{ ucfirst($mType) }}</span>
             </td>
             <td>
                 @php
+                    $statusValue = $pObj->status ?? 'not_started';
                     $statusMap = [
                         'completed'   => ['class' => 'dp-badge-active', 'label' => 'Completed'],
                         'in_progress' => ['class' => 'dp-badge-pending', 'label' => 'In Progress'],
                         'not_started' => ['class' => 'dp-badge-inactive', 'label' => 'Not Started'],
                     ];
-                    $sm = $statusMap[$p->status] ?? ['class' => 'dp-badge-error', 'label' => ucfirst($p->status)];
+                    $sm = $statusMap[$statusValue] ?? ['class' => 'dp-badge-error', 'label' => ucfirst($statusValue)];
                 @endphp
                 <span class="dp-badge {{ $sm['class'] }}">{{ $sm['label'] }}</span>
             </td>
-            <td>{{ $p->score !== null ? number_format($p->score, 1) : '-' }}{{ $p->max_score ? '/'.$p->max_score : '' }}</td>
-            <td>{{ $p->attempts }}</td>
-            <td class="muted">{{ $p->completed_at ? $p->completed_at->format('d.m.Y H:i') : ($p->started_at ? $p->started_at->format('d.m.Y H:i') : '-') }}</td>
+            <td>{{ isset($pObj->score) && $pObj->score !== null ? number_format((float)$pObj->score, 1) : '-' }}{{ !empty($pObj->max_score) ? '/'.$pObj->max_score : '' }}</td>
+            <td>{{ $pObj->attempts ?? 0 }}</td>
+            <td class="muted">
+                @php
+                    $cAt = data_get($p, 'completed_at');
+                    $sAt = data_get($p, 'started_at');
+                    if ($cAt) echo $cAt instanceof \Carbon\Carbon ? $cAt->format('d.m.Y H:i') : \Carbon\Carbon::parse($cAt)->format('d.m.Y H:i');
+                    elseif ($sAt) echo $sAt instanceof \Carbon\Carbon ? $sAt->format('d.m.Y H:i') : \Carbon\Carbon::parse($sAt)->format('d.m.Y H:i');
+                    else echo '-';
+                @endphp
+            </td>
         </tr>
         @endforeach
         </tbody>
