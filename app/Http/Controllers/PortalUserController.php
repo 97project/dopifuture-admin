@@ -136,7 +136,7 @@ class PortalUserController extends Controller
             'name' => 'required|string|max:60',
             'surname' => 'nullable|string|max:60',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8',
+            'password' => 'required|string|min:6',
             'role' => 'nullable|string|in:student,teacher,school-principal',
         ]);
 
@@ -258,7 +258,7 @@ class PortalUserController extends Controller
             'name' => 'required|string|max:60',
             'surname' => 'nullable|string|max:60',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8',
+            'password' => 'nullable|string|min:6',
             'status' => 'nullable|in:active,inactive',
         ]);
 
