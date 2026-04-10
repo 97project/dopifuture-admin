@@ -51,6 +51,9 @@ class HarvestAppData extends Command
 
     public function handle(): int
     {
+        // Prevent massive array retention on bulk inserts (Memory exhausted crash fix)
+        DB::disableQueryLog();
+
         $startTime = microtime(true);
         $this->info('🏗️ Uygulama verileri toplanıyor...');
         $this->newLine();
@@ -144,6 +147,10 @@ class HarvestAppData extends Command
         // 5. BULK: Tüm paths (filtresiz, tek paginated çağrı)
         $this->line('  🛤️  Yollar...');
         $this->harvestMwAllPaths($connector);
+
+        // 5.5 BULK: Tüm Player Progressleri (tek paginated çağrı)
+        $this->line('  📈 İlerlemeler...');
+        $this->harvestMwAllPlayerProgresses($connector);
 
         // 6. BULK: Tüm choices (filtresiz, tek paginated çağrı)
         $this->line('  🎯 Seçimler...');
@@ -656,33 +663,7 @@ class HarvestAppData extends Command
                         }
                     } catch (\Throwable $e) {}
 
-                    // Player progress → mw_player_progress
-                    try {
-                        $progressList = $connector->getPlayerProgressList([
-                            'filter' => "playerId||eq||{$extId}",
-                        ]);
-                        if (is_array($progressList)) {
-                            foreach ($progressList as $prog) {
-                                $progId = $prog['id'] ?? null;
-                                if (!$progId) continue;
-
-                                MwPlayerProgress::updateOrCreate(
-                                    ['id' => $progId],
-                                    [
-                                        'player_id'              => $mwPlayer->id,
-                                        'simulation_session_id'  => $prog['simulationSessionId'] ?? null,
-                                        'simulation_version_id'  => $prog['simulationVersionId'] ?? null,
-                                        'current_path_id'        => $prog['currentPathId'] ?? null,
-                                        'current_score'          => $prog['currentScore'] ?? 0,
-                                        'current_metrics'        => $prog['currentMetrics'] ?? null,
-                                        'started_at'             => isset($prog['startedAt']) ? \Carbon\Carbon::parse($prog['startedAt']) : null,
-                                        'completed_at'           => isset($prog['completedAt']) ? \Carbon\Carbon::parse($prog['completedAt']) : null,
-                                    ]
-                                );
-                                $this->synced++;
-                            }
-                        }
-                    } catch (\Throwable $e) {}
+                    // NOT: mw_player_progress bulk operasyonla ayrı olarak (harvestMwAllPlayerProgresses) çekilecektir.
                 }
 
                 $page++;
@@ -693,6 +674,79 @@ class HarvestAppData extends Command
             Log::channel('daily')->error('[HarvestAppData] MW players error', [
                 'error' => $e->getMessage(),
             ]);
+        }
+    }
+
+    /**
+     * BULK: Tüm player progress verilerini tek bir paginated endpoint'ten çekerek kaydeder.
+     * N+1 API sorgusu problemlerini çözer.
+     */
+    private function harvestMwAllPlayerProgresses(MissionWayConnector $connector): void
+    {
+        try {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
+            $page = 1;
+            $totalPages = 1;
+            $syncedBatch = 0;
+
+            do {
+                $result = $connector->getPlayerProgressList([
+                    'limit' => 500,
+                    'page'  => $page,
+                ]);
+
+                $progresses = $result ?? []; // It returns data array directly
+                $pageCount = count($progresses);
+
+                $batch = [];
+                $now = now()->toDateTimeString();
+                foreach ($progresses as $prog) {
+                    $progExtId = $prog['id'] ?? null;
+                    if (!$progExtId) continue;
+
+                    // Bulk Player Mapping ID (local mw_players mapped from playerId)
+                    $localPlayerId = $prog['playerId'] ?? null;
+
+                    $currentMetrics = $prog['currentMetrics'] ?? null;
+                    if (is_array($currentMetrics)) $currentMetrics = json_encode($currentMetrics, JSON_UNESCAPED_UNICODE);
+
+                    $batch[] = [
+                        'id'                    => $progExtId,
+                        'player_id'             => $localPlayerId, // The local ID corresponds directly because we forced extId onto id
+                        'simulation_session_id' => $prog['simulationSessionId'] ?? null,
+                        'simulation_version_id' => $prog['simulationVersionId'] ?? null,
+                        'current_path_id'       => $prog['currentPathId'] ?? null,
+                        'current_score'         => $prog['currentScore'] ?? 0,
+                        'current_metrics'       => $currentMetrics,
+                        'started_at'            => isset($prog['startedAt']) ? \Carbon\Carbon::parse($prog['startedAt'])->toDateTimeString() : null,
+                        'completed_at'          => isset($prog['completedAt']) ? \Carbon\Carbon::parse($prog['completedAt'])->toDateTimeString() : null,
+                        'created_at'            => isset($prog['createdAt']) ? \Carbon\Carbon::parse($prog['createdAt'])->toDateTimeString() : $now,
+                        'updated_at'            => isset($prog['updatedAt']) ? \Carbon\Carbon::parse($prog['updatedAt'])->toDateTimeString() : $now,
+                    ];
+                }
+
+                if (!empty($batch)) {
+                    foreach (array_chunk($batch, 100) as $chunk) {
+                        DB::table('mw_player_progress')->upsert(
+                            $chunk,
+                            ['id'],
+                            ['player_id', 'simulation_session_id', 'simulation_version_id', 'current_path_id', 'current_score', 'current_metrics', 'started_at', 'completed_at', 'updated_at']
+                        );
+                    }
+                    $syncedBatch += count($batch);
+                    $this->synced += count($batch);
+                }
+                unset($progresses, $batch);
+                $page++;
+            } while ($pageCount >= 500);
+
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+            $this->info("    ✅ Progresses: {$syncedBatch}");
+        } catch (\Throwable $e) {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+            $this->failed++;
+            $this->warn("    ⚠️ Progresses Bulk Sync: {$e->getMessage()}");
+            Log::channel('daily')->error('[HarvestAppData] bulk player progresses error', ['e' => $e->getMessage()]);
         }
     }
 
