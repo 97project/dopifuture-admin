@@ -321,8 +321,9 @@ class PortalAssignmentController extends Controller
                 if (!$id) continue;
 
                 $assignment = WsAssignment::updateOrCreate(
-                    ['id' => $id],
+                    ['external_id' => $id],
                     [
+                        'id'            => $id, // keep same ID for easy mapping
                         'simulation_id' => $item['simulationId'] ?? null,
                         'name'          => $item['name'] ?? 'Assignment',
                         'description'   => $item['description'] ?? null,
@@ -335,10 +336,14 @@ class PortalAssignmentController extends Controller
                 $members = $item['members'] ?? [];
                 if (is_array($members)) {
                     foreach ($members as $am) {
-                        $memberId = $am['memberId'] ?? $am['id'] ?? null;
-                        if (!$memberId) continue;
+                        $externalId = $am['memberId'] ?? $am['id'] ?? null;
+                        if (!$externalId) continue;
+                        
+                        $localMember = \App\Models\WsMember::where('external_id', $externalId)->first();
+                        if (!$localMember) continue;
+
                         WsAssignmentMember::updateOrCreate(
-                            ['assignment_id' => $assignment->id, 'member_id' => $memberId],
+                            ['assignment_id' => $assignment->id, 'member_id' => $localMember->id],
                             ['status' => $am['status'] ?? 'assigned']
                         );
                     }

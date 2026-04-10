@@ -248,16 +248,20 @@ class PortalReportController extends Controller
                     ->with(['user', 'progress'])
                     ->get();
                 $completedSteps = 0;
+                $earnedPointsSum = 0;
                 foreach ($members as $m) {
+                    $earnedPointsSum += $m->points;
                     foreach ($m->progress as $sp) {
                         if ($sp->status === 'completed') $completedSteps++;
                     }
                 }
-                $totalPoints = $wsSim->steps->sum('points');
+                $systemPointAvg = $members->count() > 0 ? round($earnedPointsSum / $members->count()) : 0;
+                $totalPoints = $systemPointAvg; // Use average earned points
                 $maxPoints = $wsSim->steps->sum('max_score');
 
                 // Deadline from assignment metadata (if available)
-                $deadline = $wsSim->metadata['dueDate'] ?? $wsSim->metadata['deadline'] ?? null;
+                $firstAssignment = \App\Models\WsAssignment::where('simulation_id', $wsSim->id)->orderBy('due_date', 'asc')->first();
+                $deadline = $firstAssignment?->due_date ?? $wsSim->metadata['dueDate'] ?? $wsSim->metadata['deadline'] ?? null;
                 $deadlineStr = $deadline ? \Carbon\Carbon::parse($deadline)->format('d/m/Y') : '-';
                 $deadlineOverdue = $deadline ? \Carbon\Carbon::parse($deadline)->isPast() : false;
 
@@ -274,8 +278,8 @@ class PortalReportController extends Controller
                     'deadline'      => $deadlineStr,
                     'deadline_overdue' => $deadlineOverdue,
                     'step_completed'=> $completedSteps,
-                    'step_total'    => $stepCount,
-                    'system_point'  => $totalPoints,
+                    'step_total'    => $stepCount * max(1, $members->count()),
+                    'system_point'  => $systemPointAvg,
                     'max_point'     => $maxPoints,
                     'teacher_point' => null,
                     'status'        => $completedSteps >= $stepCount && $stepCount > 0 ? 'completed' : ($completedSteps > 0 ? 'in_progress' : 'not_started'),
