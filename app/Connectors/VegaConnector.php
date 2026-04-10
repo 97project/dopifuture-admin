@@ -607,7 +607,21 @@ class VegaConnector implements AppConnectorInterface
         $cacheKey = 'vega.user.email.' . md5(strtolower($email));
 
         return \Illuminate\Support\Facades\Cache::remember($cacheKey, 600, function () use ($email) {
-            // 1) Önce search parametresi ile tek request dene
+            // 1) En Hızlı ve Kesin Yöntem: Direct DB Connection
+            try {
+                $dbUser = \Illuminate\Support\Facades\DB::connection('vega_db')
+                    ->table('users')
+                    ->where('email', $email)
+                    ->first();
+                    
+                if ($dbUser) {
+                    return json_decode(json_encode($dbUser), true);
+                }
+            } catch (\Exception $dbEx) {
+                Log::channel('daily')->error('[Vega] DB findByEmail error, falling back to API', ['email' => $email, 'error' => $dbEx->getMessage()]);
+            }
+
+            // 2) Fallback: API Search Parameters
             try {
                 $response = $this->request('GET', '/api/v1/users', [
                     'search' => $email,
@@ -625,45 +639,9 @@ class VegaConnector implements AppConnectorInterface
                             }
                         }
                     }
-
-                    // Search worked but no exact match found
-                    return null;
                 }
             } catch (\Throwable $e) {
-                Log::channel('daily')->warning('[Vega] search param desteklenmiyor, fallback', [
-                    'message' => $e->getMessage(),
-                ]);
-            }
-
-            // 2) Fallback: Sayfalı arama (max 3 sayfa güvenlik limiti)
-            $page = 1;
-            $maxPages = 3;
-
-            while ($page <= $maxPages) {
-                $response = $this->request('GET', '/api/v1/users', [
-                    'page' => $page,
-                    'per_page' => 50,
-                ]);
-
-                if (!$response->successful()) {
-                    return null;
-                }
-
-                $data = $response->json('data', []);
-                $users = $data['users'] ?? [];
-
-                foreach ($users as $vegaUser) {
-                    if (isset($vegaUser['email']) && mb_strtolower($vegaUser['email']) === mb_strtolower($email)) {
-                        return $vegaUser;
-                    }
-                }
-
-                $lastPage = $data['last_page'] ?? 1;
-                if ($page >= $lastPage) {
-                    break;
-                }
-
-                $page++;
+                // Ignore fallback error
             }
 
             return null;

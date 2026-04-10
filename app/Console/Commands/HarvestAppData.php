@@ -235,24 +235,7 @@ class HarvestAppData extends Command
                     $this->synced++;
                     $totalSessions++;
 
-                    // Collect session players for batch upsert
-                    try {
-                        $sessionPlayers = $connector->getSessionPlayers($sessExtId) ?? [];
-                        foreach ($sessionPlayers as $sp) {
-                            $playerId = $sp['playerId'] ?? null;
-                            if (!$playerId) continue;
-                            $allSessionPlayers[] = [
-                                'simulation_session_id' => $sessExtId,
-                                'player_id'             => $playerId,
-                                'role_id'               => $sp['roleId'] ?? null,
-                                'joined_at'             => isset($sp['joinedAt']) ? \Carbon\Carbon::parse($sp['joinedAt'])->toDateTimeString() : now()->toDateTimeString(),
-                                'created_at'            => now()->toDateTimeString(),
-                                'updated_at'            => now()->toDateTimeString(),
-                            ];
-                        }
-                    } catch (\Throwable $e) {
-                        // Log but don't fail
-                    }
+                    // NOT: Session players → mw_session_players bulk operasyonla ayrı olarak çekiliyor.
                 }
 
                 $page++;
