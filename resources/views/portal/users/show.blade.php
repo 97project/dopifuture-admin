@@ -151,13 +151,22 @@
             </tr></thead>
             <tbody>
                 @foreach($appData['progress'] as $p)
+                @php $pObj = (object) $p; @endphp
                 <tr>
-                    <td style="font-weight:500;">{{ $p->module_name ?: $p->module_id }}</td>
-                    <td><span class="dp-badge dp-badge-pending">{{ $p->module_type }}</span></td>
-                    <td><span class="dp-badge {{ $p->status === 'completed' ? 'dp-badge-active' : ($p->status === 'in_progress' ? 'dp-badge-pending' : 'dp-badge-error') }}">{{ $p->status }}</span></td>
-                    <td>{{ $p->score !== null ? number_format($p->score, 1) : '-' }}{{ $p->max_score ? '/'.$p->max_score : '' }}</td>
-                    <td>{{ $p->attempts }}</td>
-                    <td class="muted">{{ $p->completed_at ? $p->completed_at->format('Y-m-d H:i') : ($p->started_at ? $p->started_at->format('Y-m-d H:i') : '-') }}</td>
+                    <td style="font-weight:500;">{{ $pObj->module_name ?? $pObj->module_id ?? '-' }}</td>
+                    <td><span class="dp-badge dp-badge-pending">{{ $pObj->module_type ?? 'module' }}</span></td>
+                    <td><span class="dp-badge {{ ($pObj->status ?? '') === 'completed' ? 'dp-badge-active' : (($pObj->status ?? '') === 'in_progress' ? 'dp-badge-pending' : 'dp-badge-error') }}">{{ $pObj->status ?? 'unknown' }}</span></td>
+                    <td>{{ isset($pObj->score) && $pObj->score !== null ? number_format((float)$pObj->score, 1) : '-' }}{{ !empty($pObj->max_score) ? '/'.$pObj->max_score : '' }}</td>
+                    <td>{{ $pObj->attempts ?? 0 }}</td>
+                    <td class="muted">
+                        @php
+                            $cAt = $pObj->completed_at ?? null;
+                            $sAt = $pObj->started_at ?? null;
+                            if ($cAt) echo $cAt instanceof \Carbon\Carbon ? $cAt->format('Y-m-d H:i') : \Carbon\Carbon::parse($cAt)->format('Y-m-d H:i');
+                            elseif ($sAt) echo $sAt instanceof \Carbon\Carbon ? $sAt->format('Y-m-d H:i') : \Carbon\Carbon::parse($sAt)->format('Y-m-d H:i');
+                            else echo '-';
+                        @endphp
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
@@ -173,12 +182,19 @@
             </tr></thead>
             <tbody>
                 @foreach($appData['sessions']->take(10) as $s)
+                @php $sObj = (object) $s; @endphp
                 <tr>
-                    <td style="font-weight:500;">{{ $s->session_name ?: $s->external_session_id }}</td>
-                    <td><span class="dp-badge dp-badge-pending">{{ $s->session_type }}</span></td>
-                    <td class="muted">{{ $s->started_at ? $s->started_at->format('Y-m-d H:i') : '-' }}</td>
-                    <td>{{ $s->duration_seconds ? \App\Services\ReportService::formatDuration($s->duration_seconds) : '-' }}</td>
-                    <td>{{ $s->score !== null ? number_format($s->score, 1) : '-' }}</td>
+                    <td style="font-weight:500;">{{ $sObj->session_name ?? $sObj->external_session_id ?? '-' }}</td>
+                    <td><span class="dp-badge dp-badge-pending">{{ $sObj->session_type ?? 'session' }}</span></td>
+                    <td class="muted">
+                        @php
+                            $stAt = $sObj->started_at ?? null;
+                            if ($stAt) echo $stAt instanceof \Carbon\Carbon ? $stAt->format('Y-m-d H:i') : \Carbon\Carbon::parse($stAt)->format('Y-m-d H:i');
+                            else echo '-';
+                        @endphp
+                    </td>
+                    <td>{{ !empty($sObj->duration_seconds) ? \App\Services\ReportService::formatDuration((int)$sObj->duration_seconds) : '-' }}</td>
+                    <td>{{ isset($sObj->score) && $sObj->score !== null ? number_format((float)$sObj->score, 1) : '-' }}</td>
                 </tr>
                 @endforeach
             </tbody>
