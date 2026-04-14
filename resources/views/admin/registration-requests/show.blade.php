@@ -48,7 +48,7 @@
                         __('admin.contact_name') => $registrationRequest->contact_name . ' ' . $registrationRequest->contact_surname,
                         __('admin.email') => $registrationRequest->email,
                         __('admin.phone') => $registrationRequest->phone ?? '—',
-                        (app()->getLocale() === 'tr' ? 'Tahmini Öğrenci Sayısı' : 'Student Count') => $registrationRequest->student_count ?? '—',
+                        (__('admin.rep_student_count')) => $registrationRequest->student_count ?? '—',
                         __('admin.created_at') => $registrationRequest->created_at->format('d.m.Y H:i'),
                     ] as $label => $value)
                         <div>

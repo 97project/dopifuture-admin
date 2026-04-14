@@ -19,7 +19,7 @@
             <div>
                 <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ __('admin.permissions') }}</h1>
                 <p class="text-xs text-gray-400 mt-1">
-                    {{ app()->getLocale() === 'tr' ? 'İzin takma adlarını düzenleyin ve izinleri senkronize edin.' : 'Edit permission aliases and sync permissions.' }}
+                    {{ __('admin.rep_edit_permissions') }}
                 </p>
             </div>
             <form action="{{ route('admin.permissions.sync') }}" method="POST">@csrf

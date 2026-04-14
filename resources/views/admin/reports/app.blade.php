@@ -8,39 +8,39 @@
 @section('content')
 <div class="mb-6">
     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $app->name }}</h1>
-    <p class="text-sm text-gray-500 mt-1">{{ app()->getLocale() === 'tr' ? 'Detaylı uygulama raporu' : 'Detailed application report' }}</p>
+    <p class="text-sm text-gray-500 mt-1">{{ __('admin.rep_detailed_app_report') }}</p>
 </div>
 
 <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 text-center">
         <div class="text-2xl font-extrabold text-gray-900 dark:text-white">{{ $total_progress }}</div>
-        <div class="text-xs text-gray-500 mt-1">{{ app()->getLocale() === 'tr' ? 'Toplam İlerleme' : 'Total Progress' }}</div>
+        <div class="text-xs text-gray-500 mt-1">{{ __('admin.rep_total_progress') }}</div>
     </div>
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 text-center">
         <div class="text-2xl font-extrabold text-emerald-500">{{ $total_completed }}</div>
-        <div class="text-xs text-gray-500 mt-1">{{ app()->getLocale() === 'tr' ? 'Tamamlanan' : 'Completed' }}</div>
+        <div class="text-xs text-gray-500 mt-1">{{ __('admin.rep_completed') }}</div>
     </div>
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 text-center">
         <div class="text-2xl font-extrabold text-blue-500">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div>
-        <div class="text-xs text-gray-500 mt-1">{{ app()->getLocale() === 'tr' ? 'Ort. Puan' : 'Avg Score' }}</div>
+        <div class="text-xs text-gray-500 mt-1">{{ __('admin.rep_avg_score') }}</div>
     </div>
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 text-center">
         <div class="text-2xl font-extrabold text-amber-500">{{ $total_sessions }}</div>
-        <div class="text-xs text-gray-500 mt-1">{{ app()->getLocale() === 'tr' ? 'Oturum' : 'Sessions' }}</div>
+        <div class="text-xs text-gray-500 mt-1">{{ __('admin.rep_sessions') }}</div>
     </div>
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 text-center">
         <div class="text-2xl font-extrabold text-purple-500">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div>
-        <div class="text-xs text-gray-500 mt-1">{{ app()->getLocale() === 'tr' ? 'Toplam Süre' : 'Total Duration' }}</div>
+        <div class="text-xs text-gray-500 mt-1">{{ __('admin.rep_total_duration') }}</div>
     </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
-        <h3 class="text-sm font-semibold mb-4 text-gray-900 dark:text-white">{{ app()->getLocale() === 'tr' ? 'Modül Dağılımı' : 'Module Distribution' }}</h3>
+        <h3 class="text-sm font-semibold mb-4 text-gray-900 dark:text-white">{{ __('admin.rep_module_dist') }}</h3>
         <canvas id="moduleChart" height="200"></canvas>
     </div>
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
-        <h3 class="text-sm font-semibold mb-4 text-gray-900 dark:text-white">{{ app()->getLocale() === 'tr' ? 'Günlük Oturumlar' : 'Daily Sessions' }}</h3>
+        <h3 class="text-sm font-semibold mb-4 text-gray-900 dark:text-white">{{ __('admin.rep_daily_sessions') }}</h3>
         <canvas id="sessionsChart" height="200"></canvas>
     </div>
 </div>
@@ -48,15 +48,15 @@
 {{-- Student Performance --}}
 <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
     <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">👥 {{ app()->getLocale() === 'tr' ? 'Öğrenci Performansı' : 'Student Performance' }}</h3>
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">👥 {{ __('admin.rep_student_perf') }}</h3>
     </div>
     <table class="w-full">
         <thead>
             <tr class="bg-gray-50 dark:bg-gray-800/50">
-                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ app()->getLocale() === 'tr' ? 'Öğrenci' : 'Student' }}</th>
-                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase">{{ app()->getLocale() === 'tr' ? 'Tamamlanma' : 'Completion' }}</th>
-                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase">{{ app()->getLocale() === 'tr' ? 'Puan' : 'Score' }}</th>
-                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase">{{ app()->getLocale() === 'tr' ? 'Süre' : 'Duration' }}</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('admin.auto_student') }}</th>
+                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase">{{ __('admin.rep_completion') }}</th>
+                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase">{{ __('admin.auto_score') }}</th>
+                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase">{{ __('admin.auto_duration') }}</th>
                 <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase"></th>
             </tr>
         </thead>
@@ -75,11 +75,11 @@
                 <td class="px-5 py-3 text-sm text-gray-500 text-center">{{ $us['avg_score'] ? number_format($us['avg_score'], 1) : '-' }}</td>
                 <td class="px-5 py-3 text-sm text-gray-500 text-center">{{ \App\Services\ReportService::formatDuration($us['total_duration'] ?? 0) }}</td>
                 <td class="px-5 py-3 text-right">
-                    @if($us['user'])<a href="{{ route('admin.reports.student', $us['user']) }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">{{ app()->getLocale() === 'tr' ? 'Detay' : 'Detail' }} →</a>@endif
+                    @if($us['user'])<a href="{{ route('admin.reports.student', $us['user']) }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">{{ __('admin.rep_detail') }} →</a>@endif
                 </td>
             </tr>
             @empty
-            <tr><td colspan="5" class="px-5 py-8 text-center text-gray-400 text-sm">{{ app()->getLocale() === 'tr' ? 'Henüz veri yok' : 'No data yet' }}</td></tr>
+            <tr><td colspan="5" class="px-5 py-8 text-center text-gray-400 text-sm">{{ __('admin.rep_no_data_yet') }}</td></tr>
             @endforelse
         </tbody>
     </table>

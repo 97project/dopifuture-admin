@@ -1,6 +1,6 @@
 @extends('portal.layout')
-@section('title', app()->getLocale() === 'tr' ? 'İletişim — DopiFuture' : 'Contact — DopiFuture')
-@section('meta_description', app()->getLocale() === 'tr' ? 'DopiFuture ile iletişime geçin' : 'Get in touch with DopiFuture')
+@section('title', __('portal.contact_title'))
+@section('meta_description', __('portal.contact_meta'))
 
 @section('content')
 <style>
@@ -217,7 +217,7 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
                     <svg width="22" height="22" fill="none" stroke="#c084fc" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 </div>
                 <div>
-                    <div class="info-card-title">{{ app()->getLocale() === 'tr' ? 'Adres' : 'Address' }}</div>
+                    <div class="info-card-title">{{ __('portal.contact_address_lbl') }}</div>
                     <div class="info-card-value">Istanbul, Turkey</div>
                 </div>
             </div>
@@ -229,8 +229,8 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
                     <svg width="22" height="22" fill="none" stroke="#4ade80" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div>
-                    <div class="info-card-title">{{ app()->getLocale() === 'tr' ? 'Çalışma Saatleri' : 'Working Hours' }}</div>
-                    <div class="info-card-value">{{ app()->getLocale() === 'tr' ? 'Pazartesi – Cuma, 09:00 – 18:00' : 'Monday – Friday, 09:00 – 18:00' }}</div>
+                    <div class="info-card-title">{{ __('portal.contact_hours_lbl') }}</div>
+                    <div class="info-card-value">{{ __('portal.contact_hours_val') }}</div>
                 </div>
             </div>
         </div>
@@ -238,7 +238,7 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
         {{-- Social Links --}}
         <div style="padding-top: 0.5rem;">
             <div style="font-size: 0.7rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; margin-bottom: 0.75rem;">
-                {{ app()->getLocale() === 'tr' ? 'Sosyal Medya' : 'Social Media' }}
+                {{ __('portal.contact_social_lbl') }}
             </div>
             <div class="social-links">
                 <a href="https://linkedin.com/company/dopifuture" target="_blank" class="social-link" title="LinkedIn">
@@ -258,7 +258,7 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
     <div class="contact-form-card reveal reveal-delay-1">
         <div class="form-title">
             <svg width="22" height="22" fill="none" stroke="var(--brand-400)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-            {{ app()->getLocale() === 'tr' ? 'Mesaj Gönderin' : 'Send a Message' }}
+            {{ __('portal.contact_form_title') }}
         </div>
 
         @if(session('success'))
@@ -274,9 +274,9 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
             @csrf
             <div class="form-grid-2">
                 <div>
-                    <label class="form-label-v2">{{ app()->getLocale() === 'tr' ? 'Adınız' : 'Your Name' }} *</label>
+                    <label class="form-label-v2">{{ __('portal.contact_name_lbl') }} *</label>
                     <input type="text" name="name" value="{{ old('name') }}" required class="form-input-v2"
-                        placeholder="{{ app()->getLocale() === 'tr' ? 'Ad Soyad' : 'Full name' }}">
+                        placeholder="{{ __('portal.contact_name_ph') }}">
                     @error('name') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
                 <div>
@@ -288,16 +288,16 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
             </div>
 
             <div class="form-row">
-                <label class="form-label-v2">{{ app()->getLocale() === 'tr' ? 'Konu' : 'Subject' }} *</label>
+                <label class="form-label-v2">{{ __('portal.contact_subj_lbl') }} *</label>
                 <input type="text" name="subject" value="{{ old('subject') }}" required class="form-input-v2"
-                    placeholder="{{ app()->getLocale() === 'tr' ? 'Mesajınızın konusu' : 'Subject of your message' }}">
+                    placeholder="{{ __('portal.contact_subj_ph') }}">
                 @error('subject') <p class="form-error">{{ $message }}</p> @enderror
             </div>
 
             <div class="form-row">
-                <label class="form-label-v2">{{ app()->getLocale() === 'tr' ? 'Mesaj' : 'Message' }} *</label>
+                <label class="form-label-v2">{{ __('portal.contact_msg_lbl') }} *</label>
                 <textarea name="message" rows="5" required class="form-input-v2"
-                    placeholder="{{ app()->getLocale() === 'tr' ? 'Mesajınızı buraya yazın...' : 'Write your message here...' }}">{{ old('message') }}</textarea>
+                    placeholder="{{ __('portal.contact_msg_ph') }}">{{ old('message') }}</textarea>
                 @error('message') <p class="form-error">{{ $message }}</p> @enderror
             </div>
 
@@ -305,7 +305,7 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
                 <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                 </svg>
-                {{ app()->getLocale() === 'tr' ? 'Mesaj Gönder' : 'Send Message' }}
+                {{ __('portal.contact_btn_send') }}
             </button>
         </form>
     </div>
@@ -332,12 +332,12 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
         {{-- FAQ 1 --}}
         <div class="faq-item reveal">
             <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                <span>{{ app()->getLocale() === 'tr' ? 'DopiFuture hangi yaş gruplarına uygundur?' : 'What age groups is DopiFuture suitable for?' }}</span>
+                <span>{{ __('portal.faq_q1') }}</span>
                 <svg class="faq-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div class="faq-answer">
                 <div class="faq-answer-inner">
-                    {{ app()->getLocale() === 'tr' ? 'DopiFuture, ilkokul, ortaokul ve lise öğrencileri için tasarlanmıştır. Simülasyonlar ve AI koçluk modülleri öğrencinin sınıf seviyesine göre otomatik olarak uyarlanır. Study Space modülü ders bazında konu seçimi ve zorluk seviyesi ayarı sunar.' : 'DopiFuture is designed for elementary, middle, and high school students. Simulations and AI coaching modules automatically adapt to the student\'s grade level. The Study Space module offers subject-specific topic selection and difficulty level adjustment.' }}
+                    {{ __('portal.faq_a1') }}
                 </div>
             </div>
         </div>
@@ -345,12 +345,12 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
         {{-- FAQ 2 --}}
         <div class="faq-item reveal reveal-delay-1">
             <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                <span>{{ app()->getLocale() === 'tr' ? 'Uygulamalar tek tek mi yoksa paket olarak mı alınır?' : 'Are apps purchased individually or as a package?' }}</span>
+                <span>{{ __('portal.faq_q2') }}</span>
                 <svg class="faq-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div class="faq-answer">
                 <div class="faq-answer-inner">
-                    {{ app()->getLocale() === 'tr' ? 'DopiFuture modüler bir yapıdadır. Okullar, ihtiyaçlarına göre tek bir uygulama veya tüm ekosistemi kapsayan paketler alabilir. Lisans yönetimi ile her uygulama için ayrı kontenjan ve süre belirlenebilir.' : 'DopiFuture has a modular structure. Schools can license individual applications or choose packages covering the entire ecosystem. The license management system allows setting separate quotas and durations for each application.' }}
+                    {{ __('portal.faq_a2') }}
                 </div>
             </div>
         </div>
@@ -358,12 +358,12 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
         {{-- FAQ 3 --}}
         <div class="faq-item reveal">
             <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                <span>{{ app()->getLocale() === 'tr' ? 'Mission Way simülasyonlarında kaç oyuncu gerekli?' : 'How many players are needed in Mission Way simulations?' }}</span>
+                <span>{{ __('portal.faq_q3') }}</span>
                 <svg class="faq-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div class="faq-answer">
                 <div class="faq-answer-inner">
-                    {{ app()->getLocale() === 'tr' ? 'Her simülasyon senaryosunun kendine özgü rol sayısı vardır. Örneğin Earthquake simülasyonu 4 oyuncu gerektirirken, başka senaryolar farklı sayıda rol içerebilir. Sistem, öğretmene doğru sayıda öğrenci seçmesi için otomatik uyarılar gösterir.' : 'Each simulation scenario has its own specific number of roles. For example, the Earthquake simulation requires 4 players, while other scenarios may include different numbers of roles. The system automatically alerts teachers to select the correct number of students.' }}
+                    {{ __('portal.faq_a3') }}
                 </div>
             </div>
         </div>
@@ -371,12 +371,12 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
         {{-- FAQ 4 --}}
         <div class="faq-item reveal reveal-delay-1">
             <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                <span>{{ app()->getLocale() === 'tr' ? 'Öğrenciler platforma nasıl erişir?' : 'How do students access the platform?' }}</span>
+                <span>{{ __('portal.faq_q4') }}</span>
                 <svg class="faq-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div class="faq-answer">
                 <div class="faq-answer-inner">
-                    {{ app()->getLocale() === 'tr' ? 'Öğrenciler DopiFuture mobil uygulamasını (iOS/Android) indirerek erişir. Google veya Apple hesabı ile tek tıkla giriş yapabilirler. Öğretmenler ve yöneticiler ise hem web panelden hem mobil uygulamadan sisteme erişir.' : 'Students access via the DopiFuture mobile app (iOS/Android). They can sign in with a single tap using Google or Apple accounts. Teachers and administrators access the system from both the web panel and mobile app.' }}
+                    {{ __('portal.faq_a4') }}
                 </div>
             </div>
         </div>
@@ -384,12 +384,12 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
         {{-- FAQ 5 --}}
         <div class="faq-item reveal">
             <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                <span>{{ app()->getLocale() === 'tr' ? 'WAY AI Coach kişiselleştirmeyi nasıl yapıyor?' : 'How does WAY AI Coach personalize content?' }}</span>
+                <span>{{ __('portal.faq_q5') }}</span>
                 <svg class="faq-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div class="faq-answer">
                 <div class="faq-answer-inner">
-                    {{ app()->getLocale() === 'tr' ? 'WAY AI Coach, öğrencinin profil bilgilerini (sınıf seviyesi, ilgi alanları, güçlü/zayıf yönler) kullanarak her konuşmayı kişiselleştirir. Gerçek zamanlı WebSocket bağlantısı ile akıcı sohbet deneyimi sunar ve tüm oturumlar geçmişte saklanır.' : 'WAY AI Coach personalizes every conversation using the student\'s profile (grade level, interests, strengths/weaknesses). It provides a fluid chat experience via real-time WebSocket connection, and all sessions are stored in history for review.' }}
+                    {{ __('portal.faq_a5') }}
                 </div>
             </div>
         </div>
@@ -397,12 +397,12 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
         {{-- FAQ 6 --}}
         <div class="faq-item reveal reveal-delay-1">
             <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                <span>{{ app()->getLocale() === 'tr' ? 'Raporlama ve takip imkanları nelerdir?' : 'What reporting and tracking capabilities are available?' }}</span>
+                <span>{{ __('portal.faq_q6') }}</span>
                 <svg class="faq-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div class="faq-answer">
                 <div class="faq-answer-inner">
-                    {{ app()->getLocale() === 'tr' ? 'Öğretmenler her uygulama için ayrı raporlama paneline sahiptir. Mission Way simülasyon skorları, Way Startup Lab adım ilerlemeleri, WAY AI Coach oturum sayıları ve Study Space öğrenme istatistikleri detaylı olarak takip edilir. Görev ataması ve son tarih yönetimi de mevcuttur.' : 'Teachers have separate reporting panels for each application. Mission Way simulation scores, Way Startup Lab step progress, WAY AI Coach session counts, and Study Space learning statistics are tracked in detail. Assignment management and deadline tracking are also available.' }}
+                    {{ __('portal.faq_a6') }}
                 </div>
             </div>
         </div>

@@ -1,6 +1,6 @@
 @extends('portal.layout')
-@section('title', app()->getLocale() === 'tr' ? 'Çözümlerimiz — DopiFuture' : 'Solutions — DopiFuture')
-@section('meta_description', app()->getLocale() === 'tr' ? 'DopiFuture dijital eğitim uygulamaları' : 'DopiFuture digital education applications')
+@section('title', __('portal.sol_title'))
+@section('meta_description', __('portal.sol_meta'))
 
 @section('content')
 <style>
@@ -172,18 +172,10 @@
 {{-- Hero --}}
 <section class="solutions-hero">
     <h1 class="reveal">
-        @if(app()->getLocale() === 'tr')
-            Beş Güçlü Uygulama,<br><span>Tek Ekosistem</span>
-        @else
-            Five Powerful Apps,<br><span>One Ecosystem</span>
-        @endif
+        {!! __('portal.sol_hero_title') !!}
     </h1>
     <p class="reveal reveal-delay-1">
-        @if(app()->getLocale() === 'tr')
-            DopiFuture, simülasyon tabanlı oyunlardan AI koçluğa, girişimcilik laboratuvarından interaktif öğrenme alanlarına kadar kapsamlı bir eğitim ekosistemi sunar.
-        @else
-            DopiFuture offers a comprehensive education ecosystem — from simulation-based games to AI coaching, entrepreneurship labs, and interactive learning spaces.
-        @endif
+        {{ __('portal.sol_hero_desc') }}
     </p>
 </section>
 
@@ -208,17 +200,13 @@
     <div class="solution-content">
         <h3 style="color: #FFB347;">Mission Way</h3>
         <p class="desc">
-            @if(app()->getLocale() === 'tr')
-                Multiplayer simülasyon tabanlı karar verme platformu. Öğrenciler deprem müdahalesi, diplomatik kriz yönetimi, çevre politikaları gibi gerçekçi senaryolarda ekip olarak rol dağılımı yapar ve kritik kararlar alır. Her karar dallanma hikayesi oluşturur ve nihai skor hesaplanır.
-            @else
-                A multiplayer simulation-based decision-making platform. Students team up for realistic scenarios like earthquake response, diplomatic crisis management, and environmental policies. They assign roles, make critical decisions that branch the story, and earn a final score.
-            @endif
+            {{ __('portal.sol_mw_desc') }}
         </p>
         <div class="solution-features">
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#FFB347;"></div>{{ app()->getLocale() === 'tr' ? '4 oyunculu multiplayer oturumlar' : '4-player multiplayer sessions' }}</div>
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#FFB347;"></div>{{ app()->getLocale() === 'tr' ? 'Rol bazlı karar mekanizması' : 'Role-based decision mechanism' }}</div>
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#FFB347;"></div>{{ app()->getLocale() === 'tr' ? 'Gerçek zamanlı skor tablosu' : 'Real-time score tracking' }}</div>
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#FFB347;"></div>{{ app()->getLocale() === 'tr' ? 'Öğretmen görev ataması' : 'Teacher assignment management' }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#FFB347;"></div>{{ __('portal.sol_f1_1') }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#FFB347;"></div>{{ __('portal.sol_f1_2') }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#FFB347;"></div>{{ __('portal.sol_f1_3') }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#FFB347;"></div>{{ __('portal.sol_f1_4') }}</div>
         </div>
         <div class="solution-chips">
             <span class="sol-chip" style="border-color: rgba(255,137,4,0.3); color:#FFB347;">🎮 Multiplayer</span>
@@ -238,17 +226,13 @@
     <div class="solution-content">
         <h3 style="color: #7CC8FF;">Way Startup Lab</h3>
         <p class="desc">
-            @if(app()->getLocale() === 'tr')
-                Girişimcilik eğitiminin dijital laboratuvarı. Öğrenciler fikir geliştirmeden pitch sunumuna kadar bir startup yolculuğunu deneyimler. Her adımda dosya yükleyebilir, yapay zekâ değerlendirmesi alabilir ve puan kazanabilir. Zorluk seviyeleri ve kilitli adımlar ile progresif öğrenme.
-            @else
-                The digital laboratory for entrepreneurship education. Students experience the startup journey from ideation to pitch deck. Each step allows file uploads, AI-powered evaluations, and point earnings. Progressive learning with difficulty levels and locked steps.
-            @endif
+            {{ __('portal.sol_su_desc') }}
         </p>
         <div class="solution-features">
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#7CC8FF;"></div>{{ app()->getLocale() === 'tr' ? 'Adım adım girişimcilik müfredatı' : 'Step-by-step entrepreneurship curriculum' }}</div>
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#7CC8FF;"></div>{{ app()->getLocale() === 'tr' ? 'AI destekli değerlendirme' : 'AI-powered evaluation' }}</div>
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#7CC8FF;"></div>{{ app()->getLocale() === 'tr' ? 'Dosya yükleme & portfolio' : 'File upload & portfolio' }}</div>
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#7CC8FF;"></div>{{ app()->getLocale() === 'tr' ? 'Zorluk seviyeli görevler' : 'Difficulty-leveled tasks' }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#7CC8FF;"></div>{{ __('portal.sol_f2_1') }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#7CC8FF;"></div>{{ __('portal.sol_f2_2') }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#7CC8FF;"></div>{{ __('portal.sol_f2_3') }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#7CC8FF;"></div>{{ __('portal.sol_f2_4') }}</div>
         </div>
         <div class="solution-chips">
             <span class="sol-chip" style="border-color: rgba(67,172,255,0.3); color:#7CC8FF;">🧠 AI Evaluation</span>
@@ -268,17 +252,13 @@
     <div class="solution-content">
         <h3 style="color: #B794F4;">Role Galaxy</h3>
         <p class="desc">
-            @if(app()->getLocale() === 'tr')
-                Yapay zekâ ile desteklenen kariyer keşif simülatörü. Öğrenciler mühendis, doktor, avukat, girişimci gibi rollere bürünerek gerçekçi iş senaryolarında kararlar alır. Her seçim farklı bir hikaye dalı oluşturur — böylece her deneyim benzersiz ve öğreticidir.
-            @else
-                An AI-powered career discovery simulator. Students step into roles such as engineer, doctor, lawyer, and entrepreneur, making decisions in realistic work scenarios. Each choice creates a different story branch — making every experience unique and educational.
-            @endif
+            {{ __('portal.sol_rg_desc') }}
         </p>
         <div class="solution-features">
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#B794F4;"></div>{{ app()->getLocale() === 'tr' ? 'AI tarafından dinamik hikaye dalları' : 'AI-generated dynamic story branches' }}</div>
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#B794F4;"></div>{{ app()->getLocale() === 'tr' ? '10+ farklı meslek senaryosu' : '10+ different career scenarios' }}</div>
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#B794F4;"></div>{{ app()->getLocale() === 'tr' ? 'Karar ağacı ve sonuç analizi' : 'Decision tree & outcome analysis' }}</div>
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#B794F4;"></div>{{ app()->getLocale() === 'tr' ? 'Tekrarlanabilir farklı sonuçlar' : 'Replayable with different outcomes' }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#B794F4;"></div>{{ __('portal.sol_f3_1') }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#B794F4;"></div>{{ __('portal.sol_f3_2') }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#B794F4;"></div>{{ __('portal.sol_f3_3') }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#B794F4;"></div>{{ __('portal.sol_f3_4') }}</div>
         </div>
         <div class="solution-chips">
             <span class="sol-chip" style="border-color: rgba(141,101,224,0.3); color:#B794F4;">🤖 AI-Generated</span>
@@ -298,17 +278,13 @@
     <div class="solution-content">
         <h3 style="color: #F5A3EE;">WAY AI Coach</h3>
         <p class="desc">
-            @if(app()->getLocale() === 'tr')
-                Kişiselleştirilmiş yapay zekâ koçluk platformu. Her öğrencinin ilgi alanları, güçlü ve zayıf yönleri dikkate alınarak özelleştirilmiş sohbetler oluşturur. Laravel WebSocket altyapısı ile gerçek zamanlı iletişim ve akıcı sohbet deneyimi sunar.
-            @else
-                A personalized AI coaching platform. Creates customized conversations based on each student's interests, strengths, and areas for growth. Delivers real-time communication and a fluid chat experience via Laravel WebSocket infrastructure.
-            @endif
+            {{ __('portal.sol_coach_desc') }}
         </p>
         <div class="solution-features">
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#F5A3EE;"></div>{{ app()->getLocale() === 'tr' ? 'Profil bazlı kişiselleştirme' : 'Profile-based personalization' }}</div>
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#F5A3EE;"></div>{{ app()->getLocale() === 'tr' ? 'Gerçek zamanlı WebSocket sohbet' : 'Real-time WebSocket chat' }}</div>
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#F5A3EE;"></div>{{ app()->getLocale() === 'tr' ? 'Oturum geçmişi ve takip' : 'Session history & tracking' }}</div>
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#F5A3EE;"></div>{{ app()->getLocale() === 'tr' ? 'Çok dilli AI asistan' : 'Multilingual AI assistant' }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#F5A3EE;"></div>{{ __('portal.sol_f4_1') }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#F5A3EE;"></div>{{ __('portal.sol_f4_2') }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#F5A3EE;"></div>{{ __('portal.sol_f4_3') }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#F5A3EE;"></div>{{ __('portal.sol_f4_4') }}</div>
         </div>
         <div class="solution-chips">
             <span class="sol-chip" style="border-color: rgba(237,132,228,0.3); color:#F5A3EE;">💬 Real-time</span>
@@ -328,17 +304,13 @@
     <div class="solution-content">
         <h3 style="color: #86EFAC;">Study Space</h3>
         <p class="desc">
-            @if(app()->getLocale() === 'tr')
-                Yapay zekâ destekli öğretim asistanı platformu. Öğrenciler istedikleri konuda soru sorabilir, ders seçebilir, sınıf seviyesine göre özelleştirilmiş interaktif dersler alabilir. Detaylı oturum geçmişi ile öğrenme yolculuğunu takip eder.
-            @else
-                An AI-powered teaching assistant platform. Students can ask questions on any topic, select subjects, and take interactive lessons customized to their grade level. Tracks the learning journey with detailed session history.
-            @endif
+            {{ __('portal.sol_study_desc') }}
         </p>
         <div class="solution-features">
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#86EFAC;"></div>{{ app()->getLocale() === 'tr' ? 'Konu & ders bazlı öğrenme' : 'Subject & topic-based learning' }}</div>
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#86EFAC;"></div>{{ app()->getLocale() === 'tr' ? 'Sınıf seviyesi ayarı' : 'Grade-level adjustment' }}</div>
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#86EFAC;"></div>{{ app()->getLocale() === 'tr' ? 'İnteraktif soru-cevap' : 'Interactive Q&A sessions' }}</div>
-            <div class="solution-feat"><div class="solution-feat-dot" style="background:#86EFAC;"></div>{{ app()->getLocale() === 'tr' ? 'Detaylı oturum geçmişi' : 'Detailed session history' }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#86EFAC;"></div>{{ __('portal.sol_f5_1') }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#86EFAC;"></div>{{ __('portal.sol_f5_2') }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#86EFAC;"></div>{{ __('portal.sol_f5_3') }}</div>
+            <div class="solution-feat"><div class="solution-feat-dot" style="background:#86EFAC;"></div>{{ __('portal.sol_f5_4') }}</div>
         </div>
         <div class="solution-chips">
             <span class="sol-chip" style="border-color: rgba(90,199,128,0.3); color:#86EFAC;">📚 Subject-Based</span>
@@ -351,24 +323,16 @@
 {{-- CTA --}}
 <div class="platform-overview reveal" style="margin-top: 3rem;">
     <h2>
-        @if(app()->getLocale() === 'tr')
-            Tüm Uygulamaları Keşfedin
-        @else
-            Explore All Applications
-        @endif
+        {{ __('portal.sol_cta_title') }}
     </h2>
     <p>
-        @if(app()->getLocale() === 'tr')
-            Ücretsiz kayıt olun ve DopiFuture ekosisteminin tüm gücünü okulunuza entegre edin.
-        @else
-            Register for free and integrate the full power of the DopiFuture ecosystem into your school.
-        @endif
+        {{ __('portal.sol_cta_desc') }}
     </p>
     <a href="{{ route('register.create') }}" class="btn-cta">
         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
         </svg>
-        {{ app()->getLocale() === 'tr' ? 'Hemen Başla' : 'Get Started Free' }}
+        {{ __('portal.hero_btn_start') }}
     </a>
 </div>
 @endsection
