@@ -1,6 +1,6 @@
 @extends('portal.layout')
-@section('title', 'DopiFuture — ' . (app()->getLocale() === 'tr' ? 'Dijital Eğitim Platformu' : 'Digital Education Platform'))
-@section('meta_description', app()->getLocale() === 'tr' ? 'DopiFuture ile okulunuzu geleceğe hazırlayın.' : 'Prepare your school for the future with DopiFuture.')
+@section('title', 'DopiFuture — ' . (__('portal.home_title')))
+@section('meta_description', __('portal.home_meta'))
 
 @section('content')
 <style>
@@ -370,19 +370,11 @@
     </div>
 
     <h1>
-        @if(app()->getLocale() === 'tr')
-            Eğitimde<br><span class="gradient-text">Dijital Dönüşüm</span><br>Burada Başlıyor
-        @else
-            The Future of<br><span class="gradient-text">Digital Education</span><br>Starts Here
-        @endif
+        {!! __('portal.hero_title') !!}
     </h1>
 
     <p class="tagline">
-        @if(app()->getLocale() === 'tr')
-            DopiFuture, yapay zekâ destekli simülasyonlar, girişimcilik laboratuvarları ve kişiselleştirilmiş koçluk ile eğitimi yeniden tanımlayan modüler bir platformdur.
-        @else
-            DopiFuture is a modular platform that redefines education through AI-powered simulations, entrepreneurship labs, and personalized coaching — all in one ecosystem.
-        @endif
+        {{ __('portal.hero_tagline') }}
     </p>
 
     <div class="hero-actions">
@@ -390,10 +382,10 @@
             <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
             </svg>
-            {{ app()->getLocale() === 'tr' ? 'Hemen Başla' : 'Get Started Free' }}
+            {{ __('portal.hero_btn_start') }}
         </a>
         <a href="{{ route('portal.solutions') }}" class="btn-hero btn-hero-outline">
-            {{ app()->getLocale() === 'tr' ? 'Uygulamaları Keşfet' : 'Explore Apps' }}
+            {{ __('portal.hero_btn_explore') }}
             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
             </svg>
@@ -406,36 +398,32 @@
     <div class="stat-item">
         <div class="stat-icon">🚀</div>
         <div class="stat-num" data-count="{{ $appCount }}">{{ $appCount }}</div>
-        <div class="stat-label">{{ app()->getLocale() === 'tr' ? 'Eğitim Uygulaması' : 'Learning Apps' }}</div>
+        <div class="stat-label">{{ __('portal.stat_apps') }}</div>
     </div>
     <div class="stat-item">
         <div class="stat-icon">🏫</div>
         <div class="stat-num" data-count="{{ $schoolCount }}">{{ $schoolCount }}+</div>
-        <div class="stat-label">{{ app()->getLocale() === 'tr' ? 'Partner Okul' : 'Partner Schools' }}</div>
+        <div class="stat-label">{{ __('portal.stat_schools') }}</div>
     </div>
     <div class="stat-item">
         <div class="stat-icon">🎓</div>
         <div class="stat-num" data-count="{{ $studentCount }}">{{ $studentCount }}+</div>
-        <div class="stat-label">{{ app()->getLocale() === 'tr' ? 'Aktif Öğrenci' : 'Active Students' }}</div>
+        <div class="stat-label">{{ __('portal.stat_students') }}</div>
     </div>
     <div class="stat-item">
         <div class="stat-icon">🎮</div>
         <div class="stat-num" data-count="{{ $simulationCount }}">{{ $simulationCount }}</div>
-        <div class="stat-label">{{ app()->getLocale() === 'tr' ? 'Simülasyon Senaryosu' : 'Simulation Scenarios' }}</div>
+        <div class="stat-label">{{ __('portal.stat_sims') }}</div>
     </div>
 </div>
 
 {{-- ═══════════════ APP SHOWCASE ═══════════════ --}}
 <section class="section">
     <h2 class="section-title reveal">
-        {{ app()->getLocale() === 'tr' ? 'Eğitim Ekosistemi' : 'The Education Ecosystem' }}
+        {{ __('portal.eco_title') }}
     </h2>
     <p class="section-subtitle reveal reveal-delay-1">
-        @if(app()->getLocale() === 'tr')
-            DopiFuture, beş güçlü uygulamadan oluşan bütünleşik bir eğitim platformudur. Her uygulama, öğrencilerin farklı yetkinliklerini geliştirmek için tasarlanmıştır.
-        @else
-            DopiFuture brings together five powerful applications into one unified education platform. Each app is purpose-built to develop different student competencies.
-        @endif
+        {{ __('portal.eco_subtitle') }}
     </p>
     <div class="section-divider reveal reveal-delay-2"></div>
 
@@ -451,11 +439,7 @@
             <div class="app-showcase-content">
                 <h3 style="color: #FFB347;">Mission Way</h3>
                 <p>
-                    @if(app()->getLocale() === 'tr')
-                        Multiplayer simülasyon tabanlı karar verme oyunu. Öğrenciler, deprem müdahalesi, diplomatik kriz yönetimi gibi gerçekçi senaryolarda farklı roller üstlenir. Her kararda puan kazanır, takım çalışması ve liderlik becerilerini geliştirir.
-                    @else
-                        A multiplayer simulation-based decision-making game. Students take on different roles in realistic scenarios like earthquake response and diplomatic crisis management. Every decision earns points while building teamwork and leadership skills.
-                    @endif
+                    {{ __('portal.mw_desc') }}
                 </p>
                 <div class="app-feature-chips">
                     <span class="app-chip" style="border-color: rgba(255,137,4,0.3); color: #FFB347;">🎮 Multiplayer</span>
@@ -476,11 +460,7 @@
             <div class="app-showcase-content">
                 <h3 style="color: #7CC8FF;">Way Startup Lab</h3>
                 <p>
-                    @if(app()->getLocale() === 'tr')
-                        Girişimcilik eğitiminin dijital laboratuvarı. Öğrenciler adım adım bir startup fikrini geliştirir, iş modeli oluşturur ve AI destekli değerlendirmelerle geri bildirim alır. Dosya yükleme, puan sistemi ve zorluk seviyeli görevler ile pratiğe dayalı öğrenme.
-                    @else
-                        The digital laboratory for entrepreneurship education. Students develop startup ideas step-by-step, build business models, and receive AI-powered feedback. Hands-on learning with file uploads, point systems, and difficulty-based tasks.
-                    @endif
+                    {{ __('portal.startup_desc') }}
                 </p>
                 <div class="app-feature-chips">
                     <span class="app-chip" style="border-color: rgba(67,172,255,0.3); color: #7CC8FF;">🧠 AI Evaluation</span>
@@ -501,11 +481,7 @@
             <div class="app-showcase-content">
                 <h3 style="color: #B794F4;">Role Galaxy</h3>
                 <p>
-                    @if(app()->getLocale() === 'tr')
-                        AI destekli rol simülatörü. Öğrenciler; mühendis, doktor, avukat gibi farklı mesleklere bürünerek gerçekçi senaryolar içinde kararlar alır. Yapay zekâ tarafından dinamik olarak oluşturulan hikaye dalları ile her deneyim benzersizdir.
-                    @else
-                        An AI-powered role simulator. Students step into professions like engineer, doctor, or lawyer, making decisions within realistic scenarios. With dynamically generated story branches by AI, every experience is unique.
-                    @endif
+                    {{ __('portal.role_desc') }}
                 </p>
                 <div class="app-feature-chips">
                     <span class="app-chip" style="border-color: rgba(141,101,224,0.3); color: #B794F4;">🤖 AI-Generated</span>
@@ -525,11 +501,7 @@
             <div class="app-showcase-content">
                 <h3 style="color: #F5A3EE;">WAY AI Coach</h3>
                 <p>
-                    @if(app()->getLocale() === 'tr')
-                        Kişiselleştirilmiş AI koçluk asistanı. Her öğrencinin profil bilgilerine, ilgi alanlarına ve performansına göre özelleştirilmiş konuşmalar sunar. Gerçek zamanlı WebSocket iletişimi ile akıcı bir sohbet deneyimi.
-                    @else
-                        A personalized AI coaching assistant. Delivers customized conversations based on each student's profile, interests, and performance. Real-time WebSocket communication provides a fluid chat experience.
-                    @endif
+                    {{ __('portal.coach_desc') }}
                 </p>
                 <div class="app-feature-chips">
                     <span class="app-chip" style="border-color: rgba(237,132,228,0.3); color: #F5A3EE;">💬 Real-time Chat</span>
@@ -549,11 +521,7 @@
             <div class="app-showcase-content">
                 <h3 style="color: #86EFAC;">Study Space</h3>
                 <p>
-                    @if(app()->getLocale() === 'tr')
-                        AI destekli öğretim asistanı. Öğrenciler herhangi bir konuda soru sorabilir, ders notu oluşturabilir ve interaktif öğrenme oturumları başlatabilir. Ders bazlı konu seçimi, sınıf seviyesi ayarı ve detaylı oturum geçmişi ile zengin bir öğrenme deneyimi.
-                    @else
-                        An AI-powered teaching assistant. Students can ask questions on any topic, create study notes, and start interactive learning sessions. Rich learning experience with subject selection, grade-level adjustment, and detailed session history.
-                    @endif
+                    {{ __('portal.study_desc') }}
                 </p>
                 <div class="app-feature-chips">
                     <span class="app-chip" style="border-color: rgba(90,199,128,0.3); color: #86EFAC;">📚 Subject-Based</span>
@@ -570,14 +538,10 @@
 {{-- ═══════════════ WHY DOPIFUTURE ═══════════════ --}}
 <section class="section">
     <h2 class="section-title reveal">
-        {{ app()->getLocale() === 'tr' ? 'Neden DopiFuture?' : 'Why DopiFuture?' }}
+        {{ __('portal.why_title') }}
     </h2>
     <p class="section-subtitle reveal reveal-delay-1">
-        @if(app()->getLocale() === 'tr')
-            Eğitim yönetimi için ihtiyacınız olan her şey tek bir platformda. Modern teknolojiyi pedagojik uzmanlıkla birleştiriyoruz.
-        @else
-            Everything you need for education management in a single platform. We combine modern technology with pedagogical expertise.
-        @endif
+        {{ __('portal.why_subtitle') }}
     </p>
     <div class="section-divider reveal reveal-delay-2"></div>
 
@@ -586,48 +550,48 @@
             <div class="feature-icon-wrap" style="background: rgba(59,130,246,0.12);">
                 <svg width="24" height="24" fill="none" stroke="#60a5fa" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
             </div>
-            <h3>{{ app()->getLocale() === 'tr' ? 'Merkezi Okul Yönetimi' : 'Centralized School Management' }}</h3>
-            <p>{{ app()->getLocale() === 'tr' ? 'Tüm okullarınızı, sınıflarınızı ve kullanıcılarınızı tek bir panelden yönetin. Hiyerarşik yapı ile müdür, öğretmen ve öğrenci erişimlerini kontrol edin.' : 'Manage all schools, classes, and users from one panel. Control principal, teacher, and student access with hierarchical structure.' }}</p>
+            <h3>{{ __('portal.feat1_title') }}</h3>
+            <p>{{ __('portal.feat1_desc') }}</p>
         </div>
 
         <div class="feature-card reveal reveal-delay-1">
             <div class="feature-icon-wrap" style="background: rgba(168,85,247,0.12);">
                 <svg width="24" height="24" fill="none" stroke="#c084fc" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
             </div>
-            <h3>{{ app()->getLocale() === 'tr' ? 'Akıllı Lisans Sistemi' : 'Smart License System' }}</h3>
-            <p>{{ app()->getLocale() === 'tr' ? 'Kontenjan bazlı lisanslama ile hangi okulun hangi uygulamaya erişeceğini belirleyin. Otomatik süre takibi ve yenileme uyarıları.' : 'Seat-based licensing to control which school accesses which app. Automatic expiry tracking and renewal alerts.' }}</p>
+            <h3>{{ __('portal.feat2_title') }}</h3>
+            <p>{{ __('portal.feat2_desc') }}</p>
         </div>
 
         <div class="feature-card reveal reveal-delay-2">
             <div class="feature-icon-wrap" style="background: rgba(34,197,94,0.12);">
                 <svg width="24" height="24" fill="none" stroke="#4ade80" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
             </div>
-            <h3>{{ app()->getLocale() === 'tr' ? '9 Farklı Kullanıcı Rolü' : '9 Distinct User Roles' }}</h3>
-            <p>{{ app()->getLocale() === 'tr' ? 'Süper admin, okul müdürü, öğretmen, öğrenci ve daha fazlası. Her rol için özelleştirilmiş panel deneyimi ve erişim hakları.' : 'Super admin, school principal, teacher, student, and more. Customized panel experience and access rights for each role.' }}</p>
+            <h3>{{ __('portal.feat3_title') }}</h3>
+            <p>{{ __('portal.feat3_desc') }}</p>
         </div>
 
         <div class="feature-card reveal reveal-delay-1">
             <div class="feature-icon-wrap" style="background: rgba(251,146,60,0.12);">
                 <svg width="24" height="24" fill="none" stroke="#fb923c" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
             </div>
-            <h3>{{ app()->getLocale() === 'tr' ? 'Gerçek Zamanlı Raporlar' : 'Real-time Reports' }}</h3>
-            <p>{{ app()->getLocale() === 'tr' ? 'Öğrenci performansını, simülasyon skorlarını ve uygulama kullanımını detaylı grafiklerle takip edin. Görev atamaları ve ilerleme izleme.' : 'Track student performance, simulation scores, and app usage with detailed charts. Assignment management and progress tracking.' }}</p>
+            <h3>{{ __('portal.feat4_title') }}</h3>
+            <p>{{ __('portal.feat4_desc') }}</p>
         </div>
 
         <div class="feature-card reveal reveal-delay-2">
             <div class="feature-icon-wrap" style="background: rgba(56,189,248,0.12);">
                 <svg width="24" height="24" fill="none" stroke="#38bdf8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
             </div>
-            <h3>{{ app()->getLocale() === 'tr' ? 'Mobil Uygulama Entegrasyonu' : 'Mobile App Integration' }}</h3>
-            <p>{{ app()->getLocale() === 'tr' ? 'Öğrenciler mobil uygulamadan tüm eğitim modüllerine erişir, öğretmenler web panelden izler. Çapraz platform senkronizasyonu.' : 'Students access all learning modules via mobile app, while teachers monitor from web panel. Cross-platform sync.' }}</p>
+            <h3>{{ __('portal.feat5_title') }}</h3>
+            <p>{{ __('portal.feat5_desc') }}</p>
         </div>
 
         <div class="feature-card reveal reveal-delay-3">
             <div class="feature-icon-wrap" style="background: rgba(236,72,153,0.12);">
                 <svg width="24" height="24" fill="none" stroke="#f472b6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
             </div>
-            <h3>{{ app()->getLocale() === 'tr' ? 'Çok Dilli Platform' : 'Multi-Language Platform' }}</h3>
-            <p>{{ app()->getLocale() === 'tr' ? 'Türkçe ve İngilizce tam destek. Öğrenciler kendi dillerinde öğrenirken, yöneticiler tercih ettikleri dilde çalışır.' : 'Full Turkish and English support. Students learn in their language while administrators work in their preferred one.' }}</p>
+            <h3>{{ __('portal.feat6_title') }}</h3>
+            <p>{{ __('portal.feat6_desc') }}</p>
         </div>
     </div>
 </section>
@@ -637,37 +601,25 @@
     <div class="vision-section reveal">
         <div style="font-size: 3rem; margin-bottom: 1.5rem;">✨</div>
         <blockquote class="vision-quote">
-            @if(app()->getLocale() === 'tr')
-                "Her öğrenci eşsizdir. DopiFuture, her öğrencinin kendi hızında, kendi ilgi alanlarında ve kendi potansiyelinin doruklarında öğrenmesini sağlayan teknolojiyi sunar."
-            @else
-                "Every student is unique. DopiFuture delivers the technology that enables each student to learn at their own pace, in their own areas of interest, and at the peak of their potential."
-            @endif
+            {{ __('portal.vision_quote') }}
         </blockquote>
-        <p class="vision-author">— DopiFuture {{ app()->getLocale() === 'tr' ? 'Vizyonu' : 'Vision' }}</p>
+        <p class="vision-author">— DopiFuture {{ __('portal.vision_author') }}</p>
     </div>
 </section>
 
 {{-- ═══════════════ CTA ═══════════════ --}}
 <section class="cta-section reveal">
     <h2>
-        @if(app()->getLocale() === 'tr')
-            Okulunuzu Dijital Geleceğe Taşıyın
-        @else
-            Bring Your School to the Digital Future
-        @endif
+        {{ __('portal.cta_title') }}
     </h2>
     <p>
-        @if(app()->getLocale() === 'tr')
-            Ücretsiz kayıt olun, tüm uygulamaları keşfedin ve eğitim deneyiminizi dönüştürün.
-        @else
-            Register for free, explore all applications, and transform your educational experience.
-        @endif
+        {{ __('portal.cta_desc') }}
     </p>
     <a href="{{ route('register.create') }}" class="btn-hero btn-hero-primary">
         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
         </svg>
-        {{ app()->getLocale() === 'tr' ? 'Okulumu Kaydet' : 'Register My School' }}
+        {{ __('portal.cta_btn') }}
     </a>
 </section>
 @endsection

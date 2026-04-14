@@ -77,9 +77,10 @@ class PortalController extends Controller
     public function switchLocale(Request $request)
     {
         $locale = $request->input('locale', 'tr');
+        $validLocales = \App\Models\Language::getActiveCodes();
 
-        if (!in_array($locale, ['tr', 'en'])) {
-            $locale = 'tr';
+        if (!in_array($locale, $validLocales)) {
+            $locale = \App\Models\Language::getDefault()?->code ?? 'tr';
         }
 
         // Save to session (for guests and auth users alike)

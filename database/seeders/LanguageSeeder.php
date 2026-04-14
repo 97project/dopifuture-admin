@@ -33,5 +33,18 @@ class LanguageSeeder extends Seeder
                 'sort_order' => 2,
             ]
         );
+
+        Language::firstOrCreate(
+            ['code' => 'mn'],
+            [
+                'name' => 'Mongolian',
+                'native_name' => 'Монгол',
+                'is_active' => true,
+                'is_default' => false,
+                'fallback_code' => 'en',
+                'direction' => 'ltr',
+                'sort_order' => 3,
+            ]
+        );
     }
 }
