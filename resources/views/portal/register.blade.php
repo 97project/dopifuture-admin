@@ -103,7 +103,7 @@
                     <div>
                         <label class="form-label">{{ __('admin.email') }} *</label>
                         <input type="email" name="email" value="{{ old('email') }}" required class="form-input"
-                            placeholder="admin@school.edu.tr">
+                            placeholder="{{ __('portal.email_placeholder') }}">
                         @error('email') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
                     <div>

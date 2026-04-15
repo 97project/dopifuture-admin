@@ -64,7 +64,7 @@
             <button type="button" onclick="document.getElementById('addUserModal').style.display='flex'"
                     style="display:inline-flex;align-items:center;gap:8px;padding:10px 24px;background:#10B981;color:#fff;border:none;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;">
                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-width="2" d="M12 8v8m-4-4h8"/></svg>
-                {{ $currentRole === 'teacher' ? 'Add New Teacher' : 'Add New Student' }}
+                {{ $currentRole === 'teacher' ? __('portal.add_new_teacher') : __('portal.add_new_student') }}
             </button>
         </div>
     </div>
@@ -76,7 +76,7 @@
             <thead>
                 <tr>
                     <th style="width:40px;">{{ __('portal.no_num') }}</th>
-                    <th>{{ $currentRole === 'student' ? 'Student Name' : 'Teacher Name' }}</th>
+                    <th>{{ $currentRole === 'student' ? __('portal.student_name') : __('portal.teacher_name') }}</th>
                     <th>{{ __('admin.email') }}</th>
                     <th>{{ $currentRole === 'student' ? 'Class & Teacher' : 'Assigned Classes' }}</th>
                     <th>{{ __('admin.actions') }}</th>
@@ -179,7 +179,7 @@
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
-            <div class="dp-modal-title">{{ $currentRole === 'teacher' ? 'Add New Teacher' : 'Add New Student' }}</div>
+            <div class="dp-modal-title">{{ $currentRole === 'teacher' ? __('portal.add_new_teacher') : __('portal.add_new_student') }}</div>
             <p class="dp-modal-subtitle">Fill in the details below to add a new {{ $currentRole }}.</p>
 
             @if($errors->any())
@@ -204,24 +204,24 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
                     <div>
                         <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">{{ __('admin.name') }} *</label>
-                        <input type="text" name="name" value="{{ old('name') }}" class="dp-form-input" placeholder="Enter first name" required style="{{ $errors->has('name') ? 'border-color:#ef4444;' : '' }}">
+                        <input type="text" name="name" value="{{ old('name') }}" class="dp-form-input" placeholder="{{ __('portal.enter_first_name') }}" required style="{{ $errors->has('name') ? 'border-color:#ef4444;' : '' }}">
                         @error('name') <p style="font-size:11px;color:#ef4444;margin:4px 0 0 0;">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">{{ __('admin.surname') }}</label>
-                        <input type="text" name="surname" value="{{ old('surname') }}" class="dp-form-input" placeholder="Enter last name">
+                        <input type="text" name="surname" value="{{ old('surname') }}" class="dp-form-input" placeholder="{{ __('portal.enter_last_name') }}">
                     </div>
                 </div>
 
                 <div style="margin-bottom:16px;">
-                    <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">E-mail *</label>
-                    <input type="email" name="email" value="{{ old('email') }}" class="dp-form-input" placeholder="name@example.com" required style="{{ $errors->has('email') ? 'border-color:#ef4444;' : '' }}">
+                    <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">{{ __('admin.email') }} *</label>
+                    <input type="email" name="email" value="{{ old('email') }}" class="dp-form-input" placeholder="{{ __('portal.email_placeholder') }}" required style="{{ $errors->has('email') ? 'border-color:#ef4444;' : '' }}">
                     @error('email') <p style="font-size:11px;color:#ef4444;margin:4px 0 0 0;">{{ $message }}</p> @enderror
                 </div>
 
                 <div style="margin-bottom:16px;">
                     <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">Password *</label>
-                    <input type="password" name="password" class="dp-form-input" placeholder="Minimum 6 characters" required minlength="6" style="{{ $errors->has('password') ? 'border-color:#ef4444;' : '' }}">
+                    <input type="password" name="password" class="dp-form-input" placeholder="{{ __('portal.min_6_chars') }}" required minlength="6" style="{{ $errors->has('password') ? 'border-color:#ef4444;' : '' }}">
                     @error('password') <p style="font-size:11px;color:#ef4444;margin:4px 0 0 0;">{{ $message }}</p> @enderror
                 </div>
 
@@ -243,7 +243,7 @@
                     <svg width="28" height="28" fill="none" stroke="#3B82F6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                 </div>
                 <div class="dp-modal-title">{{ __('portal.reset_password') }}</div>
-                <p class="dp-modal-subtitle">Are you sure you want to reset this user's password?</p>
+                <p class="dp-modal-subtitle">{{ __('portal.confirm_reset_password_msg') }}</p>
             </div>
             {{-- User info card (populated via AJAX) --}}
             <div id="resetUserInfo" style="background:rgba(59,130,246,0.04);border:1px solid rgba(59,130,246,0.15);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:none;">

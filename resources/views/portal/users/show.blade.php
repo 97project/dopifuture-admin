@@ -40,7 +40,7 @@
             </div>
             <div>
                 <div style="font-size:12px;color:var(--color-txt-muted);margin-bottom:4px;">{{ __('admin.status') }}</div>
-                <span class="dp-badge {{ $user->status === 'active' ? 'dp-badge-active' : 'dp-badge-inactive' }}">{{ $user->status === 'active' ? 'Active' : 'Inactive' }}</span>
+                <span class="dp-badge {{ $user->status === 'active' ? 'dp-badge-active' : 'dp-badge-inactive' }}">{{ $user->status === 'active' ? __('portal.active') : __('portal.inactive') }}</span>
             </div>
             <div>
                 <div style="font-size:12px;color:var(--color-txt-muted);margin-bottom:4px;">{{ __('portal.registration_date') }}</div>

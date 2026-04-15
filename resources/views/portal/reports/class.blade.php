@@ -35,7 +35,7 @@
 
     @if(isset($reportData['user_stats']) && count($reportData['user_stats']))
     <div class="dp-card">
-        <div class="dp-card-title">👥 Student Performance</div>
+        <div class="dp-card-title">👥 {{ __('portal.student_performance') }}</div>
         <table class="dp-table">
             <thead><tr>
                 <th>{{ __('portal.student') }}</th>
@@ -89,7 +89,7 @@
 
     {{-- Students List --}}
     <div class="dp-card">
-        <div class="dp-card-title">👥 Class Students</div>
+        <div class="dp-card-title">👥 {{ __('portal.class_students') }}</div>
         <table class="dp-table">
             <thead><tr><th>{{ __('portal.student') }}</th><th>{{ __('admin.email') }}</th><th></th></tr></thead>
             <tbody>

@@ -1,10 +1,10 @@
 @extends('portal.app')
-@section('title', $editUser->exists ? 'Edit User' : 'New User')
-@section('page-title', $editUser->exists ? 'Edit User' : 'New User')
+@section('title', $editUser->exists ? __('portal.edit_user') : 'New User')
+@section('page-title', $editUser->exists ? __('portal.edit_user') : 'New User')
 
 @section('content')
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-        <div style="font-size:18px;font-weight:600;">{{ $editUser->exists ? 'Edit User' : 'New User' }}</div>
+        <div style="font-size:18px;font-weight:600;">{{ $editUser->exists ? __('portal.edit_user') : 'New User' }}</div>
         <a href="{{ route('portal.users.index') }}" class="dp-btn-ghost">← Back to Users</a>
     </div>
 
@@ -26,13 +26,13 @@
                     </div>
                 </div>
                 <div class="dp-form-group">
-                    <label class="dp-form-label">E-mail *</label>
+                    <label class="dp-form-label">{{ __('admin.email') }} *</label>
                     <input type="email" name="email" value="{{ old('email', $editUser->email) }}" required class="dp-form-input">
                     @error('email') <p class="dp-form-error">{{ $message }}</p> @enderror
                 </div>
                 <div class="dp-form-group">
                     <label class="dp-form-label">Password {{ $editUser->exists ? '' : '*' }}</label>
-                    <input type="password" name="password" class="dp-form-input" {{ $editUser->exists ? '' : 'required' }} placeholder="{{ $editUser->exists ? 'Fill to change' : '' }}">
+                    <input type="password" name="password" class="dp-form-input" {{ $editUser->exists ? '' : 'required' }} placeholder="{{ $editUser->exists ? __('portal.fill_to_change') : '' }}">
                     @error('password') <p class="dp-form-error">{{ $message }}</p> @enderror
                 </div>
                 {{-- Role: otomatik atanır, formda gösterilmez --}}
@@ -73,7 +73,7 @@
         </form>
 
         @if($editUser->exists)
-            <form action="{{ route('portal.users.destroy', $editUser) }}" method="POST" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--color-row-border);" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
+            <form action="{{ route('portal.users.destroy', $editUser) }}" method="POST" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--color-row-border);" onsubmit="return confirm('{{ __("portal.confirm_delete_user") }}')">
                 @csrf @method('DELETE')
                 <button type="submit" style="background:var(--color-error-red);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;">{{ __('portal.delete_this_user') }}</button>
             </form>

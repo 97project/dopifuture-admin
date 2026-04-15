@@ -1,13 +1,13 @@
 @extends('portal.app')
-@section('title', $license->exists ? 'Edit License' : 'Add New License')
-@section('page-title', $license->exists ? 'Edit License' : 'Add New License')
+@section('title', $license->exists ? __('portal.edit_license') : 'Add New License')
+@section('page-title', $license->exists ? __('portal.edit_license') : 'Add New License')
 @section('content')
     {{-- ═══ Figma F-72: Add New Licence form — centered card ═══ --}}
     <div>
 
         {{-- Title + Subtitle --}}
         <h2 style="font-size:24px;font-weight:700;margin:0 0 6px 0;color:#111;font-family:'Nunito',sans-serif;">
-            {{ $license->exists ? 'Edit License' : 'Add New License' }}
+            {{ $license->exists ? __('portal.edit_license') : 'Add New License' }}
         </h2>
         <p style="font-size:14px;color:#6B7280;margin:0 0 28px 0;">
             {{ $license->exists ? 'Update the license details below.' : 'Fill in the details below to create a new license.' }}
@@ -81,7 +81,7 @@
                 </div>
                 <div>
                     <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">{{ __('admin.email') }}</label>
-                    <input type="email" name="email" value="{{ old('email', $license->email ?? '') }}" placeholder="name@example.com"
+                    <input type="email" name="email" value="{{ old('email', $license->email ?? '') }}" placeholder="{{ __('portal.email_placeholder') }}"
                         style="width:100%;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;background:#F8FAFC;font-size:14px;color:#374151;outline:none;font-family:inherit;box-sizing:border-box;">
                 </div>
             </div>

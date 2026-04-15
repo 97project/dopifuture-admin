@@ -78,7 +78,7 @@
                             @if($canManage)
                             <form action="{{ route('portal.classes.remove-student', [$class, $student]) }}" method="POST" onsubmit="return confirm('{{ __("portal.confirm_remove_student") }}')">
                                 @csrf @method('DELETE')
-                                <button type="submit" class="dp-action" style="color:#E33131;border:none;background:none;cursor:pointer;" title="Remove">
+                                <button type="submit" class="dp-action" style="color:#E33131;border:none;background:none;cursor:pointer;" title="{{ __('portal.remove') }}">
                                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
                             </form>
@@ -136,7 +136,7 @@
                             @if($canManage)
                             <form action="{{ route('portal.classes.remove-teacher', [$class, $teacher]) }}" method="POST" onsubmit="return confirm('{{ __("portal.confirm_remove_teacher") }}')">
                                 @csrf @method('DELETE')
-                                <button type="submit" class="dp-action" style="color:#E33131;border:none;background:none;cursor:pointer;" title="Remove">
+                                <button type="submit" class="dp-action" style="color:#E33131;border:none;background:none;cursor:pointer;" title="{{ __('portal.remove') }}">
                                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
                             </form>

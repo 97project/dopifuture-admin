@@ -90,7 +90,7 @@
                     <input type="number" name="seat_count" class="dp-form-input" min="1" required>
                 </div>
                 <div>
-                    <label class="dp-form-label">Amount (₺)</label>
+                    <label class="dp-form-label">{{ __('portal.amount') }} (₺)</label>
                     <input type="number" name="amount" class="dp-form-input" step="0.01" min="0">
                 </div>
                 <div>

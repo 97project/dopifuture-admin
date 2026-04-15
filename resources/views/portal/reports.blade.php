@@ -72,7 +72,7 @@
                                     <td>{{ $appUser->email }}</td>
                                     <td>
                                         <span class="badge {{ $appUser->status === 'active' ? 'badge-success' : 'badge-danger' }}">
-                                            {{ $appUser->status === 'active' ? 'Active' : 'Inactive' }}
+                                            {{ $appUser->status === 'active' ? __('portal.active') : __('portal.inactive') }}
                                         </span>
                                     </td>
                                     <td>

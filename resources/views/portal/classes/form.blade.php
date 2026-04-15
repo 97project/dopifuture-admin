@@ -1,10 +1,10 @@
 @extends('portal.app')
-@section('title', $class->exists ? 'Edit Class' : 'New Class')
-@section('page-title', $class->exists ? 'Edit Class' : 'New Class')
+@section('title', $class->exists ? __('portal.edit_class') : 'New Class')
+@section('page-title', $class->exists ? __('portal.edit_class') : 'New Class')
 
 @section('content')
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-        <div style="font-size:18px;font-weight:600;">{{ $class->exists ? 'Edit Class' : 'New Class' }}</div>
+        <div style="font-size:18px;font-weight:600;">{{ $class->exists ? __('portal.edit_class') : 'New Class' }}</div>
         <a href="{{ route('portal.classes.index') }}" class="dp-btn-ghost">← Back to Classes</a>
     </div>
 
@@ -60,7 +60,7 @@
         </form>
 
         @if($class->exists)
-            <form action="{{ route('portal.classes.destroy', $class) }}" method="POST" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--color-row-border);" onsubmit="return confirm('Are you sure you want to delete this class? This action cannot be undone.')">
+            <form action="{{ route('portal.classes.destroy', $class) }}" method="POST" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--color-row-border);" onsubmit="return confirm('{{ __("portal.confirm_delete_class") }}')">
                 @csrf @method('DELETE')
                 <button type="submit" style="background:var(--color-error-red, #e33131);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;">{{ __('portal.delete_this_class') }}</button>
             </form>

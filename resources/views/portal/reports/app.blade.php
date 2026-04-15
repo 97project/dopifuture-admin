@@ -167,7 +167,7 @@
                             <td>
                                 <div style="display:flex;align-items:center;gap:12px;white-space:nowrap;">
                                     {{-- Details --}}
-                                    <a href="{{ route('portal.reports.mission.detail', $mission->id) }}" class="dp-action dp-action-view" title="View Details">
+                                    <a href="{{ route('portal.reports.mission.detail', $mission->id) }}" class="dp-action dp-action-view" title="{{ __('portal.view_details') }}">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     </a>
                                 </div>
@@ -231,7 +231,7 @@
                             </td>
                             <td>
                                 @if($startup->deadline_overdue)
-                                    <span style="color:#ef4444;font-weight:500;">{{ $startup->deadline }} <span title="Overdue">⚠️</span></span>
+                                    <span style="color:#ef4444;font-weight:500;">{{ $startup->deadline }} <span title="{{ __('portal.overdue') }}">⚠️</span></span>
                                 @else
                                     <span class="muted">{{ $startup->deadline }}</span>
                                 @endif
@@ -278,7 +278,7 @@
                             </td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;white-space:nowrap;">
-                                    <a href="{{ route('portal.reports.startup.detail', $startup->id) }}" class="dp-action dp-action-view" title="View Report">
+                                    <a href="{{ route('portal.reports.startup.detail', $startup->id) }}" class="dp-action dp-action-view" title="{{ __('portal.view_report') }}">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     </a>
                                 </div>
@@ -325,7 +325,7 @@
                             <td style="text-align:center;">{{ $stat['discussion_count'] }}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:8px;">
-                                    <a href="{{ route('portal.reports.student.study-space', $stat['user']->id) }}" class="dp-action dp-action-view" title="Study Space Detail">
+                                    <a href="{{ route('portal.reports.student.study-space', $stat['user']->id) }}" class="dp-action dp-action-view" title="{{ __('portal.study_space_detail') }}">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     </a>
                                     <a href="{{ route('portal.reports.student.study-space', $stat['user']->id) }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">Details →</a>
@@ -374,14 +374,14 @@
                             <td style="text-align:center;">{{ $stat['interaction_count'] }}</td>
                             <td style="text-align:center;">
                                 @if($isAlert)
-                                    <span style="color:#ef4444;font-weight:600;">{{ \App\Services\ReportService::formatDuration($stat['total_duration'] ?? 0) }} <span title="Alert">🔴</span></span>
+                                    <span style="color:#ef4444;font-weight:600;">{{ \App\Services\ReportService::formatDuration($stat['total_duration'] ?? 0) }} <span title="{{ __('portal.alert') }}">🔴</span></span>
                                 @else
                                     {{ \App\Services\ReportService::formatDuration($stat['total_duration'] ?? 0) }}
                                 @endif
                             </td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:8px;">
-                                    <a href="{{ route('portal.reports.student.way-ai-coach', $stat['user']->id) }}" class="dp-action dp-action-view" title="WAY AI Coach Detail">
+                                    <a href="{{ route('portal.reports.student.way-ai-coach', $stat['user']->id) }}" class="dp-action dp-action-view" title="{{ __('portal.way_ai_coach_detail') }}">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     </a>
                                     <a href="{{ route('portal.reports.student.way-ai-coach', $stat['user']->id) }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">Details →</a>
@@ -462,7 +462,7 @@
                             </td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:8px;">
-                                    <a href="{{ route('portal.reports.student.role-galaxy', $stat['user']->id) }}" class="dp-action dp-action-view" title="Role Galaxy Detail">
+                                    <a href="{{ route('portal.reports.student.role-galaxy', $stat['user']->id) }}" class="dp-action dp-action-view" title="{{ __('portal.role_galaxy_detail') }}">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     </a>
                                     <a href="{{ route('portal.reports.student.role-galaxy', $stat['user']->id) }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">Details →</a>
@@ -527,7 +527,7 @@
 
         {{-- Student table --}}
         <div class="dp-card">
-            <div class="dp-card-title">👥 Student Performance</div>
+            <div class="dp-card-title">👥 {{ __('portal.student_performance') }}</div>
             <table class="dp-table">
                 <thead><tr>
                     @if($slug === 'way-startup')
@@ -619,7 +619,7 @@
                                 $detailRoute = isset($perAppRouteMap[$slug]) ? route($perAppRouteMap[$slug], $us['user']->id) : route('portal.reports.student', $us['user']->id);
                             @endphp
                             <div style="display:flex;align-items:center;gap:8px;">
-                                <a href="{{ $detailRoute }}" class="dp-action dp-action-view" title="Details">
+                                <a href="{{ $detailRoute }}" class="dp-action dp-action-view" title="{{ __('portal.view_details') }}">
                                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 </a>
                                 <a href="{{ $detailRoute }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">Details →</a>
@@ -730,7 +730,7 @@
     @else
         {{-- Non-mission-way performance: student performance table --}}
         <div class="dp-card">
-            <div class="dp-card-title">👥 Student Performance</div>
+            <div class="dp-card-title">👥 {{ __('portal.student_performance') }}</div>
             <table class="dp-table">
                 <thead><tr>
                     <th>{{ __('portal.student') }}</th>
@@ -763,7 +763,7 @@
                         <td>
                             @if($us['user'])
                             <div style="display:flex;align-items:center;gap:8px;">
-                                <a href="{{ route('portal.reports.student', $us['user']->id ?? 0) }}?app={{ $slug }}" class="dp-action dp-action-view" title="Student Report">
+                                <a href="{{ route('portal.reports.student', $us['user']->id ?? 0) }}?app={{ $slug }}" class="dp-action dp-action-view" title="{{ __('portal.student_report') }}">
                                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 </a>
                                 <a href="{{ route('portal.reports.student', $us['user']->id ?? 0) }}?app={{ $slug }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">Details →</a>
@@ -785,7 +785,7 @@
 {{-- ── Wings / Rozetler (tüm Vega apps) ────────────────── --}}
 @if(!empty($wings) && $wings->count() > 0)
 <div class="dp-card" style="margin-top:24px;">
-    <div class="dp-card-title">🦋 Way Wings (Badges)</div>
+    <div class="dp-card-title">🦋 {{ __('portal.way_wings_badges') }}</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:12px;">
         @foreach($wings as $wing)
         <div style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:10px;background:var(--color-input-bg);border:1px solid var(--color-row-border);">
@@ -807,7 +807,7 @@
 {{-- ── Lessons / Ders Kataloğu (way-ai-coach) ────────── --}}
 @if(!empty($lessons) && $lessons->count() > 0)
 <div class="dp-card" style="margin-top:24px;">
-    <div class="dp-card-title">📚 Lesson Catalog</div>
+    <div class="dp-card-title">📚 {{ __('portal.lesson_catalog') }}</div>
     <div style="overflow-x:auto;margin-top:12px;">
         <table class="dp-table">
             <thead>
@@ -845,7 +845,7 @@
 {{-- ── Scenarios / Senaryolar (role-galaxy) ─────────── --}}
 @if(!empty($scenarios) && $scenarios->count() > 0)
 <div class="dp-card" style="margin-top:24px;">
-    <div class="dp-card-title">🎮 Scenario Catalog</div>
+    <div class="dp-card-title">🎮 {{ __('portal.scenario_catalog') }}</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:12px;">
         @foreach($scenarios as $scenario)
         <div style="padding:16px;border-radius:12px;background:var(--color-input-bg);border:1px solid var(--color-row-border);transition:transform 0.15s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
@@ -877,7 +877,7 @@
 {{-- ── Objectives / Hedefler (mission-way) ──────────── --}}
 @if(!empty($objectives) && $objectives->count() > 0)
 <div class="dp-card" style="margin-top:24px;">
-    <div class="dp-card-title">🎯 Simulation Objectives</div>
+    <div class="dp-card-title">🎯 {{ __('portal.simulation_objectives') }}</div>
     <div style="overflow-x:auto;margin-top:12px;">
         <table class="dp-table">
             <thead>
@@ -906,7 +906,7 @@
 {{-- ── Media Assets (mission-way) ──────────────────── --}}
 @if(!empty($mediaAssets) && $mediaAssets->count() > 0)
 <div class="dp-card" style="margin-top:24px;">
-    <div class="dp-card-title">🖼️ Media Assets</div>
+    <div class="dp-card-title">🖼️ {{ __('portal.media_assets') }}</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:12px;">
         @foreach($mediaAssets as $asset)
         <div style="padding:12px;border-radius:10px;background:var(--color-input-bg);border:1px solid var(--color-row-border);text-align:center;">
@@ -926,7 +926,7 @@
 {{-- ── SimulationWing Stats (mission-way) ──────────── --}}
 @if(!empty($simWingStats))
 <div class="dp-card" style="margin-top:24px;">
-    <div class="dp-card-title">📊 SimulationWing Statistics</div>
+    <div class="dp-card-title">📊 {{ __('portal.simulation_wing_stats') }}</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:12px;">
         @foreach((array)$simWingStats as $key => $value)
             @if(!is_array($value))
@@ -943,7 +943,7 @@
 {{-- ── Simulation Version Roles (mission-way) ────── --}}
 @if(!empty($simVersionRoles) && $simVersionRoles->count() > 0)
 <div class="dp-card" style="margin-top:24px;">
-    <div class="dp-card-title">🎭 Version Roles</div>
+    <div class="dp-card-title">🎭 {{ __('portal.version_roles') }}</div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">
         @foreach($simVersionRoles as $role)
         <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:var(--color-input-bg);border:1px solid var(--color-row-border);font-size:12px;font-weight:500;">
@@ -957,7 +957,7 @@
 {{-- ── Languages (mission-way) ─────────────────────── --}}
 @if(!empty($languages) && $languages->count() > 0)
 <div class="dp-card" style="margin-top:24px;">
-    <div class="dp-card-title">🌐 Supported Languages</div>
+    <div class="dp-card-title">🌐 {{ __('portal.supported_languages') }}</div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">
         @foreach($languages as $lang)
         <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:linear-gradient(135deg,rgba(6,182,212,0.1),rgba(139,92,246,0.1));border:1px solid rgba(6,182,212,0.2);font-size:12px;font-weight:500;">
@@ -1069,7 +1069,7 @@ new Chart(document.getElementById('sessionsChart'), {
             {{-- Deadline --}}
             <div class="figma-field">
                 <label class="figma-label">{{ __('portal.deadline') }}</label>
-                <input type="date" name="deadline" required min="{{ now()->format('Y-m-d') }}" class="figma-input" placeholder="Please select">
+                <input type="date" name="deadline" required min="{{ now()->format('Y-m-d') }}" class="figma-input" placeholder="{{ __('portal.please_select') }}">
             </div>
 
             <button type="submit" id="mwSubmitBtn" class="figma-submit-btn">
@@ -1122,7 +1122,7 @@ new Chart(document.getElementById('sessionsChart'), {
             {{-- Deadline --}}
             <div class="figma-field">
                 <label class="figma-label">{{ __('portal.deadline') }}</label>
-                <input type="date" name="due_date" required min="{{ now()->format('Y-m-d') }}" class="figma-input" placeholder="Please select">
+                <input type="date" name="due_date" required min="{{ now()->format('Y-m-d') }}" class="figma-input" placeholder="{{ __('portal.please_select') }}">
             </div>
 
             <button type="submit" class="figma-submit-btn">

@@ -113,7 +113,7 @@
         @if(!empty($premiumStatus))
         <div style="margin-left:auto;">
             <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:linear-gradient(135deg,#F59E0B,#EF4444);color:#fff;font-size:12px;font-weight:600;">
-                ⭐ {{ is_array($premiumStatus) ? ($premiumStatus['plan'] ?? ($premiumStatus['status'] ?? 'Premium')) : ($premiumStatus === true ? 'Premium' : $premiumStatus) }}
+                ⭐ {{ is_array($premiumStatus) ? ($premiumStatus['plan'] ?? ($premiumStatus['status'] ?? __('portal.premium'))) : ($premiumStatus === true ? __('portal.premium') : $premiumStatus) }}
             </span>
         </div>
         @endif

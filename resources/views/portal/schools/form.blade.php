@@ -15,7 +15,7 @@
             <div class="dp-card">
                 <div class="dp-form-group">
                     <label class="dp-form-label">{{ __('admin.school_name') }} *</label>
-                    <input type="text" name="name" value="{{ old('name', $school->name ?? '') }}" required class="dp-form-input" placeholder="Enter school name">
+                    <input type="text" name="name" value="{{ old('name', $school->name ?? '') }}" required class="dp-form-input" placeholder="{{ __('portal.enter_school_name') }}">
                     @error('name') <p class="dp-form-error">{{ $message }}</p> @enderror
                 </div>
 

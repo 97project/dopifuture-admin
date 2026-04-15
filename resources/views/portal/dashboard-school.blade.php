@@ -305,7 +305,7 @@
                     </div>
                     <div>
                         <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">{{ __('portal.reason_notes') }}</label>
-                        <textarea name="reason" class="dp-form-input" rows="3" placeholder="Explain why you need additional seats..."></textarea>
+                        <textarea name="reason" class="dp-form-input" rows="3" placeholder="{{ __('portal.explain_seats') }}"></textarea>
                     </div>
                 </div>
 
