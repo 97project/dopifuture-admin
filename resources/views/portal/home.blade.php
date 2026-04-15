@@ -442,10 +442,10 @@
                     {{ __('portal.mw_desc') }}
                 </p>
                 <div class="app-feature-chips">
-                    <span class="app-chip" style="border-color: rgba(255,137,4,0.3); color: #FFB347;">🎮 Multiplayer</span>
-                    <span class="app-chip" style="border-color: rgba(255,137,4,0.3); color: #FFB347;">🎯 Role-Based</span>
-                    <span class="app-chip" style="border-color: rgba(255,137,4,0.3); color: #FFB347;">📊 Real-time Scoring</span>
-                    <span class="app-chip" style="border-color: rgba(255,137,4,0.3); color: #FFB347;">🏆 Assignments</span>
+                    <span class="app-chip" style="border-color: rgba(255,137,4,0.3); color: #FFB347;">🎮 {{ __('portal.chip_mw_multiplayer') }}</span>
+                    <span class="app-chip" style="border-color: rgba(255,137,4,0.3); color: #FFB347;">🎯 {{ __('portal.chip_mw_role') }}</span>
+                    <span class="app-chip" style="border-color: rgba(255,137,4,0.3); color: #FFB347;">📊 {{ __('portal.chip_mw_scoring') }}</span>
+                    <span class="app-chip" style="border-color: rgba(255,137,4,0.3); color: #FFB347;">🏆 {{ __('portal.chip_mw_assignments') }}</span>
                 </div>
             </div>
         </div>
@@ -463,10 +463,10 @@
                     {{ __('portal.startup_desc') }}
                 </p>
                 <div class="app-feature-chips">
-                    <span class="app-chip" style="border-color: rgba(67,172,255,0.3); color: #7CC8FF;">🧠 AI Evaluation</span>
-                    <span class="app-chip" style="border-color: rgba(67,172,255,0.3); color: #7CC8FF;">📁 File Upload</span>
-                    <span class="app-chip" style="border-color: rgba(67,172,255,0.3); color: #7CC8FF;">⭐ Points System</span>
-                    <span class="app-chip" style="border-color: rgba(67,172,255,0.3); color: #7CC8FF;">📈 Step-by-Step</span>
+                    <span class="app-chip" style="border-color: rgba(67,172,255,0.3); color: #7CC8FF;">🧠 {{ __('portal.chip_ws_ai') }}</span>
+                    <span class="app-chip" style="border-color: rgba(67,172,255,0.3); color: #7CC8FF;">📁 {{ __('portal.chip_ws_upload') }}</span>
+                    <span class="app-chip" style="border-color: rgba(67,172,255,0.3); color: #7CC8FF;">⭐ {{ __('portal.chip_ws_points') }}</span>
+                    <span class="app-chip" style="border-color: rgba(67,172,255,0.3); color: #7CC8FF;">📈 {{ __('portal.chip_ws_steps') }}</span>
                 </div>
             </div>
         </div>
@@ -484,9 +484,9 @@
                     {{ __('portal.role_desc') }}
                 </p>
                 <div class="app-feature-chips">
-                    <span class="app-chip" style="border-color: rgba(141,101,224,0.3); color: #B794F4;">🤖 AI-Generated</span>
-                    <span class="app-chip" style="border-color: rgba(141,101,224,0.3); color: #B794F4;">🌌 Branching Stories</span>
-                    <span class="app-chip" style="border-color: rgba(141,101,224,0.3); color: #B794F4;">👔 Career Exploration</span>
+                    <span class="app-chip" style="border-color: rgba(141,101,224,0.3); color: #B794F4;">🤖 {{ __('portal.chip_rg_ai') }}</span>
+                    <span class="app-chip" style="border-color: rgba(141,101,224,0.3); color: #B794F4;">🌌 {{ __('portal.chip_rg_branching') }}</span>
+                    <span class="app-chip" style="border-color: rgba(141,101,224,0.3); color: #B794F4;">👔 {{ __('portal.chip_rg_career') }}</span>
                 </div>
             </div>
         </div>
@@ -504,9 +504,9 @@
                     {{ __('portal.coach_desc') }}
                 </p>
                 <div class="app-feature-chips">
-                    <span class="app-chip" style="border-color: rgba(237,132,228,0.3); color: #F5A3EE;">💬 Real-time Chat</span>
-                    <span class="app-chip" style="border-color: rgba(237,132,228,0.3); color: #F5A3EE;">🎯 Personalized</span>
-                    <span class="app-chip" style="border-color: rgba(237,132,228,0.3); color: #F5A3EE;">📡 WebSocket</span>
+                    <span class="app-chip" style="border-color: rgba(237,132,228,0.3); color: #F5A3EE;">💬 {{ __('portal.chip_coach_chat') }}</span>
+                    <span class="app-chip" style="border-color: rgba(237,132,228,0.3); color: #F5A3EE;">🎯 {{ __('portal.chip_coach_personal') }}</span>
+                    <span class="app-chip" style="border-color: rgba(237,132,228,0.3); color: #F5A3EE;">📡 {{ __('portal.chip_coach_ws') }}</span>
                 </div>
             </div>
         </div>
@@ -524,10 +524,10 @@
                     {{ __('portal.study_desc') }}
                 </p>
                 <div class="app-feature-chips">
-                    <span class="app-chip" style="border-color: rgba(90,199,128,0.3); color: #86EFAC;">📚 Subject-Based</span>
-                    <span class="app-chip" style="border-color: rgba(90,199,128,0.3); color: #86EFAC;">🎓 Grade-Level</span>
-                    <span class="app-chip" style="border-color: rgba(90,199,128,0.3); color: #86EFAC;">💡 Interactive</span>
-                    <span class="app-chip" style="border-color: rgba(90,199,128,0.3); color: #86EFAC;">📝 Session History</span>
+                    <span class="app-chip" style="border-color: rgba(90,199,128,0.3); color: #86EFAC;">📚 {{ __('portal.chip_ss_subject') }}</span>
+                    <span class="app-chip" style="border-color: rgba(90,199,128,0.3); color: #86EFAC;">🎓 {{ __('portal.chip_ss_grade') }}</span>
+                    <span class="app-chip" style="border-color: rgba(90,199,128,0.3); color: #86EFAC;">💡 {{ __('portal.chip_ss_interactive') }}</span>
+                    <span class="app-chip" style="border-color: rgba(90,199,128,0.3); color: #86EFAC;">📝 {{ __('portal.chip_ss_history') }}</span>
                 </div>
             </div>
         </div>
