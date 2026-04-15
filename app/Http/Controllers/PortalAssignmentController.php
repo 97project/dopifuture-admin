@@ -36,7 +36,7 @@ class PortalAssignmentController extends Controller
     {
         $user = auth()->user();
         if (!$user->hasAnyRole(['admin', 'super-admin', 'teacher', 'school-admin', 'school-principal'])) {
-            abort(403, 'Bu işlem için yetkiniz yok.');
+            abort(403, __('portal.no_permission'));
         }
 
         $validated = $request->validate([
@@ -52,7 +52,7 @@ class PortalAssignmentController extends Controller
             $selectedStudents = User::whereIn('id', $validated['user_ids'])->get(['id', 'email']);
 
             if ($selectedStudents->isEmpty()) {
-                return redirect()->back()->withErrors(['user_ids' => 'Seçili öğrenciler bulunamadı.']);
+                return redirect()->back()->withErrors(['user_ids' => __('portal.selected_students_not_found')]);
             }
 
             // Step 2: Fetch ALL API players and build email → API userId map
@@ -83,7 +83,7 @@ class PortalAssignmentController extends Controller
             }
 
             if (empty($backendUserIds)) {
-                return redirect()->back()->withErrors(['user_ids' => 'Seçili öğrencilerin MW backend hesabı eşleştirilemedi.']);
+                return redirect()->back()->withErrors(['user_ids' => __('portal.mw_students_not_mapped')]);
             }
             if (!empty($unmapped)) {
                 Log::warning('[PortalAssignment] MW unmapped students', ['emails' => $unmapped]);
@@ -107,14 +107,14 @@ class PortalAssignmentController extends Controller
                 // Sync: re-fetch ALL assignments from API → local DB (single source of truth)
                 $this->syncMwAssignmentsFromApi($connector);
 
-                return redirect()->back()->with('success', 'New Mission added successfully.');
+                return redirect()->back()->with('success', __('portal.mission_added_success'));
             }
 
             $errorMsg = $response->json('message') ?? $response->body();
             if (is_array($errorMsg)) {
                 $errorMsg = json_encode($errorMsg, JSON_UNESCAPED_UNICODE);
             }
-            return redirect()->back()->withErrors(['api' => "Could not create mission: {$errorMsg} (HTTP {$response->status()})."]);
+            return redirect()->back()->withErrors(['api' => __('portal.mission_create_error', ['msg' => $errorMsg, 'code' => $response->status()])]);
 
         } catch (\Throwable $e) {
             Log::error('[PortalAssignment] MW store error', [
@@ -122,7 +122,7 @@ class PortalAssignmentController extends Controller
                 'file'  => $e->getFile() . ':' . $e->getLine(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return redirect()->back()->withErrors(['api' => 'Error creating mission: ' . $e->getMessage()]);
+            return redirect()->back()->withErrors(['api' => __('portal.mission_create_exception', ['msg' => $e->getMessage()])]);
         }
     }
 
@@ -164,7 +164,7 @@ class PortalAssignmentController extends Controller
                 ->toArray();
 
             if (empty($memberIds)) {
-                return redirect()->back()->withErrors(['user_ids' => 'Seçili öğrencilerin Way Startup hesabı bulunamadı.']);
+                return redirect()->back()->withErrors(['user_ids' => __('portal.ws_students_not_found')]);
             }
 
             $connector = app(WayStartupConnector::class);
@@ -189,14 +189,14 @@ class PortalAssignmentController extends Controller
                 // Sync: re-fetch ALL assignments from API → local DB (single source of truth)
                 $this->syncWsAssignmentsFromApi($connector);
 
-                return redirect()->back()->with('success', 'New Assignment added successfully.');
+                return redirect()->back()->with('success', __('portal.assignment_added_success'));
             }
 
             $errorMsg = $response->json('message') ?? $response->body();
             if (is_array($errorMsg)) {
                 $errorMsg = json_encode($errorMsg, JSON_UNESCAPED_UNICODE);
             }
-            return redirect()->back()->withErrors(['api' => "Could not create assignment: {$errorMsg} (HTTP {$response->status()})."]);
+            return redirect()->back()->withErrors(['api' => __('portal.assignment_create_error', ['msg' => $errorMsg, 'code' => $response->status()])]);
 
         } catch (\Throwable $e) {
             Log::error('[PortalAssignment] WS store error', [
@@ -204,7 +204,7 @@ class PortalAssignmentController extends Controller
                 'file'  => $e->getFile() . ':' . $e->getLine(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return redirect()->back()->withErrors(['api' => 'Error creating assignment: ' . $e->getMessage()]);
+            return redirect()->back()->withErrors(['api' => __('portal.assignment_create_exception', ['msg' => $e->getMessage()])]);
         }
     }
 
@@ -224,11 +224,11 @@ class PortalAssignmentController extends Controller
             $response = $connector->removeAssignmentMember($assignmentId, $memberId);
 
             if ($response->successful()) {
-                return redirect()->back()->with('success', 'Üye görevden çıkarıldı.');
+                return redirect()->back()->with('success', __('portal.member_removed_mission'));
             }
-            return redirect()->back()->with('error', "Üye çıkarılamadı (HTTP {$response->status()})");
+            return redirect()->back()->with('error', __('portal.member_remove_error', ['code' => $response->status()]));
         } catch (\Throwable $e) {
-            return redirect()->back()->with('error', 'İşlem hatası: ' . $e->getMessage());
+            return redirect()->back()->with('error', __('portal.operation_error', ['msg' => $e->getMessage()]));
         }
     }
 
@@ -248,11 +248,11 @@ class PortalAssignmentController extends Controller
             $response = $connector->removeAssignmentMember($assignmentId, $memberId);
 
             if ($response->successful()) {
-                return redirect()->back()->with('success', 'Üye projeden çıkarıldı.');
+                return redirect()->back()->with('success', __('portal.member_removed_project'));
             }
-            return redirect()->back()->with('error', "Üye çıkarılamadı (HTTP {$response->status()})");
+            return redirect()->back()->with('error', __('portal.member_remove_error', ['code' => $response->status()]));
         } catch (\Throwable $e) {
-            return redirect()->back()->with('error', 'İşlem hatası: ' . $e->getMessage());
+            return redirect()->back()->with('error', __('portal.operation_error', ['msg' => $e->getMessage()]));
         }
     }
 

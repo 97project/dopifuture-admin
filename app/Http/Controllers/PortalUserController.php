@@ -328,7 +328,7 @@ class PortalUserController extends Controller
             ]);
         }
 
-        return back()->with('success', 'Password reset for ' . $user->name . '. New password: ' . $newPassword);
+        return back()->with('success', __('portal.password_reset_success', ['name' => $user->name, 'password' => $newPassword]));
     }
 
     /* -- Guards -------------------------------------------------- */
