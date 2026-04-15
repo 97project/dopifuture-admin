@@ -72,7 +72,7 @@ return array (
   'sol_f5_4' => 'Detailed session history',
   'sol_cta_title' => 'Explore All Applications',
   'sol_cta_desc' => 'Register for free and integrate the full power of the DopiFuture ecosystem into your school.',
-  'contact_title' => 'Contact — DopiFuture',
+  'contact_title' => 'Contact',
   'contact_meta' => 'Get in touch with DopiFuture',
   'contact_hero_title' => 'Get in <span>Touch</span><br>with Us',
   'contact_hero_desc' => 'Contact us for your questions, suggestions, or collaborations. Our team will be happy to assist you.',
@@ -102,4 +102,5 @@ return array (
   'faq_a5' => 'WAY AI Coach personalizes every conversation using the student\'s profile (grade level, interests, strengths/weaknesses). It provides a fluid chat experience via real-time WebSocket connection, and all sessions are stored in history for review.',
   'faq_q6' => 'What reporting and tracking capabilities are available?',
   'faq_a6' => 'Teachers have separate reporting panels for each application. Mission Way simulation scores, Way Startup Lab step progress, WAY AI Coach session counts, and Study Space learning statistics are tracked in detail. Assignment management and deadline tracking are also available.',
+  'solutions_title' => 'Solutions',
 );

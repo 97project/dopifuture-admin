@@ -308,7 +308,7 @@ return array (
   'app_connector' => 'Bağlantı Sınıfı',
   'schools' => 'Okullar',
   'school' => 'Okul',
-  'new_school' => 'Yeni Okul',
+  'new_school' => 'Kayıt',
   'edit_school' => 'Okulu Düzenle',
   'school_created' => 'Okul başarıyla oluşturuldu.',
   'school_updated' => 'Okul başarıyla güncellendi.',
@@ -600,4 +600,7 @@ return array (
   'auto_schools' => 'Okul',
   'auto_licenses' => 'Lisans',
   'auto_modules' => 'Modül',
+  'rep_homepage' => 'Ana Sayfa',
+  'confirm_password' => 'Şifreyi Onayla',
+  'info' => 'Hesap Bilgileri',
 );

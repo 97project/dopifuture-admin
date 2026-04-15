@@ -523,26 +523,39 @@
                     <a href="{{ route('portal.reports') }}"
                         class="{{ request()->routeIs('portal.reports*') ? 'active' : '' }}">{{ __('admin.reports') }}</a>
                     <a href="{{ route('portal.profile') }}"
-                        class="{{ request()->routeIs('portal.profile') ? 'active' : '' }}">{{ 'Profile' }}</a>
+                        class="{{ request()->routeIs('portal.profile') ? 'active' : '' }}">{{ __('admin.profile') ?? 'Profile' }}</a>
                     <form action="{{ route('portal.logout') }}" method="POST" style="display:inline;">
                         @csrf
                         <button type="submit"
                             style="background:rgba(239,68,68,0.12);color:#f87171;border:none;padding:0.5rem 1rem;border-radius:8px;font-size:0.875rem;font-weight:500;cursor:pointer;font-family:inherit;">
-                            {{ 'Logout' }}
+                            {{ __('admin.logout') ?? 'Logout' }}
                         </button>
                     </form>
                 @else
                     <a href="{{ route('portal.home') }}"
-                        class="{{ request()->routeIs('portal.home') ? 'active' : '' }}">{{ 'Home' }}</a>
+                        class="{{ request()->routeIs('portal.home') ? 'active' : '' }}">{{ __('admin.rep_homepage') ?? 'Home' }}</a>
                     <a href="{{ route('portal.solutions') }}"
-                        class="{{ request()->routeIs('portal.solutions') ? 'active' : '' }}">{{ 'Solutions' }}</a>
+                        class="{{ request()->routeIs('portal.solutions') ? 'active' : '' }}">{{ __('portal.solutions_title') ?? 'Solutions' }}</a>
                     <a href="{{ route('register.create') }}"
-                        class="{{ request()->routeIs('register.*') ? 'active' : '' }}">{{ 'Register' }}</a>
+                        class="{{ request()->routeIs('register.*') ? 'active' : '' }}">{{ __('admin.new_school') ?? 'Register' }}</a>
                     <a href="{{ route('portal.contact') }}"
-                        class="{{ request()->routeIs('portal.contact') ? 'active' : '' }}">{{ 'Contact' }}</a>
+                        class="{{ request()->routeIs('portal.contact') ? 'active' : '' }}">{{ __('portal.contact_title') ?? 'Contact' }}</a>
                     <a href="{{ route('portal.login') }}"
-                        style="background: rgba(59,130,246,0.15); color: var(--brand-400);">{{ 'Login' }}</a>
+                        style="background: rgba(59,130,246,0.15); color: var(--brand-400); padding: 0.5rem 1rem; border-radius: 8px;">{{ __('admin.login') ?? 'Login' }}</a>
                 @endauth
+
+                {{-- Language Switcher --}}
+                <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 0.5rem;"></div>
+                <form action="{{ route('portal.switch-locale') }}" method="POST" style="display:inline; margin:0;">
+                    @csrf
+                    <select name="locale" onchange="this.form.submit()" style="background:rgba(255,255,255,0.05); color:var(--gray-300); border:1px solid rgba(255,255,255,0.1); padding:0.4rem 0.6rem; border-radius:6px; font-size:0.8rem; font-weight:600; cursor:pointer; outline:none; text-transform:uppercase;">
+                        @foreach(\App\Models\Language::where('is_active', true)->get() as $lang)
+                            <option style="background:#0f172a; color:white;" value="{{ $lang->code }}" {{ app()->getLocale() === $lang->code ? 'selected' : '' }}>
+                                {{ $lang->code }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
 
             </nav>
         </div>

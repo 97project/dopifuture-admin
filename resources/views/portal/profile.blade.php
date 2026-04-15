@@ -18,64 +18,67 @@
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
         {{-- Personal Info --}}
         <div class="dp-card">
-            <div class="dp-card-title">Personal Details</div>
+            <div class="dp-card-title">{{ __('admin.profile') }}</div>
             <form action="{{ route('portal.profile.update') }}" method="POST">
                 @csrf @method('PUT')
                 <div class="dp-form-group">
-                    <label class="dp-form-label">First Name *</label>
+                    <label class="dp-form-label">{{ __('admin.name') }} *</label>
                     <input type="text" name="name" value="{{ old('name', $user->name) }}" required class="dp-form-input">
                     @error('name') <p class="dp-form-error">{{ $message }}</p> @enderror
                 </div>
                 <div class="dp-form-group">
-                    <label class="dp-form-label">Last Name</label>
+                    <label class="dp-form-label">{{ __('admin.surname') }}</label>
                     <input type="text" name="surname" value="{{ old('surname', $user->surname) }}" class="dp-form-input">
                 </div>
                 <div class="dp-form-group">
-                    <label class="dp-form-label">E-mail</label>
+                    <label class="dp-form-label">{{ __('admin.email') }}</label>
                     <input type="email" value="{{ $user->email }}" class="dp-form-input" disabled style="opacity:0.5;cursor:not-allowed;">
                 </div>
                 <div class="dp-form-group">
-                    <label class="dp-form-label">Phone</label>
+                    <label class="dp-form-label">{{ __('admin.phone') }}</label>
                     <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" class="dp-form-input">
                 </div>
                 <div class="dp-form-group">
-                    <label class="dp-form-label">Language</label>
+                    <label class="dp-form-label">{{ __('admin.language') }}</label>
                     <select name="locale" class="dp-form-select">
-                        <option value="en" {{ old('locale', $user->locale ?? 'en') === 'en' ? 'selected' : '' }}>English</option>
-                        <option value="tr" {{ old('locale', $user->locale ?? 'en') === 'tr' ? 'selected' : '' }}>Turkish</option>
+                        @foreach(\App\Models\Language::where('is_active', true)->get() as $lang)
+                            <option value="{{ $lang->code }}" {{ old('locale', $user->locale ?? \App\Models\Language::getDefault()->code) === $lang->code ? 'selected' : '' }}>
+                                {{ $lang->native_name }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
-                <button type="submit" class="dp-btn-submit">Update</button>
+                <button type="submit" class="dp-btn-submit">{{ __('admin.save') }}</button>
             </form>
         </div>
 
         <div>
             {{-- Password Change --}}
             <div class="dp-card" style="margin-bottom:20px;">
-                <div class="dp-card-title">Change Password</div>
+                <div class="dp-card-title">{{ __('admin.change_password') }}</div>
                 <form action="{{ route('portal.profile.update') }}" method="POST">
                     @csrf @method('PUT')
                     <div class="dp-form-group">
-                        <label class="dp-form-label">Current Password</label>
+                        <label class="dp-form-label">{{ __('admin.current_password') }}</label>
                         <input type="password" name="current_password" class="dp-form-input">
                         @error('current_password') <p class="dp-form-error">{{ $message }}</p> @enderror
                     </div>
                     <div class="dp-form-group">
-                        <label class="dp-form-label">New Password</label>
+                        <label class="dp-form-label">{{ __('admin.new_password') }}</label>
                         <input type="password" name="password" class="dp-form-input">
                         @error('password') <p class="dp-form-error">{{ $message }}</p> @enderror
                     </div>
                     <div class="dp-form-group">
-                        <label class="dp-form-label">Confirm Password</label>
+                        <label class="dp-form-label">{{ __('admin.confirm_password') }}</label>
                         <input type="password" name="password_confirmation" class="dp-form-input">
                     </div>
-                    <button type="submit" class="dp-btn-submit">Change Password</button>
+                    <button type="submit" class="dp-btn-submit">{{ __('admin.change_password') }}</button>
                 </form>
             </div>
 
             {{-- Role Info --}}
             <div class="dp-card">
-                <div class="dp-card-title">Account Info</div>
+                <div class="dp-card-title">{{ __('admin.info') }}</div>
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
                     <span style="font-size:14px;font-weight:500;color:var(--text-secondary);">Role:</span>
                     @foreach($user->roles as $r)

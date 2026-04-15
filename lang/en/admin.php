@@ -309,7 +309,7 @@ return array (
   'app_connector' => 'Connector Class',
   'schools' => 'Schools',
   'school' => 'School',
-  'new_school' => 'New School',
+  'new_school' => 'Register',
   'edit_school' => 'Edit School',
   'school_created' => 'School created successfully.',
   'school_updated' => 'School updated successfully.',
@@ -607,4 +607,7 @@ return array (
   'auto_schools' => 'Schools',
   'auto_licenses' => 'Licenses',
   'auto_modules' => 'Modules',
+  'rep_homepage' => 'Home',
+  'confirm_password' => 'Confirm Password',
+  'info' => 'Account Info',
 );

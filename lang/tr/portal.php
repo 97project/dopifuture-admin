@@ -72,7 +72,7 @@ return array (
   'sol_f5_4' => 'Detaylı oturum geçmişi',
   'sol_cta_title' => 'Tüm Uygulamaları Keşfedin',
   'sol_cta_desc' => 'Ücretsiz kayıt olun ve DopiFuture ekosisteminin tüm gücünü okulunuza entegre edin.',
-  'contact_title' => 'İletişim — DopiFuture',
+  'contact_title' => 'İletişim',
   'contact_meta' => 'DopiFuture ile iletişime geçin',
   'contact_hero_title' => 'Bizimle İletişime<br><span>Geçin</span>',
   'contact_hero_desc' => 'Sorularınız, önerileriniz veya işbirlikleriniz için bize ulaşın. Ekibimiz size yardımcı olmaktan memnuniyet duyacaktır.',
@@ -102,4 +102,5 @@ return array (
   'faq_a5' => 'WAY AI Coach, öğrencinin profil bilgilerini (sınıf seviyesi, ilgi alanları, güçlü/zayıf yönler) kullanarak her konuşmayı kişiselleştirir. Gerçek zamanlı WebSocket bağlantısı ile akıcı sohbet deneyimi sunar ve tüm oturumlar geçmişte saklanır.',
   'faq_q6' => 'Raporlama ve takip imkanları nelerdir?',
   'faq_a6' => 'Öğretmenler her uygulama için ayrı raporlama paneline sahiptir. Mission Way simülasyon skorları, Way Startup Lab adım ilerlemeleri, WAY AI Coach oturum sayıları ve Study Space öğrenme istatistikleri detaylı olarak takip edilir. Görev ataması ve son tarih yönetimi de mevcuttur.',
+  'solutions_title' => 'Çözümler',
 );
