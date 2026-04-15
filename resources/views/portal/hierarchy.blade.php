@@ -1,6 +1,6 @@
 @extends('portal.app')
-@section('title', 'School Hierarchy')
-@section('page-title', 'School Hierarchy')
+@section('title', __('portal.school_hierarchy'))
+@section('page-title', __('portal.school_hierarchy'))
 
 @section('content')
 @php
@@ -11,15 +11,15 @@
 
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
     <div>
-        <h2 style="font-size:20px;font-weight:700;margin:0;">🏫 School Hierarchy</h2>
-        <p style="font-size:13px;color:var(--text-muted);margin:4px 0 0;">School → Class → Student tree view</p>
+        <h2 style="font-size:20px;font-weight:700;margin:0;">🏫 {{ __('portal.school_hierarchy') }}</h2>
+        <p style="font-size:13px;color:var(--text-muted);margin:4px 0 0;">{{ __('portal.hierarchy_subtitle') }}</p>
     </div>
 </div>
 
 @if($schools->isEmpty())
 <div class="dp-card" style="text-align:center;padding:48px;">
     <div style="font-size:32px;margin-bottom:8px;">📭</div>
-    <p style="color:var(--text-muted);">No associated schools found.</p>
+    <p style="color:var(--text-muted);">{{ __('portal.no_schools_found') }}</p>
 </div>
 @else
 @foreach($schools as $school)
@@ -29,7 +29,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;">
             <div>
                 <span style="font-size:16px;font-weight:700;">🏫 {{ $school->name }}</span>
-                <span style="font-size:12px;opacity:0.8;margin-left:8px;">{{ $school->classes->count() }} classes</span>
+                <span style="font-size:12px;opacity:0.8;margin-left:8px;">{{ $school->classes->count() }} {{ __('admin.classes') }}</span>
             </div>
             <span style="font-size:20px;transition:transform 0.2s;">▼</span>
         </div>
@@ -43,10 +43,10 @@
                 <div style="display:flex;align-items:center;gap:8px;">
                     <span style="font-size:16px;">📚</span>
                     <span style="font-weight:600;font-size:14px;">{{ $class->name }}</span>
-                    <span style="font-size:11px;color:var(--text-muted);background:var(--bg-subtle,#f5f5f5);padding:2px 8px;border-radius:999px;">{{ $class->student_count }} students</span>
+                    <span style="font-size:11px;color:var(--text-muted);background:var(--bg-subtle,#f5f5f5);padding:2px 8px;border-radius:999px;">{{ $class->student_count }} {{ __('portal.nav_students') }}</span>
                 </div>
                 <a href="{{ route('portal.reports.class', $class->id) }}" style="font-size:11px;color:#0B6AB2;text-decoration:none;font-weight:600;">
-                    Report →
+                    {{ __('portal.report') }} →
                 </a>
             </div>
 
@@ -60,11 +60,11 @@
                         <span style="font-weight:500;">{{ $s->name }} {{ $s->surname }}</span>
                         <span style="font-size:11px;color:var(--text-muted);">{{ $s->email }}</span>
                     </div>
-                    <a href="{{ route('portal.reports.student', $s->id) }}" style="font-size:10px;color:#0B6AB2;text-decoration:none;">Detail →</a>
+                    <a href="{{ route('portal.reports.student', $s->id) }}" style="font-size:10px;color:#0B6AB2;text-decoration:none;">{{ __('portal.detail') }} →</a>
                 </div>
                 @endforeach
                 @if($class->student_count > 20)
-                <div style="padding:6px 52px;font-size:11px;color:var(--text-muted);">+{{ $class->student_count - 20 }} more…</div>
+                <div style="padding:6px 52px;font-size:11px;color:var(--text-muted);">+{{ $class->student_count - 20 }} {{ __('portal.more') }}…</div>
                 @endif
             </div>
         </div>

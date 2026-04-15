@@ -126,7 +126,7 @@ details summary:hover { color: var(--text-primary); }
         @if($student)
             <a href="{{ route('portal.reports.student', $student) }}" class="dp-btn-ghost">← Student Report</a>
         @else
-            <a href="{{ route('portal.reports') }}" class="dp-btn-ghost">← Back</a>
+            <a href="{{ route('portal.reports') }}" class="dp-btn-ghost">← {{ __('portal.back') }}</a>
         @endif
     </div>
 </div>

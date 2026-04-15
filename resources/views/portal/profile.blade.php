@@ -1,6 +1,6 @@
 @extends('portal.app')
-@section('title', 'My Profile')
-@section('page-title', 'My Profile')
+@section('title', __('portal.my_profile'))
+@section('page-title', __('portal.my_profile'))
 @php $user = auth()->user(); @endphp
 
 @section('content')
@@ -80,12 +80,12 @@
             <div class="dp-card">
                 <div class="dp-card-title">{{ __('admin.info') }}</div>
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                    <span style="font-size:14px;font-weight:500;color:var(--text-secondary);">Role:</span>
+                    <span style="font-size:14px;font-weight:500;color:var(--text-secondary);">{{ __('admin.role') }}:</span>
                     @foreach($user->roles as $r)
                         <span class="dp-badge dp-badge-pending">{{ $r->name }}</span>
                     @endforeach
                 </div>
-                <p style="font-size:13px;color:var(--text-muted);">Joined: {{ $user->created_at?->format('d.m.Y') }}</p>
+                <p style="font-size:13px;color:var(--text-muted);">{{ __('portal.joined') }}: {{ $user->created_at?->format('d.m.Y') }}</p>
             </div>
         </div>
     </div>

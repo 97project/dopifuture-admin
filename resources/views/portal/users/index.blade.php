@@ -162,7 +162,7 @@
             @else
                 <a href="{{ $users->previousPageUrl() }}" style="color:var(--color-txt);text-decoration:none;">{{ __('portal.previous') }}</a>
             @endif
-            <span style="color:var(--color-txt-muted);">Page {{ $users->currentPage() }} of {{ $users->lastPage() }}</span>
+            <span style="color:var(--color-txt-muted);">{{ __('portal.page') }} {{ $users->currentPage() }} {{ __('portal.of') }} {{ $users->lastPage() }}</span>
             @if($users->hasMorePages())
                 <a href="{{ $users->nextPageUrl() }}" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ __('portal.next') }}</a>
             @else

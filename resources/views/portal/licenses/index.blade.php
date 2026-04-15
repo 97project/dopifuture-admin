@@ -109,7 +109,7 @@
             <a href="{{ $licenses->previousPageUrl() }}" style="color:var(--color-txt);text-decoration:none;">{{ __('portal.previous') }}</a>
         @endif
 
-        <span style="color:var(--color-txt-muted);">Page{{ $licenses->currentPage() }} of {{ $licenses->lastPage() }}</span>
+        <span style="color:var(--color-txt-muted);">Page{{ $licenses->currentPage() }} {{ __('portal.of') }} {{ $licenses->lastPage() }}</span>
 
         @if($licenses->hasMorePages())
             <a href="{{ $licenses->nextPageUrl() }}" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ __('portal.next') }}</a>

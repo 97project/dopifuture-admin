@@ -91,7 +91,7 @@
             @else
                 <a href="{{ $data['licenses']->previousPageUrl() }}" style="color:var(--color-txt);text-decoration:none;">{{ __('portal.previous') }}</a>
             @endif
-            <span style="color:var(--color-txt-muted);">Page {{ $data['licenses']->currentPage() }} of {{ $data['licenses']->lastPage() }}</span>
+            <span style="color:var(--color-txt-muted);">{{ __('portal.page') }} {{ $data['licenses']->currentPage() }} {{ __('portal.of') }} {{ $data['licenses']->lastPage() }}</span>
             @if($data['licenses']->hasMorePages())
                 <a href="{{ $data['licenses']->nextPageUrl() }}" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ __('portal.next') }}</a>
             @else

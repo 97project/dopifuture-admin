@@ -3,7 +3,7 @@
 @section('content')
     <div style="margin-bottom:24px;">
         <h2 style="font-size:24px;font-weight:700;color:#030719;margin:0 0 4px;font-family:'Nunito',sans-serif;">
-            Welcome, {{ $user->name }}
+            {{ __('portal.welcome_user', ['name' => $user->name]) }}
         </h2>
         <p style="font-size:14px;color:var(--color-txt-muted);margin:0;">
             Your classes and students overview

@@ -11,7 +11,7 @@
     @endif
 
     <span style="font-size:13px;color:var(--color-txt-muted);">
-        Page {{ $paginator->currentPage() }} of {{ $paginator->lastPage() }}
+        Page {{ $paginator->currentPage() }} {{ __('portal.of') }} {{ $paginator->lastPage() }}
     </span>
 
     @if($paginator->hasMorePages())

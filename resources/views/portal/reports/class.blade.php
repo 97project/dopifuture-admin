@@ -8,7 +8,7 @@
         <div style="font-size:18px;font-weight:600;">{{ $class->name }}</div>
         <p style="font-size:13px;color:var(--text-muted);margin:4px 0 0;">{{ $class->school->name ?? '' }} — Class report</p>
     </div>
-    <a href="{{ route('portal.reports') }}" class="dp-btn-ghost">← Back</a>
+    <a href="{{ route('portal.reports') }}" class="dp-btn-ghost">← {{ __('portal.back') }}</a>
 </div>
 
 {{-- Stats --}}

@@ -14,7 +14,7 @@
         </div>
         <div style="display:flex;gap:8px;">
             <a href="{{ route('portal.users.edit', $user) }}" class="dp-btn">{{ __('admin.edit') }}</a>
-            <a href="{{ route('portal.users.index') }}" class="dp-btn-ghost">← Back</a>
+            <a href="{{ route('portal.users.index') }}" class="dp-btn-ghost">← {{ __('portal.back') }}</a>
         </div>
     </div>
 

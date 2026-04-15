@@ -7,7 +7,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
         <div>
             <h2 style="font-size:24px;font-weight:700;color:#030719;margin:0;font-family:'Nunito',sans-serif;">
-                {{ $school->name ?? 'My School' }}
+                {{ $school->name ?? __('portal.my_school') }}
             </h2>
             <p style="font-size:14px;color:var(--color-txt-muted);margin:4px 0 0;">
                 {{ $school->city ?? '' }}{{ $school->country ? ', ' . $school->country : '' }}
@@ -18,7 +18,7 @@
                 onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(67,100,247,0.4)'"
                 onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(67,100,247,0.3)'">
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Request Additional Seats
+            {{ __('portal.request_additional_seats') }}
         </button>
     </div>
 
@@ -83,7 +83,7 @@
                     <div style="font-size:13px;color:var(--color-txt-muted);font-weight:500;">{{ __('portal.available_seats') }}</div>
                 </div>
             </div>
-            <div style="font-size:12px;color:var(--color-txt-muted);">{{ $usedSeats }} / {{ $totalSeats }} used ({{ $pct }}%)</div>
+            <div style="font-size:12px;color:var(--color-txt-muted);">{{ $usedSeats }} / {{ $totalSeats }} {{ __('portal.used_lowercase') }} ({{ $pct }}%)</div>
         </div>
     </div>
 
@@ -189,11 +189,11 @@
 
                 @if($licenseWarning === 'critical')
                     <div style="padding:10px 14px;background:rgba(239,68,68,0.08);border-radius:8px;font-size:13px;color:#DC2626;margin-bottom:12px;">
-                        ⚠️ License expires in {{ now()->diffInDays($license->expires_at) }} days!
+                        ⚠️ {{ __('portal.license_expires_in') }} {{ now()->diffInDays($license->expires_at) }} {{ __('portal.days') }}!
                     </div>
                 @elseif($licenseWarning === 'warning')
                     <div style="padding:10px 14px;background:rgba(245,158,11,0.08);border-radius:8px;font-size:13px;color:#D97706;margin-bottom:12px;">
-                        ⏳ License expires in {{ now()->diffInDays($license->expires_at) }} days.
+                        ⏳ {{ __('portal.license_expires_in') }} {{ now()->diffInDays($license->expires_at) }} {{ __('portal.days') }}.
                     </div>
                 @endif
 
@@ -301,7 +301,7 @@
                 <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px;">
                     <div>
                         <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">{{ __('portal.num_additional_seats') }} *</label>
-                        <input type="number" name="requested_seats" class="dp-form-input" placeholder="e.g. 50" required min="1">
+                        <input type="number" name="requested_seats" class="dp-form-input" placeholder="{{ __('portal.eg_50') }}" required min="1">
                     </div>
                     <div>
                         <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">{{ __('portal.reason_notes') }}</label>

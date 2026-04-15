@@ -1,6 +1,6 @@
 @extends('portal.layout')
 @section('title', __('admin.new_registration_request'))
-@section('meta_description', 'Register your school on DopiFuture digital education platform')
+@section('meta_description', __('portal.register_meta'))
 
 @section('content')
     <div style="max-width: 640px; margin: 0 auto;">

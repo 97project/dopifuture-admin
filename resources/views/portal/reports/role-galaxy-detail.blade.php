@@ -59,7 +59,7 @@
 <div class="dp-card" style="margin-bottom:24px;">
     <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
         <span style="font-size:20px;">🎮</span> Scenario Galaxy
-        <span style="font-size:12px;color:var(--color-txt-muted);margin-left:auto;">{{ $scenarioBreakdown->count() }} of {{ count($allScenarios) }} explored</span>
+        <span style="font-size:12px;color:var(--color-txt-muted);margin-left:auto;">{{ $scenarioBreakdown->count() }} {{ __('portal.of') }} {{ count($allScenarios) }} explored</span>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
         @foreach($allScenarios as $scenarioKey => $cfg)
