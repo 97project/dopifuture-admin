@@ -892,7 +892,7 @@
             {{-- Figma sidebar: flat list, no section headers --}}
             <a href="{{ route('portal.dashboard') }}" class="dp-nav-item {{ str_starts_with($cr, 'portal.dashboard') || str_starts_with($cr, 'portal.schools') || str_starts_with($cr, 'portal.classes') || str_starts_with($cr, 'portal.users') || str_starts_with($cr, 'portal.licenses') ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                Administration
+                {{ __('admin.dashboard') }}
             </a>
 
 
@@ -903,55 +903,55 @@
 
             <a href="{{ route('portal.reports.app', 'way-startup') }}" class="dp-nav-item {{ ($cr === 'portal.reports.app' && request()->route('app')?->slug === 'way-startup') || ($activeApp ?? '') === 'way-startup' ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                Startup
+                {{ __('portal.nav_startup') }}
             </a>
 
             <a href="{{ route('portal.reports.app', 'role-galaxy') }}" class="dp-nav-item {{ ($cr === 'portal.reports.app' && request()->route('app')?->slug === 'role-galaxy') || ($activeApp ?? '') === 'role-galaxy' ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-                Role Galaxy
+                {{ __('portal.nav_role_galaxy') }}
             </a>
 
             <a href="{{ route('portal.reports.app', 'study-space') }}" class="dp-nav-item {{ ($cr === 'portal.reports.app' && request()->route('app')?->slug === 'study-space') || ($activeApp ?? '') === 'study-space' ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                Study Space
+                {{ __('portal.nav_study_space') }}
             </a>
 
             <a href="{{ route('portal.reports.app', 'way-ai-coach') }}" class="dp-nav-item {{ ($cr === 'portal.reports.app' && request()->route('app')?->slug === 'way-ai-coach') || ($activeApp ?? '') === 'way-ai-coach' ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                WAY AI Coach
+                {{ __('portal.nav_way_ai_coach') }}
             </a>
 
             {{-- Figma F-28: no section headers — flat list --}}
 
             <a href="{{ route('portal.reports') }}" class="dp-nav-item {{ $cr === 'portal.reports' ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                Reports
+                {{ __('admin.reports') }}
             </a>
 
             <a href="{{ route('portal.users.index', ['role' => 'student']) }}" class="dp-nav-item {{ str_starts_with($cr, 'portal.users') && request('role') === 'student' ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                Students
+                {{ __('portal.nav_students') }}
             </a>
 
             <a href="{{ route('portal.users.index', ['role' => 'teacher']) }}" class="dp-nav-item {{ str_starts_with($cr, 'portal.users') && request('role') === 'teacher' ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V9a2 2 0 012-2h2a2 2 0 012 2v9a2 2 0 01-2 2h-2z"/></svg>
-                Teachers
+                {{ __('portal.nav_teachers') }}
             </a>
 
             <a href="{{ route('portal.classes.index') }}" class="dp-nav-item {{ str_starts_with($cr, 'portal.classes') ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                Classes
+                {{ __('admin.classes') }}
             </a>
 
             <a href="{{ route('portal.profile') }}" class="dp-nav-item {{ str_starts_with($cr, 'portal.profile') ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                Profile
+                {{ __('admin.profile') }}
             </a>
 
             @if($user && $user->hasAnyRole(['super-admin','admin']))
             <a href="{{ route('admin.dashboard') }}" class="dp-nav-item">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                Admin Panel
+                {{ __('portal.nav_admin_panel') }}
             </a>
             @endif
         </nav>
@@ -962,7 +962,7 @@
                 @csrf
                 <button type="submit" class="dp-nav-item" style="width:100%; color: rgba(255,255,255,0.45); border:none; cursor:pointer; font-family:inherit; background:transparent;">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                    Log Out
+                    {{ __('admin.logout') }}
                 </button>
             </form>
 
@@ -981,11 +981,41 @@
 
             <div class="dp-topbar-search" style="position:relative;">
                 <svg width="16" height="16" fill="none" stroke="var(--color-txt-muted)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="text" id="dp-student-search" placeholder="Search students..." autocomplete="off">
+                <input type="text" id="dp-student-search" placeholder="{{ __('portal.search_students') }}" autocomplete="off">
                 <div id="dp-search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--color-card-bg);border:1px solid var(--color-row-border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);max-height:280px;overflow-y:auto;z-index:999;margin-top:4px;"></div>
             </div>
 
             <div class="dp-topbar-right">
+                {{-- Language Switcher --}}
+                @php
+                    $flagMap = ['tr' => '🇹🇷', 'en' => '🇬🇧', 'mn' => '🇲🇳'];
+                    $currentLocale = app()->getLocale();
+                    $allLangs = \App\Models\Language::where('is_active', true)->get();
+                @endphp
+                <div style="position:relative;" id="dpLangSw">
+                    <button type="button" onclick="document.getElementById('dpLangSw').classList.toggle('lsOpen')" style="display:flex;align-items:center;gap:4px;background:rgba(40,68,225,0.08);border:1px solid rgba(40,68,225,0.2);color:var(--color-primary);padding:5px 10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+                        <span>{{ $flagMap[$currentLocale] ?? '🌐' }}</span>
+                        <span>{{ strtoupper($currentLocale) }}</span>
+                        <span style="font-size:9px;opacity:0.6;">▾</span>
+                    </button>
+                    <div id="dpLangMenu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid var(--color-row-border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:140px;z-index:200;overflow:hidden;">
+                        @foreach($allLangs as $lang)
+                            <form action="{{ route('portal.switch-locale') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="locale" value="{{ $lang->code }}">
+                                <button type="submit" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;background:none;border:none;font-family:inherit;font-size:13px;font-weight:{{ $currentLocale === $lang->code ? '700' : '500' }};color:{{ $currentLocale === $lang->code ? 'var(--color-primary)' : 'var(--color-txt)' }};cursor:pointer;text-align:left;">
+                                    <span>{{ $flagMap[$lang->code] ?? '🌐' }}</span>
+                                    <span style="flex:1;">{{ $lang->native_name }}</span>
+                                    @if($currentLocale === $lang->code)<span style="color:var(--color-primary);font-size:11px;">✓</span>@endif
+                                </button>
+                            </form>
+                        @endforeach
+                    </div>
+                </div>
+                <script>
+                document.addEventListener('click',function(e){var sw=document.getElementById('dpLangSw');if(sw&&!sw.contains(e.target)){sw.classList.remove('lsOpen');} });
+                document.getElementById('dpLangSw').addEventListener('click',function(){var m=document.getElementById('dpLangMenu');m.style.display=this.classList.contains('lsOpen')?'block':'none';});
+                </script>
                 <a href="{{ route('portal.profile') }}" class="dp-user-link">
                     <div class="dp-avatar">{{ strtoupper(substr($user->name ?? 'U', 0, 1) . substr($user->surname ?? '', 0, 1)) }}</div>
                     <span class="dp-username" style="display:none;">{{ $user->name ?? '' }}</span>
@@ -1008,7 +1038,7 @@
         </div>
 
         <footer style="text-align:center; padding:24px; font-size:12px; color:var(--color-txt-muted);">
-            &copy; {{ date('Y') }} DopiFuture. All rights reserved.
+            &copy; {{ date('Y') }} DopiFuture. {{ __('admin.all_rights_reserved') }}
         </footer>
     </div>
 

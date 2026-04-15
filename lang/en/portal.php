@@ -119,4 +119,12 @@ return array (
   'submit_registration' => 'Submit Registration Request',
   'secure_connection' => 'Secure Connection',
   'gdpr_compliant' => 'GDPR Compliant',
+  'nav_startup' => 'Startup',
+  'nav_role_galaxy' => 'Role Galaxy',
+  'nav_study_space' => 'Study Space',
+  'nav_way_ai_coach' => 'WAY AI Coach',
+  'nav_students' => 'Students',
+  'nav_teachers' => 'Teachers',
+  'nav_admin_panel' => 'Admin Panel',
+  'search_students' => 'Search students...',
 );

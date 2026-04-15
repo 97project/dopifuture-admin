@@ -119,4 +119,12 @@ return array (
   'submit_registration' => 'Бүртгэлийн хүсэлт илгээх',
   'secure_connection' => 'Аюулгүй холболт',
   'gdpr_compliant' => 'GDPR нийцтэй',
+  'nav_startup' => 'Startup',
+  'nav_role_galaxy' => 'Role Galaxy',
+  'nav_study_space' => 'Study Space',
+  'nav_way_ai_coach' => 'WAY AI Coach',
+  'nav_students' => 'Сурагчид',
+  'nav_teachers' => 'Багш нар',
+  'nav_admin_panel' => 'Админ самбар',
+  'search_students' => 'Сурагч хайх...',
 );

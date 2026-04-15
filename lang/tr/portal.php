@@ -119,4 +119,12 @@ return array (
   'submit_registration' => 'Kayıt Talebini Gönder',
   'secure_connection' => 'Güvenli Bağlantı',
   'gdpr_compliant' => 'GDPR Uyumlu',
+  'nav_startup' => 'Startup',
+  'nav_role_galaxy' => 'Role Galaxy',
+  'nav_study_space' => 'Study Space',
+  'nav_way_ai_coach' => 'WAY AI Coach',
+  'nav_students' => 'Öğrenciler',
+  'nav_teachers' => 'Öğretmenler',
+  'nav_admin_panel' => 'Admin Panel',
+  'search_students' => 'Öğrenci ara...',
 );
