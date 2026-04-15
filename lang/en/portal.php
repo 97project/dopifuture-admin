@@ -9,8 +9,8 @@ return array (
   'hero_tagline_mn' => 'DopiFuture нь хиймэл оюун ухаанд суурилсан симуляци, энтрепренёршип лаборатори, хувийн дасгалжуулалт зэргээр боловсролыг дахин тодорхойлдог модульчлагдсан платформ юм.',
   'home_title' => 'Digital Education Platform',
   'home_meta' => 'Prepare your school for the future with DopiFuture.',
-  'hero_btn_start' => 'Get Started Free',
-  'hero_btn_explore' => 'Explore Apps',
+  'hero_btn_start' => 'Get Started',
+  'hero_btn_explore' => 'Explore Solutions',
   'stat_apps' => 'Learning Apps',
   'stat_schools' => 'Partner Schools',
   'stat_students' => 'Active Students',
@@ -145,4 +145,6 @@ return array (
   'chip_ss_grade' => 'Grade-Level',
   'chip_ss_interactive' => 'Interactive',
   'chip_ss_history' => 'Session History',
+  'hero_title' => 'Transform Education<br>with <span class="gradient-text">DopiFuture</span>',
+  'hero_tagline' => 'Unlock your students\' potential with five powerful apps. Gamified learning, AI coaching, and real-time analytics.',
 );

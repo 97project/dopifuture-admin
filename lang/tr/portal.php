@@ -9,8 +9,8 @@ return array (
   'hero_tagline_mn' => 'DopiFuture нь хиймэл оюун ухаанд суурилсан симуляци, энтрепренёршип лаборатори, хувийн дасгалжуулалт зэргээр боловсролыг дахин тодорхойлдог модульчлагдсан платформ юм.',
   'home_title' => 'Dijital Eğitim Platformu',
   'home_meta' => 'DopiFuture ile okulunuzu geleceğe hazırlayın.',
-  'hero_btn_start' => 'Hemen Başla',
-  'hero_btn_explore' => 'Uygulamaları Keşfet',
+  'hero_btn_start' => 'Hemen Başlayın',
+  'hero_btn_explore' => 'Çözümleri Keşfet',
   'stat_apps' => 'Eğitim Uygulaması',
   'stat_schools' => 'Partner Okul',
   'stat_students' => 'Aktif Öğrenci',
@@ -145,4 +145,6 @@ return array (
   'chip_ss_grade' => 'Seviye Bazlı',
   'chip_ss_interactive' => 'İnteraktif',
   'chip_ss_history' => 'Oturum Geçmişi',
+  'hero_title' => '<span class="gradient-text">DopiFuture</span> ile<br>Eğitimi Dönüştürün',
+  'hero_tagline' => 'Beş güçlü uygulama ile öğrencilerinizin potansiyelini keşfedin. Oyunlaştırılmış öğrenme, YZ koçluk ve gerçek zamanlı analitik.',
 );
