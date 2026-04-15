@@ -13,7 +13,7 @@
             </div>
         </div>
         <div style="display:flex;gap:8px;">
-            <a href="{{ route('portal.users.edit', $user) }}" class="dp-btn">Edit</a>
+            <a href="{{ route('portal.users.edit', $user) }}" class="dp-btn">{{ __('admin.edit') }}</a>
             <a href="{{ route('portal.users.index') }}" class="dp-btn-ghost">← Back</a>
         </div>
     </div>
@@ -27,11 +27,11 @@
                 <div style="font-weight:500;">{{ $user->name }}</div>
             </div>
             <div>
-                <div style="font-size:12px;color:var(--color-txt-muted);margin-bottom:4px;">Last Name</div>
+                <div style="font-size:12px;color:var(--color-txt-muted);margin-bottom:4px;">{{ __('admin.surname') }}</div>
                 <div style="font-weight:500;">{{ $user->surname ?? '—' }}</div>
             </div>
             <div>
-                <div style="font-size:12px;color:var(--color-txt-muted);margin-bottom:4px;">E-mail</div>
+                <div style="font-size:12px;color:var(--color-txt-muted);margin-bottom:4px;">{{ __('admin.email') }}</div>
                 <div style="font-weight:500;">{{ $user->email }}</div>
             </div>
             <div>
@@ -39,7 +39,7 @@
                 <div>@foreach($user->roles as $role)<span class="dp-badge dp-badge-pending" style="margin-right:4px;">{{ $role->name }}</span>@endforeach</div>
             </div>
             <div>
-                <div style="font-size:12px;color:var(--color-txt-muted);margin-bottom:4px;">Status</div>
+                <div style="font-size:12px;color:var(--color-txt-muted);margin-bottom:4px;">{{ __('admin.status') }}</div>
                 <span class="dp-badge {{ $user->status === 'active' ? 'dp-badge-active' : 'dp-badge-inactive' }}">{{ $user->status === 'active' ? 'Active' : 'Inactive' }}</span>
             </div>
             <div>
@@ -70,7 +70,7 @@
     {{-- Classes --}}
     @if($user->classes->count())
     <div class="dp-card">
-        <div class="dp-card-title">Classes</div>
+        <div class="dp-card-title">{{ __('admin.classes') }}</div>
         <table class="dp-table">
             <thead><tr><th>Class</th><th>School</th><th></th></tr></thead>
             <tbody>
@@ -91,7 +91,7 @@
     <div class="dp-card">
         <div class="dp-card-title">Applications</div>
         <table class="dp-table">
-            <thead><tr><th>Application</th><th>Granted At</th></tr></thead>
+            <thead><tr><th>{{ __('portal.application') }}</th><th>Granted At</th></tr></thead>
             <tbody>
                 @foreach($user->applications as $app)
                 <tr>
@@ -122,7 +122,7 @@
             </div>
             <div>
                 <div style="font-size:20px;font-weight:700;color:var(--color-active-green);">{{ $appData['stats']['completed'] }}</div>
-                <div style="font-size:11px;color:var(--color-txt-muted);">Completed</div>
+                <div style="font-size:11px;color:var(--color-txt-muted);">{{ __('portal.completed') }}</div>
             </div>
             <div>
                 <div style="font-size:20px;font-weight:700;color:#fbbf24;">{{ $appData['stats']['in_progress'] }}</div>
@@ -130,11 +130,11 @@
             </div>
             <div>
                 <div style="font-size:20px;font-weight:700;color:var(--color-primary);">{{ $appData['stats']['avg_score'] ? number_format($appData['stats']['avg_score'], 1) : '-' }}</div>
-                <div style="font-size:11px;color:var(--color-txt-muted);">Avg Score</div>
+                <div style="font-size:11px;color:var(--color-txt-muted);">{{ __('portal.avg_score') }}</div>
             </div>
             <div>
                 <div style="font-size:20px;font-weight:700;color:#a78bfa;">{{ $appData['stats']['total_sessions'] }}</div>
-                <div style="font-size:11px;color:var(--color-txt-muted);">Sessions</div>
+                <div style="font-size:11px;color:var(--color-txt-muted);">{{ __('portal.sessions') }}</div>
             </div>
         </div>
 
@@ -147,7 +147,7 @@
         <div class="dp-card-title" style="font-size:14px;">📋 Module Progress</div>
         <table class="dp-table">
             <thead><tr>
-                <th>Module</th><th>Type</th><th>Status</th><th>Score</th><th>Attempts</th><th>Date</th>
+                <th>Module</th><th>Type</th><th>{{ __('admin.status') }}</th><th>{{ __('portal.score') }}</th><th>Attempts</th><th>{{ __('admin.date') }}</th>
             </tr></thead>
             <tbody>
                 @foreach($appData['progress'] as $p)
@@ -178,7 +178,7 @@
         <div class="dp-card-title" style="font-size:14px;margin-top:16px;">🕐 Session History</div>
         <table class="dp-table">
             <thead><tr>
-                <th>Session</th><th>Type</th><th>Start</th><th>Duration</th><th>Score</th>
+                <th>Session</th><th>Type</th><th>Start</th><th>Duration</th><th>{{ __('portal.score') }}</th>
             </tr></thead>
             <tbody>
                 @foreach($appData['sessions']->take(10) as $s)

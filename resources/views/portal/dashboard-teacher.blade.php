@@ -14,11 +14,11 @@
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
         <div class="dp-card" style="padding:20px;text-align:center;">
             <div style="font-size:28px;font-weight:800;color:#4364F7;">{{ $classes->count() }}</div>
-            <div style="font-size:13px;color:var(--color-txt-muted);margin-top:4px;">Classes</div>
+            <div style="font-size:13px;color:var(--color-txt-muted);margin-top:4px;">{{ __('admin.classes') }}</div>
         </div>
         <div class="dp-card" style="padding:20px;text-align:center;">
             <div style="font-size:28px;font-weight:800;color:#8B5CF6;">{{ $classes->sum('students_count') }}</div>
-            <div style="font-size:13px;color:var(--color-txt-muted);margin-top:4px;">Total Students</div>
+            <div style="font-size:13px;color:var(--color-txt-muted);margin-top:4px;">{{ __('portal.total_students') }}</div>
         </div>
         <div class="dp-card" style="padding:20px;text-align:center;">
             <div style="font-size:28px;font-weight:800;color:#10B981;">{{ $recentStudents->count() }}</div>
@@ -28,13 +28,13 @@
 
     {{-- Classes --}}
     <div class="dp-card" style="margin-bottom:24px;">
-        <div class="dp-card-title" style="padding:20px 24px 12px;">My Classes</div>
+        <div class="dp-card-title" style="padding:20px 24px 12px;">{{ __('portal.my_classes') }}</div>
         @if($classes->count())
         <table class="dp-table">
             <thead><tr>
-                <th>Class Name</th>
+                <th>{{ __('portal.class_name') }}</th>
                 <th>School</th>
-                <th>Students</th>
+                <th>{{ __('portal.nav_students') }}</th>
                 <th style="text-align:right;"></th>
             </tr></thead>
             <tbody>
@@ -69,7 +69,7 @@
         <table class="dp-table">
             <thead><tr>
                 <th>Name</th>
-                <th>E-mail</th>
+                <th>{{ __('admin.email') }}</th>
                 <th style="text-align:right;"></th>
             </tr></thead>
             <tbody>
@@ -92,7 +92,7 @@
             </tbody>
         </table>
         @else
-        <div style="padding:32px;text-align:center;color:var(--text-muted);">No students yet.</div>
+        <div style="padding:32px;text-align:center;color:var(--text-muted);">{{ __('portal.no_students_yet') }}</div>
         @endif
     </div>
 @endsection

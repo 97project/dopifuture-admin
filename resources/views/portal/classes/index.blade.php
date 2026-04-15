@@ -1,12 +1,12 @@
 @extends('portal.app')
-@section('title', 'Classes')
-@section('page-title', 'Classes')
+@section('title', __('admin.classes'))
+@section('page-title', __('admin.classes'))
 
 @section('content')
     <div class="dp-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
             <div>
-                <div class="dp-card-title" style="margin-bottom:4px;">Classes</div>
+                <div class="dp-card-title" style="margin-bottom:4px;">{{ __('admin.classes') }}</div>
                 <p style="font-size:13px;color:var(--text-muted);margin:0;">View and manage school classes.</p>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
@@ -31,9 +31,9 @@
                     <th>School</th>
                     <th>Grade</th>
                     <th>Year</th>
-                    <th>Students</th>
-                    <th>Status</th>
-                    <th style="text-align:right;">Actions</th>
+                    <th>{{ __('portal.nav_students') }}</th>
+                    <th>{{ __('admin.status') }}</th>
+                    <th style="text-align:right;">{{ __('admin.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -48,7 +48,7 @@
                         </td>
                         <td>
                             @if($cls->is_active)
-                                <span class="dp-badge dp-badge-active">Active</span>
+                                <span class="dp-badge dp-badge-active">{{ __('portal.active') }}</span>
                             @else
                                 <span class="dp-badge dp-badge-inactive">Inactive</span>
                             @endif

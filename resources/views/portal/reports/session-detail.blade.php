@@ -167,7 +167,7 @@ details summary:hover { color: var(--text-primary); }
                 </tr>
                 @endif
                 <tr>
-                    <td style="padding:6px 0;color:var(--text-muted);">Status</td>
+                    <td style="padding:6px 0;color:var(--text-muted);">{{ __('admin.status') }}</td>
                     <td style="padding:6px 0;">
                         @php
                             $statusClass = match(strtoupper($session->status ?? '')) {
@@ -376,7 +376,7 @@ details summary:hover { color: var(--text-primary); }
                     <div class="chat-header-stats">
                         <div class="chat-header-stat">
                             <div class="stat-value">{{ $session->lecturerMessages->count() }}</div>
-                            <div class="stat-label">Messages</div>
+                            <div class="stat-label">{{ __('portal.messages') }}</div>
                         </div>
                     </div>
                 </div>
@@ -455,7 +455,7 @@ details summary:hover { color: var(--text-primary); }
                     <div class="chat-header-stats">
                         <div class="chat-header-stat">
                             <div class="stat-value">{{ $session->chatMessages->count() }}</div>
-                            <div class="stat-label">Messages</div>
+                            <div class="stat-label">{{ __('portal.messages') }}</div>
                         </div>
                     </div>
                 </div>

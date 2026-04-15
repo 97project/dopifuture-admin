@@ -53,23 +53,23 @@
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:24px;">
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#667eea,#764ba2);">
         <div class="s-value">{{ $totalSessions }}</div>
-        <div class="s-label">Total Sessions</div>
+        <div class="s-label">{{ __('portal.total_sessions') }}</div>
     </div>
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#43e97b,#38f9d7);">
         <div class="s-value">{{ $totalCompleted }}</div>
-        <div class="s-label">Completed</div>
+        <div class="s-label">{{ __('portal.completed') }}</div>
     </div>
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#f093fb,#f5576c);">
         <div class="s-value">{{ $avgScore ?? '-' }}</div>
-        <div class="s-label">Avg Score</div>
+        <div class="s-label">{{ __('portal.avg_score') }}</div>
     </div>
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#4facfe,#00f2fe);">
         <div class="s-value">{{ \App\Services\ReportService::formatDuration($totalDuration) }}</div>
-        <div class="s-label">Total Duration</div>
+        <div class="s-label">{{ __('portal.total_duration') }}</div>
     </div>
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#fa709a,#fee140);">
         <div class="s-value">{{ count($reportData) }}</div>
-        <div class="s-label">Active Apps</div>
+        <div class="s-label">{{ __('portal.active_apps') }}</div>
     </div>
 </div>
 
@@ -194,7 +194,7 @@
         </div>
         <div>
             <div style="font-size:22px;font-weight:700;color:var(--active-green);">{{ $appData['stats']['completed'] }}</div>
-            <div style="font-size:11px;color:var(--text-muted);">Completed</div>
+            <div style="font-size:11px;color:var(--text-muted);">{{ __('portal.completed') }}</div>
         </div>
         <div>
             <div style="font-size:22px;font-weight:700;color:#fbbf24;">{{ $appData['stats']['in_progress'] }}</div>
@@ -202,11 +202,11 @@
         </div>
         <div>
             <div style="font-size:22px;font-weight:700;color:var(--primary);">{{ $appData['stats']['avg_score'] ? number_format($appData['stats']['avg_score'], 1) : '-' }}</div>
-            <div style="font-size:11px;color:var(--text-muted);">Avg Score</div>
+            <div style="font-size:11px;color:var(--text-muted);">{{ __('portal.avg_score') }}</div>
         </div>
         <div>
             <div style="font-size:22px;font-weight:700;color:#a78bfa;">{{ $appData['stats']['total_sessions'] }}</div>
-            <div style="font-size:11px;color:var(--text-muted);">Sessions</div>
+            <div style="font-size:11px;color:var(--text-muted);">{{ __('portal.sessions') }}</div>
         </div>
     </div>
 
@@ -220,8 +220,8 @@
     <table class="dp-table">
         <thead><tr>
             <th>Module</th><th>Type</th>
-            <th>Status</th><th>Score</th>
-            <th>Attempts</th><th>Date</th>
+            <th>{{ __('admin.status') }}</th><th>{{ __('portal.score') }}</th>
+            <th>Attempts</th><th>{{ __('admin.date') }}</th>
         </tr></thead>
         <tbody>
         @foreach($appData['progress'] as $p)
@@ -275,8 +275,8 @@
     <table class="dp-table" id="session-table-{{ $slug }}">
         <thead><tr>
             <th>Session</th><th>Type</th>
-            <th>Status</th><th>Started</th><th>Duration</th>
-            <th>Score</th><th>Threshold</th>
+            <th>{{ __('admin.status') }}</th><th>Started</th><th>Duration</th>
+            <th>{{ __('portal.score') }}</th><th>Threshold</th>
             <th style="width:80px;"></th>
         </tr></thead>
         <tbody>

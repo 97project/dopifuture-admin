@@ -13,7 +13,7 @@
     {{-- Class Info --}}
     @if($user->classes->count())
     <div class="dp-card" style="margin-bottom:24px;padding:20px 24px;">
-        <div style="font-size:15px;font-weight:600;color:#030719;margin-bottom:12px;">My Classes</div>
+        <div style="font-size:15px;font-weight:600;color:#030719;margin-bottom:12px;">{{ __('portal.my_classes') }}</div>
         <div style="display:flex;gap:12px;flex-wrap:wrap;">
             @foreach($user->classes as $cls)
             <div style="padding:10px 16px;background:rgba(67,100,247,0.08);border-radius:10px;font-size:13px;font-weight:500;color:#4364F7;">

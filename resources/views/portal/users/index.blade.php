@@ -1,6 +1,6 @@
 @extends('portal.app')
-@section('title', 'Users')
-@section('page-title', 'Administration')
+@section('title', __('portal.nav_students'))
+@section('page-title', __('admin.dashboard'))
 @php
     $currentRole = request('role', 'student');
 @endphp
@@ -75,11 +75,11 @@
         <table class="dp-table">
             <thead>
                 <tr>
-                    <th style="width:40px;">No</th>
+                    <th style="width:40px;">{{ __('portal.no_num') }}</th>
                     <th>{{ $currentRole === 'student' ? 'Student Name' : 'Teacher Name' }}</th>
-                    <th>E-mail</th>
+                    <th>{{ __('admin.email') }}</th>
                     <th>{{ $currentRole === 'student' ? 'Class & Teacher' : 'Assigned Classes' }}</th>
-                    <th>Actions</th>
+                    <th>{{ __('admin.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -158,15 +158,15 @@
         @if($users->hasPages())
         <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;">
             @if($users->onFirstPage())
-                <span style="color:var(--color-txt-muted);cursor:default;">Previous</span>
+                <span style="color:var(--color-txt-muted);cursor:default;">{{ __('portal.previous') }}</span>
             @else
-                <a href="{{ $users->previousPageUrl() }}" style="color:var(--color-txt);text-decoration:none;">Previous</a>
+                <a href="{{ $users->previousPageUrl() }}" style="color:var(--color-txt);text-decoration:none;">{{ __('portal.previous') }}</a>
             @endif
             <span style="color:var(--color-txt-muted);">Page {{ $users->currentPage() }} of {{ $users->lastPage() }}</span>
             @if($users->hasMorePages())
-                <a href="{{ $users->nextPageUrl() }}" class="dp-btn" style="font-size:12px;padding:6px 16px;">Next</a>
+                <a href="{{ $users->nextPageUrl() }}" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ __('portal.next') }}</a>
             @else
-                <span style="color:var(--color-txt-muted);cursor:default;">Next</span>
+                <span style="color:var(--color-txt-muted);cursor:default;">{{ __('portal.next') }}</span>
             @endif
         </div>
         @endif
@@ -203,12 +203,12 @@
 
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
                     <div>
-                        <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">First Name *</label>
+                        <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">{{ __('admin.name') }} *</label>
                         <input type="text" name="name" value="{{ old('name') }}" class="dp-form-input" placeholder="Enter first name" required style="{{ $errors->has('name') ? 'border-color:#ef4444;' : '' }}">
                         @error('name') <p style="font-size:11px;color:#ef4444;margin:4px 0 0 0;">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">Last Name</label>
+                        <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">{{ __('admin.surname') }}</label>
                         <input type="text" name="surname" value="{{ old('surname') }}" class="dp-form-input" placeholder="Enter last name">
                     </div>
                 </div>
@@ -242,7 +242,7 @@
                 <div style="width:56px;height:56px;border-radius:50%;background:rgba(59,130,246,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
                     <svg width="28" height="28" fill="none" stroke="#3B82F6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                 </div>
-                <div class="dp-modal-title">Reset Password</div>
+                <div class="dp-modal-title">{{ __('portal.reset_password') }}</div>
                 <p class="dp-modal-subtitle">Are you sure you want to reset this user's password?</p>
             </div>
             {{-- User info card (populated via AJAX) --}}

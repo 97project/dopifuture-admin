@@ -5,9 +5,9 @@
 @if($paginator->hasPages())
 <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;">
     @if($paginator->onFirstPage())
-        <span style="font-size:13px;color:var(--color-txt-muted);cursor:default;">Previous</span>
+        <span style="font-size:13px;color:var(--color-txt-muted);cursor:default;">{{ __('portal.previous') }}</span>
     @else
-        <a href="{{ $paginator->previousPageUrl() }}" style="font-size:13px;color:var(--color-primary);text-decoration:none;font-weight:500;">Previous</a>
+        <a href="{{ $paginator->previousPageUrl() }}" style="font-size:13px;color:var(--color-primary);text-decoration:none;font-weight:500;">{{ __('portal.previous') }}</a>
     @endif
 
     <span style="font-size:13px;color:var(--color-txt-muted);">
@@ -15,9 +15,9 @@
     </span>
 
     @if($paginator->hasMorePages())
-        <a href="{{ $paginator->nextPageUrl() }}" style="font-size:13px;color:var(--color-primary);text-decoration:none;font-weight:500;">Next</a>
+        <a href="{{ $paginator->nextPageUrl() }}" style="font-size:13px;color:var(--color-primary);text-decoration:none;font-weight:500;">{{ __('portal.next') }}</a>
     @else
-        <span style="font-size:13px;color:var(--color-txt-muted);cursor:default;">Next</span>
+        <span style="font-size:13px;color:var(--color-txt-muted);cursor:default;">{{ __('portal.next') }}</span>
     @endif
 </div>
 @endif

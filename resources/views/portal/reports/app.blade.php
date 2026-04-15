@@ -54,10 +54,10 @@
                 <table class="dp-table">
                     <thead>
                         <tr>
-                            <th style="width:40px;">No</th>
-                            <th>Mission Name</th>
-                            <th>Students</th>
-                            <th>Assigned Date</th>
+                            <th style="width:40px;">{{ __('portal.no_num') }}</th>
+                            <th>{{ __('portal.mission_name') }}</th>
+                            <th>{{ __('portal.nav_students') }}</th>
+                            <th>{{ __('portal.assigned_date') }}</th>
                             <th>Deadline</th>
                             <th>
                                 <span style="display:inline-flex;align-items:center;gap:4px;">
@@ -193,14 +193,14 @@
                 <table class="dp-table">
                     <thead>
                         <tr>
-                            <th style="width:40px;">No</th>
+                            <th style="width:40px;">{{ __('portal.no_num') }}</th>
                             <th>Startup Name</th>
                             <th>Startup Type</th>
-                            <th>Students</th>
+                            <th>{{ __('portal.nav_students') }}</th>
                             <th>Deadline</th>
                             <th>Step</th>
-                            <th>System Point</th>
-                            <th>Teacher Point</th>
+                            <th>{{ __('portal.system_point') }}</th>
+                            <th>{{ __('portal.teacher_point') }}</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -243,7 +243,7 @@
                                         Completed
                                     </span>
                                 @elseif($startup->status === 'not_started')
-                                    <span class="muted">Not Started</span>
+                                    <span class="muted">{{ __('portal.not_started') }}</span>
                                 @else
                                     <div style="display:flex;align-items:center;gap:8px;">
                                         <div style="width:60px;height:6px;border-radius:3px;background:var(--color-input-bg);overflow:hidden;">
@@ -269,7 +269,7 @@
                             </td>
                             <td>
                                 @if($startup->teacher_point === 'Score')
-                                    <span style="display:inline-block;padding:4px 12px;background:var(--color-primary);color:#fff;border-radius:6px;font-size:12px;font-weight:500;">Score</span>
+                                    <span style="display:inline-block;padding:4px 12px;background:var(--color-primary);color:#fff;border-radius:6px;font-size:12px;font-weight:500;">{{ __('portal.score') }}</span>
                                 @elseif($startup->teacher_point)
                                     <span style="font-weight:500;">{{ $startup->teacher_point }}</span>
                                 @else
@@ -304,10 +304,10 @@
                 <table class="dp-table">
                     <thead>
                         <tr>
-                            <th style="width:40px;">No</th>
-                            <th>Students</th>
-                            <th>Total Discussion Minute</th>
-                            <th>Total Discussion Count</th>
+                            <th style="width:40px;">{{ __('portal.no_num') }}</th>
+                            <th>{{ __('portal.nav_students') }}</th>
+                            <th>{{ __('portal.total_discussion_min') }}</th>
+                            <th>{{ __('portal.total_discussion_count') }}</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -351,10 +351,10 @@
                 <table class="dp-table">
                     <thead>
                         <tr>
-                            <th style="width:40px;">No</th>
-                            <th>Students</th>
+                            <th style="width:40px;">{{ __('portal.no_num') }}</th>
+                            <th>{{ __('portal.nav_students') }}</th>
                             <th>AI Coach Interaction Number</th>
-                            <th>Total Duration</th>
+                            <th>{{ __('portal.total_duration') }}</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -406,11 +406,11 @@
         <div style="display:flex;gap:16px;margin-bottom:20px;">
             <div class="dp-stat-card" style="flex:1;">
                 <div class="s-value">{{ $avg_galaxy_join ?? 0 }}</div>
-                <div class="s-label">Average Galaxy Join</div>
+                <div class="s-label">{{ __('portal.avg_galaxy_join') }}</div>
             </div>
             <div class="dp-stat-card" style="flex:1;">
                 <div class="s-value">{{ \App\Services\ReportService::formatDuration($avg_duration_sec ?? 0) }}</div>
-                <div class="s-label">Average Duration</div>
+                <div class="s-label">{{ __('portal.avg_duration') }}</div>
             </div>
         </div>
 
@@ -419,11 +419,11 @@
                 <table class="dp-table">
                     <thead>
                         <tr>
-                            <th style="width:40px;">No</th>
-                            <th>Students</th>
+                            <th style="width:40px;">{{ __('portal.no_num') }}</th>
+                            <th>{{ __('portal.nav_students') }}</th>
                             <th>Last Interaction</th>
-                            <th>Total Role Galaxies Joined</th>
-                            <th>Total Duration</th>
+                            <th>{{ __('portal.total_galaxies_joined') }}</th>
+                            <th>{{ __('portal.total_duration') }}</th>
                             <th>Last 5 Role Galaxies Joined</th>
                             <th>Action</th>
                         </tr>
@@ -488,39 +488,39 @@
         <div class="dp-stats-grid" style="margin-bottom:20px;">
             @if($slug === 'way-startup')
                 <div class="dp-stat-card"><div class="s-value">{{ $total_progress }}</div><div class="s-label">Total Progress</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $total_completed }}</div><div class="s-label">Completed</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div><div class="s-label">Avg Score</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $total_sessions }}</div><div class="s-label">Sessions</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">Total Duration</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_completed }}</div><div class="s-label">{{ __('portal.completed') }}</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div><div class="s-label">{{ __('portal.avg_score') }}</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_sessions }}</div><div class="s-label">{{ __('portal.sessions') }}</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">{{ __('portal.total_duration') }}</div></div>
             @elseif($slug === 'study-space')
                 <div class="dp-stat-card-yellow"><div class="s-value">{{ $total_progress }}</div><div class="s-label">Total Discussion</div></div>
                 <div class="dp-stat-card-yellow"><div class="s-value">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div><div class="s-label">Avg Discussion Time</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $total_sessions }}</div><div class="s-label">Sessions</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_sessions }}</div><div class="s-label">{{ __('portal.sessions') }}</div></div>
             @elseif($slug === 'way-ai-coach')
                 <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg></div><div class="s-value">{{ $total_progress }}</div><div class="s-label">Empathy Score</div></div>
                 <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><div class="s-value">{{ $total_sessions }}</div><div class="s-label">Interaction Count</div></div>
-                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">Total Duration</div></div>
+                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">{{ __('portal.total_duration') }}</div></div>
             @elseif($slug === 'role-galaxy')
                 <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg></div><div class="s-value">{{ $total_progress }}</div><div class="s-label">Galaxy Join</div></div>
                 <div class="dp-stat-card"><div class="s-value">{{ $total_completed }}</div><div class="s-label">Roles Completed</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">Total Duration</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">{{ __('portal.total_duration') }}</div></div>
             @else
                 <div class="dp-stat-card"><div class="s-value">{{ $total_progress }}</div><div class="s-label">Total Progress</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $total_completed }}</div><div class="s-label">Completed</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div><div class="s-label">Avg Score</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $total_sessions }}</div><div class="s-label">Sessions</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">Total Duration</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_completed }}</div><div class="s-label">{{ __('portal.completed') }}</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div><div class="s-label">{{ __('portal.avg_score') }}</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_sessions }}</div><div class="s-label">{{ __('portal.sessions') }}</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">{{ __('portal.total_duration') }}</div></div>
             @endif
         </div>
 
         {{-- Charts --}}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
             <div class="dp-card">
-                <div class="dp-card-title">Module Distribution</div>
+                <div class="dp-card-title">{{ __('portal.module_distribution') }}</div>
                 <canvas id="moduleChart"></canvas>
             </div>
             <div class="dp-card">
-                <div class="dp-card-title">Daily Sessions (Last 30 Days)</div>
+                <div class="dp-card-title">{{ __('portal.daily_sessions_30') }}</div>
                 <canvas id="sessionsChart"></canvas>
             </div>
         </div>
@@ -533,34 +533,34 @@
                     @if($slug === 'way-startup')
                         <th>Startup Name</th>
                         <th>Type</th>
-                        <th>Students</th>
+                        <th>{{ __('portal.nav_students') }}</th>
                         <th>Deadline</th>
                         <th>Step</th>
-                        <th>System Point</th>
-                        <th>Teacher Point</th>
-                        <th>Actions</th>
+                        <th>{{ __('portal.system_point') }}</th>
+                        <th>{{ __('portal.teacher_point') }}</th>
+                        <th>{{ __('admin.actions') }}</th>
                     @elseif($slug === 'way-ai-coach')
-                        <th>Students</th>
+                        <th>{{ __('portal.nav_students') }}</th>
                         <th>Interaction Count</th>
-                        <th>Total Duration</th>
-                        <th>Actions</th>
+                        <th>{{ __('portal.total_duration') }}</th>
+                        <th>{{ __('admin.actions') }}</th>
                     @elseif($slug === 'role-galaxy')
-                        <th>Students</th>
-                        <th>Galaxy Selected</th>
-                        <th>Role Played</th>
-                        <th>Total Duration</th>
-                        <th>Actions</th>
+                        <th>{{ __('portal.nav_students') }}</th>
+                        <th>{{ __('portal.galaxy_selected') }}</th>
+                        <th>{{ __('portal.role_played') }}</th>
+                        <th>{{ __('portal.total_duration') }}</th>
+                        <th>{{ __('admin.actions') }}</th>
                     @elseif($slug === 'study-space')
-                        <th>Students</th>
-                        <th>Discussion Minutes</th>
-                        <th>Discussion Count</th>
-                        <th>Actions</th>
+                        <th>{{ __('portal.nav_students') }}</th>
+                        <th>{{ __('portal.discussion_minutes') }}</th>
+                        <th>{{ __('portal.discussion_count') }}</th>
+                        <th>{{ __('admin.actions') }}</th>
                     @else
                         <th>Student</th>
                         <th>Total</th>
-                        <th>Completed</th>
+                        <th>{{ __('portal.completed') }}</th>
                         <th>Completion %</th>
-                        <th>Avg Score</th>
+                        <th>{{ __('portal.avg_score') }}</th>
                         <th>Duration</th>
                         <th></th>
                     @endif
@@ -648,9 +648,9 @@
                 <table class="dp-table">
                     <thead>
                         <tr>
-                            <th style="width:40px;">No</th>
-                            <th>Mission Name</th>
-                            <th>Students</th>
+                            <th style="width:40px;">{{ __('portal.no_num') }}</th>
+                            <th>{{ __('portal.mission_name') }}</th>
+                            <th>{{ __('portal.nav_students') }}</th>
                             <th>
                                 <span style="color:#ef4444;">❤️</span>
                                 Health Point
@@ -735,9 +735,9 @@
                 <thead><tr>
                     <th>Student</th>
                     <th>Total</th>
-                    <th>Completed</th>
+                    <th>{{ __('portal.completed') }}</th>
                     <th>Completion %</th>
-                    <th>Avg Score</th>
+                    <th>{{ __('portal.avg_score') }}</th>
                     <th>Duration</th>
                     <th></th>
                 </tr></thead>
@@ -1027,7 +1027,7 @@ new Chart(document.getElementById('sessionsChart'), {
             <div class="figma-field">
                 <label class="figma-label">Grade</label>
                 <select name="grade" class="figma-select" id="mwGradeSelect">
-                    <option value="">Please select</option>
+                    <option value="">{{ __('portal.please_select') }}</option>
                     @foreach(range(1, 12) as $g)
                         <option value="{{ $g }}">{{ $g }}</option>
                     @endforeach
@@ -1056,7 +1056,7 @@ new Chart(document.getElementById('sessionsChart'), {
             <div class="figma-field">
                 <label class="figma-label">Mission</label>
                 <select name="simulation_id" required class="figma-select" id="mwSimSelect">
-                    <option value="" data-role-count="0">Please select</option>
+                    <option value="" data-role-count="0">{{ __('portal.please_select') }}</option>
                     @foreach($mw_simulations ?? [] as $sim)
                         <option value="{{ $sim->id }}" data-role-count="{{ $sim->role_count }}">{{ $sim->name }}</option>
                     @endforeach
@@ -1086,7 +1086,7 @@ new Chart(document.getElementById('sessionsChart'), {
             <div class="figma-field">
                 <label class="figma-label">Grade</label>
                 <select name="grade" class="figma-select" id="wsGradeSelect">
-                    <option value="">Please select</option>
+                    <option value="">{{ __('portal.please_select') }}</option>
                     @foreach(range(1, 12) as $g)
                         <option value="{{ $g }}">{{ $g }}</option>
                     @endforeach
@@ -1112,7 +1112,7 @@ new Chart(document.getElementById('sessionsChart'), {
             <div class="figma-field">
                 <label class="figma-label">Business</label>
                 <select name="simulation_id" required class="figma-select">
-                    <option value="">Please select</option>
+                    <option value="">{{ __('portal.please_select') }}</option>
                     @foreach($ws_simulations ?? [] as $sim)
                         <option value="{{ $sim->id }}">{{ $sim->name }}</option>
                     @endforeach

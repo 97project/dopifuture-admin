@@ -14,7 +14,7 @@
 
             <div class="dp-card">
                 <div class="dp-form-group">
-                    <label class="dp-form-label">School Name *</label>
+                    <label class="dp-form-label">{{ __('admin.school_name') }} *</label>
                     <input type="text" name="name" value="{{ old('name', $school->name ?? '') }}" required class="dp-form-input" placeholder="Enter school name">
                     @error('name') <p class="dp-form-error">{{ $message }}</p> @enderror
                 </div>
@@ -49,7 +49,7 @@
                         <input type="text" name="phone" value="{{ old('phone', $school->phone) }}" class="dp-form-input">
                     </div>
                     <div>
-                        <label class="dp-form-label">E-mail</label>
+                        <label class="dp-form-label">{{ __('admin.email') }}</label>
                         <input type="email" name="email" value="{{ old('email', $school->email) }}" class="dp-form-input">
                     </div>
                 </div>
@@ -64,8 +64,8 @@
             </div>
 
             <div style="display:flex;gap:12px;align-items:center;margin-top:16px;">
-                <button type="submit" class="dp-btn">Save</button>
-                <a href="{{ route('portal.schools.index') }}" class="dp-btn-ghost">Cancel</a>
+                <button type="submit" class="dp-btn">{{ __('admin.save') }}</button>
+                <a href="{{ route('portal.schools.index') }}" class="dp-btn-ghost">{{ __('portal.cancel') }}</a>
             </div>
         </form>
     </div>

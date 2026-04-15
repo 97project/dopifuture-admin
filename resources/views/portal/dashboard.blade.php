@@ -1,6 +1,6 @@
 @extends('portal.app')
-@section('title', 'License Management')
-@section('page-title', 'Administration')
+@section('title', __('portal.license_management'))
+@section('page-title', __('admin.dashboard'))
 @section('content')
 
     {{-- ═══ HEADER ═══ --}}
@@ -21,15 +21,15 @@
         <table class="dp-table">
             <thead>
                 <tr>
-                    <th style="width:48px;">No</th>
-                    <th>School Name</th>
-                    <th>Country/State</th>
-                    <th>Total Licenses</th>
-                    <th>Status</th>
-                    <th>Purchase Date</th>
-                    <th>License Duration</th>
-                    <th>E-mail</th>
-                    <th style="text-align:right;">Actions</th>
+                    <th style="width:48px;">{{ __('portal.no_num') }}</th>
+                    <th>{{ __('admin.school_name') }}</th>
+                    <th>{{ __('portal.country_state') }}</th>
+                    <th>{{ __('portal.total_licenses') }}</th>
+                    <th>{{ __('admin.status') }}</th>
+                    <th>{{ __('portal.purchase_date') }}</th>
+                    <th>{{ __('portal.license_duration') }}</th>
+                    <th>{{ __('admin.email') }}</th>
+                    <th style="text-align:right;">{{ __('admin.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -44,7 +44,7 @@
                         @if($st === 'active')
                             <span class="dp-badge dp-badge-active">
                                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="margin-right:4px;"><circle cx="7" cy="7" r="7" fill="#0E9F6E"/><path d="M4 7l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                Active
+                                {{ __('portal.active') }}
                             </span>
                         @else
                             <span class="dp-badge" style="background:rgba(107,114,128,0.1);color:#6B7280;">
@@ -63,7 +63,7 @@
                             <a href="{{ route('portal.licenses.edit', $license) }}" class="dp-action dp-action-edit" title="Edit" style="padding:4px;">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             </a>
-                            <form action="{{ route('portal.licenses.destroy', $license) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this license?')">
+                            <form action="{{ route('portal.licenses.destroy', $license) }}" method="POST" style="display:inline;" onsubmit="return confirm('{{ __(\'portal.confirm_delete_license\') }}')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="dp-action" title="Delete" style="background:none;border:none;cursor:pointer;color:var(--color-error-red);padding:4px;">
                                     <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -87,15 +87,15 @@
         @if(isset($data['licenses']) && $data['licenses'] instanceof \Illuminate\Pagination\LengthAwarePaginator && $data['licenses']->hasPages())
         <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
             @if($data['licenses']->onFirstPage())
-                <span style="color:var(--color-txt-muted);cursor:default;">Previous</span>
+                <span style="color:var(--color-txt-muted);cursor:default;">{{ __('portal.previous') }}</span>
             @else
-                <a href="{{ $data['licenses']->previousPageUrl() }}" style="color:var(--color-txt);text-decoration:none;">Previous</a>
+                <a href="{{ $data['licenses']->previousPageUrl() }}" style="color:var(--color-txt);text-decoration:none;">{{ __('portal.previous') }}</a>
             @endif
             <span style="color:var(--color-txt-muted);">Page {{ $data['licenses']->currentPage() }} of {{ $data['licenses']->lastPage() }}</span>
             @if($data['licenses']->hasMorePages())
-                <a href="{{ $data['licenses']->nextPageUrl() }}" class="dp-btn" style="font-size:12px;padding:6px 16px;">Next</a>
+                <a href="{{ $data['licenses']->nextPageUrl() }}" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ __('portal.next') }}</a>
             @else
-                <span style="color:var(--color-txt-muted);cursor:default;">Next</span>
+                <span style="color:var(--color-txt-muted);cursor:default;">{{ __('portal.next') }}</span>
             @endif
         </div>
         @endif
@@ -108,40 +108,40 @@
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
-            <div class="dp-modal-title">Add New License</div>
-            <p class="dp-modal-subtitle">Fill in the license details below.</p>
+            <div class="dp-modal-title">{{ __('portal.add_new_license') }}</div>
+            <p class="dp-modal-subtitle">{{ __('portal.fill_license_details') }}</p>
 
             <form method="POST" action="{{ route('portal.licenses.store') }}">
                 @csrf
                 <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px;">
                     <div>
-                        <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">School *</label>
+                        <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">{{ __('admin.school_name') }} *</label>
                         <select name="school_id" class="dp-form-input" required>
-                            <option value="">Select a school...</option>
+                            <option value="">{{ __('portal.select_school') }}</option>
                             @foreach(\App\Models\School::orderBy('name')->get() as $school)
                                 <option value="{{ $school->id }}">{{ $school->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">Number of Seats *</label>
+                        <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">{{ __('portal.number_of_seats') }} *</label>
                         <input type="number" name="seat_count" class="dp-form-input" placeholder="0" required min="1">
                     </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                         <div>
-                            <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">Start Date</label>
+                            <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">{{ __('portal.start_date') }}</label>
                             <input type="date" name="starts_at" class="dp-form-input">
                         </div>
                         <div>
-                            <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">End Date</label>
+                            <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">{{ __('portal.end_date') }}</label>
                             <input type="date" name="expires_at" class="dp-form-input">
                         </div>
                     </div>
                 </div>
 
                 <div style="display:flex;gap:12px;">
-                    <button type="button" class="dp-btn-ghost" style="flex:1;justify-content:center;" onclick="document.getElementById('addLicenseModal').style.display='none'">Cancel</button>
-                    <button type="submit" class="dp-btn" style="flex:1;justify-content:center;">Save</button>
+                    <button type="button" class="dp-btn-ghost" style="flex:1;justify-content:center;" onclick="document.getElementById('addLicenseModal').style.display='none'">{{ __('portal.cancel') }}</button>
+                    <button type="submit" class="dp-btn" style="flex:1;justify-content:center;">{{ __('admin.save') }}</button>
                 </div>
             </form>
         </div>

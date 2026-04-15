@@ -15,7 +15,7 @@
 
             <div class="dp-card">
                 <div class="dp-form-group">
-                    <label class="dp-form-label">School *</label>
+                    <label class="dp-form-label">{{ __('admin.school_name') }} *</label>
                     <select name="school_id" class="dp-form-select" required>
                         <option value="">Select</option>
                         @foreach($schools as $school)
@@ -26,17 +26,17 @@
                 </div>
                 <div class="dp-form-grid" style="margin-bottom:16px;">
                     <div>
-                        <label class="dp-form-label">Class Name *</label>
+                        <label class="dp-form-label">{{ __('portal.class_name') }} *</label>
                         <input type="text" name="name" value="{{ old('name', $class->name) }}" required class="dp-form-input" placeholder="e.g. 10-A">
                         @error('name') <p class="dp-form-error">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="dp-form-label">Grade Level</label>
+                        <label class="dp-form-label">{{ __('portal.grade_level') }}</label>
                         <input type="text" name="grade_level" value="{{ old('grade_level', $class->grade_level) }}" class="dp-form-input" placeholder="10">
                     </div>
                 </div>
                 <div class="dp-form-group">
-                    <label class="dp-form-label">Academic Year</label>
+                    <label class="dp-form-label">{{ __('portal.academic_year') }}</label>
                     <select name="academic_year" class="dp-form-select">
                         <option value="">Select</option>
                         @foreach($academicYears as $year)
@@ -48,14 +48,14 @@
                     <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
                         <input type="hidden" name="is_active" value="0">
                         <input type="checkbox" name="is_active" value="1" {{ $class->is_active ? 'checked' : '' }} style="accent-color:var(--primary);">
-                        <span class="dp-form-label" style="margin:0;">Active</span>
+                        <span class="dp-form-label" style="margin:0;">{{ __('portal.active') }}</span>
                     </label>
                 @endif
             </div>
 
             <div style="display:flex;gap:12px;align-items:center;margin-top:16px;">
-                <button type="submit" class="dp-btn">Save</button>
-                <a href="{{ route('portal.classes.index') }}" class="dp-btn-ghost">Cancel</a>
+                <button type="submit" class="dp-btn">{{ __('admin.save') }}</button>
+                <a href="{{ route('portal.classes.index') }}" class="dp-btn-ghost">{{ __('portal.cancel') }}</a>
             </div>
         </form>
 

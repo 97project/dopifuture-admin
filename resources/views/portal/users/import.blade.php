@@ -21,7 +21,7 @@
         <form action="{{ route('portal.users.import') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="dp-form-group">
-                <label class="dp-form-label">School *</label>
+                <label class="dp-form-label">{{ __('admin.school_name') }} *</label>
                 <select name="school_id" class="dp-form-select" required>
                     @foreach($schools as $school)
                     <option value="{{ $school->id }}">{{ $school->name }}</option>
@@ -29,7 +29,7 @@
                 </select>
             </div>
             <div class="dp-form-group">
-                <label class="dp-form-label">CSV File *</label>
+                <label class="dp-form-label">{{ __('portal.csv_file') }} *</label>
                 <input type="file" name="csv_file" accept=".csv,.txt" required class="dp-form-input" style="padding:8px;">
                 @error('csv_file') <p class="dp-form-error">{{ $message }}</p> @enderror
             </div>

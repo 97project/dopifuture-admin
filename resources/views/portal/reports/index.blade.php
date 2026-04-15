@@ -30,15 +30,15 @@
             </div>
             <div>
                 <div style="font-size:20px;font-weight:700;color:var(--active-green);">{{ $appData['stats']['completed'] }}</div>
-                <div style="font-size:11px;color:var(--text-muted);">Completed</div>
+                <div style="font-size:11px;color:var(--text-muted);">{{ __('portal.completed') }}</div>
             </div>
             <div>
                 <div style="font-size:20px;font-weight:700;color:var(--primary);">{{ $appData['stats']['avg_score'] ? number_format($appData['stats']['avg_score'], 1) : '-' }}</div>
-                <div style="font-size:11px;color:var(--text-muted);">Avg Score</div>
+                <div style="font-size:11px;color:var(--text-muted);">{{ __('portal.avg_score') }}</div>
             </div>
             <div>
                 <div style="font-size:20px;font-weight:700;color:#fbbf24;">{{ $appData['stats']['total_sessions'] }}</div>
-                <div style="font-size:11px;color:var(--text-muted);">Sessions</div>
+                <div style="font-size:11px;color:var(--text-muted);">{{ __('portal.sessions') }}</div>
             </div>
         </div>
         <div class="dp-progress" style="margin-top:16px;">
@@ -74,14 +74,14 @@
                     <div style="background:linear-gradient(135deg,rgba(67,100,247,0.05),transparent);padding:16px;border-radius:12px;border:1px solid rgba(67,100,247,0.1);text-align:center;">
                         <div style="color:var(--primary);margin-bottom:8px;"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
                         <div style="font-size:24px;font-weight:800;color:var(--text-main);line-height:1;">{{ $overview['total_students'] }}</div>
-                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;">Students</div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;">{{ __('portal.nav_students') }}</div>
                     </div>
                     
                     {{-- 2. Total Completions --}}
                     <div style="background:linear-gradient(135deg,rgba(16,185,129,0.05),transparent);padding:16px;border-radius:12px;border:1px solid rgba(16,185,129,0.1);text-align:center;">
                         <div style="color:#10b981;margin-bottom:8px;"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
                         <div style="font-size:24px;font-weight:800;color:var(--text-main);line-height:1;">{{ $sumCompleted }}</div>
-                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;">Completed</div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;">{{ __('portal.completed') }}</div>
                     </div>
 
                     {{-- 3. Active Sessions --}}
@@ -102,7 +102,7 @@
                     <div style="background:linear-gradient(135deg,rgba(236,72,153,0.05),transparent);padding:16px;border-radius:12px;border:1px solid rgba(236,72,153,0.1);text-align:center;">
                         <div style="color:#ec4899;margin-bottom:8px;"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg></div>
                         <div style="font-size:24px;font-weight:800;color:var(--text-main);line-height:1;">{{ $avgScore ? number_format($avgScore, 1) : '-' }}</div>
-                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;">Avg Score</div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;">{{ __('portal.avg_score') }}</div>
                     </div>
 
                     {{-- 6. Completion Rate --}}
@@ -128,7 +128,7 @@
                 <a href="{{ route('portal.reports.class', $class) }}" style="text-decoration:none;">
                     <div class="dp-card" style="cursor:pointer;padding:16px;">
                         <div style="font-weight:600;font-size:15px;color:var(--text-main);">{{ $class->name }}</div>
-                        <div style="margin-top:8px;font-size:24px;font-weight:800;color:var(--primary);">{{ $class->students_count }} <span style="font-size:12px;color:var(--text-muted);font-weight:500;">Students</span></div>
+                        <div style="margin-top:8px;font-size:24px;font-weight:800;color:var(--primary);">{{ $class->students_count }} <span style="font-size:12px;color:var(--text-muted);font-weight:500;">{{ __('portal.nav_students') }}</span></div>
                     </div>
                 </a>
                 @endforeach
@@ -148,7 +148,7 @@
                                 </div>
                                 <div style="display:flex;gap:12px;align-items:end;">
                                     <div style="font-size:24px;font-weight:800;color:var(--text-main);line-height:1;">{{ $stat['completed'] }}</div>
-                                    <div style="font-size:12px;color:var(--text-muted);margin-bottom:2px;">Completed</div>
+                                    <div style="font-size:12px;color:var(--text-muted);margin-bottom:2px;">{{ __('portal.completed') }}</div>
                                 </div>
                                 @if($stat['total_progress'] > 0)
                                 <div class="dp-progress" style="margin-top:12px;height:6px;">
@@ -166,7 +166,7 @@
         {{-- Radar Chart Widget (Moved beneath overview or beside apps depending on layout) --}}
         @if(!isset($myClasses))
         <div class="dp-card" style="display:flex;flex-direction:column;grid-column: 2; grid-row: 1 / span 2;">
-            <div class="dp-card-title">Global Skill Matrix</div>
+            <div class="dp-card-title">{{ __('portal.global_skill_matrix') }}</div>
             <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;min-height:260px;">
                 <canvas id="globalRadarChart"></canvas>
             </div>
@@ -245,7 +245,7 @@
 
         {{-- Activity Feed --}}
         <div class="dp-card" style="display:flex;flex-direction:column;max-height:400px;">
-            <div class="dp-card-title">Live Activity Feed</div>
+            <div class="dp-card-title">{{ __('portal.live_activity_feed') }}</div>
             <div style="flex:1;overflow-y:auto;padding-right:8px;" class="custom-scrollbar">
                 <style>
                     .feed-item { position: relative; padding-left: 24px; padding-bottom: 16px; }

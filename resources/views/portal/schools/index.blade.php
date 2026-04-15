@@ -1,6 +1,6 @@
 @extends('portal.app')
-@section('title', 'Schools')
-@section('page-title', 'Schools')
+@section('title', __('admin.schools'))
+@section('page-title', __('admin.schools'))
 @section('content')
     <div class="dp-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
@@ -24,13 +24,13 @@
         <table class="dp-table">
             <thead>
                 <tr>
-                    <th>School Name</th>
+                    <th>{{ __('admin.school_name') }}</th>
                     <th>City</th>
-                    <th>Classes</th>
+                    <th>{{ __('admin.classes') }}</th>
                     <th>Users</th>
                     <th>Licenses</th>
-                    <th>Status</th>
-                    <th style="text-align:right;">Actions</th>
+                    <th>{{ __('admin.status') }}</th>
+                    <th style="text-align:right;">{{ __('admin.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,7 +43,7 @@
                         <td>{{ $school->licenses_count }}</td>
                         <td>
                             @if($school->is_active)
-                                <span class="dp-badge dp-badge-active">Active</span>
+                                <span class="dp-badge dp-badge-active">{{ __('portal.active') }}</span>
                             @else
                                 <span class="dp-badge dp-badge-inactive">Inactive</span>
                             @endif

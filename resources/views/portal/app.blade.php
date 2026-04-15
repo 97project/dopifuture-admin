@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') — DopiFuture</title>
+    <title>@yield('title', __('admin.dashboard')) — DopiFuture</title>
     <meta name="description" content="@yield('meta_description', 'DopiFuture — Digital Education Platform')">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -976,7 +976,7 @@
                 <button class="dp-hamburger" onclick="toggleSidebar()">
                     <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
-                <span class="dp-topbar-title">@yield('page-title', 'Dashboard')</span>
+                <span class="dp-topbar-title">@yield('page-title', __('admin.dashboard'))</span>
             </div>
 
             <div class="dp-topbar-search" style="position:relative;">

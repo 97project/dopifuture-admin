@@ -29,15 +29,15 @@
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px;">
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
         <div class="s-value">{{ $stats['total_sessions'] }}</div>
-        <div class="s-label">Total Sessions</div>
+        <div class="s-label">{{ __('portal.total_sessions') }}</div>
     </div>
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#43e97b,#38f9d7);">
         <div class="s-value">{{ $stats['total_messages'] }}</div>
-        <div class="s-label">Total Messages</div>
+        <div class="s-label">{{ __('portal.total_messages') }}</div>
     </div>
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#4facfe,#00f2fe);">
         <div class="s-value">{{ \App\Services\ReportService::formatDuration($stats['total_duration']) }}</div>
-        <div class="s-label">Total Duration</div>
+        <div class="s-label">{{ __('portal.total_duration') }}</div>
     </div>
 </div>
 
@@ -66,7 +66,7 @@
                 <div style="font-size:36px;margin-bottom:10px;">{{ $emoji }}</div>
                 <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:12px;">{{ $cfg['label'] ?? $tb['theme'] }}</div>
                 <div style="display:flex;align-items:center;justify-content:space-between;">
-                    <div style="font-size:10px;font-weight:600;color:#62748E;text-transform:uppercase;letter-spacing:0.5px;">Sessions</div>
+                    <div style="font-size:10px;font-weight:600;color:#62748E;text-transform:uppercase;letter-spacing:0.5px;">{{ __('portal.sessions') }}</div>
                     <div style="display:inline-flex;align-items:center;gap:6px;border:2px solid {{ $isHigh ? '#60A5FA' : '#F87171' }};border-radius:10px;padding:4px 10px;">
                         <span style="font-size:10px;">{{ $isHigh ? '🟢' : '🔴' }}</span>
                         <span style="font-size:16px;font-weight:700;color:#fff;">{{ $tb['count'] }}</span>
@@ -86,8 +86,8 @@
     </div>
     <table class="dp-table">
         <thead><tr>
-            <th>Date</th><th>Theme</th>
-            <th>Status</th><th>Messages</th><th>Duration</th><th></th>
+            <th>{{ __('admin.date') }}</th><th>Theme</th>
+            <th>{{ __('admin.status') }}</th><th>{{ __('portal.messages') }}</th><th>Duration</th><th></th>
         </tr></thead>
         <tbody>
         @foreach($sessions->take(30) as $s)

@@ -1,9 +1,9 @@
 @extends('portal.app')
-@section('title', 'Reports')
+@section('title', __('admin.reports'))
 @section('content')
     <div class="page-header">
         <h1>Reports</h1>
-        <p>Application usage, license analytics and per-school distribution reports.
+        <p>{{ __('portal.reports_subtitle') }}
         </p>
     </div>
 
@@ -60,8 +60,8 @@
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>E-mail</th>
-                                <th>Status</th>
+                                <th>{{ __('admin.email') }}</th>
+                                <th>{{ __('admin.status') }}</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -163,10 +163,10 @@
                 <thead>
                     <tr>
                         <th>School</th>
-                        <th>Students</th>
-                        <th>Teachers</th>
-                        <th>Classes</th>
-                        <th>Total Users</th>
+                        <th>{{ __('portal.nav_students') }}</th>
+                        <th>{{ __('portal.nav_teachers') }}</th>
+                        <th>{{ __('admin.classes') }}</th>
+                        <th>{{ __('portal.total_users') }}</th>
                     </tr>
                 </thead>
                 <tbody>

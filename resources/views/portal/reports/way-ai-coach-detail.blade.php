@@ -63,7 +63,7 @@
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px;">
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#667eea,#764ba2);">
         <div class="s-value">{{ $stats['total_sessions'] }}</div>
-        <div class="s-label">Total Sessions</div>
+        <div class="s-label">{{ __('portal.total_sessions') }}</div>
     </div>
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);">
         <div class="s-value">{{ $stats['lecturer'] }}</div>
@@ -75,15 +75,15 @@
     </div>
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#f093fb,#f5576c);">
         <div class="s-value">{{ $stats['avg_score'] ? number_format($stats['avg_score'], 1) : '-' }}</div>
-        <div class="s-label">Avg Score</div>
+        <div class="s-label">{{ __('portal.avg_score') }}</div>
     </div>
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#4facfe,#00f2fe);">
         <div class="s-value">{{ \App\Services\ReportService::formatDuration($stats['total_duration']) }}</div>
-        <div class="s-label">Total Duration</div>
+        <div class="s-label">{{ __('portal.total_duration') }}</div>
     </div>
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#43e97b,#38f9d7);">
         <div class="s-value">{{ $stats['total_messages'] }}</div>
-        <div class="s-label">Total Messages</div>
+        <div class="s-label">{{ __('portal.total_messages') }}</div>
     </div>
 </div>
 
@@ -196,8 +196,8 @@
     </div>
     <table class="dp-table">
         <thead><tr>
-            <th>Date</th><th>Module</th><th>Theme</th>
-            <th>Status</th><th>Score</th><th>Messages</th><th>Duration</th><th></th>
+            <th>{{ __('admin.date') }}</th><th>Module</th><th>Theme</th>
+            <th>{{ __('admin.status') }}</th><th>{{ __('portal.score') }}</th><th>{{ __('portal.messages') }}</th><th>Duration</th><th></th>
         </tr></thead>
         <tbody>
         @foreach($sessions->take(30) as $s)

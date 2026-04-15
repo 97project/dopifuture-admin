@@ -51,7 +51,7 @@
             </div>
             <div>
                 <div style="font-size:20px;font-weight:800;color:#F59E0B;">{{ $app->pending }}</div>
-                <div style="font-size:10px;color:var(--color-txt-muted);">Pending</div>
+                <div style="font-size:10px;color:var(--color-txt-muted);">{{ __('portal.pending') }}</div>
             </div>
             <div>
                 <div style="font-size:20px;font-weight:800;color:#EF4444;">{{ $app->failed }}</div>
@@ -62,7 +62,7 @@
         {{-- Sync Progress Bar --}}
         <div>
             <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-txt-muted);margin-bottom:4px;">
-                <span>Sync Progress</span>
+                <span>{{ __('portal.sync_progress') }}</span>
                 <span style="font-weight:600;color:#030719;">{{ $app->sync_percent }}%</span>
             </div>
             <div style="height:6px;background:rgba(0,0,0,0.06);border-radius:999px;overflow:hidden;">

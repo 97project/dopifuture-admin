@@ -19,9 +19,9 @@
 
             {{-- School Name --}}
             <div style="margin-bottom:20px;">
-                <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">School Name</label>
+                <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">{{ __('admin.school_name') }}</label>
                 <select name="school_id" style="width:100%;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;background:#F8FAFC;font-size:14px;color:#374151;outline:none;font-family:inherit;appearance:none;" required>
-                    <option value="">Select School</option>
+                    <option value="">{{ __('portal.select_school') }}</option>
                     @foreach($schools as $school)
                         <option value="{{ $school->id }}" {{ old('school_id', $license->school_id) == $school->id ? 'selected' : '' }}>{{ $school->name }}</option>
                     @endforeach
@@ -34,7 +34,7 @@
                 <div>
                     <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">Country</label>
                     <select name="country" style="width:100%;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;background:#F8FAFC;font-size:14px;color:#9CA3AF;outline:none;font-family:inherit;">
-                        <option value="">Please select</option>
+                        <option value="">{{ __('portal.please_select') }}</option>
                         <option value="TR" {{ old('country', $license->country ?? '') === 'TR' ? 'selected' : '' }}>Turkey</option>
                         <option value="US" {{ old('country', $license->country ?? '') === 'US' ? 'selected' : '' }}>United States</option>
                     </select>
@@ -42,7 +42,7 @@
                 <div>
                     <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">State</label>
                     <select name="state" style="width:100%;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;background:#F8FAFC;font-size:14px;color:#9CA3AF;outline:none;font-family:inherit;">
-                        <option value="">Please select</option>
+                        <option value="">{{ __('portal.please_select') }}</option>
                     </select>
                 </div>
             </div>
@@ -71,16 +71,16 @@
             {{-- License Duration / E-mail — side by side --}}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;">
                 <div>
-                    <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">License Duration</label>
+                    <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">{{ __('portal.license_duration') }}</label>
                     <select name="duration" style="width:100%;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;background:#F8FAFC;font-size:14px;color:#9CA3AF;outline:none;font-family:inherit;">
-                        <option value="">Please select</option>
+                        <option value="">{{ __('portal.please_select') }}</option>
                         <option value="6" {{ old('duration', $license->duration ?? '') == 6 ? 'selected' : '' }}>6 Months</option>
                         <option value="12" {{ old('duration', $license->duration ?? '') == 12 ? 'selected' : '' }}>12 Months</option>
                         <option value="24" {{ old('duration', $license->duration ?? '') == 24 ? 'selected' : '' }}>24 Months</option>
                     </select>
                 </div>
                 <div>
-                    <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">E-mail</label>
+                    <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">{{ __('admin.email') }}</label>
                     <input type="email" name="email" value="{{ old('email', $license->email ?? '') }}" placeholder="name@example.com"
                         style="width:100%;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;background:#F8FAFC;font-size:14px;color:#374151;outline:none;font-family:inherit;box-sizing:border-box;">
                 </div>

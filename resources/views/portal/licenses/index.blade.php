@@ -1,5 +1,5 @@
 @extends('portal.app')
-@section('title', 'License Management')
+@section('title', __('portal.license_management'))
 @section('page-title', 'License Management')
 @section('content')
     <div class="dp-card">
@@ -22,15 +22,15 @@
         <table class="dp-table">
             <thead>
                 <tr>
-                    <th style="width:40px;">No</th>
-                    <th>School Name</th>
-                    <th>Country/State</th>
-                    <th>Total Licenses</th>
-                    <th>Status</th>
-                    <th>Purchase Date</th>
-                    <th>License Duration</th>
-                    <th>E-mail</th>
-                    <th style="text-align:right;">Actions</th>
+                    <th style="width:40px;">{{ __('portal.no_num') }}</th>
+                    <th>{{ __('admin.school_name') }}</th>
+                    <th>{{ __('portal.country_state') }}</th>
+                    <th>{{ __('portal.total_licenses') }}</th>
+                    <th>{{ __('admin.status') }}</th>
+                    <th>{{ __('portal.purchase_date') }}</th>
+                    <th>{{ __('portal.license_duration') }}</th>
+                    <th>{{ __('admin.email') }}</th>
+                    <th style="text-align:right;">{{ __('admin.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,7 +57,7 @@
                                     Cancelled
                                 </span>
                             @elseif($st === 'expired')
-                                <span class="dp-badge dp-badge-error">Expired</span>
+                                <span class="dp-badge dp-badge-error">{{ __('portal.expired') }}</span>
                             @else
                                 <span class="dp-badge dp-badge-inactive">
                                     <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="margin-right:4px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" opacity=".3"/></svg>
@@ -79,7 +79,7 @@
                                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 </a>
                                 {{-- Delete --}}
-                                <form action="{{ route('portal.licenses.destroy', $lic) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this license?')">
+                                <form action="{{ route('portal.licenses.destroy', $lic) }}" method="POST" style="display:inline;" onsubmit="return confirm('{{ __(\'portal.confirm_delete_license\') }}')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="dp-action" title="Delete" style="background:none;border:none;cursor:pointer;color:var(--color-error-red);padding:4px;">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -104,17 +104,17 @@
     @if($licenses->hasPages())
     <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;font-size:12px;">
         @if($licenses->onFirstPage())
-            <span style="color:var(--color-txt-muted);cursor:default;">Previous</span>
+            <span style="color:var(--color-txt-muted);cursor:default;">{{ __('portal.previous') }}</span>
         @else
-            <a href="{{ $licenses->previousPageUrl() }}" style="color:var(--color-txt);text-decoration:none;">Previous</a>
+            <a href="{{ $licenses->previousPageUrl() }}" style="color:var(--color-txt);text-decoration:none;">{{ __('portal.previous') }}</a>
         @endif
 
         <span style="color:var(--color-txt-muted);">Page{{ $licenses->currentPage() }} of {{ $licenses->lastPage() }}</span>
 
         @if($licenses->hasMorePages())
-            <a href="{{ $licenses->nextPageUrl() }}" class="dp-btn" style="font-size:12px;padding:6px 16px;">Next</a>
+            <a href="{{ $licenses->nextPageUrl() }}" class="dp-btn" style="font-size:12px;padding:6px 16px;">{{ __('portal.next') }}</a>
         @else
-            <span style="color:var(--color-txt-muted);cursor:default;">Next</span>
+            <span style="color:var(--color-txt-muted);cursor:default;">{{ __('portal.next') }}</span>
         @endif
     </div>
     @endif

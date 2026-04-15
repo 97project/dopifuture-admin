@@ -13,7 +13,7 @@
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
                 {{-- Students Section --}}
                 <div style="background:rgba(255,255,255,0.9);border-radius:12px;padding:16px;">
-                    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">Students</div>
+                    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">{{ __('portal.nav_students') }}</div>
                     @foreach($students as $s)
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
                         <div style="display:flex;align-items:center;gap:10px;">

@@ -13,8 +13,8 @@
 
 {{-- Stats --}}
 <div class="dp-stats-grid" style="margin-bottom:20px;">
-    <div class="dp-stat-card"><div class="s-value">{{ $class->students->count() }}</div><div class="s-label">Students</div></div>
-    <div class="dp-stat-card"><div class="s-value">{{ $class->teachers->count() }}</div><div class="s-label">Teachers</div></div>
+    <div class="dp-stat-card"><div class="s-value">{{ $class->students->count() }}</div><div class="s-label">{{ __('portal.nav_students') }}</div></div>
+    <div class="dp-stat-card"><div class="s-value">{{ $class->teachers->count() }}</div><div class="s-label">{{ __('portal.nav_teachers') }}</div></div>
 </div>
 
 {{-- App Filter Tabs --}}
@@ -29,8 +29,8 @@
 @if($selectedApp && isset($reportData['app']))
     <div class="dp-stats-grid" style="margin-bottom:20px;">
         <div class="dp-stat-card"><div class="s-value">{{ $reportData['total_progress'] ?? 0 }}</div><div class="s-label">Total Progress</div></div>
-        <div class="dp-stat-card"><div class="s-value" style="color:var(--active-green);">{{ $reportData['total_completed'] ?? 0 }}</div><div class="s-label">Completed</div></div>
-        <div class="dp-stat-card"><div class="s-value" style="color:var(--primary);">{{ isset($reportData['avg_score']) && $reportData['avg_score'] ? number_format($reportData['avg_score'], 1) : '-' }}</div><div class="s-label">Avg Score</div></div>
+        <div class="dp-stat-card"><div class="s-value" style="color:var(--active-green);">{{ $reportData['total_completed'] ?? 0 }}</div><div class="s-label">{{ __('portal.completed') }}</div></div>
+        <div class="dp-stat-card"><div class="s-value" style="color:var(--primary);">{{ isset($reportData['avg_score']) && $reportData['avg_score'] ? number_format($reportData['avg_score'], 1) : '-' }}</div><div class="s-label">{{ __('portal.avg_score') }}</div></div>
     </div>
 
     @if(isset($reportData['user_stats']) && count($reportData['user_stats']))
@@ -40,7 +40,7 @@
             <thead><tr>
                 <th>Student</th>
                 <th>Completion</th>
-                <th>Score</th>
+                <th>{{ __('portal.score') }}</th>
                 <th></th>
             </tr></thead>
             <tbody>
@@ -75,11 +75,11 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                 <div>
                     <div style="font-size:20px;font-weight:700;color:var(--active-green);">{{ $r['completed'] }}<span style="color:var(--text-muted);font-size:12px;font-weight:400;">/{{ $r['total_progress'] }}</span></div>
-                    <div style="font-size:11px;color:var(--text-muted);">Completed</div>
+                    <div style="font-size:11px;color:var(--text-muted);">{{ __('portal.completed') }}</div>
                 </div>
                 <div>
                     <div style="font-size:20px;font-weight:700;color:var(--primary);">{{ $r['avg_score'] ? number_format($r['avg_score'], 1) : '-' }}</div>
-                    <div style="font-size:11px;color:var(--text-muted);">Avg Score</div>
+                    <div style="font-size:11px;color:var(--text-muted);">{{ __('portal.avg_score') }}</div>
                 </div>
             </div>
             <div class="dp-progress" style="margin-top:12px;"><div class="dp-progress-fill" style="width:{{ $r['completion_rate'] }}%;"></div></div>

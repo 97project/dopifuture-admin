@@ -10,7 +10,7 @@
             <p style="font-size:13px;color:var(--text-muted);margin:4px 0 0;">{{ $class->school?->name }} — Grade: {{ $class->grade_level ?? '—' }}</p>
         </div>
         <div style="display:flex;gap:8px;">
-            <a href="{{ route('portal.classes.edit', $class) }}" class="dp-btn">Edit</a>
+            <a href="{{ route('portal.classes.edit', $class) }}" class="dp-btn">{{ __('admin.edit') }}</a>
             <a href="{{ route('portal.classes.index') }}" class="dp-btn-ghost">← Back</a>
         </div>
     </div>
@@ -20,17 +20,17 @@
         <div class="dp-stat-card">
             <div class="s-icon"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg></div>
             <div class="s-value">{{ $class->students->count() }}</div>
-            <div class="s-label">Students</div>
+            <div class="s-label">{{ __('portal.nav_students') }}</div>
         </div>
         <div class="dp-stat-card">
             <div class="s-icon"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
             <div class="s-value">{{ $class->teachers->count() }}</div>
-            <div class="s-label">Teachers</div>
+            <div class="s-label">{{ __('portal.nav_teachers') }}</div>
         </div>
         <div class="dp-stat-card">
             <div class="s-icon"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
             <div class="s-value" style="font-size:16px;">{{ $class->academic_year ?? '—' }}</div>
-            <div class="s-label">Academic Year</div>
+            <div class="s-label">{{ __('portal.academic_year') }}</div>
         </div>
     </div>
 
@@ -44,7 +44,7 @@
         <form action="{{ route('portal.classes.add-student', $class) }}" method="POST" style="display:flex;gap:8px;margin:12px 0;">
             @csrf
             <select name="user_id" class="dp-form-select" style="flex:1;" required>
-                <option value="">Select student to add...</option>
+                <option value="">{{ __('portal.select_student') }}</option>
                 @foreach($availableStudents as $s)
                     <option value="{{ $s->id }}">{{ $s->name }} {{ $s->surname }} ({{ $s->email }})</option>
                 @endforeach
@@ -57,8 +57,8 @@
         <table class="dp-table">
             <thead><tr>
                 <th>Name</th>
-                <th>E-mail</th>
-                <th>Status</th>
+                <th>{{ __('admin.email') }}</th>
+                <th>{{ __('admin.status') }}</th>
                 <th style="text-align:right;"></th>
             </tr></thead>
             <tbody>
@@ -104,7 +104,7 @@
         <form action="{{ route('portal.classes.add-teacher', $class) }}" method="POST" style="display:flex;gap:8px;margin:12px 0;">
             @csrf
             <select name="user_id" class="dp-form-select" style="flex:1;" required>
-                <option value="">Select teacher to add...</option>
+                <option value="">{{ __('portal.select_teacher') }}</option>
                 @foreach($availableTeachers as $t)
                     <option value="{{ $t->id }}">{{ $t->name }} {{ $t->surname }} ({{ $t->email }})</option>
                 @endforeach
@@ -117,7 +117,7 @@
         <table class="dp-table">
             <thead><tr>
                 <th>Name</th>
-                <th>E-mail</th>
+                <th>{{ __('admin.email') }}</th>
                 <th style="text-align:right;"></th>
             </tr></thead>
             <tbody>

@@ -16,12 +16,12 @@
             <div class="dp-card">
                 <div class="dp-form-grid" style="margin-bottom:16px;">
                     <div>
-                        <label class="dp-form-label">First Name *</label>
+                        <label class="dp-form-label">{{ __('admin.name') }} *</label>
                         <input type="text" name="name" value="{{ old('name', $editUser->name) }}" required class="dp-form-input">
                         @error('name') <p class="dp-form-error">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="dp-form-label">Last Name</label>
+                        <label class="dp-form-label">{{ __('admin.surname') }}</label>
                         <input type="text" name="surname" value="{{ old('surname', $editUser->surname) }}" class="dp-form-input">
                     </div>
                 </div>
@@ -47,7 +47,7 @@
                     <div>
                         <label class="dp-form-label">Status *</label>
                         <select name="status" class="dp-form-select" required>
-                            <option value="active" {{ $editUser->status === 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="active" {{ $editUser->status === 'active' ? 'selected' : '' }}>{{ __('portal.active') }}</option>
                             <option value="inactive" {{ $editUser->status === 'inactive' ? 'selected' : '' }}>Inactive</option>
                         </select>
                     </div>
@@ -55,7 +55,7 @@
                 @endif
                 @if(!$editUser->exists && isset($classes) && $classes->count())
                 <div class="dp-form-group">
-                    <label class="dp-form-label">Assign to Class</label>
+                    <label class="dp-form-label">{{ __('portal.assign_to_class') }}</label>
                     <select name="class_id" class="dp-form-select">
                         <option value="">Select (optional)</option>
                         @foreach($classes as $cls)
@@ -67,8 +67,8 @@
             </div>
 
             <div style="display:flex;gap:12px;align-items:center;margin-top:16px;">
-                <button type="submit" class="dp-btn">Save</button>
-                <a href="{{ route('portal.users.index') }}" class="dp-btn-ghost">Cancel</a>
+                <button type="submit" class="dp-btn">{{ __('admin.save') }}</button>
+                <a href="{{ route('portal.users.index') }}" class="dp-btn-ghost">{{ __('portal.cancel') }}</a>
             </div>
         </form>
 

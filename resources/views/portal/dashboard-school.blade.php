@@ -1,6 +1,6 @@
 @extends('portal.app')
-@section('title', 'Dashboard')
-@section('page-title', 'Administration')
+@section('title', __('admin.dashboard'))
+@section('page-title', __('admin.dashboard'))
 @section('content')
 
     {{-- ═══ SCHOOL OVERVIEW HEADER ═══ --}}
@@ -32,10 +32,10 @@
                 </div>
                 <div>
                     <div style="font-size:28px;font-weight:700;color:#030719;line-height:1;">{{ $school->students_count ?? 0 }}</div>
-                    <div style="font-size:13px;color:var(--color-txt-muted);font-weight:500;">Students</div>
+                    <div style="font-size:13px;color:var(--color-txt-muted);font-weight:500;">{{ __('portal.nav_students') }}</div>
                 </div>
             </div>
-            <a href="{{ route('portal.users.index', ['role' => 'student']) }}" style="font-size:12px;color:#4364F7;text-decoration:none;font-weight:500;">View all →</a>
+            <a href="{{ route('portal.users.index', ['role' => 'student']) }}" style="font-size:12px;color:#4364F7;text-decoration:none;font-weight:500;">{{ __('portal.view_all') }} →</a>
         </div>
 
         {{-- Total Teachers --}}
@@ -46,10 +46,10 @@
                 </div>
                 <div>
                     <div style="font-size:28px;font-weight:700;color:#030719;line-height:1;">{{ $school->teachers_count ?? 0 }}</div>
-                    <div style="font-size:13px;color:var(--color-txt-muted);font-weight:500;">Teachers</div>
+                    <div style="font-size:13px;color:var(--color-txt-muted);font-weight:500;">{{ __('portal.nav_teachers') }}</div>
                 </div>
             </div>
-            <a href="{{ route('portal.users.index', ['role' => 'teacher']) }}" style="font-size:12px;color:#4364F7;text-decoration:none;font-weight:500;">View all →</a>
+            <a href="{{ route('portal.users.index', ['role' => 'teacher']) }}" style="font-size:12px;color:#4364F7;text-decoration:none;font-weight:500;">{{ __('portal.view_all') }} →</a>
         </div>
 
         {{-- Total Classes --}}
@@ -60,10 +60,10 @@
                 </div>
                 <div>
                     <div style="font-size:28px;font-weight:700;color:#030719;line-height:1;">{{ $school->classes_count ?? 0 }}</div>
-                    <div style="font-size:13px;color:var(--color-txt-muted);font-weight:500;">Classes</div>
+                    <div style="font-size:13px;color:var(--color-txt-muted);font-weight:500;">{{ __('admin.classes') }}</div>
                 </div>
             </div>
-            <a href="{{ route('portal.classes.index') }}" style="font-size:12px;color:#4364F7;text-decoration:none;font-weight:500;">View all →</a>
+            <a href="{{ route('portal.classes.index') }}" style="font-size:12px;color:#4364F7;text-decoration:none;font-weight:500;">{{ __('portal.view_all') }} →</a>
         </div>
 
         {{-- Available Seats --}}
@@ -80,7 +80,7 @@
                 </div>
                 <div>
                     <div style="font-size:28px;font-weight:700;color:#030719;line-height:1;">{{ $remaining }}</div>
-                    <div style="font-size:13px;color:var(--color-txt-muted);font-weight:500;">Available Seats</div>
+                    <div style="font-size:13px;color:var(--color-txt-muted);font-weight:500;">{{ __('portal.available_seats') }}</div>
                 </div>
             </div>
             <div style="font-size:12px;color:var(--color-txt-muted);">{{ $usedSeats }} / {{ $totalSeats }} used ({{ $pct }}%)</div>
@@ -97,22 +97,22 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                 <div>
                     <div style="font-size:24px;font-weight:700;">{{ $vegaSummary['role_galaxy']['sessions'] }}</div>
-                    <div style="font-size:11px;opacity:0.85;">Simulations</div>
+                    <div style="font-size:11px;opacity:0.85;">{{ __('portal.simulations') }}</div>
                 </div>
                 <div>
                     <div style="font-size:24px;font-weight:700;">{{ $vegaSummary['role_galaxy']['avg_score'] ?? '-' }}</div>
-                    <div style="font-size:11px;opacity:0.85;">Avg Score</div>
+                    <div style="font-size:11px;opacity:0.85;">{{ __('portal.avg_score') }}</div>
                 </div>
                 <div>
                     <div style="font-size:18px;font-weight:600;">{{ $vegaSummary['role_galaxy']['active_students'] }}</div>
-                    <div style="font-size:11px;opacity:0.85;">Active Students</div>
+                    <div style="font-size:11px;opacity:0.85;">{{ __('portal.active_students') }}</div>
                 </div>
                 <div>
                     <div style="font-size:18px;font-weight:600;">{{ $vegaSummary['role_galaxy']['completed'] ?? 0 }}</div>
-                    <div style="font-size:11px;opacity:0.85;">Completed</div>
+                    <div style="font-size:11px;opacity:0.85;">{{ __('portal.completed') }}</div>
                 </div>
             </div>
-            <a href="{{ route('portal.reports.app', 'role-galaxy') }}" style="display:inline-block;margin-top:12px;font-size:12px;color:#fff;text-decoration:none;font-weight:600;opacity:0.9;">View Details →</a>
+            <a href="{{ route('portal.reports.app', 'role-galaxy') }}" style="display:inline-block;margin-top:12px;font-size:12px;color:#fff;text-decoration:none;font-weight:600;opacity:0.9;">{{ __('portal.view_details') }} →</a>
         </div>
 
         {{-- Study Space --}}
@@ -122,18 +122,18 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                 <div>
                     <div style="font-size:24px;font-weight:700;">{{ $vegaSummary['study_space']['sessions'] }}</div>
-                    <div style="font-size:11px;opacity:0.85;">Discussions</div>
+                    <div style="font-size:11px;opacity:0.85;">{{ __('portal.discussions') }}</div>
                 </div>
                 <div>
                     <div style="font-size:24px;font-weight:700;">{{ number_format($vegaSummary['study_space']['total_messages']) }}</div>
-                    <div style="font-size:11px;opacity:0.85;">Messages</div>
+                    <div style="font-size:11px;opacity:0.85;">{{ __('portal.messages') }}</div>
                 </div>
                 <div>
                     <div style="font-size:18px;font-weight:600;">{{ $vegaSummary['study_space']['active_students'] }}</div>
-                    <div style="font-size:11px;opacity:0.85;">Active Students</div>
+                    <div style="font-size:11px;opacity:0.85;">{{ __('portal.active_students') }}</div>
                 </div>
             </div>
-            <a href="{{ route('portal.reports.app', 'study-space') }}" style="display:inline-block;margin-top:12px;font-size:12px;color:#fff;text-decoration:none;font-weight:600;opacity:0.9;">View Details →</a>
+            <a href="{{ route('portal.reports.app', 'study-space') }}" style="display:inline-block;margin-top:12px;font-size:12px;color:#fff;text-decoration:none;font-weight:600;opacity:0.9;">{{ __('portal.view_details') }} →</a>
         </div>
 
         {{-- WAY AI Coach --}}
@@ -143,18 +143,18 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                 <div>
                     <div style="font-size:24px;font-weight:700;">{{ $vegaSummary['way_ai_coach']['sessions'] }}</div>
-                    <div style="font-size:11px;opacity:0.85;">Sessions</div>
+                    <div style="font-size:11px;opacity:0.85;">{{ __('portal.sessions') }}</div>
                 </div>
                 <div>
                     <div style="font-size:24px;font-weight:700;">{{ number_format($vegaSummary['way_ai_coach']['total_messages']) }}</div>
-                    <div style="font-size:11px;opacity:0.85;">Messages</div>
+                    <div style="font-size:11px;opacity:0.85;">{{ __('portal.messages') }}</div>
                 </div>
                 <div>
                     <div style="font-size:18px;font-weight:600;">{{ $vegaSummary['way_ai_coach']['active_students'] }}</div>
-                    <div style="font-size:11px;opacity:0.85;">Active Students</div>
+                    <div style="font-size:11px;opacity:0.85;">{{ __('portal.active_students') }}</div>
                 </div>
             </div>
-            <a href="{{ route('portal.reports.app', 'way-ai-coach') }}" style="display:inline-block;margin-top:12px;font-size:12px;color:#fff;text-decoration:none;font-weight:600;opacity:0.9;">View Details →</a>
+            <a href="{{ route('portal.reports.app', 'way-ai-coach') }}" style="display:inline-block;margin-top:12px;font-size:12px;color:#fff;text-decoration:none;font-weight:600;opacity:0.9;">{{ __('portal.view_details') }} →</a>
         </div>
     </div>
     @endif
@@ -165,13 +165,13 @@
         {{-- License Status Card --}}
         <div class="dp-card">
             <div class="dp-card-title" style="display:flex;justify-content:space-between;align-items:center;">
-                <span>License Status</span>
+                <span>{{ __('portal.license_status') }}</span>
                 @if($license && $license->is_active)
-                    <span class="dp-badge dp-badge-active" style="font-size:11px;">Active</span>
+                    <span class="dp-badge dp-badge-active" style="font-size:11px;">{{ __('portal.active') }}</span>
                 @elseif($license)
-                    <span class="dp-badge" style="background:rgba(239,68,68,0.1);color:#EF4444;font-size:11px;">Expired</span>
+                    <span class="dp-badge" style="background:rgba(239,68,68,0.1);color:#EF4444;font-size:11px;">{{ __('portal.expired') }}</span>
                 @else
-                    <span class="dp-badge" style="background:rgba(107,114,128,0.1);color:#6B7280;font-size:11px;">No License</span>
+                    <span class="dp-badge" style="background:rgba(107,114,128,0.1);color:#6B7280;font-size:11px;">{{ __('portal.no_license') }}</span>
                 @endif
             </div>
 
@@ -179,7 +179,7 @@
                 {{-- Seat usage bar --}}
                 <div style="margin:16px 0;">
                     <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
-                        <span style="color:var(--color-txt-sec);font-weight:500;">Seat Usage</span>
+                        <span style="color:var(--color-txt-sec);font-weight:500;">{{ __('portal.seat_usage') }}</span>
                         <span style="color:var(--color-txt-muted);">{{ $usedSeats }} / {{ $totalSeats }}</span>
                     </div>
                     <div style="height:10px;background:#E5E7EB;border-radius:999px;overflow:hidden;">
@@ -199,25 +199,25 @@
 
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">
                     <div>
-                        <span style="color:var(--color-txt-muted);">Start Date</span>
+                        <span style="color:var(--color-txt-muted);">{{ __('portal.start_date') }}</span>
                         <div style="font-weight:500;color:var(--color-txt);">{{ $license->starts_at?->format('M d, Y') ?? '—' }}</div>
                     </div>
                     <div>
-                        <span style="color:var(--color-txt-muted);">Expiry Date</span>
+                        <span style="color:var(--color-txt-muted);">{{ __('portal.expiry_date') }}</span>
                         <div style="font-weight:500;color:var(--color-txt);">{{ $license->expires_at?->format('M d, Y') ?? '—' }}</div>
                     </div>
                     <div>
-                        <span style="color:var(--color-txt-muted);">Total Seats</span>
+                        <span style="color:var(--color-txt-muted);">{{ __('portal.total_seats') }}</span>
                         <div style="font-weight:500;color:var(--color-txt);">{{ $totalSeats }}</div>
                     </div>
                     <div>
-                        <span style="color:var(--color-txt-muted);">Available</span>
+                        <span style="color:var(--color-txt-muted);">{{ __('portal.available') }}</span>
                         <div style="font-weight:500;color:{{ $remaining > 0 ? '#059669' : '#EF4444' }};">{{ $remaining }}</div>
                     </div>
                 </div>
             @else
                 <p style="color:var(--color-txt-muted);padding:20px 0;text-align:center;font-size:14px;">
-                    No active license found. Contact your administrator.
+                    {{ __('portal.no_active_license') }}
                 </p>
             @endif
         </div>
@@ -225,8 +225,8 @@
         {{-- Recently Added Students --}}
         <div class="dp-card">
             <div class="dp-card-title" style="display:flex;justify-content:space-between;align-items:center;">
-                <span>Recently Added Students</span>
-                <a href="{{ route('portal.users.index', ['role' => 'student']) }}" style="font-size:12px;color:#4364F7;text-decoration:none;font-weight:500;">View all →</a>
+                <span>{{ __('portal.recently_added_students') }}</span>
+                <a href="{{ route('portal.users.index', ['role' => 'student']) }}" style="font-size:12px;color:#4364F7;text-decoration:none;font-weight:500;">{{ __('portal.view_all') }} →</a>
             </div>
 
             @forelse($recentStudents as $s)
@@ -242,7 +242,7 @@
             </div>
             @empty
             <p style="color:var(--color-txt-muted);padding:20px 0;text-align:center;font-size:14px;">
-                No students yet. <a href="{{ route('portal.users.create', ['role' => 'student']) }}" style="color:#4364F7;">Add your first student →</a>
+                {{ __('portal.no_students_yet') }} <a href="{{ route('portal.users.create', ['role' => 'student']) }}" style="color:#4364F7;">{{ __('portal.add_first_student') }} →</a>
             </p>
             @endforelse
         </div>
@@ -251,15 +251,15 @@
     {{-- ═══ SEAT REQUESTS HISTORY ═══ --}}
     @if($seatRequests->count() > 0)
     <div class="dp-card">
-        <div class="dp-card-title">My Seat Requests</div>
+        <div class="dp-card-title">{{ __('portal.my_seat_requests') }}</div>
         <table class="dp-table" style="font-size:13px;">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Seats Requested</th>
-                    <th>Reason</th>
-                    <th>Status</th>
-                    <th>Admin Response</th>
+                    <th>{{ __('admin.date') }}</th>
+                    <th>{{ __('portal.seats_requested') }}</th>
+                    <th>{{ __('portal.reason') }}</th>
+                    <th>{{ __('admin.status') }}</th>
+                    <th>{{ __('portal.admin_response') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -270,11 +270,11 @@
                     <td class="muted">{{ Str::limit($req->reason, 50) }}</td>
                     <td>
                         @if($req->status === 'pending')
-                            <span class="dp-badge" style="background:rgba(245,158,11,0.1);color:#D97706;">Pending</span>
+                            <span class="dp-badge" style="background:rgba(245,158,11,0.1);color:#D97706;">{{ __('portal.pending') }}</span>
                         @elseif($req->status === 'approved')
-                            <span class="dp-badge dp-badge-active">Approved</span>
+                            <span class="dp-badge dp-badge-active">{{ __('portal.approved') }}</span>
                         @else
-                            <span class="dp-badge" style="background:rgba(239,68,68,0.1);color:#EF4444;">Rejected</span>
+                            <span class="dp-badge" style="background:rgba(239,68,68,0.1);color:#EF4444;">{{ __('portal.rejected') }}</span>
                         @endif
                     </td>
                     <td class="muted">{{ $req->admin_notes ?? '—' }}</td>
@@ -292,26 +292,26 @@
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
-            <div class="dp-modal-title">Request Additional Seats</div>
-            <p class="dp-modal-subtitle">Submit a request to your administrator for additional student seats.</p>
+            <div class="dp-modal-title">{{ __('portal.request_additional_seats') }}</div>
+            <p class="dp-modal-subtitle">{{ __('portal.seat_request_subtitle') }}</p>
 
             <form method="POST" action="{{ route('portal.seat-requests.store') }}">
                 @csrf
                 <input type="hidden" name="school_id" value="{{ $school->id }}">
                 <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px;">
                     <div>
-                        <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">Number of Additional Seats *</label>
+                        <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">{{ __('portal.num_additional_seats') }} *</label>
                         <input type="number" name="requested_seats" class="dp-form-input" placeholder="e.g. 50" required min="1">
                     </div>
                     <div>
-                        <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">Reason / Notes</label>
+                        <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">{{ __('portal.reason_notes') }}</label>
                         <textarea name="reason" class="dp-form-input" rows="3" placeholder="Explain why you need additional seats..."></textarea>
                     </div>
                 </div>
 
                 <div style="display:flex;gap:12px;">
-                    <button type="button" class="dp-btn-ghost" style="flex:1;justify-content:center;" onclick="document.getElementById('seatRequestModal').style.display='none'">Cancel</button>
-                    <button type="submit" class="dp-btn" style="flex:1;justify-content:center;">Submit Request</button>
+                    <button type="button" class="dp-btn-ghost" style="flex:1;justify-content:center;" onclick="document.getElementById('seatRequestModal').style.display='none'">{{ __('portal.cancel') }}</button>
+                    <button type="submit" class="dp-btn" style="flex:1;justify-content:center;">{{ __('portal.submit_request') }}</button>
                 </div>
             </form>
         </div>
