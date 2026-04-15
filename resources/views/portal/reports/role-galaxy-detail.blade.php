@@ -153,7 +153,7 @@
                         <span class="dp-badge dp-badge-inactive">{{ $s->scenario ?? '-' }}</span>
                     @endif
                 </td>
-                <td><span class="dp-badge {{ $statusClass }}">{{ ucfirst(strtolower($s->status ?? 'Unknown')) }}</span></td>
+                <td><span class="dp-badge {{ $statusClass }}">{{ ucfirst(strtolower($s->status ?? __('portal.unknown'))) }}</span></td>
                 <td>
                     @if($s->score !== null)
                         <span class="dp-badge {{ $s->score >= 70 ? 'dp-badge-active' : ($s->score >= 50 ? 'dp-badge-pending' : 'dp-badge-error') }}">{{ number_format($s->score, 1) }}</span>

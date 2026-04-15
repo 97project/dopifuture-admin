@@ -94,7 +94,7 @@
         <div style="display:flex;align-items:center;gap:12px;">
             <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:22px;">🦅</div>
             <div>
-                <div style="font-size:18px;font-weight:700;">My Wings</div>
+                <div style="font-size:18px;font-weight:700;">{{ __('portal.my_wings') }}</div>
                 <div style="font-size:12px;color:var(--color-txt-muted);">Achievement points from WAY AI Coach</div>
             </div>
         </div>
@@ -226,7 +226,7 @@
                         <span class="muted">{{ ucfirst(str_replace('_', ' ', $s->theme ?? '-')) }}</span>
                     @endif
                 </td>
-                <td><span class="dp-badge {{ $statusClass }}">{{ ucfirst(strtolower($s->status ?? 'Unknown')) }}</span></td>
+                <td><span class="dp-badge {{ $statusClass }}">{{ ucfirst(strtolower($s->status ?? __('portal.unknown'))) }}</span></td>
                 <td>
                     @if($s->score !== null)
                         <span class="dp-badge {{ $s->score >= 70 ? 'dp-badge-active' : ($s->score >= 50 ? 'dp-badge-pending' : 'dp-badge-error') }}">{{ number_format($s->score, 1) }}</span>

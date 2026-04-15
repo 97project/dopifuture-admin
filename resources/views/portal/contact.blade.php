@@ -180,18 +180,10 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
 {{-- Hero --}}
 <section class="contact-hero">
     <h1 class="reveal">
-        @if(app()->getLocale() === 'tr')
-            Bize <span>Ulaşın</span>
-        @else
-            Get in <span>Touch</span>
-        @endif
+        {!! __('portal.contact_hero_title') !!}
     </h1>
     <p class="reveal reveal-delay-1">
-        @if(app()->getLocale() === 'tr')
-            Sorularınız veya işbirliği talepleriniz için bizimle iletişime geçin.
-        @else
-            Reach out to us for questions, collaboration requests, or to schedule a demo.
-        @endif
+            {{ __('portal.contact_hero_subtitle') }}
     </p>
 </section>
 
@@ -314,18 +306,10 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
 {{-- ═══════════════ FAQ ═══════════════ --}}
 <section class="faq-section">
     <h2 class="faq-title reveal">
-        @if(app()->getLocale() === 'tr')
-            Sıkça Sorulan Sorular
-        @else
-            Frequently Asked Questions
-        @endif
+        {!! __('portal.contact_faq_title') !!}
     </h2>
     <p class="faq-subtitle reveal reveal-delay-1">
-        @if(app()->getLocale() === 'tr')
-            DopiFuture hakkında merak edilen sorular ve yanıtları.
-        @else
-            Common questions about DopiFuture and their answers.
-        @endif
+            {{ __('portal.contact_faq_subtitle') }}
     </p>
 
     <div class="faq-grid">

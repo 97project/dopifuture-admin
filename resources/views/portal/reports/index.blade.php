@@ -16,7 +16,7 @@
 
 {{-- Student View (Keeping it minimal as requested, unchanged) --}}
 @if(isset($studentReport))
-    <div style="font-size:16px;font-weight:600;margin-bottom:12px;">My Progress</div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:12px;">{{ __('portal.my_progress') }}</div>
     @foreach($studentReport as $slug => $appData)
     <div class="dp-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
@@ -88,7 +88,7 @@
                     <div style="background:linear-gradient(135deg,rgba(245,158,11,0.05),transparent);padding:16px;border-radius:12px;border:1px solid rgba(245,158,11,0.1);text-align:center;">
                         <div style="color:#f59e0b;margin-bottom:8px;"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
                         <div style="font-size:24px;font-weight:800;color:var(--text-main);line-height:1;">{{ $sumInProgress }}</div>
-                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;">In Progress</div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;">{{ __('portal.in_progress') }}</div>
                     </div>
 
                     {{-- 4. Total Engagement --}}
@@ -196,7 +196,7 @@
                                 {{ $i+1 }}
                             </div>
                             <div style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                <div style="font-size:13px;font-weight:600;color:var(--text-main);">{{ $row['user']->name ?? 'Unknown' }} {{ $row['user']->surname ?? '' }}</div>
+                                <div style="font-size:13px;font-weight:600;color:var(--text-main);">{{ $row['user']->name ?? __('portal.unknown') }} {{ $row['user']->surname ?? '' }}</div>
                             </div>
                             <div style="font-weight:700;font-size:14px;color:var(--text-main);">{{ $row['score'] }}</div>
                         </div>
@@ -214,7 +214,7 @@
                                 {{ $i+1 }}
                             </div>
                             <div style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                <div style="font-size:13px;font-weight:600;color:var(--text-main);">{{ $row['user']->name ?? 'Unknown' }} {{ $row['user']->surname ?? '' }}</div>
+                                <div style="font-size:13px;font-weight:600;color:var(--text-main);">{{ $row['user']->name ?? __('portal.unknown') }} {{ $row['user']->surname ?? '' }}</div>
                             </div>
                             <div style="font-weight:700;font-size:14px;color:var(--text-main);">{{ $row['ethics'] }}</div>
                         </div>
@@ -232,7 +232,7 @@
                                 {{ $i+1 }}
                             </div>
                             <div style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                <div style="font-size:13px;font-weight:600;color:var(--text-main);">{{ $row['user']->name ?? 'Unknown' }} {{ $row['user']->surname ?? '' }}</div>
+                                <div style="font-size:13px;font-weight:600;color:var(--text-main);">{{ $row['user']->name ?? __('portal.unknown') }} {{ $row['user']->surname ?? '' }}</div>
                             </div>
                             <div style="font-weight:700;font-size:14px;color:var(--text-main);">{{ $row['adaptation'] }}</div>
                         </div>
@@ -264,7 +264,7 @@
                     <div class="feed-item">
                         <div class="feed-dot" style="background: {{ $act['color'] }};"></div>
                         <div style="font-size:13px;line-height:1.4;">
-                            <span style="font-weight:700;color:var(--text-main);">{{ $act['student']->name ?? 'Unknown' }} {{ $act['student']->surname ?? '' }}</span>
+                            <span style="font-weight:700;color:var(--text-main);">{{ $act['student']->name ?? __('portal.unknown') }} {{ $act['student']->surname ?? '' }}</span>
                             <span style="color:var(--text-muted);">{{ $act['action'] }}</span>
                             <span style="font-weight:600;color:{{ $act['color'] }};">{{ $act['app'] }}</span>
                         </div>

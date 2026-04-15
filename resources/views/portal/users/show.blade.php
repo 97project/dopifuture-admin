@@ -126,7 +126,7 @@
             </div>
             <div>
                 <div style="font-size:20px;font-weight:700;color:#fbbf24;">{{ $appData['stats']['in_progress'] }}</div>
-                <div style="font-size:11px;color:var(--color-txt-muted);">In Progress</div>
+                <div style="font-size:11px;color:var(--color-txt-muted);">{{ __('portal.in_progress') }}</div>
             </div>
             <div>
                 <div style="font-size:20px;font-weight:700;color:var(--color-primary);">{{ $appData['stats']['avg_score'] ? number_format($appData['stats']['avg_score'], 1) : '-' }}</div>

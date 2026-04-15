@@ -11,7 +11,7 @@
             <div style="width:32px;height:32px;border-radius:8px;background:#8B5CF6;display:flex;align-items:center;justify-content:center;">
                 <svg width="18" height="18" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
             </div>
-            <span style="font-size:18px;font-weight:700;color:#111;font-family:'Nunito',sans-serif;">AI Coach Feedback</span>
+            <span style="font-size:18px;font-weight:700;color:#111;font-family:'Nunito',sans-serif;">{{ __('portal.ai_coach_feedback') }}</span>
         </div>
 
         {{-- Questions timeline --}}
@@ -46,7 +46,7 @@
 
                 {{-- Your Answer --}}
                 <div style="margin-bottom:12px;">
-                    <div style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">YOUR ANSWER</div>
+                    <div style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">{{ __('portal.your_answer') }}</div>
                     <p style="font-size:13px;color:#374151;line-height:1.6;margin:0;font-style:italic;background:#F8FAFC;border-radius:8px;padding:12px 14px;">{{ $q->answer ?? '-' }}</p>
                 </div>
 

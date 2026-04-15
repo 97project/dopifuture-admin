@@ -75,7 +75,7 @@
 @else
 <div class="dp-card" style="text-align:center;padding:48px;">
     <div style="font-size:48px;margin-bottom:16px;">📱</div>
-    <h3 style="font-size:18px;font-weight:700;margin:0 0 8px;">No applications found</h3>
+    <h3 style="font-size:18px;font-weight:700;margin:0 0 8px;">{{ __('portal.no_applications_found') }}</h3>
     <p style="color:var(--color-txt-muted);">No users from your school are assigned to any application yet.</p>
 </div>
 @endif

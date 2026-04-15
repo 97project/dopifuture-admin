@@ -8,7 +8,7 @@
         <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.6) 100%);"></div>
         <div style="position:relative;z-index:1;padding:24px 28px;">
             {{-- Mission Title --}}
-            <h2 style="color:#fff;font-size:22px;font-weight:700;margin:0 0 20px 0;font-family:'Nunito',sans-serif;">{{ $mission->title ?? 'Session' }}</h2>
+            <h2 style="color:#fff;font-size:22px;font-weight:700;margin:0 0 20px 0;font-family:'Nunito',sans-serif;">{{ $mission->title ?? __('portal.session') }}</h2>
 
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
                 {{-- Students Section --}}

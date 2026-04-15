@@ -80,7 +80,7 @@
         <div style="display:flex;align-items:center;gap:10px;">
             <span style="font-size:24px;">🦅</span>
             <div>
-                <div style="font-size:16px;font-weight:700;">My Wings</div>
+                <div style="font-size:16px;font-weight:700;">{{ __('portal.my_wings') }}</div>
                 <div style="font-size:12px;color:var(--color-txt-muted);">{{ __('portal.achievement_points_all_apps') }}</div>
             </div>
         </div>
@@ -126,7 +126,7 @@
             @else
                 <div style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#8B5CF6,#06B6D4);display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 6px;">🦋</div>
             @endif
-            <div style="font-size:11px;font-weight:600;">{{ $badge['name'] ?? $badge['title'] ?? 'Badge' }}</div>
+            <div style="font-size:11px;font-weight:600;">{{ $badge['name'] ?? $badge['title'] ?? __('portal.badge') }}</div>
             <div style="font-size:10px;color:var(--color-txt-muted);">{{ $badge['pointsRequired'] ?? $badge['points'] ?? 0 }} pts</div>
         </div>
         @endforeach
@@ -156,7 +156,7 @@
                 @elseif($sess > 0)
                     <span class="tab-count" style="background:rgba(59,130,246,0.1);color:#3b82f6;">{{ $sess }} sessions</span>
                 @else
-                    <span class="tab-count" style="background:rgba(148,163,184,0.1);color:#94a3b8;">No activity</span>
+                    <span class="tab-count" style="background:rgba(148,163,184,0.1);color:#94a3b8;">{{ __('portal.no_activity') }}</span>
                 @endif
             </a>
         @endif
@@ -198,7 +198,7 @@
         </div>
         <div>
             <div style="font-size:22px;font-weight:700;color:#fbbf24;">{{ $appData['stats']['in_progress'] }}</div>
-            <div style="font-size:11px;color:var(--text-muted);">In Progress</div>
+            <div style="font-size:11px;color:var(--text-muted);">{{ __('portal.in_progress') }}</div>
         </div>
         <div>
             <div style="font-size:22px;font-weight:700;color:var(--primary);">{{ $appData['stats']['avg_score'] ? number_format($appData['stats']['avg_score'], 1) : '-' }}</div>

@@ -174,7 +174,7 @@
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="10" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No missions yet</td></tr>
+                        <tr><td colspan="10" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ __('portal.no_missions_yet') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -285,7 +285,7 @@
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="9" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No startups yet</td></tr>
+                        <tr><td colspan="9" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ __('portal.no_startups_yet') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -333,7 +333,7 @@
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="5" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No data yet</td></tr>
+                        <tr><td colspan="5" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ __('portal.no_data_yet') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -353,7 +353,7 @@
                         <tr>
                             <th style="width:40px;">{{ __('portal.no_num') }}</th>
                             <th>{{ __('portal.nav_students') }}</th>
-                            <th>AI Coach Interaction Number</th>
+                            <th>{{ __('portal.ai_coach_interaction_num') }}</th>
                             <th>{{ __('portal.total_duration') }}</th>
                             <th>{{ __('portal.action') }}</th>
                         </tr>
@@ -389,7 +389,7 @@
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="5" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No data yet</td></tr>
+                        <tr><td colspan="5" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ __('portal.no_data_yet') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -470,7 +470,7 @@
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="7" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No data yet</td></tr>
+                        <tr><td colspan="7" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ __('portal.no_data_yet') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -628,7 +628,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="10" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No data yet</td></tr>
+                    <tr><td colspan="10" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ __('portal.no_data_yet') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -717,7 +717,7 @@
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="8" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No data yet</td></tr>
+                        <tr><td colspan="8" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ __('portal.no_data_yet') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -772,7 +772,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="7" style="text-align:center;color:var(--color-txt-muted);padding:32px;">No data yet</td></tr>
+                    <tr><td colspan="7" style="text-align:center;color:var(--color-txt-muted);padding:32px;">{{ __('portal.no_data_yet') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -795,7 +795,7 @@
                 <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#8B5CF6,#06B6D4);display:flex;align-items:center;justify-content:center;font-size:16px;">🦋</div>
             @endif
             <div>
-                <div style="font-weight:600;font-size:13px;">{{ $wing['name'] ?? $wing['title'] ?? 'Wing' }}</div>
+                <div style="font-weight:600;font-size:13px;">{{ $wing['name'] ?? $wing['title'] ?? __('portal.wing') }}</div>
                 <div style="font-size:11px;color:var(--color-txt-muted);">{{ $wing['pointsRequired'] ?? $wing['points'] ?? 0 }} pts</div>
             </div>
         </div>
@@ -855,7 +855,7 @@
                 @else
                     <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#4364F7,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:14px;">🎭</div>
                 @endif
-                <div style="font-weight:600;font-size:13px;">{{ $scenario['title'] ?? $scenario['name'] ?? 'Scenario' }}</div>
+                <div style="font-weight:600;font-size:13px;">{{ $scenario['title'] ?? $scenario['name'] ?? __('portal.scenario') }}</div>
             </div>
             @if(!empty($scenario['description']))
                 <div style="font-size:11px;color:var(--color-txt-muted);line-height:1.4;">{{ Str::limit($scenario['description'], 80) }}</div>
@@ -892,7 +892,7 @@
                 @foreach($objectives as $i => $obj)
                 <tr>
                     <td class="muted">{{ $i + 1 }}</td>
-                    <td style="font-weight:500;">{{ $obj['name'] ?? $obj['title'] ?? 'Objective' }}</td>
+                    <td style="font-weight:500;">{{ $obj['name'] ?? $obj['title'] ?? __('portal.objective') }}</td>
                     <td><code style="font-size:11px;background:var(--color-input-bg);padding:2px 6px;border-radius:4px;">{{ $obj['key'] ?? $obj['slug'] ?? '-' }}</code></td>
                     <td class="muted" style="max-width:300px;">{{ Str::limit($obj['description'] ?? '-', 60) }}</td>
                 </tr>
@@ -915,7 +915,7 @@
             @else
                 <div style="width:100%;height:80px;border-radius:6px;background:linear-gradient(135deg,#1e293b,#334155);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:8px;">📁</div>
             @endif
-            <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $asset['name'] ?? $asset['title'] ?? 'Asset' }}</div>
+            <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $asset['name'] ?? $asset['title'] ?? __('portal.asset') }}</div>
             <div style="font-size:10px;color:var(--color-txt-muted);">{{ $asset['type'] ?? $asset['assetType'] ?? '' }}</div>
         </div>
         @endforeach
@@ -1044,7 +1044,7 @@ new Chart(document.getElementById('sessionsChart'), {
                         <span>{{ $student->name }} {{ $student->surname }}</span>
                     </label>
                     @empty
-                    <div style="padding:16px;text-align:center;color:#9CA3AF;font-size:13px;">No students with MW account found</div>
+                    <div style="padding:16px;text-align:center;color:#9CA3AF;font-size:13px;">{{ __('portal.no_mw_students') }}</div>
                     @endforelse
                 </div>
                 <div id="mwCountWarning" class="figma-warning" style="display:none;">
@@ -1103,7 +1103,7 @@ new Chart(document.getElementById('sessionsChart'), {
                         <span>{{ $student->name }} {{ $student->surname }}</span>
                     </label>
                     @empty
-                    <div style="padding:16px;text-align:center;color:#9CA3AF;font-size:13px;">No students with WS account found</div>
+                    <div style="padding:16px;text-align:center;color:#9CA3AF;font-size:13px;">{{ __('portal.no_ws_students') }}</div>
                     @endforelse
                 </div>
             </div>
@@ -1400,7 +1400,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var checked = document.querySelectorAll('.ws-student-cb:checked').length;
             if (checked === 0) {
                 e.preventDefault();
-                alert('Please select at least one student.');
+                alert('{{ __("portal.select_at_least_one_student") }}');
             }
         });
     }
@@ -1471,7 +1471,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (warningEl && warningText) {
             if (required > 0 && checked > 0 && checked !== required) {
                 warningEl.style.display = 'block';
-                warningText.textContent = 'You selected ' + checked + ' students, this mission requires exactly ' + required + ' players.';
+                warningText.textContent = '{{ __("portal.you_selected") }} ' + checked + ' students, this mission requires exactly ' + required + ' players.';
                 if (submitBtn) submitBtn.style.opacity = '0.5';
             } else {
                 warningEl.style.display = 'none';
@@ -1495,7 +1495,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var checked = getCheckedCount();
             if (checked === 0) {
                 e.preventDefault();
-                alert('Please select at least one student.');
+                alert('{{ __("portal.select_at_least_one_student") }}');
                 return;
             }
             if (required > 0 && checked !== required) {

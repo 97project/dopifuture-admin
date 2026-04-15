@@ -115,7 +115,7 @@
                     @if($step->overall_feedback)
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        <span style="font-size:14px;font-weight:700;color:#060B17;">AI Coach Feedback</span>
+                        <span style="font-size:14px;font-weight:700;color:#060B17;">{{ __('portal.ai_coach_feedback') }}</span>
                     </div>
                     <div style="background:#EEF2FF;border-radius:12px;padding:14px;border-left:3px solid var(--color-primary);margin-bottom:14px;">
                         <p style="font-size:14px;color:#374151;line-height:22px;margin:0;">{{ $step->overall_feedback }}</p>
@@ -156,7 +156,7 @@
                                 {{-- User answer --}}
                                 @if($q->user_answer)
                                 <div style="background:#F8FAFF;border-radius:10px;padding:10px;margin-bottom:8px;">
-                                    <div style="font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:0.5px;margin-bottom:4px;">YOUR ANSWER</div>
+                                    <div style="font-size:10px;font-weight:700;color:#94A3B8;letter-spacing:0.5px;margin-bottom:4px;">{{ __('portal.your_answer') }}</div>
                                     <div style="font-size:13px;color:#374151;line-height:20px;font-style:italic;">{{ $q->user_answer }}</div>
                                 </div>
                                 @endif
@@ -195,7 +195,7 @@
         <div style="position:sticky;top:80px;">
             {{-- Project name + Team --}}
             <div class="dp-card" style="margin-bottom:16px;">
-                <div style="font-size:18px;font-weight:700;margin-bottom:16px;">{{ $project->name ?? 'Project' }}</div>
+                <div style="font-size:18px;font-weight:700;margin-bottom:16px;">{{ $project->name ?? __('portal.project') }}</div>
                 {{-- Team Summary --}}
                 <div style="font-weight:600;font-size:13px;margin-bottom:12px;">{{ __('portal.team_summary') }}</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px;margin-bottom:4px;">

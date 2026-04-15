@@ -26,7 +26,7 @@
     @endif
 
     {{-- App Cards --}}
-    <div style="font-size:16px;font-weight:600;color:#030719;margin-bottom:16px;">My Apps</div>
+    <div style="font-size:16px;font-weight:600;color:#030719;margin-bottom:16px;">{{ __('portal.my_apps') }}</div>
     @if($appStats->count())
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:24px;">
         @foreach($appStats as $app)

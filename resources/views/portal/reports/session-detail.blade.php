@@ -389,7 +389,7 @@ details summary:hover { color: var(--text-primary); }
                         @endphp
                         @if($lastDate != $currentDate)
                             <div class="chat-date-separator">
-                                <span>{{ $messageDate?->format('d M Y') ?? 'No Date' }}</span>
+                                <span>{{ $messageDate?->format('d M Y') ?? __('portal.no_date') }}</span>
                             </div>
                             @php $lastDate = $currentDate; @endphp
                         @endif
@@ -436,7 +436,7 @@ details summary:hover { color: var(--text-primary); }
                     @empty
                         <div class="empty-chat-state">
                             <div style="font-size:4rem;opacity:0.4;margin-bottom:20px;">💬</div>
-                            <h5 style="margin-bottom:8px;">No messages yet</h5>
+                            <h5 style="margin-bottom:8px;">{{ __('portal.no_messages_yet') }}</h5>
                             <p style="font-size:0.9rem;color:var(--text-muted);">This session has no messages yet.</p>
                         </div>
                     @endforelse
@@ -468,7 +468,7 @@ details summary:hover { color: var(--text-primary); }
                         @endphp
                         @if($lastDate != $currentDate)
                             <div class="chat-date-separator">
-                                <span>{{ $messageDate?->format('d M Y') ?? 'No Date' }}</span>
+                                <span>{{ $messageDate?->format('d M Y') ?? __('portal.no_date') }}</span>
                             </div>
                             @php $lastDate = $currentDate; @endphp
                         @endif
@@ -511,7 +511,7 @@ details summary:hover { color: var(--text-primary); }
                     @empty
                         <div class="empty-chat-state">
                             <div style="font-size:4rem;opacity:0.4;margin-bottom:20px;">🤖</div>
-                            <h5 style="margin-bottom:8px;">No messages yet</h5>
+                            <h5 style="margin-bottom:8px;">{{ __('portal.no_messages_yet') }}</h5>
                             <p style="font-size:0.9rem;color:var(--text-muted);">This chat session has no messages yet.</p>
                         </div>
                     @endforelse

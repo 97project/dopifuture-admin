@@ -109,7 +109,7 @@
                         <span class="muted">{{ ucfirst(str_replace('_', ' ', $s->theme ?? '-')) }}</span>
                     @endif
                 </td>
-                <td><span class="dp-badge {{ $statusClass }}">{{ ucfirst(strtolower($s->status ?? 'Unknown')) }}</span></td>
+                <td><span class="dp-badge {{ $statusClass }}">{{ ucfirst(strtolower($s->status ?? __('portal.unknown'))) }}</span></td>
                 <td>{{ $s->chat_messages_count ?? 0 }}</td>
                 <td>{{ $s->duration_seconds ? \App\Services\ReportService::formatDuration($s->duration_seconds) : '-' }}</td>
                 <td>

@@ -367,7 +367,7 @@
             document.getElementById(infoId).style.display = 'block';
         })
         .catch(function() {
-            document.getElementById(loadId).textContent = 'Failed to load user data.';
+            document.getElementById(loadId).textContent = '{{ __("portal.failed_load_user") }}';
         });
     }
 
