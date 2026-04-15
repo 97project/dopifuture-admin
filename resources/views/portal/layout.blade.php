@@ -94,6 +94,7 @@
             display: flex;
             gap: 0.5rem;
             align-items: center;
+            flex-wrap: nowrap;
         }
 
         .portal-nav a {
@@ -104,6 +105,7 @@
             font-size: 0.875rem;
             font-weight: 500;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .portal-nav a:hover {
@@ -114,6 +116,41 @@
         .portal-nav a.active {
             color: white;
             background: rgba(59, 130, 246, 0.15);
+        }
+
+        /* ─── Language Switcher ───────────── */
+        .lang-divider {
+            width: 1px;
+            height: 20px;
+            background: rgba(255,255,255,0.12);
+            flex-shrink: 0;
+        }
+
+        .lang-switcher-select {
+            background: rgba(59,130,246,0.1);
+            color: var(--brand-400);
+            border: 1px solid rgba(59,130,246,0.25);
+            padding: 0.4rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            outline: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            min-width: 52px;
+            transition: all 0.2s;
+        }
+
+        .lang-switcher-select:hover {
+            background: rgba(59,130,246,0.2);
+            border-color: rgba(59,130,246,0.4);
+        }
+
+        .lang-switcher-select option {
+            background: #0f172a;
+            color: white;
+            font-weight: 600;
         }
 
         /* ─── Main ───────────────────────── */
@@ -545,13 +582,13 @@
                 @endauth
 
                 {{-- Language Switcher --}}
-                <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 0.5rem;"></div>
+                <div class="lang-divider"></div>
                 <form action="{{ route('portal.switch-locale') }}" method="POST" style="display:inline; margin:0;">
                     @csrf
-                    <select name="locale" onchange="this.form.submit()" style="background:rgba(255,255,255,0.05); color:var(--gray-300); border:1px solid rgba(255,255,255,0.1); padding:0.4rem 0.6rem; border-radius:6px; font-size:0.8rem; font-weight:600; cursor:pointer; outline:none; text-transform:uppercase;">
+                    <select name="locale" class="lang-switcher-select" onchange="this.form.submit()">
                         @foreach(\App\Models\Language::where('is_active', true)->get() as $lang)
-                            <option style="background:#0f172a; color:white;" value="{{ $lang->code }}" {{ app()->getLocale() === $lang->code ? 'selected' : '' }}>
-                                {{ $lang->code }}
+                            <option value="{{ $lang->code }}" {{ app()->getLocale() === $lang->code ? 'selected' : '' }}>
+                                {{ strtoupper($lang->code) }}
                             </option>
                         @endforeach
                     </select>

@@ -1,6 +1,6 @@
 @extends('portal.layout')
-@section('title', 'Login')
-@section('meta_description', 'DopiFuture portal login')
+@section('title', __('portal.login_title'))
+@section('meta_description', __('portal.login_meta'))
 
 @section('content')
     <div style="max-width: 440px; margin: 0 auto;">
@@ -14,7 +14,7 @@
                 <img src="{{ asset('images/dopifuture-logo-yazi.png') }}" alt="DopiFuture" style="height: 36px; object-fit: contain; margin: 0 auto; display: block; filter: invert(1) brightness(100);" />
             </div>
             <p style="color: var(--gray-400); font-size: 0.95rem;">
-                {{ 'Sign in with your DopiFuture account.' }}
+                {{ __('portal.login_subtitle') }}
             </p>
         </div>
 
@@ -40,14 +40,14 @@
                 <div style="margin-bottom: 1.25rem;">
                     <label class="form-label">{{ __('admin.email') }}</label>
                     <input type="email" name="email" value="{{ old('email') }}" required autofocus class="form-input"
-                        placeholder="{{ 'Your email address' }}">
+                        placeholder="{{ __('portal.email_placeholder') }}">
                 </div>
 
                 {{-- Password --}}
                 <div style="margin-bottom: 1.5rem;">
                     <label class="form-label">{{ __('admin.password') }}</label>
                     <input type="password" name="password" required class="form-input"
-                        placeholder="{{ 'Your password' }}">
+                        placeholder="{{ __('portal.password_placeholder') }}">
                 </div>
 
                 {{-- Remember Me --}}
@@ -56,7 +56,7 @@
                         style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-400); font-size: 0.875rem; cursor: pointer;">
                         <input type="checkbox" name="remember" value="1"
                             style="accent-color: var(--brand-500); width: 16px; height: 16px;">
-                        {{ 'Remember me' }}
+                        {{ __('portal.remember_me') }}
                     </label>
                 </div>
 
@@ -66,7 +66,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
-                    {{ 'Sign In' }}
+                    {{ __('portal.sign_in') }}
                 </button>
             </form>
         </div>
@@ -75,10 +75,10 @@
         <div style="margin-top: 1.75rem; text-align: center; display: flex; flex-direction: column; gap: 0.75rem;">
             <a href="{{ route('register.create') }}"
                 style="color: var(--brand-400); font-size: 0.875rem; text-decoration: none;">
-                {{ 'Want to register your school?' }}
+                {{ __('portal.want_to_register') }}
             </a>
             <a href="{{ url('/admin/login') }}" style="color: var(--gray-500); font-size: 0.8rem; text-decoration: none;">
-                {{ 'Admin Login →' }}
+                {{ __('portal.admin_login') }}
             </a>
         </div>
     </div>
