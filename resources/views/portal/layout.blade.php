@@ -126,32 +126,100 @@
             flex-shrink: 0;
         }
 
-        .lang-switcher-select {
-            background: rgba(59,130,246,0.1);
-            color: var(--brand-400);
-            border: 1px solid rgba(59,130,246,0.25);
-            padding: 0.4rem 0.5rem;
-            border-radius: 6px;
+        .lang-switcher {
+            position: relative;
+        }
+
+        .lang-switcher-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--gray-300);
+            padding: 0.35rem 0.6rem;
+            border-radius: 7px;
             font-size: 0.78rem;
-            font-weight: 700;
-            cursor: pointer;
-            outline: none;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            min-width: 52px;
-            transition: all 0.2s;
-        }
-
-        .lang-switcher-select:hover {
-            background: rgba(59,130,246,0.2);
-            border-color: rgba(59,130,246,0.4);
-        }
-
-        .lang-switcher-select option {
-            background: #0f172a;
-            color: white;
             font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            user-select: none;
         }
+
+        .lang-switcher-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .lang-switcher-btn .lang-flag {
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .lang-switcher-btn .lang-chevron {
+            opacity: 0.5;
+            font-size: 0.65rem;
+            transition: transform 0.2s;
+        }
+
+        .lang-switcher.open .lang-chevron {
+            transform: rotate(180deg);
+        }
+
+        .lang-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            background: #0f172a;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            min-width: 140px;
+            z-index: 100;
+        }
+
+        .lang-switcher.open .lang-dropdown {
+            display: block;
+        }
+
+        .lang-dropdown form {
+            display: block;
+        }
+
+        .lang-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            width: 100%;
+            padding: 0.6rem 0.9rem;
+            background: none;
+            border: none;
+            color: var(--gray-300);
+            font-size: 0.85rem;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.15s;
+        }
+
+        .lang-dropdown-item:hover {
+            background: rgba(255,255,255,0.06);
+            color: white;
+        }
+
+        .lang-dropdown-item.active {
+            color: var(--brand-400);
+            background: rgba(59,130,246,0.08);
+        }
+
+        .lang-dropdown-item .item-flag { font-size: 1.1rem; }
+        .lang-dropdown-item .item-name { flex: 1; }
+        .lang-dropdown-item .item-check { font-size: 0.75rem; color: var(--brand-400); }
 
         /* ─── Main ───────────────────────── */
         .portal-main {
@@ -583,16 +651,34 @@
 
                 {{-- Language Switcher --}}
                 <div class="lang-divider"></div>
-                <form action="{{ route('portal.switch-locale') }}" method="POST" style="display:inline; margin:0;">
-                    @csrf
-                    <select name="locale" class="lang-switcher-select" onchange="this.form.submit()">
-                        @foreach(\App\Models\Language::where('is_active', true)->get() as $lang)
-                            <option value="{{ $lang->code }}" {{ app()->getLocale() === $lang->code ? 'selected' : '' }}>
-                                {{ strtoupper($lang->code) }}
-                            </option>
+                @php
+                    $flagMap = ['tr' => '🇹🇷', 'en' => '🇬🇧', 'mn' => '🇲🇳'];
+                    $currentLocale = app()->getLocale();
+                    $languages = \App\Models\Language::where('is_active', true)->get();
+                    $currentLang = $languages->firstWhere('code', $currentLocale) ?? $languages->first();
+                @endphp
+                <div class="lang-switcher" id="langSwitcher">
+                    <button type="button" class="lang-switcher-btn" onclick="toggleLangDropdown()">
+                        <span class="lang-flag">{{ $flagMap[$currentLocale] ?? '🌐' }}</span>
+                        <span>{{ strtoupper($currentLocale) }}</span>
+                        <span class="lang-chevron">▾</span>
+                    </button>
+                    <div class="lang-dropdown">
+                        @foreach($languages as $lang)
+                            <form action="{{ route('portal.switch-locale') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="locale" value="{{ $lang->code }}">
+                                <button type="submit" class="lang-dropdown-item {{ $currentLocale === $lang->code ? 'active' : '' }}">
+                                    <span class="item-flag">{{ $flagMap[$lang->code] ?? '🌐' }}</span>
+                                    <span class="item-name">{{ $lang->native_name }}</span>
+                                    @if($currentLocale === $lang->code)
+                                        <span class="item-check">✓</span>
+                                    @endif
+                                </button>
+                            </form>
                         @endforeach
-                    </select>
-                </form>
+                    </div>
+                </div>
 
             </nav>
         </div>
@@ -611,4 +697,15 @@
 </body>
 
 @yield('scripts')
+<script>
+function toggleLangDropdown() {
+    document.getElementById('langSwitcher').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+    var sw = document.getElementById('langSwitcher');
+    if (sw && !sw.contains(e.target)) {
+        sw.classList.remove('open');
+    }
+});
+</script>
 </html>
