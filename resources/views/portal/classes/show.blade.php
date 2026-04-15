@@ -56,7 +56,7 @@
         @if($class->students->count())
         <table class="dp-table">
             <thead><tr>
-                <th>Name</th>
+                <th>{{ __('admin.name') }}</th>
                 <th>{{ __('admin.email') }}</th>
                 <th>{{ __('admin.status') }}</th>
                 <th style="text-align:right;"></th>
@@ -116,7 +116,7 @@
         @if($class->teachers->count())
         <table class="dp-table">
             <thead><tr>
-                <th>Name</th>
+                <th>{{ __('admin.name') }}</th>
                 <th>{{ __('admin.email') }}</th>
                 <th style="text-align:right;"></th>
             </tr></thead>

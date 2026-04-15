@@ -148,7 +148,7 @@ details summary:hover { color: var(--text-primary); }
                 @endif
                 @if($module === 'lecturer')
                 <tr>
-                    <td style="padding:6px 0;color:var(--text-muted);width:100px;">Subject</td>
+                    <td style="padding:6px 0;color:var(--text-muted);width:100px;">{{ __('portal.subject') }}</td>
                     <td style="padding:6px 0;font-weight:500;">
                         <span class="dp-badge dp-badge-pending">{{ $session->subject ?? '-' }}</span>
                     </td>

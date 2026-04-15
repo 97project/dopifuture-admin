@@ -33,7 +33,7 @@
         <table class="dp-table">
             <thead><tr>
                 <th>{{ __('portal.class_name') }}</th>
-                <th>School</th>
+                <th>{{ __('admin.school_name') }}</th>
                 <th>{{ __('portal.nav_students') }}</th>
                 <th style="text-align:right;"></th>
             </tr></thead>
@@ -68,7 +68,7 @@
         @if($recentStudents->count())
         <table class="dp-table">
             <thead><tr>
-                <th>Name</th>
+                <th>{{ __('admin.name') }}</th>
                 <th>{{ __('admin.email') }}</th>
                 <th style="text-align:right;"></th>
             </tr></thead>

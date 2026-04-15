@@ -21,7 +21,7 @@
 
                 <div class="dp-form-grid" style="margin-bottom:16px;">
                     <div>
-                        <label class="dp-form-label">Country</label>
+                        <label class="dp-form-label">{{ __('portal.country') }}</label>
                         <select name="country" id="country-select" class="dp-form-select">
                             <option value="">— Select Country —</option>
                             @foreach($countries as $country)
@@ -30,14 +30,14 @@
                         </select>
                     </div>
                     <div>
-                        <label class="dp-form-label">State</label>
+                        <label class="dp-form-label">{{ __('portal.state') }}</label>
                         <select name="state" id="state-select" class="dp-form-select">
                             <option value="">— Select State —</option>
                         </select>
                     </div>
                 </div>
                 <div class="dp-form-group">
-                    <label class="dp-form-label">City</label>
+                    <label class="dp-form-label">{{ __('portal.city') }}</label>
                     <select name="city" id="city-select" class="dp-form-select">
                         <option value="">— Select City —</option>
                     </select>
@@ -45,7 +45,7 @@
 
                 <div class="dp-form-grid" style="margin-bottom:16px;">
                     <div>
-                        <label class="dp-form-label">Phone</label>
+                        <label class="dp-form-label">{{ __('portal.phone') }}</label>
                         <input type="text" name="phone" value="{{ old('phone', $school->phone) }}" class="dp-form-input">
                     </div>
                     <div>
@@ -54,11 +54,11 @@
                     </div>
                 </div>
                 <div class="dp-form-group">
-                    <label class="dp-form-label">Address</label>
+                    <label class="dp-form-label">{{ __('portal.address') }}</label>
                     <textarea name="address" class="dp-form-textarea" rows="2">{{ old('address', $school->address) }}</textarea>
                 </div>
                 <div class="dp-form-group">
-                    <label class="dp-form-label">Website</label>
+                    <label class="dp-form-label">{{ __('portal.website') }}</label>
                     <input type="url" name="website" value="{{ old('website', $school->website) }}" class="dp-form-input" placeholder="https://">
                 </div>
             </div>

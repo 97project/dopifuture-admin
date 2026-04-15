@@ -45,7 +45,7 @@
                 @if($editUser->exists)
                 <div class="dp-form-grid" style="margin-bottom:16px;">
                     <div>
-                        <label class="dp-form-label">Status *</label>
+                        <label class="dp-form-label">{{ __('admin.status') }} *</label>
                         <select name="status" class="dp-form-select" required>
                             <option value="active" {{ $editUser->status === 'active' ? 'selected' : '' }}>{{ __('portal.active') }}</option>
                             <option value="inactive" {{ $editUser->status === 'inactive' ? 'selected' : '' }}>Inactive</option>

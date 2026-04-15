@@ -58,7 +58,7 @@
         <table class="dp-table">
             <thead><tr>
                 <th>{{ __('admin.date') }}</th>
-                <th>Seats</th>
+                <th>{{ __('portal.total_seats') }}</th>
                 <th>Amount</th>
                 <th>Notes</th>
             </tr></thead>

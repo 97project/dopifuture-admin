@@ -129,7 +129,7 @@
     <table class="dp-table">
         <thead><tr>
             <th>{{ __('admin.date') }}</th><th>Scenario</th><th>{{ __('admin.status') }}</th>
-            <th>{{ __('portal.score') }}</th><th>Steps</th><th>Duration</th><th></th>
+            <th>{{ __('portal.score') }}</th><th>Steps</th><th>{{ __('portal.duration') }}</th><th></th>
         </tr></thead>
         <tbody>
         @foreach($sessions->take(30) as $s)

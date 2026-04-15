@@ -59,7 +59,7 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Name</th>
+                                <th>{{ __('admin.name') }}</th>
                                 <th>{{ __('admin.email') }}</th>
                                 <th>{{ __('admin.status') }}</th>
                                 <th></th>
@@ -103,12 +103,12 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>School</th>
+                        <th>{{ __('admin.school_name') }}</th>
                         <th>Capacity</th>
-                        <th>Used</th>
-                        <th>Remaining</th>
+                        <th>{{ __('portal.used_seats') }}</th>
+                        <th>{{ __('portal.remaining_seats') }}</th>
                         <th>Rate</th>
-                        <th>Expiry</th>
+                        <th>{{ __('portal.expiry_date') }}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -162,7 +162,7 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>School</th>
+                        <th>{{ __('admin.school_name') }}</th>
                         <th>{{ __('portal.nav_students') }}</th>
                         <th>{{ __('portal.nav_teachers') }}</th>
                         <th>{{ __('admin.classes') }}</th>

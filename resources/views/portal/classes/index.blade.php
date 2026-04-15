@@ -15,7 +15,7 @@
                         <svg width="14" height="14" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Search class...">
                     </div>
-                    <button type="submit" class="dp-btn-ghost">Search</button>
+                    <button type="submit" class="dp-btn-ghost">{{ __('portal.search') }}</button>
                 </form>
                 @if(auth()->user()->hasAnyRole(['super-admin','admin','license-manager','school-admin','school-principal']))
                     <a href="{{ route('portal.classes.create') }}" class="dp-btn">+ New Class</a>
@@ -27,10 +27,10 @@
         <table class="dp-table">
             <thead>
                 <tr>
-                    <th>Class</th>
-                    <th>School</th>
-                    <th>Grade</th>
-                    <th>Year</th>
+                    <th>{{ __('portal.class') }}</th>
+                    <th>{{ __('admin.school_name') }}</th>
+                    <th>{{ __('portal.grade') }}</th>
+                    <th>{{ __('portal.year') }}</th>
                     <th>{{ __('portal.nav_students') }}</th>
                     <th>{{ __('admin.status') }}</th>
                     <th style="text-align:right;">{{ __('admin.actions') }}</th>

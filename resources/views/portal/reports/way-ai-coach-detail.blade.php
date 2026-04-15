@@ -67,11 +67,11 @@
     </div>
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);">
         <div class="s-value">{{ $stats['lecturer'] }}</div>
-        <div class="s-label">Lecturer</div>
+        <div class="s-label">{{ __('portal.lecturer') }}</div>
     </div>
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
         <div class="s-value">{{ $stats['chatbot'] }}</div>
-        <div class="s-label">Chatbot</div>
+        <div class="s-label">{{ __('portal.chatbot') }}</div>
     </div>
     <div class="dp-stat-card" style="background:linear-gradient(135deg,#f093fb,#f5576c);">
         <div class="s-value">{{ $stats['avg_score'] ? number_format($stats['avg_score'], 1) : '-' }}</div>
@@ -196,8 +196,8 @@
     </div>
     <table class="dp-table">
         <thead><tr>
-            <th>{{ __('admin.date') }}</th><th>Module</th><th>Theme</th>
-            <th>{{ __('admin.status') }}</th><th>{{ __('portal.score') }}</th><th>{{ __('portal.messages') }}</th><th>Duration</th><th></th>
+            <th>{{ __('admin.date') }}</th><th>{{ __('portal.module') }}</th><th>Theme</th>
+            <th>{{ __('admin.status') }}</th><th>{{ __('portal.score') }}</th><th>{{ __('portal.messages') }}</th><th>{{ __('portal.duration') }}</th><th></th>
         </tr></thead>
         <tbody>
         @foreach($sessions->take(30) as $s)

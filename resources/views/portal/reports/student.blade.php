@@ -219,9 +219,9 @@
     <div class="dp-card-title" style="font-size:14px;">Module Progress</div>
     <table class="dp-table">
         <thead><tr>
-            <th>Module</th><th>Type</th>
+            <th>{{ __('portal.module') }}</th><th>{{ __('portal.type') }}</th>
             <th>{{ __('admin.status') }}</th><th>{{ __('portal.score') }}</th>
-            <th>Attempts</th><th>{{ __('admin.date') }}</th>
+            <th>{{ __('portal.attempts') }}</th><th>{{ __('admin.date') }}</th>
         </tr></thead>
         <tbody>
         @foreach($appData['progress'] as $p)
@@ -274,8 +274,8 @@
     <div class="dp-card-title" style="font-size:14px;margin-top:16px;">Session History</div>
     <table class="dp-table" id="session-table-{{ $slug }}">
         <thead><tr>
-            <th>Session</th><th>Type</th>
-            <th>{{ __('admin.status') }}</th><th>Started</th><th>Duration</th>
+            <th>{{ __('portal.session') }}</th><th>{{ __('portal.type') }}</th>
+            <th>{{ __('admin.status') }}</th><th>Started</th><th>{{ __('portal.duration') }}</th>
             <th>{{ __('portal.score') }}</th><th>Threshold</th>
             <th style="width:80px;"></th>
         </tr></thead>

@@ -5,7 +5,7 @@
     <div class="dp-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
             <div>
-                <div class="dp-card-title" style="margin-bottom:4px;">Schools</div>
+                <div class="dp-card-title" style="margin-bottom:4px;">{{ __('admin.schools') }}</div>
                 <p style="font-size:13px;color:var(--text-muted);margin:0;">View and manage registered schools.</p>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
@@ -14,7 +14,7 @@
                         <svg width="14" height="14" fill="none" stroke="var(--text-muted)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Search school...">
                     </div>
-                    <button type="submit" class="dp-btn-ghost">Search</button>
+                    <button type="submit" class="dp-btn-ghost">{{ __('portal.search') }}</button>
                 </form>
                 {{-- School admins cannot create new schools --}}
             </div>
@@ -25,10 +25,10 @@
             <thead>
                 <tr>
                     <th>{{ __('admin.school_name') }}</th>
-                    <th>City</th>
+                    <th>{{ __('portal.city') }}</th>
                     <th>{{ __('admin.classes') }}</th>
-                    <th>Users</th>
-                    <th>Licenses</th>
+                    <th>{{ __('portal.total_users') }}</th>
+                    <th>{{ __('portal.license_management') }}</th>
                     <th>{{ __('admin.status') }}</th>
                     <th style="text-align:right;">{{ __('admin.actions') }}</th>
                 </tr>

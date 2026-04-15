@@ -287,7 +287,7 @@
                     <svg width="28" height="28" fill="none" stroke="#EF4444" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 </div>
                 <div class="dp-modal-title" style="color:#DC2626;">Delete User</div>
-                <p class="dp-modal-subtitle">This action cannot be undone. The user will be permanently removed.</p>
+                <p class="dp-modal-subtitle">{{ __('portal.confirm_delete_user_msg') }}</p>
             </div>
             {{-- User info card (populated via AJAX) --}}
             <div id="deleteUserInfo" style="background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.15);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:none;">

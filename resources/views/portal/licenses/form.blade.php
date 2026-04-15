@@ -32,7 +32,7 @@
             {{-- Country / State — side by side --}}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
                 <div>
-                    <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">Country</label>
+                    <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">{{ __('portal.country') }}</label>
                     <select name="country" style="width:100%;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;background:#F8FAFC;font-size:14px;color:#9CA3AF;outline:none;font-family:inherit;">
                         <option value="">{{ __('portal.please_select') }}</option>
                         <option value="TR" {{ old('country', $license->country ?? '') === 'TR' ? 'selected' : '' }}>Turkey</option>
@@ -40,7 +40,7 @@
                     </select>
                 </div>
                 <div>
-                    <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">State</label>
+                    <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">{{ __('portal.state') }}</label>
                     <select name="state" style="width:100%;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;background:#F8FAFC;font-size:14px;color:#9CA3AF;outline:none;font-family:inherit;">
                         <option value="">{{ __('portal.please_select') }}</option>
                     </select>

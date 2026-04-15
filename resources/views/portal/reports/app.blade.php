@@ -532,7 +532,7 @@
                 <thead><tr>
                     @if($slug === 'way-startup')
                         <th>Startup Name</th>
-                        <th>Type</th>
+                        <th>{{ __('portal.type') }}</th>
                         <th>{{ __('portal.nav_students') }}</th>
                         <th>Deadline</th>
                         <th>Step</th>
@@ -561,7 +561,7 @@
                         <th>{{ __('portal.completed') }}</th>
                         <th>Completion %</th>
                         <th>{{ __('portal.avg_score') }}</th>
-                        <th>Duration</th>
+                        <th>{{ __('portal.duration') }}</th>
                         <th></th>
                     @endif
                 </tr></thead>
@@ -738,7 +738,7 @@
                     <th>{{ __('portal.completed') }}</th>
                     <th>Completion %</th>
                     <th>{{ __('portal.avg_score') }}</th>
-                    <th>Duration</th>
+                    <th>{{ __('portal.duration') }}</th>
                     <th></th>
                 </tr></thead>
                 <tbody>
@@ -816,7 +816,7 @@
                     <th>Title</th>
                     <th>Category</th>
                     <th>Difficulty</th>
-                    <th>Duration</th>
+                    <th>{{ __('portal.duration') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -883,7 +883,7 @@
             <thead>
                 <tr>
                     <th style="width:40px;">#</th>
-                    <th>Name</th>
+                    <th>{{ __('admin.name') }}</th>
                     <th>Key</th>
                     <th>Description</th>
                 </tr>
@@ -1025,7 +1025,7 @@ new Chart(document.getElementById('sessionsChart'), {
 
             {{-- Grade --}}
             <div class="figma-field">
-                <label class="figma-label">Grade</label>
+                <label class="figma-label">{{ __('portal.grade') }}</label>
                 <select name="grade" class="figma-select" id="mwGradeSelect">
                     <option value="">{{ __('portal.please_select') }}</option>
                     @foreach(range(1, 12) as $g)
@@ -1084,7 +1084,7 @@ new Chart(document.getElementById('sessionsChart'), {
 
             {{-- Grade --}}
             <div class="figma-field">
-                <label class="figma-label">Grade</label>
+                <label class="figma-label">{{ __('portal.grade') }}</label>
                 <select name="grade" class="figma-select" id="wsGradeSelect">
                     <option value="">{{ __('portal.please_select') }}</option>
                     @foreach(range(1, 12) as $g)

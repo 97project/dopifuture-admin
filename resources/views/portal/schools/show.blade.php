@@ -33,20 +33,20 @@
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
             </div>
             <div class="s-value">{{ $school->licenses_count }}</div>
-            <div class="s-label">Licenses</div>
+            <div class="s-label">{{ __('portal.license_management') }}</div>
         </div>
     </div>
 
     {{-- General Info --}}
     <div class="dp-card">
-        <div class="dp-card-title">General Information</div>
+        <div class="dp-card-title">{{ __('portal.general_info') }}</div>
         <div class="dp-form-grid">
             <div>
-                <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">City</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">{{ __('portal.city') }}</div>
                 <div style="font-weight:500;">{{ $school->city ?? '—' }}</div>
             </div>
             <div>
-                <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Country</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">{{ __('portal.country') }}</div>
                 <div style="font-weight:500;">{{ $school->country ?? '—' }}</div>
             </div>
             <div>
@@ -54,7 +54,7 @@
                 <div style="font-weight:500;">{{ $school->email ?? '—' }}</div>
             </div>
             <div>
-                <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Phone</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">{{ __('portal.phone') }}</div>
                 <div style="font-weight:500;">{{ $school->phone ?? '—' }}</div>
             </div>
             <div>
@@ -65,7 +65,7 @@
             </div>
             @if($school->website)
             <div>
-                <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Website</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">{{ __('portal.website') }}</div>
                 <a href="{{ $school->website }}" target="_blank" style="color:var(--primary);font-weight:500;">{{ $school->website }}</a>
             </div>
             @endif
@@ -79,9 +79,9 @@
         <div style="overflow-x:auto;">
         <table class="dp-table">
             <thead><tr>
-                <th>Class</th>
-                <th>Grade</th>
-                <th>Year</th>
+                <th>{{ __('portal.class') }}</th>
+                <th>{{ __('portal.grade') }}</th>
+                <th>{{ __('portal.year') }}</th>
                 <th>{{ __('portal.nav_students') }}</th>
                 <th>{{ __('admin.status') }}</th>
                 <th style="text-align:right;"></th>
@@ -112,9 +112,9 @@
         <div style="overflow-x:auto;">
         <table class="dp-table">
             <thead><tr>
-                <th>Name</th>
+                <th>{{ __('admin.name') }}</th>
                 <th>{{ __('admin.email') }}</th>
-                <th>Role</th>
+                <th>{{ __('admin.role') }}</th>
                 <th>{{ __('admin.status') }}</th>
                 <th style="text-align:right;"></th>
             </tr></thead>
@@ -148,10 +148,10 @@
         <div style="overflow-x:auto;">
         <table class="dp-table">
             <thead><tr>
-                <th>Seats</th>
-                <th>Used</th>
-                <th>Remaining</th>
-                <th>Expiry</th>
+                <th>{{ __('portal.total_seats') }}</th>
+                <th>{{ __('portal.used_seats') }}</th>
+                <th>{{ __('portal.remaining_seats') }}</th>
+                <th>{{ __('portal.expiry_date') }}</th>
                 <th>{{ __('admin.status') }}</th>
                 <th style="text-align:right;"></th>
             </tr></thead>
