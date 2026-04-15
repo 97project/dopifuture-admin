@@ -17,7 +17,7 @@
                 <div class="dp-form-group">
                     <label class="dp-form-label">{{ __('admin.school_name') }} *</label>
                     <select name="school_id" class="dp-form-select" required>
-                        <option value="">Select</option>
+                        <option value="">{{ __('portal.select') }}</option>
                         @foreach($schools as $school)
                             <option value="{{ $school->id }}" {{ old('school_id', $class->school_id) == $school->id ? 'selected' : '' }}>{{ $school->name }}</option>
                         @endforeach
@@ -38,7 +38,7 @@
                 <div class="dp-form-group">
                     <label class="dp-form-label">{{ __('portal.academic_year') }}</label>
                     <select name="academic_year" class="dp-form-select">
-                        <option value="">Select</option>
+                        <option value="">{{ __('portal.select') }}</option>
                         @foreach($academicYears as $year)
                             <option value="{{ $year }}" {{ old('academic_year', $class->academic_year) === $year ? 'selected' : '' }}>{{ $year }}</option>
                         @endforeach
@@ -62,7 +62,7 @@
         @if($class->exists)
             <form action="{{ route('portal.classes.destroy', $class) }}" method="POST" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--color-row-border);" onsubmit="return confirm('Are you sure you want to delete this class? This action cannot be undone.')">
                 @csrf @method('DELETE')
-                <button type="submit" style="background:var(--color-error-red, #e33131);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;">Delete This Class</button>
+                <button type="submit" style="background:var(--color-error-red, #e33131);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;">{{ __('portal.delete_this_class') }}</button>
             </form>
         @endif
     </div>

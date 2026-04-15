@@ -2,7 +2,7 @@
 @section('title', __('admin.reports'))
 @section('content')
     <div class="page-header">
-        <h1>Reports</h1>
+        <h1>{{ __('admin.reports') }}</h1>
         <p>{{ __('portal.reports_subtitle') }}
         </p>
     </div>
@@ -77,7 +77,7 @@
                                     </td>
                                     <td>
                                         <a href="{{ route('portal.users.show', $appUser) }}"
-                                            class="btn btn-ghost btn-sm">Detail</a>
+                                            class="btn btn-ghost btn-sm">{{ __('portal.detail') }}</a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -104,10 +104,10 @@
                 <thead>
                     <tr>
                         <th>{{ __('admin.school_name') }}</th>
-                        <th>Capacity</th>
+                        <th>{{ __('portal.capacity') }}</th>
                         <th>{{ __('portal.used_seats') }}</th>
                         <th>{{ __('portal.remaining_seats') }}</th>
-                        <th>Rate</th>
+                        <th>{{ __('portal.rate') }}</th>
                         <th>{{ __('portal.expiry_date') }}</th>
                         <th></th>
                     </tr>
@@ -138,7 +138,7 @@
                             </td>
                             <td>
                                 <a href="{{ route('portal.licenses.show', $lic) }}"
-                                    class="btn btn-ghost btn-sm">Detail</a>
+                                    class="btn btn-ghost btn-sm">{{ __('portal.detail') }}</a>
                             </td>
                         </tr>
                     @endforeach

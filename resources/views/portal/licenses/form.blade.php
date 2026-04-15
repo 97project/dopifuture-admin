@@ -35,8 +35,8 @@
                     <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">{{ __('portal.country') }}</label>
                     <select name="country" style="width:100%;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;background:#F8FAFC;font-size:14px;color:#9CA3AF;outline:none;font-family:inherit;">
                         <option value="">{{ __('portal.please_select') }}</option>
-                        <option value="TR" {{ old('country', $license->country ?? '') === 'TR' ? 'selected' : '' }}>Turkey</option>
-                        <option value="US" {{ old('country', $license->country ?? '') === 'US' ? 'selected' : '' }}>United States</option>
+                        <option value="TR" {{ old('country', $license->country ?? '') === 'TR' ? 'selected' : '' }}>{{ __('portal.country_turkey') }}</option>
+                        <option value="US" {{ old('country', $license->country ?? '') === 'US' ? 'selected' : '' }}>{{ __('portal.country_us') }}</option>
                     </select>
                 </div>
                 <div>
@@ -59,7 +59,7 @@
                         {{ $label }}
                     </label>
                     <select name="product_counts[{{ $key }}]" style="padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:13px;color:#9CA3AF;outline:none;font-family:inherit;">
-                        <option value="">Number</option>
+                        <option value="">{{ __('portal.number') }}</option>
                         @for($i = 1; $i <= 12; $i++)
                         <option value="{{ $i }}" {{ old("product_counts.$key", $license->{"count_$key"} ?? '') == $i ? 'selected' : '' }}>{{ $i }}</option>
                         @endfor

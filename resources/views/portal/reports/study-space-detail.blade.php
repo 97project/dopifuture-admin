@@ -86,7 +86,7 @@
     </div>
     <table class="dp-table">
         <thead><tr>
-            <th>{{ __('admin.date') }}</th><th>Theme</th>
+            <th>{{ __('admin.date') }}</th><th>{{ __('portal.theme') }}</th>
             <th>{{ __('admin.status') }}</th><th>{{ __('portal.messages') }}</th><th>{{ __('portal.duration') }}</th><th></th>
         </tr></thead>
         <tbody>

@@ -81,7 +81,7 @@
             <span style="font-size:24px;">🦅</span>
             <div>
                 <div style="font-size:16px;font-weight:700;">My Wings</div>
-                <div style="font-size:12px;color:var(--color-txt-muted);">Achievement points across all apps</div>
+                <div style="font-size:12px;color:var(--color-txt-muted);">{{ __('portal.achievement_points_all_apps') }}</div>
             </div>
         </div>
         <div style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:8px 18px;border-radius:20px;font-weight:700;font-size:18px;">
@@ -107,8 +107,8 @@
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
         <span style="font-size:24px;">🦋</span>
         <div>
-            <div style="font-size:16px;font-weight:700;">Available Wing Badges</div>
-            <div style="font-size:12px;color:var(--color-txt-muted);">All collectible badges from the platform</div>
+            <div style="font-size:16px;font-weight:700;">{{ __('portal.available_wing_badges') }}</div>
+            <div style="font-size:12px;color:var(--color-txt-muted);">{{ __('portal.all_collectible_badges') }}</div>
         </div>
         @if(!empty($premiumStatus))
         <div style="margin-left:auto;">
@@ -190,7 +190,7 @@
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;text-align:center;margin-bottom:16px;">
         <div>
             <div style="font-size:22px;font-weight:700;">{{ $appData['stats']['total_modules'] }}</div>
-            <div style="font-size:11px;color:var(--text-muted);">Modules</div>
+            <div style="font-size:11px;color:var(--text-muted);">{{ __('portal.modules') }}</div>
         </div>
         <div>
             <div style="font-size:22px;font-weight:700;color:var(--active-green);">{{ $appData['stats']['completed'] }}</div>
@@ -216,7 +216,7 @@
 
     {{-- Module Progress --}}
     @if($appData['progress']->count())
-    <div class="dp-card-title" style="font-size:14px;">Module Progress</div>
+    <div class="dp-card-title" style="font-size:14px;">{{ __('portal.module_progress') }}</div>
     <table class="dp-table">
         <thead><tr>
             <th>{{ __('portal.module') }}</th><th>{{ __('portal.type') }}</th>
@@ -271,11 +271,11 @@
 
     {{-- Sessions --}}
     @if($appData['sessions']->count())
-    <div class="dp-card-title" style="font-size:14px;margin-top:16px;">Session History</div>
+    <div class="dp-card-title" style="font-size:14px;margin-top:16px;">{{ __('portal.session_history') }}</div>
     <table class="dp-table" id="session-table-{{ $slug }}">
         <thead><tr>
             <th>{{ __('portal.session') }}</th><th>{{ __('portal.type') }}</th>
-            <th>{{ __('admin.status') }}</th><th>Started</th><th>{{ __('portal.duration') }}</th>
+            <th>{{ __('admin.status') }}</th><th>{{ __('portal.started') }}</th><th>{{ __('portal.duration') }}</th>
             <th>{{ __('portal.score') }}</th><th>Threshold</th>
             <th style="width:80px;"></th>
         </tr></thead>
@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Score Trend Chart
             if (data.score_trend && data.score_trend.length >= 2) {
                 html += '<div class="dp-card" style="margin-bottom:16px;">';
-                html += '<div class="dp-card-title" style="font-size:14px;">Score Trend (Recent Simulations)</div>';
+                html += '<div class="dp-card-title" style="font-size:14px;">{{ __('portal.score_trend_simulations') }}</div>';
                 html += '<div style="height:200px;"><canvas id="scoreTrendChart"></canvas></div>';
                 html += '</div>';
             }

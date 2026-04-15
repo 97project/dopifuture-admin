@@ -23,7 +23,7 @@
         <div class="dp-card-title">{{ __('portal.user_info') }}</div>
         <div class="dp-form-grid">
             <div>
-                <div style="font-size:12px;color:var(--color-txt-muted);margin-bottom:4px;">First Name</div>
+                <div style="font-size:12px;color:var(--color-txt-muted);margin-bottom:4px;">{{ __('admin.name') }}</div>
                 <div style="font-weight:500;">{{ $user->name }}</div>
             </div>
             <div>
@@ -43,7 +43,7 @@
                 <span class="dp-badge {{ $user->status === 'active' ? 'dp-badge-active' : 'dp-badge-inactive' }}">{{ $user->status === 'active' ? 'Active' : 'Inactive' }}</span>
             </div>
             <div>
-                <div style="font-size:12px;color:var(--color-txt-muted);margin-bottom:4px;">Registration Date</div>
+                <div style="font-size:12px;color:var(--color-txt-muted);margin-bottom:4px;">{{ __('portal.registration_date') }}</div>
                 <div style="font-weight:500;">{{ $user->created_at?->format('Y-m-d H:i') }}</div>
             </div>
         </div>
@@ -118,7 +118,7 @@
         <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;text-align:center;margin-bottom:16px;">
             <div>
                 <div style="font-size:20px;font-weight:700;">{{ $appData['stats']['total_modules'] }}</div>
-                <div style="font-size:11px;color:var(--color-txt-muted);">Modules</div>
+                <div style="font-size:11px;color:var(--color-txt-muted);">{{ __('portal.modules') }}</div>
             </div>
             <div>
                 <div style="font-size:20px;font-weight:700;color:var(--color-active-green);">{{ $appData['stats']['completed'] }}</div>

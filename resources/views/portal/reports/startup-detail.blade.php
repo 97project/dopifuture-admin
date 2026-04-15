@@ -25,7 +25,7 @@
         <a href="{{ route('portal.reports.app', 'way-startup') }}" style="display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--color-txt-muted);font-size:13px;">
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </a>
-        <span style="font-size:18px;font-weight:600;">Project Detail</span>
+        <span style="font-size:18px;font-weight:600;">{{ __('portal.project_detail') }}</span>
     </div>
 
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;align-items:start;">
@@ -197,10 +197,10 @@
             <div class="dp-card" style="margin-bottom:16px;">
                 <div style="font-size:18px;font-weight:700;margin-bottom:16px;">{{ $project->name ?? 'Project' }}</div>
                 {{-- Team Summary --}}
-                <div style="font-weight:600;font-size:13px;margin-bottom:12px;">Team Summary</div>
+                <div style="font-weight:600;font-size:13px;margin-bottom:12px;">{{ __('portal.team_summary') }}</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px;margin-bottom:4px;">
-                    <span style="font-weight:500;">Member</span>
-                    <span style="font-weight:500;text-align:right;">Responsible</span>
+                    <span style="font-weight:500;">{{ __('portal.member') }}</span>
+                    <span style="font-weight:500;text-align:right;">{{ __('portal.responsible') }}</span>
                 </div>
                 @foreach($team as $member)
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--color-row-border);">
@@ -227,7 +227,7 @@
             <div class="dp-card" style="margin-bottom:16px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;">
                     <div>
-                        <div style="font-size:12px;color:var(--color-txt-muted);">Total Product Score</div>
+                        <div style="font-size:12px;color:var(--color-txt-muted);">{{ __('portal.total_product_score') }}</div>
                         <div style="font-size:22px;font-weight:700;">{{ $project->product_score }} / {{ $project->max_score }}</div>
                     </div>
                 </div>
@@ -259,7 +259,7 @@
 
             {{-- Submitted Files â€” Figma shows real file list --}}
             <div class="dp-card" style="margin-bottom:16px;">
-                <div style="font-weight:600;font-size:13px;margin-bottom:12px;">Submitted Files</div>
+                <div style="font-weight:600;font-size:13px;margin-bottom:12px;">{{ __('portal.submitted_files') }}</div>
                 @forelse($files ?? [] as $file)
                 <div style="margin-bottom:12px;">
                     <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
@@ -313,7 +313,7 @@
 
             {{-- Submitted Links --}}
             <div class="dp-card">
-                <div style="font-weight:600;font-size:13px;margin-bottom:12px;">Submitted Links</div>
+                <div style="font-weight:600;font-size:13px;margin-bottom:12px;">{{ __('portal.submitted_links') }}</div>
                 @forelse($links ?? [] as $link)
                 <div style="margin-bottom:12px;">
                     <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">

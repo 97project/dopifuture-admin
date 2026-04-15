@@ -19,7 +19,7 @@
 
 {{-- App Filter Tabs --}}
 <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
-    <a href="{{ route('portal.reports.class', $class) }}" class="{{ !$selectedApp ? 'dp-btn' : 'dp-btn-ghost' }}" style="font-size:13px;">All</a>
+    <a href="{{ route('portal.reports.class', $class) }}" class="{{ !$selectedApp ? 'dp-btn' : 'dp-btn-ghost' }}" style="font-size:13px;">{{ __('portal.all') }}</a>
     @foreach($apps as $a)
     <a href="{{ route('portal.reports.class.app', [$class, $a->slug]) }}" class="{{ $selectedApp && $selectedApp->id === $a->id ? 'dp-btn' : 'dp-btn-ghost' }}" style="font-size:13px;">{{ $a->name }}</a>
     @endforeach
@@ -28,7 +28,7 @@
 {{-- Single App Detailed View --}}
 @if($selectedApp && isset($reportData['app']))
     <div class="dp-stats-grid" style="margin-bottom:20px;">
-        <div class="dp-stat-card"><div class="s-value">{{ $reportData['total_progress'] ?? 0 }}</div><div class="s-label">Total Progress</div></div>
+        <div class="dp-stat-card"><div class="s-value">{{ $reportData['total_progress'] ?? 0 }}</div><div class="s-label">{{ __('portal.total_progress') }}</div></div>
         <div class="dp-stat-card"><div class="s-value" style="color:var(--active-green);">{{ $reportData['total_completed'] ?? 0 }}</div><div class="s-label">{{ __('portal.completed') }}</div></div>
         <div class="dp-stat-card"><div class="s-value" style="color:var(--primary);">{{ isset($reportData['avg_score']) && $reportData['avg_score'] ? number_format($reportData['avg_score'], 1) : '-' }}</div><div class="s-label">{{ __('portal.avg_score') }}</div></div>
     </div>
@@ -38,8 +38,8 @@
         <div class="dp-card-title">👥 Student Performance</div>
         <table class="dp-table">
             <thead><tr>
-                <th>Student</th>
-                <th>Completion</th>
+                <th>{{ __('portal.student') }}</th>
+                <th>{{ __('portal.completion') }}</th>
                 <th>{{ __('portal.score') }}</th>
                 <th></th>
             </tr></thead>
@@ -91,7 +91,7 @@
     <div class="dp-card">
         <div class="dp-card-title">👥 Class Students</div>
         <table class="dp-table">
-            <thead><tr><th>Student</th><th>Email</th><th></th></tr></thead>
+            <thead><tr><th>{{ __('portal.student') }}</th><th>{{ __('admin.email') }}</th><th></th></tr></thead>
             <tbody>
             @foreach($class->students as $s)
             <tr>

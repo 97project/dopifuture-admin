@@ -45,7 +45,7 @@
                             @if($school->is_active)
                                 <span class="dp-badge dp-badge-active">{{ __('portal.active') }}</span>
                             @else
-                                <span class="dp-badge dp-badge-inactive">Inactive</span>
+                                <span class="dp-badge dp-badge-inactive">{{ __('portal.inactive') }}</span>
                             @endif
                         </td>
                         <td style="text-align:right;">

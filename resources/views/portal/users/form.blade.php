@@ -48,7 +48,7 @@
                         <label class="dp-form-label">{{ __('admin.status') }} *</label>
                         <select name="status" class="dp-form-select" required>
                             <option value="active" {{ $editUser->status === 'active' ? 'selected' : '' }}>{{ __('portal.active') }}</option>
-                            <option value="inactive" {{ $editUser->status === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            <option value="inactive" {{ $editUser->status === 'inactive' ? 'selected' : '' }}>{{ __('portal.inactive') }}</option>
                         </select>
                     </div>
                 </div>
@@ -57,7 +57,7 @@
                 <div class="dp-form-group">
                     <label class="dp-form-label">{{ __('portal.assign_to_class') }}</label>
                     <select name="class_id" class="dp-form-select">
-                        <option value="">Select (optional)</option>
+                        <option value="">{{ __('portal.select_optional') }}</option>
                         @foreach($classes as $cls)
                             <option value="{{ $cls->id }}">{{ $cls->name }} — {{ $cls->school?->name }}</option>
                         @endforeach
@@ -75,7 +75,7 @@
         @if($editUser->exists)
             <form action="{{ route('portal.users.destroy', $editUser) }}" method="POST" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--color-row-border);" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
                 @csrf @method('DELETE')
-                <button type="submit" style="background:var(--color-error-red);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;">Delete This User</button>
+                <button type="submit" style="background:var(--color-error-red);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;">{{ __('portal.delete_this_user') }}</button>
             </form>
         @endif
     </div>

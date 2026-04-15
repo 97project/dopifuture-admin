@@ -3,7 +3,7 @@
 @section('page-title', 'Edit School')
 @section('content')
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-        <div style="font-size:18px;font-weight:600;">Edit School</div>
+        <div style="font-size:18px;font-weight:600;">{{ __('portal.edit_school') }}</div>
         <a href="{{ route('portal.schools.index') }}" class="dp-btn-ghost">← Back to Schools</a>
     </div>
 

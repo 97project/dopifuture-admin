@@ -27,13 +27,13 @@
 
                 {{-- Result Section --}}
                 <div style="background:rgba(255,255,255,0.9);border-radius:12px;padding:16px;">
-                    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">Result</div>
+                    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">{{ __('portal.result') }}</div>
                     <p style="font-size:13px;line-height:1.7;color:#374151;margin:0;">{{ $mission->result ?? 'Awaiting completion data.' }}</p>
                 </div>
 
                 {{-- Overall Score Section --}}
                 <div style="background:rgba(230,235,255,0.95);border-radius:12px;padding:16px;">
-                    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">Overall Score</div>
+                    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">{{ __('portal.overall_score') }}</div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                         <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
                             <div style="font-size:10px;font-weight:600;color:#EF4444;text-transform:uppercase;margin-bottom:4px;">❤️ HEALTH POINT:</div>
@@ -58,7 +58,7 @@
     </div>
 
     {{-- ═══ GROUP FLOW — Figma F-62: question cards with dashed arrow connectors ═══ --}}
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;font-family:'Nunito',sans-serif;">Group Flow</h3>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;font-family:'Nunito',sans-serif;">{{ __('portal.group_flow') }}</h3>
 
     <div style="display:flex;gap:0;align-items:flex-start;overflow-x:auto;padding-bottom:16px;">
         @forelse($questions as $qi => $q)
@@ -94,23 +94,23 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px;">
                     <div style="background:linear-gradient(135deg,#FCA5A5,#EF4444);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">❤️</span>
-                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Health<br>Point:</span>
+                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">{{ __('portal.health') }}<br>Point:</span>
                         <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->health ?? '-' }}</span>
                         @if($q->health !== null)<span style="font-size:12px;">{{ $q->health >= 50 ? '👍' : '👎' }}</span>@endif
                     </div>
                     <div style="background:linear-gradient(135deg,#93C5FD,#3B82F6);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">📦</span>
-                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Resource<br>Point:</span>
+                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">{{ __('portal.resource') }}<br>Point:</span>
                         <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->resource ?? '-' }}</span>
                     </div>
                     <div style="background:linear-gradient(135deg,#A7F3D0,#22C55E);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">⚖️</span>
-                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Ethics<br>Point:</span>
+                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">{{ __('portal.ethics') }}<br>Point:</span>
                         <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->ethics ?? '-' }}</span>
                     </div>
                     <div style="background:linear-gradient(135deg,#C4B5FD,#8B5CF6);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">✅</span>
-                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">Adaptation<br>Point:</span>
+                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">{{ __('portal.adaptation') }}<br>Point:</span>
                         <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->adaptation ?? '-' }}</span>
                         @if($q->adaptation !== null)<span style="font-size:12px;">{{ $q->adaptation >= 50 ? '👍' : '👎' }}</span>@endif
                     </div>

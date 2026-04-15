@@ -39,7 +39,7 @@
     {{-- Utilization Bar --}}
     <div class="dp-card">
         <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-            <span style="font-size:13px;color:var(--text-muted);">Utilization Rate</span>
+            <span style="font-size:13px;color:var(--text-muted);">{{ __('portal.utilization_rate') }}</span>
             <span style="font-size:13px;font-weight:600;color:{{ $pct >= 90 ? 'var(--error-red)' : ($pct >= 70 ? '#fbbf24' : 'var(--active-green)') }};">%{{ $pct }}</span>
         </div>
         <div class="dp-progress" style="height:12px;">
@@ -59,8 +59,8 @@
             <thead><tr>
                 <th>{{ __('admin.date') }}</th>
                 <th>{{ __('portal.total_seats') }}</th>
-                <th>Amount</th>
-                <th>Notes</th>
+                <th>{{ __('portal.amount') }}</th>
+                <th>{{ __('portal.notes') }}</th>
             </tr></thead>
             <tbody>
                 @foreach($license->purchases as $purchase)
@@ -98,7 +98,7 @@
                     <input type="date" name="purchased_at" class="dp-form-input" value="{{ now()->format('Y-m-d') }}" required>
                 </div>
                 <div>
-                    <label class="dp-form-label">Notes</label>
+                    <label class="dp-form-label">{{ __('portal.notes') }}</label>
                     <input type="text" name="notes" class="dp-form-input" maxlength="500">
                 </div>
             </div>

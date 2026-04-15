@@ -43,11 +43,11 @@
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;margin-bottom:16px;">
             <div>
                 <div style="font-size:20px;font-weight:800;color:#030719;">{{ $app->total_users }}</div>
-                <div style="font-size:10px;color:var(--color-txt-muted);">Total</div>
+                <div style="font-size:10px;color:var(--color-txt-muted);">{{ __('portal.total') }}</div>
             </div>
             <div>
                 <div style="font-size:20px;font-weight:800;color:#10B981;">{{ $app->synced }}</div>
-                <div style="font-size:10px;color:var(--color-txt-muted);">Synced</div>
+                <div style="font-size:10px;color:var(--color-txt-muted);">{{ __('portal.synced') }}</div>
             </div>
             <div>
                 <div style="font-size:20px;font-weight:800;color:#F59E0B;">{{ $app->pending }}</div>
@@ -55,7 +55,7 @@
             </div>
             <div>
                 <div style="font-size:20px;font-weight:800;color:#EF4444;">{{ $app->failed }}</div>
-                <div style="font-size:10px;color:var(--color-txt-muted);">Failed</div>
+                <div style="font-size:10px;color:var(--color-txt-muted);">{{ __('portal.failed') }}</div>
             </div>
         </div>
 

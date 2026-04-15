@@ -58,7 +58,7 @@
                             <th>{{ __('portal.mission_name') }}</th>
                             <th>{{ __('portal.nav_students') }}</th>
                             <th>{{ __('portal.assigned_date') }}</th>
-                            <th>Deadline</th>
+                            <th>{{ __('portal.deadline') }}</th>
                             <th>
                                 <span style="display:inline-flex;align-items:center;gap:4px;">
                                     <span style="color:#ef4444;">❤️</span>
@@ -83,7 +83,7 @@
                                     Adaptation Point
                                 </span>
                             </th>
-                            <th>Action</th>
+                            <th>{{ __('portal.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -194,14 +194,14 @@
                     <thead>
                         <tr>
                             <th style="width:40px;">{{ __('portal.no_num') }}</th>
-                            <th>Startup Name</th>
-                            <th>Startup Type</th>
+                            <th>{{ __('portal.startup_name') }}</th>
+                            <th>{{ __('portal.startup_type') }}</th>
                             <th>{{ __('portal.nav_students') }}</th>
-                            <th>Deadline</th>
-                            <th>Step</th>
+                            <th>{{ __('portal.deadline') }}</th>
+                            <th>{{ __('portal.step') }}</th>
                             <th>{{ __('portal.system_point') }}</th>
                             <th>{{ __('portal.teacher_point') }}</th>
-                            <th>Action</th>
+                            <th>{{ __('portal.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -308,7 +308,7 @@
                             <th>{{ __('portal.nav_students') }}</th>
                             <th>{{ __('portal.total_discussion_min') }}</th>
                             <th>{{ __('portal.total_discussion_count') }}</th>
-                            <th>Action</th>
+                            <th>{{ __('portal.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -355,7 +355,7 @@
                             <th>{{ __('portal.nav_students') }}</th>
                             <th>AI Coach Interaction Number</th>
                             <th>{{ __('portal.total_duration') }}</th>
-                            <th>Action</th>
+                            <th>{{ __('portal.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -421,11 +421,11 @@
                         <tr>
                             <th style="width:40px;">{{ __('portal.no_num') }}</th>
                             <th>{{ __('portal.nav_students') }}</th>
-                            <th>Last Interaction</th>
+                            <th>{{ __('portal.last_interaction') }}</th>
                             <th>{{ __('portal.total_galaxies_joined') }}</th>
                             <th>{{ __('portal.total_duration') }}</th>
                             <th>Last 5 Role Galaxies Joined</th>
-                            <th>Action</th>
+                            <th>{{ __('portal.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -487,25 +487,25 @@
         {{-- Stat cards --}}
         <div class="dp-stats-grid" style="margin-bottom:20px;">
             @if($slug === 'way-startup')
-                <div class="dp-stat-card"><div class="s-value">{{ $total_progress }}</div><div class="s-label">Total Progress</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_progress }}</div><div class="s-label">{{ __('portal.total_progress') }}</div></div>
                 <div class="dp-stat-card"><div class="s-value">{{ $total_completed }}</div><div class="s-label">{{ __('portal.completed') }}</div></div>
                 <div class="dp-stat-card"><div class="s-value">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div><div class="s-label">{{ __('portal.avg_score') }}</div></div>
                 <div class="dp-stat-card"><div class="s-value">{{ $total_sessions }}</div><div class="s-label">{{ __('portal.sessions') }}</div></div>
                 <div class="dp-stat-card"><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">{{ __('portal.total_duration') }}</div></div>
             @elseif($slug === 'study-space')
-                <div class="dp-stat-card-yellow"><div class="s-value">{{ $total_progress }}</div><div class="s-label">Total Discussion</div></div>
-                <div class="dp-stat-card-yellow"><div class="s-value">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div><div class="s-label">Avg Discussion Time</div></div>
+                <div class="dp-stat-card-yellow"><div class="s-value">{{ $total_progress }}</div><div class="s-label">{{ __('portal.total_discussion') }}</div></div>
+                <div class="dp-stat-card-yellow"><div class="s-value">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div><div class="s-label">{{ __('portal.avg_discussion_time') }}</div></div>
                 <div class="dp-stat-card"><div class="s-value">{{ $total_sessions }}</div><div class="s-label">{{ __('portal.sessions') }}</div></div>
             @elseif($slug === 'way-ai-coach')
-                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg></div><div class="s-value">{{ $total_progress }}</div><div class="s-label">Empathy Score</div></div>
-                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><div class="s-value">{{ $total_sessions }}</div><div class="s-label">Interaction Count</div></div>
+                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg></div><div class="s-value">{{ $total_progress }}</div><div class="s-label">{{ __('portal.empathy_score') }}</div></div>
+                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><div class="s-value">{{ $total_sessions }}</div><div class="s-label">{{ __('portal.interaction_count') }}</div></div>
                 <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">{{ __('portal.total_duration') }}</div></div>
             @elseif($slug === 'role-galaxy')
-                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg></div><div class="s-value">{{ $total_progress }}</div><div class="s-label">Galaxy Join</div></div>
-                <div class="dp-stat-card"><div class="s-value">{{ $total_completed }}</div><div class="s-label">Roles Completed</div></div>
+                <div class="dp-stat-card"><div class="s-icon"><svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg></div><div class="s-value">{{ $total_progress }}</div><div class="s-label">{{ __('portal.galaxy_join') }}</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_completed }}</div><div class="s-label">{{ __('portal.roles_completed') }}</div></div>
                 <div class="dp-stat-card"><div class="s-value">{{ \App\Services\ReportService::formatDuration($total_duration ?? 0) }}</div><div class="s-label">{{ __('portal.total_duration') }}</div></div>
             @else
-                <div class="dp-stat-card"><div class="s-value">{{ $total_progress }}</div><div class="s-label">Total Progress</div></div>
+                <div class="dp-stat-card"><div class="s-value">{{ $total_progress }}</div><div class="s-label">{{ __('portal.total_progress') }}</div></div>
                 <div class="dp-stat-card"><div class="s-value">{{ $total_completed }}</div><div class="s-label">{{ __('portal.completed') }}</div></div>
                 <div class="dp-stat-card"><div class="s-value">{{ $avg_score ? number_format($avg_score, 1) : '-' }}</div><div class="s-label">{{ __('portal.avg_score') }}</div></div>
                 <div class="dp-stat-card"><div class="s-value">{{ $total_sessions }}</div><div class="s-label">{{ __('portal.sessions') }}</div></div>
@@ -531,17 +531,17 @@
             <table class="dp-table">
                 <thead><tr>
                     @if($slug === 'way-startup')
-                        <th>Startup Name</th>
+                        <th>{{ __('portal.startup_name') }}</th>
                         <th>{{ __('portal.type') }}</th>
                         <th>{{ __('portal.nav_students') }}</th>
-                        <th>Deadline</th>
-                        <th>Step</th>
+                        <th>{{ __('portal.deadline') }}</th>
+                        <th>{{ __('portal.step') }}</th>
                         <th>{{ __('portal.system_point') }}</th>
                         <th>{{ __('portal.teacher_point') }}</th>
                         <th>{{ __('admin.actions') }}</th>
                     @elseif($slug === 'way-ai-coach')
                         <th>{{ __('portal.nav_students') }}</th>
-                        <th>Interaction Count</th>
+                        <th>{{ __('portal.interaction_count') }}</th>
                         <th>{{ __('portal.total_duration') }}</th>
                         <th>{{ __('admin.actions') }}</th>
                     @elseif($slug === 'role-galaxy')
@@ -556,8 +556,8 @@
                         <th>{{ __('portal.discussion_count') }}</th>
                         <th>{{ __('admin.actions') }}</th>
                     @else
-                        <th>Student</th>
-                        <th>Total</th>
+                        <th>{{ __('portal.student') }}</th>
+                        <th>{{ __('portal.total') }}</th>
                         <th>{{ __('portal.completed') }}</th>
                         <th>Completion %</th>
                         <th>{{ __('portal.avg_score') }}</th>
@@ -667,7 +667,7 @@
                                 <span style="color:#22c55e;">✅</span>
                                 Adaptation Point
                             </th>
-                            <th>Action</th>
+                            <th>{{ __('portal.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -713,7 +713,7 @@
                                 @else <span class="muted">-</span> @endif
                             </td>
                             <td>
-                                <a href="{{ route('portal.reports.mission.detail', $mission->id) }}" style="color:var(--color-primary);font-size:13px;font-weight:500;text-decoration:none;">Details</a>
+                                <a href="{{ route('portal.reports.mission.detail', $mission->id) }}" style="color:var(--color-primary);font-size:13px;font-weight:500;text-decoration:none;">{{ __('portal.view_details') }}</a>
                             </td>
                         </tr>
                         @empty
@@ -733,8 +733,8 @@
             <div class="dp-card-title">👥 Student Performance</div>
             <table class="dp-table">
                 <thead><tr>
-                    <th>Student</th>
-                    <th>Total</th>
+                    <th>{{ __('portal.student') }}</th>
+                    <th>{{ __('portal.total') }}</th>
                     <th>{{ __('portal.completed') }}</th>
                     <th>Completion %</th>
                     <th>{{ __('portal.avg_score') }}</th>
@@ -813,9 +813,9 @@
             <thead>
                 <tr>
                     <th style="width:40px;">#</th>
-                    <th>Title</th>
-                    <th>Category</th>
-                    <th>Difficulty</th>
+                    <th>{{ __('portal.title') }}</th>
+                    <th>{{ __('portal.category') }}</th>
+                    <th>{{ __('portal.difficulty') }}</th>
                     <th>{{ __('portal.duration') }}</th>
                 </tr>
             </thead>
@@ -884,8 +884,8 @@
                 <tr>
                     <th style="width:40px;">#</th>
                     <th>{{ __('admin.name') }}</th>
-                    <th>Key</th>
-                    <th>Description</th>
+                    <th>{{ __('portal.key') }}</th>
+                    <th>{{ __('portal.description') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -1036,7 +1036,7 @@ new Chart(document.getElementById('sessionsChart'), {
 
             {{-- Student (multi-select — MW requires exact player count) --}}
             <div class="figma-field">
-                <label class="figma-label">Student <span id="mwSelectedCount" style="font-weight:500;color:#3B5BDB;font-size:12px;"></span></label>
+                <label class="figma-label">{{ __('portal.student') }} <span id="mwSelectedCount" style="font-weight:500;color:#3B5BDB;font-size:12px;"></span></label>
                 <div class="figma-student-list" id="mwStudentList">
                     @forelse($mw_students ?? [] as $student)
                     <label class="figma-student-item">
@@ -1054,7 +1054,7 @@ new Chart(document.getElementById('sessionsChart'), {
 
             {{-- Mission (simulation) --}}
             <div class="figma-field">
-                <label class="figma-label">Mission</label>
+                <label class="figma-label">{{ __('portal.mission') }}</label>
                 <select name="simulation_id" required class="figma-select" id="mwSimSelect">
                     <option value="" data-role-count="0">{{ __('portal.please_select') }}</option>
                     @foreach($mw_simulations ?? [] as $sim)
@@ -1068,7 +1068,7 @@ new Chart(document.getElementById('sessionsChart'), {
 
             {{-- Deadline --}}
             <div class="figma-field">
-                <label class="figma-label">Deadline</label>
+                <label class="figma-label">{{ __('portal.deadline') }}</label>
                 <input type="date" name="deadline" required min="{{ now()->format('Y-m-d') }}" class="figma-input" placeholder="Please select">
             </div>
 
@@ -1095,7 +1095,7 @@ new Chart(document.getElementById('sessionsChart'), {
 
             {{-- Student (checkbox list — same design as MW) --}}
             <div class="figma-field">
-                <label class="figma-label">Student <span id="wsSelectedCount" style="font-weight:500;color:#3B5BDB;font-size:12px;"></span></label>
+                <label class="figma-label">{{ __('portal.student') }} <span id="wsSelectedCount" style="font-weight:500;color:#3B5BDB;font-size:12px;"></span></label>
                 <div class="figma-student-list" id="wsStudentList">
                     @forelse($ws_students ?? [] as $student)
                     <label class="figma-student-item">
@@ -1110,7 +1110,7 @@ new Chart(document.getElementById('sessionsChart'), {
 
             {{-- Business (simulation) --}}
             <div class="figma-field">
-                <label class="figma-label">Business</label>
+                <label class="figma-label">{{ __('portal.business') }}</label>
                 <select name="simulation_id" required class="figma-select">
                     <option value="">{{ __('portal.please_select') }}</option>
                     @foreach($ws_simulations ?? [] as $sim)
@@ -1121,7 +1121,7 @@ new Chart(document.getElementById('sessionsChart'), {
 
             {{-- Deadline --}}
             <div class="figma-field">
-                <label class="figma-label">Deadline</label>
+                <label class="figma-label">{{ __('portal.deadline') }}</label>
                 <input type="date" name="due_date" required min="{{ now()->format('Y-m-d') }}" class="figma-input" placeholder="Please select">
             </div>
 

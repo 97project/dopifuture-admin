@@ -22,7 +22,7 @@
         </div>
         <div class="dp-card" style="padding:20px;text-align:center;">
             <div style="font-size:28px;font-weight:800;color:#10B981;">{{ $recentStudents->count() }}</div>
-            <div style="font-size:13px;color:var(--color-txt-muted);margin-top:4px;">Recent</div>
+            <div style="font-size:13px;color:var(--color-txt-muted);margin-top:4px;">{{ __('portal.recent') }}</div>
         </div>
     </div>
 
@@ -64,7 +64,7 @@
 
     {{-- Recent Students --}}
     <div class="dp-card">
-        <div class="dp-card-title" style="padding:20px 24px 12px;">Recent Students</div>
+        <div class="dp-card-title" style="padding:20px 24px 12px;">{{ __('portal.recently_added_students') }}</div>
         @if($recentStudents->count())
         <table class="dp-table">
             <thead><tr>

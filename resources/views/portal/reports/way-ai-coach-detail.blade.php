@@ -151,7 +151,7 @@
                 <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:12px;min-height:20px;">{{ $cfg['label'] }}</div>
                 {{-- Bottom: Total Interaction + count --}}
                 <div style="display:flex;align-items:center;justify-content:space-between;">
-                    <div style="font-size:10px;font-weight:600;color:#62748E;text-transform:uppercase;letter-spacing:0.5px;">Total Interaction</div>
+                    <div style="font-size:10px;font-weight:600;color:#62748E;text-transform:uppercase;letter-spacing:0.5px;">{{ __('portal.total_interaction') }}</div>
                     <div style="display:inline-flex;align-items:center;gap:6px;border:2px solid {{ $isHigh ? '#60A5FA' : '#F87171' }};border-radius:10px;padding:4px 10px;">
                         <span style="font-size:10px;">{{ $isHigh ? '🟢' : '🔴' }}</span>
                         <span style="font-size:16px;font-weight:700;color:#fff;">{{ $count }}</span>
@@ -178,12 +178,12 @@
         <div style="text-align:center;padding:24px;background:#1e293b;border-radius:14px;transition:transform .2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='none'">
             <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px;">📘</div>
             <div style="font-size:32px;font-weight:800;color:#fff;">{{ $stats['lecturer'] }}</div>
-            <div style="font-size:13px;color:#94a3b8;font-weight:500;margin-top:4px;">Lecturer Sessions</div>
+            <div style="font-size:13px;color:#94a3b8;font-weight:500;margin-top:4px;">{{ __('portal.lecturer_sessions') }}</div>
         </div>
         <div style="text-align:center;padding:24px;background:#1e293b;border-radius:14px;transition:transform .2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='none'">
             <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px;">💬</div>
             <div style="font-size:32px;font-weight:800;color:#fff;">{{ $stats['chatbot'] }}</div>
-            <div style="font-size:13px;color:#94a3b8;font-weight:500;margin-top:4px;">Chatbot Sessions</div>
+            <div style="font-size:13px;color:#94a3b8;font-weight:500;margin-top:4px;">{{ __('portal.chatbot_sessions') }}</div>
         </div>
     </div>
 </div>
@@ -196,7 +196,7 @@
     </div>
     <table class="dp-table">
         <thead><tr>
-            <th>{{ __('admin.date') }}</th><th>{{ __('portal.module') }}</th><th>Theme</th>
+            <th>{{ __('admin.date') }}</th><th>{{ __('portal.module') }}</th><th>{{ __('portal.theme') }}</th>
             <th>{{ __('admin.status') }}</th><th>{{ __('portal.score') }}</th><th>{{ __('portal.messages') }}</th><th>{{ __('portal.duration') }}</th><th></th>
         </tr></thead>
         <tbody>

@@ -101,7 +101,7 @@
                         </div>
                         <div>
                             <div style="font-size:18px;font-weight:800;color:#43e97b;">{{ $completed }}</div>
-                            <div style="font-size:9px;color:#62748E;text-transform:uppercase;">Done</div>
+                            <div style="font-size:9px;color:#62748E;text-transform:uppercase;">{{ __('portal.done') }}</div>
                         </div>
                         <div>
                             <div style="font-size:18px;font-weight:800;color:{{ $cfg['color'] }};">{{ $avgScore ? round($avgScore) : '-' }}</div>
@@ -113,7 +113,7 @@
                         <div style="height:100%;width:{{ $completionRate }}%;background:linear-gradient(90deg,{{ $cfg['color'] }},{{ $cfg['color'] }}cc);border-radius:2px;transition:width .3s;"></div>
                     </div>
                 @else
-                    <div style="text-align:center;padding:8px 0;font-size:11px;color:#475569;font-weight:500;">Not yet explored</div>
+                    <div style="text-align:center;padding:8px 0;font-size:11px;color:#475569;font-weight:500;">{{ __('portal.not_yet_explored') }}</div>
                 @endif
             </div>
         @endforeach
@@ -128,7 +128,7 @@
     </div>
     <table class="dp-table">
         <thead><tr>
-            <th>{{ __('admin.date') }}</th><th>Scenario</th><th>{{ __('admin.status') }}</th>
+            <th>{{ __('admin.date') }}</th><th>{{ __('portal.scenario') }}</th><th>{{ __('admin.status') }}</th>
             <th>{{ __('portal.score') }}</th><th>Steps</th><th>{{ __('portal.duration') }}</th><th></th>
         </tr></thead>
         <tbody>

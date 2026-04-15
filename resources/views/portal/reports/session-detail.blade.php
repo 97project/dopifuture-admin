@@ -140,7 +140,7 @@ details summary:hover { color: var(--text-primary); }
             <table style="width:100%;font-size:13px;">
                 @if($module === 'simulator')
                 <tr>
-                    <td style="padding:6px 0;color:var(--text-muted);width:100px;">Scenario</td>
+                    <td style="padding:6px 0;color:var(--text-muted);width:100px;">{{ __('portal.scenario') }}</td>
                     <td style="padding:6px 0;font-weight:500;">
                         <span class="dp-badge dp-badge-pending">{{ $session->scenario ?? '-' }}</span>
                     </td>
@@ -154,11 +154,11 @@ details summary:hover { color: var(--text-primary); }
                     </td>
                 </tr>
                 <tr>
-                    <td style="padding:6px 0;color:var(--text-muted);">Sub Topic</td>
+                    <td style="padding:6px 0;color:var(--text-muted);">{{ __('portal.sub_topic') }}</td>
                     <td style="padding:6px 0;">{{ $session->topic ?? '-' }}</td>
                 </tr>
                 <tr>
-                    <td style="padding:6px 0;color:var(--text-muted);">Theme</td>
+                    <td style="padding:6px 0;color:var(--text-muted);">{{ __('portal.theme') }}</td>
                     <td style="padding:6px 0;">
                         @if($session->theme)
                             <span class="dp-badge dp-badge-pending">{{ $session->theme }}</span>
@@ -188,7 +188,7 @@ details summary:hover { color: var(--text-primary); }
                 </tr>
                 @if($module !== 'simulator' && $session->language)
                 <tr>
-                    <td style="padding:6px 0;color:var(--text-muted);">Language</td>
+                    <td style="padding:6px 0;color:var(--text-muted);">{{ __('portal.language') }}</td>
                     <td style="padding:6px 0;">
                         @php
                             $langLabels = ['tr' => '🇹🇷 Turkish', 'en' => '🇬🇧 English', 'de' => '🇩🇪 German', 'es' => '🇪🇸 Spanish'];
@@ -213,12 +213,12 @@ details summary:hover { color: var(--text-primary); }
                 </tr>
                 @if($session->thread_id)
                 <tr>
-                    <td style="padding:6px 0;color:var(--text-muted);">Thread</td>
+                    <td style="padding:6px 0;color:var(--text-muted);">{{ __('portal.thread') }}</td>
                     <td style="padding:6px 0;"><code style="font-size:11px;">{{ Str::limit($session->thread_id, 15) }}</code></td>
                 </tr>
                 @endif
                 <tr>
-                    <td style="padding:6px 0;color:var(--text-muted);">Started</td>
+                    <td style="padding:6px 0;color:var(--text-muted);">{{ __('portal.started') }}</td>
                     <td style="padding:6px 0;">{{ $session->created_at?->format('d.m.Y H:i') ?? '-' }}</td>
                 </tr>
             </table>
@@ -245,9 +245,9 @@ details summary:hover { color: var(--text-primary); }
         @if($module !== 'simulator')
         {{-- Token Usage --}}
         <div class="dp-card" style="text-align:center;">
-            <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Token Usage</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">{{ __('portal.token_usage') }}</div>
             <div style="font-size:28px;font-weight:700;color:var(--primary);">{{ number_format($totalTokens) }}</div>
-            <div style="font-size:11px;color:var(--text-muted);">Estimated Total</div>
+            <div style="font-size:11px;color:var(--text-muted);">{{ __('portal.estimated_total') }}</div>
         </div>
         @endif
     </div>
@@ -450,7 +450,7 @@ details summary:hover { color: var(--text-primary); }
                     <div class="chat-avatar"><span style="font-size:1.5rem;">🤖</span></div>
                     <div class="chat-info">
                         <h4 style="margin:0;font-size:1.1rem;font-weight:600;color:#fff;">Study Space AI</h4>
-                        <small style="opacity:0.85;">Real-Time WebSocket Chat</small>
+                        <small style="opacity:0.85;">{{ __('portal.realtime_ws_chat') }}</small>
                     </div>
                     <div class="chat-header-stats">
                         <div class="chat-header-stat">

@@ -1,5 +1,5 @@
 @extends('portal.app')
-@section('title', 'Class Detail')
+@section('title', __('portal.class') . ' ' . __('portal.detail'))
 @section('page-title', $class->name)
 
 @section('content')
@@ -7,11 +7,11 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
         <div>
             <div style="font-size:18px;font-weight:600;">{{ $class->name }}</div>
-            <p style="font-size:13px;color:var(--text-muted);margin:4px 0 0;">{{ $class->school?->name }} — Grade: {{ $class->grade_level ?? '—' }}</p>
+            <p style="font-size:13px;color:var(--text-muted);margin:4px 0 0;">{{ $class->school?->name }} — {{ __('portal.grade') }}: {{ $class->grade_level ?? '—' }}</p>
         </div>
         <div style="display:flex;gap:8px;">
             <a href="{{ route('portal.classes.edit', $class) }}" class="dp-btn">{{ __('admin.edit') }}</a>
-            <a href="{{ route('portal.classes.index') }}" class="dp-btn-ghost">← Back</a>
+            <a href="{{ route('portal.classes.index') }}" class="dp-btn-ghost">← {{ __('portal.back') }}</a>
         </div>
     </div>
 
@@ -37,7 +37,7 @@
     {{-- Students --}}
     <div class="dp-card">
         <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div class="dp-card-title">Students <span style="font-weight:400;color:var(--text-muted);font-size:14px;">({{ $class->students->count() }})</span></div>
+            <div class="dp-card-title">{{ __('portal.nav_students') }} <span style="font-weight:400;color:var(--text-muted);font-size:14px;">({{ $class->students->count() }})</span></div>
         </div>
 
         @if($canManage && $availableStudents->count())
@@ -49,7 +49,7 @@
                     <option value="{{ $s->id }}">{{ $s->name }} {{ $s->surname }} ({{ $s->email }})</option>
                 @endforeach
             </select>
-            <button type="submit" class="dp-btn" style="white-space:nowrap;">+ Add</button>
+            <button type="submit" class="dp-btn" style="white-space:nowrap;">+ {{ __('portal.add') }}</button>
         </form>
         @endif
 
@@ -71,12 +71,12 @@
                         </div>
                     </td>
                     <td class="muted">{{ $student->email }}</td>
-                    <td><span class="dp-badge {{ $student->status === 'active' ? 'dp-badge-active' : 'dp-badge-inactive' }}">{{ $student->status === 'active' ? 'Active' : 'Inactive' }}</span></td>
+                    <td><span class="dp-badge {{ $student->status === 'active' ? 'dp-badge-active' : 'dp-badge-inactive' }}">{{ $student->status === 'active' ? __('portal.active') : __('portal.inactive') }}</span></td>
                     <td style="text-align:right;">
                         <div style="display:flex;gap:4px;justify-content:flex-end;">
                             <a href="{{ route('portal.users.show', $student) }}" class="dp-action dp-action-view"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a>
                             @if($canManage)
-                            <form action="{{ route('portal.classes.remove-student', [$class, $student]) }}" method="POST" onsubmit="return confirm('Remove this student from class?')">
+                            <form action="{{ route('portal.classes.remove-student', [$class, $student]) }}" method="POST" onsubmit="return confirm('{{ __("portal.confirm_remove_student") }}')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="dp-action" style="color:#E33131;border:none;background:none;cursor:pointer;" title="Remove">
                                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -90,14 +90,14 @@
             </tbody>
         </table>
         @else
-        <div style="padding:32px;text-align:center;color:var(--text-muted);">No students in this class yet.</div>
+        <div style="padding:32px;text-align:center;color:var(--text-muted);">{{ __('portal.no_students_in_class') }}</div>
         @endif
     </div>
 
     {{-- Teachers --}}
     <div class="dp-card">
         <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div class="dp-card-title">Teachers <span style="font-weight:400;color:var(--text-muted);font-size:14px;">({{ $class->teachers->count() }})</span></div>
+            <div class="dp-card-title">{{ __('portal.nav_teachers') }} <span style="font-weight:400;color:var(--text-muted);font-size:14px;">({{ $class->teachers->count() }})</span></div>
         </div>
 
         @if($canManage && $availableTeachers->count())
@@ -109,7 +109,7 @@
                     <option value="{{ $t->id }}">{{ $t->name }} {{ $t->surname }} ({{ $t->email }})</option>
                 @endforeach
             </select>
-            <button type="submit" class="dp-btn" style="white-space:nowrap;">+ Add</button>
+            <button type="submit" class="dp-btn" style="white-space:nowrap;">+ {{ __('portal.add') }}</button>
         </form>
         @endif
 
@@ -134,7 +134,7 @@
                         <div style="display:flex;gap:4px;justify-content:flex-end;">
                             <a href="{{ route('portal.users.show', $teacher) }}" class="dp-action dp-action-view"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a>
                             @if($canManage)
-                            <form action="{{ route('portal.classes.remove-teacher', [$class, $teacher]) }}" method="POST" onsubmit="return confirm('Remove this teacher from class?')">
+                            <form action="{{ route('portal.classes.remove-teacher', [$class, $teacher]) }}" method="POST" onsubmit="return confirm('{{ __("portal.confirm_remove_teacher") }}')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="dp-action" style="color:#E33131;border:none;background:none;cursor:pointer;" title="Remove">
                                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -148,7 +148,7 @@
             </tbody>
         </table>
         @else
-        <div style="padding:32px;text-align:center;color:var(--text-muted);">No teachers assigned to this class yet.</div>
+        <div style="padding:32px;text-align:center;color:var(--text-muted);">{{ __('portal.no_teachers_in_class') }}</div>
         @endif
     </div>
 @endsection

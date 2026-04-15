@@ -6,7 +6,7 @@
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
     <div>
         <div style="font-size:22px;font-weight:700;color:var(--text-main);">📊 Command Center</div>
-        <p style="font-size:13px;color:var(--text-muted);margin-top:2px;">Advanced cross-platform intelligence and gamified reporting</p>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:2px;">{{ __('portal.reports_index_subtitle') }}</p>
     </div>
 </div>
 
@@ -26,7 +26,7 @@
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center;">
             <div>
                 <div style="font-size:20px;font-weight:700;">{{ $appData['stats']['total_modules'] }}</div>
-                <div style="font-size:11px;color:var(--text-muted);">Modules</div>
+                <div style="font-size:11px;color:var(--text-muted);">{{ __('portal.modules') }}</div>
             </div>
             <div>
                 <div style="font-size:20px;font-weight:700;color:var(--active-green);">{{ $appData['stats']['completed'] }}</div>
@@ -59,7 +59,7 @@
         <div style="margin-bottom:24px;">
             @if(isset($overview))
             <div class="dp-card" style="margin-bottom:24px;">
-                <div class="dp-card-title" style="margin-bottom:16px;">Platform At A Glance</div>
+                <div class="dp-card-title" style="margin-bottom:16px;">{{ __('portal.platform_at_glance') }}</div>
                 @php
                     $appStats = collect($overview['app_stats']);
                     $sumCompleted = $appStats->sum('completed');
@@ -95,7 +95,7 @@
                     <div style="background:linear-gradient(135deg,rgba(139,92,246,0.05),transparent);padding:16px;border-radius:12px;border:1px solid rgba(139,92,246,0.1);text-align:center;">
                         <div style="color:#8b5cf6;margin-bottom:8px;"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
                         <div style="font-size:24px;font-weight:800;color:var(--text-main);line-height:1;">{{ $sumProgress }}</div>
-                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;">Total Plays</div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;">{{ __('portal.total_plays') }}</div>
                     </div>
 
                     {{-- 5. Platform Avg Score --}}
@@ -109,14 +109,14 @@
                     <div style="background:linear-gradient(135deg,rgba(14,165,233,0.05),transparent);padding:16px;border-radius:12px;border:1px solid rgba(14,165,233,0.1);text-align:center;">
                         <div style="color:#0ea5e9;margin-bottom:8px;"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg></div>
                         <div style="font-size:24px;font-weight:800;color:var(--text-main);line-height:1;">%{{ $globalRate }}</div>
-                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;">Win Rate</div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;">{{ __('portal.win_rate') }}</div>
                     </div>
 
                     {{-- 7. Top Score --}}
                     <div style="background:linear-gradient(135deg,rgba(244,63,94,0.05),transparent);padding:16px;border-radius:12px;border:1px solid rgba(244,63,94,0.1);text-align:center;">
                         <div style="color:#f43f5e;margin-bottom:8px;"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
                         <div style="font-size:24px;font-weight:800;color:var(--text-main);line-height:1;">{{ $topScore }}</div>
-                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;">Max Score</div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;">{{ __('portal.max_score') }}</div>
                     </div>
                 </div>
             </div>
@@ -136,7 +136,7 @@
             @endif
 
             <div class="dp-card" style="padding:0;overflow:hidden;">
-                <div class="dp-card-title" style="padding:20px 20px 0;">Platforms Overview</div>
+                <div class="dp-card-title" style="padding:20px 20px 0;">{{ __('portal.platforms_overview') }}</div>
                 <div style="padding:20px;">
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;">
                         @foreach($overview['app_stats'] ?? [] as $stat)
@@ -293,7 +293,7 @@
 
         {{-- Score Distribution --}}
         <div class="dp-card" style="display:flex;flex-direction:column;">
-            <div class="dp-card-title" style="margin-bottom:8px;">Score Distribution</div>
+            <div class="dp-card-title" style="margin-bottom:8px;">{{ __('portal.score_distribution') }}</div>
             <div style="flex:1;position:relative;min-height:220px;">
                 <canvas id="scoreDistChart"></canvas>
             </div>
@@ -301,7 +301,7 @@
 
         {{-- Module Popularity --}}
         <div class="dp-card" style="display:flex;flex-direction:column;">
-            <div class="dp-card-title" style="margin-bottom:8px;">Most Popular Modules</div>
+            <div class="dp-card-title" style="margin-bottom:8px;">{{ __('portal.most_popular_modules') }}</div>
             <div style="flex:1;position:relative;min-height:220px;">
                 <canvas id="popularityChart"></canvas>
             </div>
@@ -320,15 +320,15 @@
                     {{-- 3 Charts Row --}}
                     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:24px;background:rgba(0,0,0,0.02);padding:16px;border-radius:12px;">
                         <div style="background:#fff;padding:12px;border-radius:8px;border:1px solid rgba(0,0,0,0.04);">
-                            <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-align:center;margin-bottom:8px;">Completion Status</div>
+                            <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-align:center;margin-bottom:8px;">{{ __('portal.completion_status') }}</div>
                             <div style="position:relative;height:180px;"><canvas id="chart_doughnut_{{ $slug }}"></canvas></div>
                         </div>
                         <div style="background:#fff;padding:12px;border-radius:8px;border:1px solid rgba(0,0,0,0.04);">
-                            <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-align:center;margin-bottom:8px;">Score Distribution</div>
+                            <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-align:center;margin-bottom:8px;">{{ __('portal.score_distribution') }}</div>
                             <div style="position:relative;height:180px;"><canvas id="chart_bar_{{ $slug }}"></canvas></div>
                         </div>
                         <div style="background:#fff;padding:12px;border-radius:8px;border:1px solid rgba(0,0,0,0.04);">
-                            <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-align:center;margin-bottom:8px;">Daily Volatility</div>
+                            <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-align:center;margin-bottom:8px;">{{ __('portal.daily_volatility') }}</div>
                             <div style="position:relative;height:180px;"><canvas id="chart_line_{{ $slug }}"></canvas></div>
                         </div>
                     </div>
@@ -345,7 +345,7 @@
                                     <span style="font-weight:600;color:var(--text-muted);">{{ $tRow['detail'] }}</span>
                                 </div>
                             @empty
-                                <div style="font-size:12px;color:var(--text-muted);padding:8px 0;text-align:center;">Insufficient Data</div>
+                                <div style="font-size:12px;color:var(--text-muted);padding:8px 0;text-align:center;">{{ __('portal.insufficient_data') }}</div>
                             @endforelse
                         </div>
 

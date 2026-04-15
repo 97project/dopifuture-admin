@@ -1,5 +1,5 @@
 @extends('portal.app')
-@section('title', 'School Detail')
+@section('title', __('portal.school_detail'))
 @section('page-title', $school->name)
 
 @section('content')
@@ -7,9 +7,9 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
         <div>
             <div style="font-size:18px;font-weight:600;color:var(--text-primary);">{{ $school->name }}</div>
-            <p style="font-size:13px;color:var(--text-muted);margin:4px 0 0;">School Detail</p>
+            <p style="font-size:13px;color:var(--text-muted);margin:4px 0 0;">{{ __('portal.school_detail') }}</p>
         </div>
-        <a href="{{ route('portal.schools.index') }}" class="dp-btn-ghost">← Back</a>
+        <a href="{{ route('portal.schools.index') }}" class="dp-btn-ghost">← {{ __('portal.back') }}</a>
     </div>
 
     {{-- Stat Cards --}}
@@ -60,7 +60,7 @@
             <div>
                 <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">{{ __('admin.status') }}</div>
                 <span class="dp-badge {{ $school->is_active ? 'dp-badge-active' : 'dp-badge-inactive' }}">
-                    {{ $school->is_active ? 'Active' : 'Inactive' }}
+                    {{ $school->is_active ? __('portal.active') : __('portal.inactive') }}
                 </span>
             </div>
             @if($school->website)
@@ -75,7 +75,7 @@
     {{-- Classes Table --}}
     @if($school->classes->count())
     <div class="dp-card">
-        <div class="dp-card-title">Classes <span style="font-weight:400;color:var(--text-muted);font-size:14px;">({{ $school->classes->count() }})</span></div>
+        <div class="dp-card-title">{{ __('admin.classes') }} <span style="font-weight:400;color:var(--text-muted);font-size:14px;">({{ $school->classes->count() }})</span></div>
         <div style="overflow-x:auto;">
         <table class="dp-table">
             <thead><tr>
@@ -93,7 +93,7 @@
                     <td class="muted">{{ $cls->grade_level ?? '—' }}</td>
                     <td class="muted">{{ $cls->academic_year ?? '—' }}</td>
                     <td>{{ $cls->students_count }}</td>
-                    <td><span class="dp-badge {{ $cls->is_active ? 'dp-badge-active' : 'dp-badge-inactive' }}">{{ $cls->is_active ? 'Active' : 'Inactive' }}</span></td>
+                    <td><span class="dp-badge {{ $cls->is_active ? 'dp-badge-active' : 'dp-badge-inactive' }}">{{ $cls->is_active ? __('portal.active') : __('portal.inactive') }}</span></td>
                     <td style="text-align:right;">
                         <a href="{{ route('portal.classes.show', $cls) }}" class="dp-action dp-action-view"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a>
                     </td>
@@ -108,7 +108,7 @@
     {{-- Users Table --}}
     @if($school->users->count())
     <div class="dp-card">
-        <div class="dp-card-title">Users <span style="font-weight:400;color:var(--text-muted);font-size:14px;">({{ $school->users->count() }})</span></div>
+        <div class="dp-card-title">{{ __('portal.total_users') }} <span style="font-weight:400;color:var(--text-muted);font-size:14px;">({{ $school->users->count() }})</span></div>
         <div style="overflow-x:auto;">
         <table class="dp-table">
             <thead><tr>
@@ -129,7 +129,7 @@
                     </td>
                     <td class="muted">{{ $u->email }}</td>
                     <td><span class="dp-badge dp-badge-pending">{{ $u->pivot->role ?? '—' }}</span></td>
-                    <td><span class="dp-badge {{ $u->status === 'active' ? 'dp-badge-active' : 'dp-badge-inactive' }}">{{ $u->status === 'active' ? 'Active' : 'Inactive' }}</span></td>
+                    <td><span class="dp-badge {{ $u->status === 'active' ? 'dp-badge-active' : 'dp-badge-inactive' }}">{{ $u->status === 'active' ? __('portal.active') : __('portal.inactive') }}</span></td>
                     <td style="text-align:right;">
                         <a href="{{ route('portal.users.show', $u) }}" class="dp-action dp-action-view"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a>
                     </td>
@@ -144,7 +144,7 @@
     {{-- Licenses Table --}}
     @if($school->licenses->count())
     <div class="dp-card">
-        <div class="dp-card-title">Licenses <span style="font-weight:400;color:var(--text-muted);font-size:14px;">({{ $school->licenses->count() }})</span></div>
+        <div class="dp-card-title">{{ __('portal.license_management') }} <span style="font-weight:400;color:var(--text-muted);font-size:14px;">({{ $school->licenses->count() }})</span></div>
         <div style="overflow-x:auto;">
         <table class="dp-table">
             <thead><tr>
@@ -162,7 +162,7 @@
                     <td>{{ $lic->used_seats }}</td>
                     <td style="font-weight:600;color:{{ $lic->availableSeats() > 0 ? 'var(--active-green)' : 'var(--error-red)' }};">{{ $lic->availableSeats() }}</td>
                     <td class="muted">{{ $lic->expires_at?->format('d.m.Y') ?? '—' }}</td>
-                    <td><span class="dp-badge {{ $lic->is_active ? 'dp-badge-active' : 'dp-badge-error' }}">{{ $lic->is_active ? 'Active' : 'Inactive' }}</span></td>
+                    <td><span class="dp-badge {{ $lic->is_active ? 'dp-badge-active' : 'dp-badge-error' }}">{{ $lic->is_active ? __('portal.active') : __('portal.inactive') }}</span></td>
                     <td style="text-align:right;">
                         <a href="{{ route('portal.licenses.show', $lic) }}" class="dp-action dp-action-view"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a>
                     </td>
