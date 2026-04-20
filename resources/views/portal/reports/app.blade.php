@@ -13,7 +13,7 @@
     <div class="dp-tabs" style="border-bottom:none;margin-bottom:0;">
         <a href="{{ route('portal.reports.app', $app->slug) }}?tab=assignment"
            class="dp-tab {{ $tab === 'assignment' ? 'active' : '' }}">
-            Assignments
+            {{ __('admin.menu_assignments') }}
             @if($slug === 'mission-way')
                 <span class="tab-count">{{ $total_missions ?? 0 }}</span>
             @else
@@ -22,7 +22,7 @@
         </a>
         <a href="{{ route('portal.reports.app', $app->slug) }}?tab=performance"
            class="dp-tab {{ $tab === 'performance' ? 'active' : '' }}">
-            Performance
+            {{ __('portal.student_performance') }}
         </a>
     </div>
 
