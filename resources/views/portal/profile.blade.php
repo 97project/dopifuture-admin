@@ -7,7 +7,7 @@
     {{-- Figma §4.8: Profile Avatar --}}
     <div style="text-align:center;margin-bottom:24px;">
         <div class="dp-profile-avatar">
-            {{ strtoupper(substr($user->name,0,1) . substr($user->surname ?? '',0,1)) }}
+            {{ mb_strtoupper(mb_substr($user->name,0,1) . mb_substr($user->surname ?? '',0,1)) }}
         </div>
         <h2 style="font-size:24px;font-weight:700;color:var(--color-txt);margin:0;">{{ $user->name }} {{ $user->surname ?? '' }}</h2>
         <p style="font-size:14px;color:var(--color-txt-muted);margin-top:4px;">

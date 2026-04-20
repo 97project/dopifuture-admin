@@ -41,7 +41,7 @@
                     {{ $user->full_name ?? $user->name }}
                 </span>
                 <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold">
-                    {{ strtoupper(substr($user->name ?? 'U', 0, 1)) }}
+                    {{ mb_strtoupper(mb_substr($user->name ?? 'U', 0, 1)) }}
                 </div>
             </div>
         @endif

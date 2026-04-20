@@ -665,7 +665,7 @@
                 <div class="lang-switcher" id="langSwitcher">
                     <button type="button" class="lang-switcher-btn" onclick="toggleLangDropdown()">
                         <img src="https://flagcdn.com/w20/{{ $flagCdns[$currentLocale] ?? $currentLocale }}.png" width="18" alt="{{ $currentLocale }}" class="lang-flag" style="border-radius: 2px;">
-                        <span>{{ strtoupper($currentLocale) }}</span>
+                        <span>{{ mb_strtoupper($currentLocale) }}</span>
                         <span class="lang-chevron">▾</span>
                     </button>
                     <div class="lang-dropdown">

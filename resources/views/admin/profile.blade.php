@@ -13,7 +13,7 @@
                 <img src="{{ auth()->user()->avatar_url }}" class="w-16 h-16 rounded-full object-cover" alt="">
             @else
                 <div class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                    <span class="text-[#0B6AB2] dark:text-[#0B6AB2] text-xl font-bold">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                    <span class="text-[#0B6AB2] dark:text-[#0B6AB2] text-xl font-bold">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
                 </div>
             @endif
             <input type="file" name="avatar" accept="image/*" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">

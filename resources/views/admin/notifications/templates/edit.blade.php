@@ -22,12 +22,12 @@
 
             @foreach (config('app.available_locales', ['tr', 'en']) as $locale)
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('admin.title') }} ({{ strtoupper($locale) }})</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('admin.title') }} ({{ mb_strtoupper($locale) }})</label>
                     <input type="text" name="title[{{ $locale }}]" value="{{ old("title.$locale", $template->title[$locale] ?? '') }}" required
                         class="w-full rounded-lg border-gray-200 dark:border-[#1A3A5C] dark:bg-[#0A1628] dark:text-white text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('admin.body') }} ({{ strtoupper($locale) }})</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('admin.body') }} ({{ mb_strtoupper($locale) }})</label>
                     <textarea name="body[{{ $locale }}]" rows="3" required
                         class="w-full rounded-lg border-gray-200 dark:border-[#1A3A5C] dark:bg-[#0A1628] dark:text-white text-sm">{{ old("body.$locale", $template->body[$locale] ?? '') }}</textarea>
                 </div>

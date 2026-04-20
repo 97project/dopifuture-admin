@@ -59,7 +59,7 @@
                                             <div
                                                 class="w-6 h-6 rounded-full bg-gray-200 dark:bg-[#1A3A5C] flex items-center justify-center flex-shrink-0">
                                                 <span
-                                                    class="text-[10px] font-bold text-gray-500">{{ strtoupper(substr($student->name, 0, 1)) }}</span>
+                                                    class="text-[10px] font-bold text-gray-500">{{ mb_strtoupper(mb_substr($student->name, 0, 1)) }}</span>
                                             </div>
                                             <span
                                                 class="text-gray-700 dark:text-gray-300 font-medium truncate">{{ $student->full_name }}</span>

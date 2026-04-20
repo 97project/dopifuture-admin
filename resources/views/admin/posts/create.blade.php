@@ -10,7 +10,7 @@
 
             @foreach(['tr', 'en'] as $locale)
                 <fieldset class="border border-gray-100 dark:border-[#1A3A5C] rounded-lg p-4">
-                    <legend class="px-2 text-sm font-medium text-gray-500 uppercase">{{ strtoupper($locale) }}</legend>
+                    <legend class="px-2 text-sm font-medium text-gray-500 uppercase">{{ mb_strtoupper($locale) }}</legend>
                     <div class="space-y-4">
                         <div>
                             <label

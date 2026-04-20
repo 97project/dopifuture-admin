@@ -123,7 +123,7 @@
                 <tr>
                     <td>
                         <div class="dp-td-avatar">
-                            <div class="av">{{ strtoupper(substr($u->name,0,1).substr($u->surname??'',0,1)) }}</div>
+                            <div class="av">{{ mb_strtoupper(mb_substr($u->name,0,1).mb_substr($u->surname??'',0,1)) }}</div>
                             <span style="font-weight:500;">{{ $u->name }} {{ $u->surname }}</span>
                         </div>
                     </td>

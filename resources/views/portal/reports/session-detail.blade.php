@@ -170,12 +170,12 @@ details summary:hover { color: var(--text-primary); }
                     <td style="padding:6px 0;color:var(--text-muted);">{{ __('admin.status') }}</td>
                     <td style="padding:6px 0;">
                         @php
-                            $statusClass = match(strtoupper($session->status ?? '')) {
+                            $statusClass = match(mb_strtoupper($session->status ?? '')) {
                                 'ACTIVE' => 'dp-badge-active',
                                 'COMPLETED', 'ENDED' => 'dp-badge-pending',
                                 default => 'dp-badge-error',
                             };
-                            $statusLabel = match(strtoupper($session->status ?? '')) {
+                            $statusLabel = match(mb_strtoupper($session->status ?? '')) {
                                 'ACTIVE' => __('portal.active'),
                                 'COMPLETED' => __('portal.completed'),
                                 'ENDED' => __('portal.completed'),
@@ -193,7 +193,7 @@ details summary:hover { color: var(--text-primary); }
                         @php
                             $langLabels = ['tr' => '🇹🇷 Turkish', 'en' => '🇬🇧 English', 'de' => '🇩🇪 German', 'es' => '🇪🇸 Spanish'];
                         @endphp
-                        <span class="dp-badge dp-badge-pending">{{ $langLabels[$session->language] ?? strtoupper($session->language) }}</span>
+                        <span class="dp-badge dp-badge-pending">{{ $langLabels[$session->language] ?? mb_strtoupper($session->language) }}</span>
                     </td>
                 </tr>
                 @endif

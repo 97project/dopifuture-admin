@@ -78,7 +78,7 @@
                         @foreach(['tr', 'en'] as $locale)
                             <div>
                                 <label class="block text-xs font-medium text-gray-500 mb-1">{{ __('admin.title') }}
-                                    ({{ strtoupper($locale) }}) *</label>
+                                    ({{ mb_strtoupper($locale) }}) *</label>
                                 <input type="text" name="title[{{ $locale }}]" required
                                     class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-[#1A3A5C] rounded-lg bg-white dark:bg-[#0A1628]">
                             </div>

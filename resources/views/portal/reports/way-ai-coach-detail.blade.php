@@ -40,7 +40,7 @@
 {{-- ═══ PROFILE MINI-HEADER ═══ --}}
 <div class="dp-card" style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;">
     <div style="display:flex;align-items:center;gap:14px;">
-        <div class="dp-profile-avatar" style="width:44px;height:44px;font-size:16px;">{{ strtoupper(substr($student->name,0,1).substr($student->surname??'',0,1)) }}</div>
+        <div class="dp-profile-avatar" style="width:44px;height:44px;font-size:16px;">{{ mb_strtoupper(mb_substr($student->name,0,1).mb_substr($student->surname??'',0,1)) }}</div>
         <div>
             <div style="font-size:18px;font-weight:700;">{{ $student->name }} {{ $student->surname }}</div>
             <div style="font-size:12px;color:var(--text-muted);">{{ $student->email }}</div>
@@ -204,7 +204,7 @@
             @php
                 $moduleColor = $s->module === 'lecturer' ? ['bg' => 'rgba(59,130,246,0.1)', 'color' => '#3b82f6'] : ['bg' => 'rgba(245,158,11,0.1)', 'color' => '#f59e0b'];
                 $themeCfg = $themeConfig[$s->theme] ?? null;
-                $statusClass = match(strtoupper($s->status ?? '')) {
+                $statusClass = match(mb_strtoupper($s->status ?? '')) {
                     'COMPLETED' => 'dp-badge-active',
                     'ACTIVE'    => 'dp-badge-pending',
                     'ENDED'     => 'dp-badge-inactive',

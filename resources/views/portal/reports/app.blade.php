@@ -1,4 +1,4 @@
-@extends('portal.app')
+﻿@extends('portal.app')
 @section('title', $app->name . ' — ' . __('admin.reports'))
 @section('page-title', $app->name)
 
@@ -96,7 +96,7 @@
                                 <div style="display:flex;align-items:center;">
                                     @foreach($mission->students->take(4) as $si => $st)
                                     <div style="width:30px;height:30px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981'][$si % 5] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;border:2px solid var(--color-card-bg);margin-left:{{ $si > 0 ? '-8px' : '0' }};position:relative;z-index:{{ 10 - $si }};" title="{{ $st->name }} {{ $st->surname }}">
-                                        {{ strtoupper(substr($st->name,0,1)) }}{{ strtoupper(substr($st->surname,0,1)) }}
+                                        {{ mb_strtoupper(mb_substr($st->name,0,1)) }}{{ mb_strtoupper(mb_substr($st->surname,0,1)) }}
                                     </div>
                                     @endforeach
                                     @if($mission->students->count() > 4)
@@ -219,7 +219,7 @@
                                 <div style="display:flex;align-items:center;">
                                     @foreach($startup->students->take(3) as $si => $st)
                                     <div style="width:28px;height:28px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981'][$si % 5] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;border:2px solid var(--color-card-bg);margin-left:{{ $si > 0 ? '-6px' : '0' }};position:relative;z-index:{{ 10 - $si }};" title="{{ $st->name }} {{ $st->surname }}">
-                                        {{ strtoupper(substr($st->name,0,1)) }}{{ strtoupper(substr($st->surname,0,1)) }}
+                                        {{ mb_strtoupper(mb_substr($st->name,0,1)) }}{{ mb_strtoupper(mb_substr($st->surname,0,1)) }}
                                     </div>
                                     @endforeach
                                     @if($startup->students->count() > 3)
@@ -317,7 +317,7 @@
                             <td class="muted">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <div class="av" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;">{{ strtoupper(substr($stat['user']->name ?? '', 0, 1) . substr($stat['user']->surname ?? '', 0, 1)) }}</div>
+                                    <div class="av" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;">{{ mb_strtoupper(mb_substr($stat['user']->name ?? '', 0, 1) . mb_substr($stat['user']->surname ?? '', 0, 1)) }}</div>
                                     <span style="font-weight:500;">{{ $stat['user']->name }} {{ $stat['user']->surname }}</span>
                                 </div>
                             </td>
@@ -367,7 +367,7 @@
                             <td class="muted">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <div class="av" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;">{{ strtoupper(substr($stat['user']->name ?? '', 0, 1) . substr($stat['user']->surname ?? '', 0, 1)) }}</div>
+                                    <div class="av" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;">{{ mb_strtoupper(mb_substr($stat['user']->name ?? '', 0, 1) . mb_substr($stat['user']->surname ?? '', 0, 1)) }}</div>
                                     <span style="font-weight:500;">{{ $stat['user']->name }} {{ $stat['user']->surname }}</span>
                                 </div>
                             </td>
@@ -434,7 +434,7 @@
                             <td class="muted">{{ str_pad($idx + 1, 2, '0', STR_PAD_LEFT) }}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <div class="av" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;">{{ strtoupper(substr($stat['user']->name ?? '', 0, 1) . substr($stat['user']->surname ?? '', 0, 1)) }}</div>
+                                    <div class="av" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;">{{ mb_strtoupper(mb_substr($stat['user']->name ?? '', 0, 1) . mb_substr($stat['user']->surname ?? '', 0, 1)) }}</div>
                                     <span style="font-weight:500;">{{ $stat['user']->name }} {{ $stat['user']->surname }}</span>
                                 </div>
                             </td>
@@ -570,7 +570,7 @@
                     <tr @if($slug === 'way-ai-coach' && isset($us['alert']) && $us['alert']) style="background:rgba(227,49,49,0.05);" @endif>
                         <td>
                             <div class="dp-td-avatar">
-                                <div class="av">{{ strtoupper(substr($us['user']->name ?? '',0,1).substr($us['user']->surname ?? '',0,1)) }}</div>
+                                <div class="av">{{ mb_strtoupper(mb_substr($us['user']->name ?? '',0,1).mb_substr($us['user']->surname ?? '',0,1)) }}</div>
                                 <span style="font-weight:500;">{{ $us['user']->name ?? '' }} {{ $us['user']->surname ?? '' }}</span>
                             </div>
                         </td>
@@ -679,7 +679,7 @@
                                 <div style="display:flex;align-items:center;">
                                     @foreach($mission->students->take(4) as $si => $st)
                                     <div style="width:30px;height:30px;border-radius:50%;background:{{ ['#4364F7','#8b5cf6','#f59e0b','#ef4444','#10b981'][$si % 5] }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;border:2px solid var(--color-card-bg);margin-left:{{ $si > 0 ? '-8px' : '0' }};position:relative;z-index:{{ 10 - $si }};">
-                                        {{ strtoupper(substr($st->name,0,1)) }}{{ strtoupper(substr($st->surname,0,1)) }}
+                                        {{ mb_strtoupper(mb_substr($st->name,0,1)) }}{{ mb_strtoupper(mb_substr($st->surname,0,1)) }}
                                     </div>
                                     @endforeach
                                 </div>
@@ -746,7 +746,7 @@
                     <tr>
                         <td>
                             <div class="dp-td-avatar">
-                                <div class="av">{{ strtoupper(substr($us['user']->name ?? '',0,1).substr($us['user']->surname ?? '',0,1)) }}</div>
+                                <div class="av">{{ mb_strtoupper(mb_substr($us['user']->name ?? '',0,1).mb_substr($us['user']->surname ?? '',0,1)) }}</div>
                                 <span style="font-weight:500;">{{ $us['user']->name ?? '' }} {{ $us['user']->surname ?? '' }}</span>
                             </div>
                         </td>

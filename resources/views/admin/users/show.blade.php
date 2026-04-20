@@ -28,7 +28,7 @@
                     <img src="{{ $user->avatar_url }}" class="w-20 h-20 rounded-2xl object-cover ring-4 ring-white/20 shadow-xl" alt="">
                     @else
                     <div class="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center ring-4 ring-white/20 shadow-xl">
-                        <span class="text-white text-2xl font-bold">{{ strtoupper(substr($user->name, 0, 1)) }}{{ strtoupper(substr($user->surname ?? '', 0, 1)) }}</span>
+                        <span class="text-white text-2xl font-bold">{{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}{{ mb_strtoupper(mb_substr($user->surname ?? '', 0, 1)) }}</span>
                     </div>
                     @endif
                     @php $sc = ['active' => 'bg-emerald-400', 'banned' => 'bg-red-400', 'inactive' => 'bg-gray-400'][$user->status] ?? 'bg-gray-400'; @endphp
@@ -171,7 +171,7 @@
                         <img src="{{ $user->avatar_url }}" class="w-20 h-20 rounded-2xl object-cover border-2 border-gray-100 dark:border-[#1A3A5C] shadow-sm" alt="">
                         @else
                         <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#0B6AB2] to-[#13398E] flex items-center justify-center shadow-sm">
-                            <span class="text-white text-2xl font-bold">{{ strtoupper(substr($user->name, 0, 1)) }}{{ strtoupper(substr($user->surname ?? '', 0, 1)) }}</span>
+                            <span class="text-white text-2xl font-bold">{{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}{{ mb_strtoupper(mb_substr($user->surname ?? '', 0, 1)) }}</span>
                         </div>
                         @endif
                         <div>

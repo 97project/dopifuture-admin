@@ -37,7 +37,7 @@
                                 <span
                                     class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded {{ strtolower($device->platform) === 'ios' ? 'bg-gray-100 dark:bg-gray-800 text-gray-600' : 'bg-green-50 dark:bg-green-900/20 text-green-600' }}">{{ $device->platform }}</span>
                                 <span
-                                    class="text-[10px] text-gray-400 font-mono">{{ substr($device->fcm_token, 0, 24) }}...</span>
+                                    class="text-[10px] text-gray-400 font-mono">{{ mb_substr($device->fcm_token, 0, 24) }}...</span>
                             </div>
                         </div>
                     </div>

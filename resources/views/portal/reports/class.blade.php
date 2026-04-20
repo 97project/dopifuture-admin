@@ -48,7 +48,7 @@
             <tr>
                 <td>
                     <div class="dp-td-avatar">
-                        <div class="av">{{ strtoupper(substr($us['user']->name??'',0,1).substr($us['user']->surname??'',0,1)) }}</div>
+                        <div class="av">{{ mb_strtoupper(mb_substr($us['user']->name??'',0,1).mb_substr($us['user']->surname??'',0,1)) }}</div>
                         <span style="font-weight:500;">{{ $us['user']->name ?? '' }} {{ $us['user']->surname ?? '' }}</span>
                     </div>
                 </td>
@@ -97,7 +97,7 @@
             <tr>
                 <td>
                     <div class="dp-td-avatar">
-                        <div class="av">{{ strtoupper(substr($s->name,0,1).substr($s->surname??'',0,1)) }}</div>
+                        <div class="av">{{ mb_strtoupper(mb_substr($s->name,0,1).mb_substr($s->surname??'',0,1)) }}</div>
                         <span style="font-weight:500;">{{ $s->name }} {{ $s->surname }}</span>
                     </div>
                 </td>

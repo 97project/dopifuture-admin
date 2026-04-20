@@ -370,7 +370,7 @@
                         <div
                             class="w-8 h-8 rounded-full bg-gradient-to-br from-[#0B6AB2] to-[#13398E] flex items-center justify-center flex-shrink-0 shadow-sm">
                             <span
-                                class="text-white text-xs font-bold">{{ strtoupper(substr(auth()->user()?->name ?? 'A', 0, 1)) }}</span>
+                                class="text-white text-xs font-bold">{{ mb_strtoupper(mb_substr(auth()->user()?->name ?? 'A', 0, 1)) }}</span>
                         </div>
                     @endif
                     <div class="flex-1 min-w-0">
@@ -423,7 +423,7 @@
                                 class="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-bold rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 uppercase tracking-wider"
                                 title="{{ __('admin.switch_language') }}">
                                 <img src="https://flagcdn.com/w20/{{ $flagCdns[$currentLocale] ?? $currentLocale }}.png" width="16" alt="{{ $currentLocale }}" class="rounded-[2px]">
-                                <span>{{ strtoupper($currentLocale) }}</span>
+                                <span>{{ mb_strtoupper($currentLocale) }}</span>
                             </button>
                             <div x-show="open" @click.away="open = false" x-transition
                                 class="absolute right-0 mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 py-1">
@@ -435,7 +435,7 @@
                                             <button type="submit"
                                                 class="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                                 <img src="https://flagcdn.com/w20/{{ $flagCdns[$lang->code] ?? $lang->code }}.png" width="18" alt="{{ $lang->code }}" class="rounded-[2px]">
-                                                <span>{{ $lang->native_name }} ({{ strtoupper($lang->code) }})</span>
+                                                <span>{{ $lang->native_name }} ({{ mb_strtoupper($lang->code) }})</span>
                                             </button>
                                         </form>
                                     @endif
@@ -452,7 +452,7 @@
                                 class="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-bold rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 uppercase tracking-wider"
                                 title="{{ __('admin.switch_language') }}">
                                 <img src="https://flagcdn.com/w20/{{ $flagCdns[$otherLang->code] ?? $otherLang->code }}.png" width="16" alt="{{ $otherLang->code }}" class="rounded-[2px]">
-                                <span>{{ strtoupper($otherLang->code) }}</span>
+                                <span>{{ mb_strtoupper($otherLang->code) }}</span>
                             </button>
                         </form>
                     @endif

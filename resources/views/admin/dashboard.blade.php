@@ -310,7 +310,7 @@
                             <a href="{{ route('admin.applications.show', $app) }}" class="flex items-center gap-3 group">
                                 <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0 group-hover:scale-110 transition-transform"
                                     style="background: {{ $app->color ?? '#0B6AB2' }}">
-                                    {{ strtoupper(substr(is_array($app->name) ? (reset($app->name)) : $app->name, 0, 2)) }}
+                                    {{ mb_strtoupper(mb_substr(is_array($app->name) ? (reset($app->name)) : $app->name, 0, 2)) }}
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <div class="flex justify-between items-center mb-1">
@@ -496,7 +496,7 @@
                                     <div
                                         class="w-8 h-8 rounded-full bg-gradient-to-br from-[#F87D17] to-[#E06810] flex items-center justify-center flex-shrink-0">
                                         <span
-                                            class="text-white text-xs font-bold">{{ strtoupper(substr($req->name ?? $req->school_name ?? '?', 0, 1)) }}</span>
+                                            class="text-white text-xs font-bold">{{ mb_strtoupper(mb_substr($req->name ?? $req->school_name ?? '?', 0, 1)) }}</span>
                                     </div>
                                     <div class="min-w-0">
                                         <p class="text-xs font-semibold text-gray-900 dark:text-white truncate">

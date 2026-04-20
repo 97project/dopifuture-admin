@@ -66,7 +66,7 @@
                 <tr>
                     <td>
                         <div class="dp-td-avatar">
-                            <div class="av">{{ strtoupper(substr($student->name,0,1).substr($student->surname??'',0,1)) }}</div>
+                            <div class="av">{{ mb_strtoupper(mb_substr($student->name,0,1).mb_substr($student->surname??'',0,1)) }}</div>
                             <span style="font-weight:500;">{{ $student->name }} {{ $student->surname }}</span>
                         </div>
                     </td>
@@ -125,7 +125,7 @@
                 <tr>
                     <td>
                         <div class="dp-td-avatar">
-                            <div class="av">{{ strtoupper(substr($teacher->name,0,1).substr($teacher->surname??'',0,1)) }}</div>
+                            <div class="av">{{ mb_strtoupper(mb_substr($teacher->name,0,1).mb_substr($teacher->surname??'',0,1)) }}</div>
                             <span style="font-weight:500;">{{ $teacher->name }} {{ $teacher->surname }}</span>
                         </div>
                     </td>

@@ -209,7 +209,7 @@
                                 <div class="flex items-center justify-center gap-1.5">
                                     <div class="w-5 h-5 rounded-full bg-[#0B6AB2]/10 flex items-center justify-center">
                                         <span
-                                            class="text-[#0B6AB2] text-[8px] font-bold">{{ strtoupper(substr($log->sender?->name ?? 'S', 0, 1)) }}</span>
+                                            class="text-[#0B6AB2] text-[8px] font-bold">{{ mb_strtoupper(mb_substr($log->sender?->name ?? 'S', 0, 1)) }}</span>
                                     </div>
                                     <span class="text-[10px] text-gray-500">{{ $log->sender?->name ?? 'System' }}</span>
                                 </div>

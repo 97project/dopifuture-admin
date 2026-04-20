@@ -111,7 +111,7 @@
                                             <img src="{{ $user->avatar_url }}" class="w-8 h-8 rounded-full object-cover" alt="">
                                         @else
                                             <div class="w-8 h-8 rounded-full bg-[#0B6AB2]/10 flex items-center justify-center"><span
-                                                    class="text-[#0B6AB2] text-xs font-bold">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                                                    class="text-[#0B6AB2] text-xs font-bold">{{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}</span>
                                             </div>
                                         @endif
                                         <a href="{{ route('admin.users.show', $user) }}"

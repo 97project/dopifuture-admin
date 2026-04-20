@@ -84,7 +84,7 @@
                             <div style="font-weight:700;font-size:14px;color:#030719;font-family:'Nunito',sans-serif;line-height:18px;">{{ $step->title }}</div>
                         </div>
                         <div style="display:flex;align-items:center;gap:6px;">
-                            <div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;flex-shrink:0;">{{ strtoupper(substr($step->responsible ?? '', 0, 2)) }}</div>
+                            <div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;flex-shrink:0;">{{ mb_strtoupper(mb_substr($step->responsible ?? '', 0, 2)) }}</div>
                             <span style="font-size:12px;font-weight:400;color:#030719;font-family:'Nunito',sans-serif;line-height:18px;">{{ $step->responsible }}</span>
                         </div>
                     </div>
@@ -205,7 +205,7 @@
                 @foreach($team as $member)
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--color-row-border);">
                     <div class="dp-td-avatar">
-                        <div class="av" style="width:32px;height:32px;font-size:11px;">{{ strtoupper(substr($member->name,0,1).substr($member->surname,0,1)) }}</div>
+                        <div class="av" style="width:32px;height:32px;font-size:11px;">{{ mb_strtoupper(mb_substr($member->name,0,1).mb_substr($member->surname,0,1)) }}</div>
                         <span style="font-size:13px;font-weight:500;">{{ $member->name }} {{ $member->surname }}</span>
                     </div>
                     <span style="font-size:12px;color:var(--color-primary);font-weight:500;">{{ $member->steps }}</span>

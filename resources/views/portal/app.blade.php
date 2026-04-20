@@ -995,7 +995,7 @@
                 <div style="position:relative;" id="dpLangSw">
                     <button type="button" onclick="document.getElementById('dpLangSw').classList.toggle('lsOpen')" style="display:flex;align-items:center;gap:4px;background:rgba(40,68,225,0.08);border:1px solid rgba(40,68,225,0.2);color:var(--color-primary);padding:5px 10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
                         <span>{{ $flagMap[$currentLocale] ?? '🌐' }}</span>
-                        <span>{{ strtoupper($currentLocale) }}</span>
+                        <span>{{ mb_strtoupper($currentLocale) }}</span>
                         <span style="font-size:9px;opacity:0.6;">▾</span>
                     </button>
                     <div id="dpLangMenu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid var(--color-row-border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:140px;z-index:200;overflow:hidden;">
@@ -1017,7 +1017,7 @@
                 document.getElementById('dpLangSw').addEventListener('click',function(){var m=document.getElementById('dpLangMenu');m.style.display=this.classList.contains('lsOpen')?'block':'none';});
                 </script>
                 <a href="{{ route('portal.profile') }}" class="dp-user-link">
-                    <div class="dp-avatar">{{ strtoupper(substr($user->name ?? 'U', 0, 1) . substr($user->surname ?? '', 0, 1)) }}</div>
+                    <div class="dp-avatar">{{ mb_strtoupper(mb_substr($user->name ?? 'U', 0, 1) . mb_substr($user->surname ?? '', 0, 1)) }}</div>
                     <span class="dp-username" style="display:none;">{{ $user->name ?? '' }}</span>
                 </a>
             </div>

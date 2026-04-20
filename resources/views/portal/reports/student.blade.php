@@ -9,7 +9,7 @@
 
 {{-- ═══ PROFILE HEADER — Matching vega-dopi users/detail.blade.php ═══ --}}
 <div class="dp-card" style="text-align:center;padding:32px 24px 24px;">
-    <div class="dp-profile-avatar">{{ strtoupper(substr($student->name,0,1).substr($student->surname??'',0,1)) }}</div>
+    <div class="dp-profile-avatar">{{ mb_strtoupper(mb_substr($student->name,0,1).mb_substr($student->surname??'',0,1)) }}</div>
     <div style="font-size:22px;font-weight:700;margin-bottom:4px;">{{ $student->name }} {{ $student->surname }}</div>
     <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">{{ $student->email }}</div>
 
@@ -295,7 +295,7 @@
             <td>
                 @if(!empty($s->status))
                     @php
-                        $statusUpper = strtoupper($s->status);
+                        $statusUpper = mb_strtoupper($s->status);
                         $statusClass = match($statusUpper) {
                             'ACTIVE' => 'dp-badge-active',
                             'COMPLETED' => 'dp-badge-active',

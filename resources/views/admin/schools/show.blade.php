@@ -26,7 +26,7 @@
             <div class="flex items-center gap-4">
                 <div
                     class="w-14 h-14 rounded-xl bg-gradient-to-br from-[#13398E] to-[#0B6AB2] flex items-center justify-center shadow-lg shadow-blue-800/20">
-                    <span class="text-white text-xl font-bold">{{ strtoupper(mb_substr($school->name, 0, 2)) }}</span>
+                    <span class="text-white text-xl font-bold">{{ mb_strtoupper(mb_substr($school->name, 0, 2)) }}</span>
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ $school->name }}</h1>
@@ -205,7 +205,7 @@
                                 @foreach($group['users']->take(12) as $user)
                                     <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-[#0A1628]/40">
                                         <div class="w-7 h-7 rounded-full bg-{{ $group['color'] }}-100 dark:bg-{{ $group['color'] }}-900/20 flex items-center justify-center flex-shrink-0">
-                                            <span class="text-{{ $group['color'] }}-600 text-[10px] font-bold">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                                            <span class="text-{{ $group['color'] }}-600 text-[10px] font-bold">{{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}</span>
                                         </div>
                                         <div class="min-w-0">
                                             <p class="text-xs font-medium text-gray-900 dark:text-white truncate">{{ $user->name }}</p>
@@ -323,7 +323,7 @@
                                     <td class="px-5 py-3">
                                         <div class="flex items-center gap-3">
                                             <div class="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[10px] font-bold" style="background: {{ $appStat->color ?? '#0B6AB2' }}">
-                                                {{ strtoupper(substr(is_array($appStat->name) ? reset($appStat->name) : $appStat->name, 0, 2)) }}
+                                                {{ mb_strtoupper(mb_substr(is_array($appStat->name) ? reset($appStat->name) : $appStat->name, 0, 2)) }}
                                             </div>
                                             <div>
                                                 <a href="{{ route('admin.applications.show', $appStat) }}" class="font-medium text-gray-900 dark:text-white hover:text-[#0B6AB2] transition">{{ $appName }}</a>

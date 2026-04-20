@@ -6,7 +6,7 @@
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
         <div style="display:flex;align-items:center;gap:12px;">
-            <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--color-primary),var(--color-primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;">{{ strtoupper(substr($user->name,0,1).substr($user->surname??'',0,1)) }}</div>
+            <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--color-primary),var(--color-primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;">{{ mb_strtoupper(mb_substr($user->name,0,1).mb_substr($user->surname??'',0,1)) }}</div>
             <div>
                 <div style="font-size:18px;font-weight:600;">{{ $user->name }} {{ $user->surname }}</div>
                 <p style="font-size:13px;color:var(--color-txt-muted);margin:2px 0 0;">{{ $user->email }}</p>

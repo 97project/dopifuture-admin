@@ -88,7 +88,7 @@
                     <td class="muted">{{ str_pad(($users->currentPage()-1)*$users->perPage()+$i+1, 2, '0', STR_PAD_LEFT) }}</td>
                     <td>
                         <div class="dp-td-avatar">
-                            <div class="av" style="width:28px;height:28px;font-size:10px;">{{ strtoupper(substr($u->name ?? '', 0, 1) . substr($u->surname ?? '', 0, 1)) }}</div>
+                            <div class="av" style="width:28px;height:28px;font-size:10px;">{{ mb_strtoupper(mb_substr($u->name ?? '', 0, 1) . mb_substr($u->surname ?? '', 0, 1)) }}</div>
                             <a href="{{ route('portal.users.show', $u) }}" style="font-weight:500;color:#030719;text-decoration:none;">{{ $u->name }} {{ $u->surname }}</a>
                         </div>
                     </td>

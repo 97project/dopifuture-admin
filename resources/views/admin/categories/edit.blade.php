@@ -11,14 +11,14 @@
             @foreach(['tr', 'en'] as $locale)
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('admin.name') }}
-                        ({{ strtoupper($locale) }}) *</label>
+                        ({{ mb_strtoupper($locale) }}) *</label>
                     <input type="text" name="name[{{ $locale }}]"
                         value="{{ old("name.{$locale}", $category->name[$locale] ?? '') }}" required
                         class="w-full px-3 py-2 border border-gray-200 dark:border-[#1A3A5C] rounded-lg bg-white dark:bg-[#0A1628] text-gray-900 dark:text-white">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('admin.description') }}
-                        ({{ strtoupper($locale) }})</label>
+                        ({{ mb_strtoupper($locale) }})</label>
                     <textarea name="description[{{ $locale }}]" rows="2"
                         class="w-full px-3 py-2 border border-gray-200 dark:border-[#1A3A5C] rounded-lg bg-white dark:bg-[#0A1628]">{{ old("description.{$locale}", $category->description[$locale] ?? '') }}</textarea>
                 </div>

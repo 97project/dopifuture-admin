@@ -145,7 +145,7 @@
                                         <div
                                             class="w-9 h-9 rounded-lg bg-gradient-to-br from-[#13398E] to-[#0B6AB2] flex items-center justify-center flex-shrink-0">
                                             <span
-                                                class="text-white text-xs font-bold">{{ strtoupper(mb_substr($school->name, 0, 2)) }}</span>
+                                                class="text-white text-xs font-bold">{{ mb_strtoupper(mb_substr($school->name, 0, 2)) }}</span>
                                         </div>
                                         <div class="min-w-0">
                                             <a href="{{ route('admin.schools.show', $school) }}"
