@@ -801,10 +801,26 @@ class PortalReportController extends Controller
             ];
         });
 
-        // Team members with step mapping
-        $team = $members->map(function ($m) use ($stepsCollection) {
+        $projectStepIds = $stepsCollection->pluck('external_id')->toArray();
+
+        // Team members with step mapping, filtering to show only active members
+        $team = $members->filter(function ($m) use ($projectStepIds, $stepsCollection) {
+            if (!$m->user) return false;
+            
+            // Is the user listed as responsible for any step?
+            $isResponsible = $stepsCollection->contains(function ($s) use ($m) {
+                return !empty($s->responsible_name) && mb_strtolower(trim($s->responsible_name)) === mb_strtolower(trim($m->user->name));
+            });
+
+            // Or do they have any progress on this project's steps?
+            $hasProgress = collect($m->progress)->contains(function ($p) use ($projectStepIds) {
+                return in_array($p->step_external_id, $projectStepIds);
+            });
+
+            return $isResponsible || $hasProgress;
+        })->map(function ($m) use ($stepsCollection) {
             // Find which steps this member is responsible for
-            $responsibleSteps = $stepsCollection->filter(fn($s) => $s->responsible_name === ($m->user?->name ?? ''))
+            $responsibleSteps = $stepsCollection->filter(fn($s) => !empty($s->responsible_name) && mb_strtolower(trim($s->responsible_name)) === mb_strtolower(trim($m->user?->name ?? '')))
                 ->pluck('name')
                 ->join(', ');
 
@@ -813,7 +829,7 @@ class PortalReportController extends Controller
                 'surname' => $m->user?->surname ?? '',
                 'steps' => $responsibleSteps ?: '-',
             ];
-        });
+        })->values();
 
         // Extract submitted files and links from step_submissions
         $files = [];
