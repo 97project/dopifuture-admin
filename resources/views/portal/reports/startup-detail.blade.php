@@ -1,9 +1,9 @@
-﻿@extends('portal.app')
-@section('title', ($isTr ?? false) ? 'Proje Detay' : 'Project Detail')
-@section('page-title', 'Startup â€” Detail')
+@extends('portal.app')
+@section('title', __('portal.project_detail'))
+@section('page-title', __('portal.way_startup'))
 @section('content')
 
-    {{-- â•â•â• STEP ICONS â€” Figma 684-17330 exported assets â•â•â• --}}
+    {{-- â• â• â•  STEP ICONS â€” Figma 684-17330 exported assets â• â• â•  --}}
     @php
         $stepIcons = [
             'step1_team_formation.png',
@@ -74,7 +74,7 @@
                     <div style="display:flex;flex-direction:column;gap:4px;">
                         <div style="display:flex;flex-direction:column;gap:4px;">
                             <div style="display:flex;align-items:flex-end;gap:8px;">
-                                <span style="font-size:14px;color:#496df7;font-weight:500;font-family:'Nunito',sans-serif;line-height:18px;white-space:nowrap;">Step {{ $i + 1 }}</span>
+                                <span style="font-size:14px;color:#496df7;font-weight:500;font-family:'Nunito',sans-serif;line-height:18px;white-space:nowrap;">{{ __('portal.step_label') }} {{ $i + 1 }}</span>
                                 <span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;
                                     font-size:12px;font-weight:400;font-family:'Nunito',sans-serif;line-height:16px;white-space:nowrap;
                                     background:{{ $diffBg }};border:1px solid {{ $diffBorder }};color:{{ $diffColor }};">
@@ -107,7 +107,7 @@
                     {{-- Score badge --}}
                     <div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;background:#ECFDF5;border-radius:12px;border-bottom:3px solid #34D399;margin-bottom:14px;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="#FBBF24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <span style="font-size:18px;font-weight:800;color:#060B17;">Score:</span>
+                        <span style="font-size:18px;font-weight:800;color:#060B17;">{{ __('portal.score_label') }}:</span>
                         <span style="font-size:18px;font-weight:600;color:#060B17;">{{ $step->ai_score }}/{{ $step->ai_max_score }}</span>
                     </div>
 
@@ -166,7 +166,7 @@
                                 <div style="display:flex;gap:8px;align-items:flex-start;">
                                     <svg width="16" height="16" style="flex-shrink:0;margin-top:2px;" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                                     <p style="font-size:13px;color:#374151;line-height:20px;margin:0;">
-                                        <span style="font-weight:700;color:var(--color-primary);">Feedback: </span>{{ $q->ai_feedback }}
+                                        <span style="font-weight:700;color:var(--color-primary);">{{ __('portal.feedback_label') }}: </span>{{ $q->ai_feedback }}
                                     </p>
                                 </div>
                                 @endif
@@ -216,7 +216,7 @@
             {{-- Progress --}}
             <div class="dp-card" style="margin-bottom:16px;">
                 <div style="font-size:13px;font-weight:600;color:var(--color-primary);margin-bottom:6px;">
-                    {{ $project->steps_completed }}/{{ $project->total_steps }} Step Completed
+                    {{ $project->steps_completed }}/{{ $project->total_steps }} {{ __('portal.completed') }}
                 </div>
                 <div style="width:100%;height:8px;border-radius:4px;background:#e2e8f0;">
                     <div style="width:{{ ($project->total_steps ?? 0) > 0 ? (($project->steps_completed ?? 0) / $project->total_steps * 100) : 0 }}%;height:100%;border-radius:4px;background:var(--color-primary);"></div>
@@ -238,7 +238,7 @@
             <div class="dp-card" style="margin-bottom:16px;">
                 <div style="font-weight:600;font-size:13px;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><path d="M8 21h8m-4-4v4m-4-8l4-8 4 8m1-4h1a2 2 0 0 1 0 4h-1m-10 0H6a2 2 0 0 1 0-4h1"/></svg>
-                    Ranking
+                    {{ __('portal.ranking') }}
                 </div>
                 @foreach($rankings ?? [] as $rank)
                 <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;margin-bottom:4px;
@@ -264,7 +264,7 @@
                 <div style="margin-bottom:12px;">
                     <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
                         <div style="display:inline-block;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:600;background:#DBEAFE;color:#2563EB;">
-                            Step {{ $file['step'] ?? '-' }}
+                            {{ __('portal.step_label') }} {{ $file['step'] ?? '-' }}
                         </div>
                         @if($file['status'] ?? null)
                         @php
@@ -277,7 +277,7 @@
                         @endif
                         @if($file['points_earned'] ?? null)
                         <span style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:600;background:#ECFDF5;color:#059669;">
-                            +{{ $file['points_earned'] }} pts
+                            +{{ $file['points_earned'] }} {{ __('portal.pts') }}
                         </span>
                         @endif
                     </div>
@@ -299,14 +299,14 @@
                     </div>
                     @if($file['feedback'] ?? null)
                     <div style="margin-top:6px;padding:8px 12px;background:#F8FAFF;border-radius:8px;font-size:12px;color:#374151;line-height:18px;">
-                        <span style="font-weight:600;color:var(--color-primary);">Feedback: </span>{{ $file['feedback'] }}
+                        <span style="font-weight:600;color:var(--color-primary);">{{ __('portal.feedback_label') }}: </span>{{ $file['feedback'] }}
                     </div>
                     @endif
                 </div>
                 @empty
                 <div style="text-align:center;padding:16px;color:var(--color-txt-muted);font-size:13px;">
                     <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 8px;display:block;opacity:0.4;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                    No files submitted yet
+                    {{ __('portal.no_recent_logs') }}
                 </div>
                 @endforelse
             </div>
@@ -318,7 +318,7 @@
                 <div style="margin-bottom:12px;">
                     <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
                         <div style="display:inline-block;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:600;background:#FEF3C7;color:#D97706;">
-                            Step {{ $link['step'] ?? '-' }}
+                            {{ __('portal.step_label') }} {{ $link['step'] ?? '-' }}
                         </div>
                         @if($link['platform'] ?? null)
                         <span style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:600;background:#EDE9FE;color:#7C3AED;">
@@ -350,7 +350,7 @@
                 @empty
                 <div style="text-align:center;padding:16px;color:var(--color-txt-muted);font-size:13px;">
                     <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 8px;display:block;opacity:0.4;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"/></svg>
-                    No links submitted yet
+                    {{ __('portal.no_recent_logs') }}
                 </div>
                 @endforelse
             </div>

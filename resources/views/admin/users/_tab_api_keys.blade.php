@@ -132,7 +132,7 @@
                                     @if($key->is_active && !$key->isExpired())
                                         <span
                                             class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Aktif
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>{{ __('admin.active') }}
                                         </span>
                                     @elseif($key->isExpired())
                                         <span
@@ -157,7 +157,7 @@
                                                 @csrf @method('PUT')
                                                 <button type="submit"
                                                     class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-[#0A1628] transition"
-                                                    title="{{ $key->is_active ? 'Devre dışı bırak' : 'Aktifleştir' }}">
+                                                    title="{{ $key->is_active ? __('admin.deactivate') : __('admin.activate') }}">
                                                     @if($key->is_active)
                                                         <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor"
                                                             viewBox="0 0 24 24">
@@ -176,7 +176,7 @@
                                             {{-- Delete --}}
                                             <form action="{{ route('admin.users.api-keys.destroy', [$user, $key]) }}" method="POST"
                                                 class="inline"
-                                                onsubmit="return confirm('Bu API anahtarını silmek istediğinizden emin misiniz?')">
+                                                onsubmit="return confirm('{{ __('admin.confirm_delete_api_key') }}')">
                                                 @csrf @method('DELETE')
                                                 <button type="submit"
                                                     class="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition"

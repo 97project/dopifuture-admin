@@ -1,6 +1,6 @@
 @extends('portal.app')
-@section('title', ($module === 'simulator' ? 'Simulation' : ($module === 'lecturer' ? 'Way AI Coach' : 'Study Space')) . ' Detail')
-@section('page-title', ($module === 'simulator' ? '🎮 Simulation' : ($module === 'lecturer' ? '💬 Way AI Coach' : '🤖 Study Space')) . ' — Session Detail')
+@section('title', ($module === 'simulator' ? __('portal.simulation_detail') : ($module === 'lecturer' ? __('portal.way_ai_coach') : __('portal.study_space'))) . ' — ' . __('portal.detail'))
+@section('page-title', ($module === 'simulator' ? '🎮 ' . __('portal.simulation_detail') : ($module === 'lecturer' ? '💬 ' . __('portal.way_ai_coach_session') : '🤖 ' . __('portal.study_space_chat'))))
 
 @section('styles')
 @if($module !== 'simulator')
@@ -103,11 +103,11 @@ details summary:hover { color: var(--text-primary); }
     <div>
         <div style="font-size:18px;font-weight:600;">
             @if($module === 'simulator')
-                🎮 Simulation Detail
+                🎮 {{ __('portal.simulation_detail') }}
             @elseif($module === 'lecturer')
-                💬 Way AI Coach Session
+                💬 {{ __('portal.way_ai_coach_session') }}
             @else
-                🤖 Study Space Chat
+                🤖 {{ __('portal.study_space_chat') }}
             @endif
         </div>
         <p style="font-size:13px;color:var(--text-muted);margin:2px 0 0;">
@@ -124,7 +124,7 @@ details summary:hover { color: var(--text-primary); }
             </button>
         @endif
         @if($student)
-            <a href="{{ route('portal.reports.student', $student) }}" class="dp-btn-ghost">← Student Report</a>
+            <a href="{{ route('portal.reports.student', $student) }}" class="dp-btn-ghost">← {{ __('portal.student_report') }}</a>
         @else
             <a href="{{ route('portal.reports') }}" class="dp-btn-ghost">← {{ __('portal.back') }}</a>
         @endif
@@ -136,7 +136,7 @@ details summary:hover { color: var(--text-primary); }
     <div>
         {{-- Session Info Card --}}
         <div class="dp-card">
-            <div class="dp-card-title" style="font-size:14px;">📋 Session Info</div>
+            <div class="dp-card-title" style="font-size:14px;">📋 {{ __('portal.session_info') }}</div>
             <table style="width:100%;font-size:13px;">
                 @if($module === 'simulator')
                 <tr>
@@ -176,10 +176,10 @@ details summary:hover { color: var(--text-primary); }
                                 default => 'dp-badge-error',
                             };
                             $statusLabel = match(strtoupper($session->status ?? '')) {
-                                'ACTIVE' => 'Active',
-                                'COMPLETED' => 'Completed',
-                                'ENDED' => 'Ended',
-                                'ABANDONED' => 'Abandoned',
+                                'ACTIVE' => __('portal.active'),
+                                'COMPLETED' => __('portal.completed'),
+                                'ENDED' => __('portal.completed'),
+                                'ABANDONED' => __('portal.inactive'),
                                 default => $session->status ?? '-',
                             };
                         @endphp
@@ -199,15 +199,15 @@ details summary:hover { color: var(--text-primary); }
                 @endif
                 <tr>
                     <td style="padding:6px 0;color:var(--text-muted);">
-                        @if($module === 'simulator') Steps @else Messages @endif
+                        @if($module === 'simulator') {{ __('portal.steps_count') }} @else {{ __('portal.messages_count') }} @endif
                     </td>
                     <td style="padding:6px 0;font-weight:600;">
                         @if($module === 'simulator')
-                            {{ $session->simulatorSteps->count() }} steps
+                            {{ $session->simulatorSteps->count() }} {{ __('portal.steps_count') }}
                         @elseif($module === 'lecturer')
-                            {{ $session->lecturerMessages->count() }} messages
+                            {{ $session->lecturerMessages->count() }} {{ __('portal.messages_count') }}
                         @else
-                            {{ $session->chatMessages->count() }} messages
+                            {{ $session->chatMessages->count() }} {{ __('portal.messages_count') }}
                         @endif
                     </td>
                 </tr>
@@ -258,21 +258,21 @@ details summary:hover { color: var(--text-primary); }
             {{-- SIMULATOR: Score Chart --}}
             @if(count($chartData) > 0)
             <div class="dp-card">
-                <div class="dp-card-title" style="font-size:14px;">📈 Score Chart</div>
+                <div class="dp-card-title" style="font-size:14px;">📈 {{ __('portal.score_chart') }}</div>
                 <div style="height:220px;"><canvas id="scoreChart"></canvas></div>
             </div>
             @endif
 
             {{-- SIMULATOR: Steps Timeline --}}
             <div class="dp-card">
-                <div class="dp-card-title" style="font-size:14px;">🎮 Simulation Timeline ({{ $session->simulatorSteps->count() }} steps)</div>
+                <div class="dp-card-title" style="font-size:14px;">🎮 {{ __('portal.simulation_timeline') }} ({{ $session->simulatorSteps->count() }} {{ __('portal.steps_count') }})</div>
                 <div class="sim-timeline">
                     @foreach($session->simulatorSteps->sortBy('turn') as $step)
                     <div class="sim-timeline-item {{ $step->ended ? 'ended' : '' }}" id="step-{{ $step->turn }}">
                         {{-- Header --}}
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                                <span style="font-weight:600;font-size:13px;color:var(--primary);">Turn {{ $step->turn }}</span>
+                                <span style="font-weight:600;font-size:13px;color:var(--primary);">{{ __('portal.turn_label') }} {{ $step->turn }}</span>
                                 <span style="font-size:11px;color:var(--text-muted);background:var(--bg-secondary,#f1f5f9);padding:2px 6px;border-radius:4px;">{{ $step->node_id }}</span>
                                 @if($step->delta != 0)
                                     <span class="score-delta {{ $step->delta > 0 ? 'positive' : 'negative' }}">
@@ -286,14 +286,14 @@ details summary:hover { color: var(--text-primary); }
                                 @endif
                             </div>
                             <span style="padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;background:var(--bg-secondary,#f1f5f9);color:var(--text-primary);">
-                                Score: {{ $step->score_after }}
+                                {{ __('portal.score_label') }}: {{ $step->score_after }}
                             </span>
                         </div>
 
                         {{-- Node Text --}}
                         @if($step->node_intro)
                             <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">
-                                <strong>Intro:</strong> {{ Str::limit($step->node_intro, 200) }}
+                                <strong>{{ __('portal.intro_text') }}:</strong> {{ Str::limit($step->node_intro, 200) }}
                             </div>
                         @endif
                         @if($step->node_text)
@@ -303,7 +303,7 @@ details summary:hover { color: var(--text-primary); }
                         {{-- Question --}}
                         @if($step->node_question)
                             <div style="background:rgba(245,158,11,0.08);border-left:3px solid #f59e0b;padding:8px 12px;border-radius:0 6px 6px 0;margin-bottom:8px;">
-                                <strong style="font-size:12px;color:#d97706;">❓ Question:</strong>
+                                <strong style="font-size:12px;color:#d97706;">❓ {{ __('portal.question_colon') }}</strong>
                                 <span style="font-size:13px;">{{ $step->node_question }}</span>
                             </div>
                         @endif
@@ -311,7 +311,7 @@ details summary:hover { color: var(--text-primary); }
                         {{-- Choices --}}
                         @if($step->choices && is_array($step->choices))
                             <div style="margin:8px 0;">
-                                <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:4px;">Choices:</div>
+                                <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:4px;">{{ __('portal.choices_label') }}</div>
                                 @foreach($step->choices as $choice)
                                     @php $isSelected = ($step->selected_choice_id ?? null) == ($choice['id'] ?? null); @endphp
                                     <div class="choice-card {{ $isSelected ? 'selected' : '' }}">
@@ -337,12 +337,12 @@ details summary:hover { color: var(--text-primary); }
                         {{-- Coach Reply --}}
                         @if($step->coach_reply)
                             <div class="coach-advice">
-                                <div class="coach-advice-title">🧑‍🏫 Coach Advice</div>
+                                <div class="coach-advice-title">🧑‍🏫 {{ __('portal.coach_advice') }}</div>
                                 <div style="font-size:13px;line-height:1.5;">{{ $step->coach_reply }}</div>
                             </div>
                             @if($step->audio_coach_reply && $step->audio_coach_reply !== $step->coach_reply)
                                 <details style="margin-top:6px;">
-                                    <summary>🔊 Audio Text</summary>
+                                    <summary>🔊 {{ __('portal.audio_text') }}</summary>
                                     <div style="margin-top:4px;padding:6px 10px;background:var(--bg-secondary,#f9fafb);border-radius:6px;font-size:12px;">
                                         {{ Str::limit($step->audio_coach_reply, 200) }}
                                     </div>
@@ -353,7 +353,7 @@ details summary:hover { color: var(--text-primary); }
                         {{-- End Marker --}}
                         @if($step->ended)
                             <div style="margin-top:8px;padding:6px 10px;background:rgba(239,68,68,0.08);border-radius:6px;font-size:12px;color:#dc2626;font-weight:500;">
-                                ⏹ Simulation ended at this step.
+                                ⏹ {{ __('portal.simulation_ended') }}
                             </div>
                         @endif
                     </div>
@@ -369,7 +369,7 @@ details summary:hover { color: var(--text-primary); }
                     <div class="chat-info">
                         <h4 style="margin:0;font-size:1.1rem;font-weight:600;color:#fff;">WAY AI Coach</h4>
                         <small style="opacity:0.85;">
-                            {{ $session->subject ?? 'General' }}
+                            {{ $session->subject ?? __('portal.intro_label') }}
                             @if($session->topic) • {{ $session->topic }} @endif
                         </small>
                     </div>
@@ -397,7 +397,7 @@ details summary:hover { color: var(--text-primary); }
                             <div class="whatsapp-bubble {{ $message->role == 'user' ? 'outgoing' : 'incoming' }}">
                                 <div class="bubble-author">
                                     @if($message->role == 'user')
-                                        👤 Student
+                                        👤 {{ __('portal.student_author') }}
                                     @else
                                         🤖 WAY AI Coach
                                     @endif
@@ -409,7 +409,7 @@ details summary:hover { color: var(--text-primary); }
                                     <div style="margin-top:4px;font-size:11px;">
                                         @if($message->score !== null)
                                             <span class="dp-badge {{ $message->score == 1 ? 'dp-badge-active' : 'dp-badge-pending' }}" style="font-size:10px;">
-                                                Score: {{ $message->score }}
+                                                {{ __('portal.score_label') }}: {{ $message->score }}
                                             </span>
                                         @endif
                                         @if($message->theme_message)
@@ -419,7 +419,7 @@ details summary:hover { color: var(--text-primary); }
                                 @endif
                                 @if($message->role == 'assistant' && $message->audio_text && $message->audio_text !== $message->content)
                                     <details style="margin-top:4px;">
-                                        <summary>🔊 Audio Metni</summary>
+                                        <summary>🔊 {{ __('portal.audio_text') }}</summary>
                                         <div style="margin-top:4px;padding:4px 8px;background:rgba(255,255,255,0.5);border-radius:4px;font-size:11px;">
                                             {{ Str::limit($message->audio_text, 200) }}
                                         </div>
@@ -437,7 +437,7 @@ details summary:hover { color: var(--text-primary); }
                         <div class="empty-chat-state">
                             <div style="font-size:4rem;opacity:0.4;margin-bottom:20px;">💬</div>
                             <h5 style="margin-bottom:8px;">{{ __('portal.no_messages_yet') }}</h5>
-                            <p style="font-size:0.9rem;color:var(--text-muted);">This session has no messages yet.</p>
+                            <p style="font-size:0.9rem;color:var(--text-muted);">{{ __('portal.no_messages_in_session') }}</p>
                         </div>
                     @endforelse
                 </div>
@@ -476,7 +476,7 @@ details summary:hover { color: var(--text-primary); }
                             <div class="whatsapp-bubble {{ $message->role == 'user' ? 'outgoing' : 'incoming' }}">
                                 <div class="bubble-author">
                                     @if($message->role == 'user')
-                                        👤 Student
+                                        👤 {{ __('portal.student_author') }}
                                     @else
                                         🤖 Study Space AI
                                     @endif
@@ -486,7 +486,7 @@ details summary:hover { color: var(--text-primary); }
                                         <a href="{{ $message->image_url }}" target="_blank">
                                             <img src="{{ $message->image_url }}" style="max-width:300px;border-radius:8px;cursor:pointer;" onerror="this.style.display='none'">
                                         </a>
-                                        <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">🖼 AI Generated Image</div>
+                                        <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">🖼 {{ __('portal.ai_generated_image') }}</div>
                                     </div>
                                 @endif
                                 <div class="bubble-content markdown-content" data-content="{{ $message->content }}">
@@ -494,7 +494,7 @@ details summary:hover { color: var(--text-primary); }
                                 </div>
                                 @if($message->role == 'assistant' && $message->audio_text && $message->audio_text !== $message->content)
                                     <details style="margin-top:4px;">
-                                        <summary>🔊 Audio Text</summary>
+                                        <summary>🔊 {{ __('portal.audio_text') }}</summary>
                                         <div style="margin-top:4px;padding:4px 8px;background:rgba(255,255,255,0.5);border-radius:4px;font-size:11px;">
                                             {{ Str::limit($message->audio_text, 200) }}
                                         </div>
@@ -512,7 +512,7 @@ details summary:hover { color: var(--text-primary); }
                         <div class="empty-chat-state">
                             <div style="font-size:4rem;opacity:0.4;margin-bottom:20px;">🤖</div>
                             <h5 style="margin-bottom:8px;">{{ __('portal.no_messages_yet') }}</h5>
-                            <p style="font-size:0.9rem;color:var(--text-muted);">This chat session has no messages yet.</p>
+                            <p style="font-size:0.9rem;color:var(--text-muted);">{{ __('portal.no_chat_messages') }}</p>
                         </div>
                     @endforelse
                 </div>
@@ -524,9 +524,9 @@ details summary:hover { color: var(--text-primary); }
 {{-- Back Button --}}
 <div style="margin-top:20px;display:flex;justify-content:space-between;">
     @if($student)
-        <a href="{{ route('portal.reports.student', $student) }}" class="dp-btn-ghost">← Back to Student Report</a>
+        <a href="{{ route('portal.reports.student', $student) }}" class="dp-btn-ghost">← {{ __('portal.student_report') }}</a>
     @else
-        <a href="{{ route('portal.reports') }}" class="dp-btn-ghost">← Back to Reports</a>
+        <a href="{{ route('portal.reports') }}" class="dp-btn-ghost">← {{ __('portal.back_to_reports') }}</a>
     @endif
 </div>
 
@@ -535,7 +535,7 @@ details summary:hover { color: var(--text-primary); }
 <div class="playback-overlay" id="playbackOverlay">
     <div class="playback-modal">
         <div class="playback-header">
-            <div style="font-weight:600;">▶ Simulation Playback</div>
+            <div style="font-weight:600;">▶ {{ __('portal.simulation_playback') }}</div>
             <button onclick="document.getElementById('playbackOverlay').classList.remove('active')" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;">✕</button>
         </div>
         <div style="text-align:center;padding:16px;">
@@ -548,7 +548,7 @@ details summary:hover { color: var(--text-primary); }
             </div>
         </div>
         <div class="playback-body" id="playback-content">
-            <p style="text-align:center;color:var(--text-muted);">Click ▶ to start playback</p>
+            <p style="text-align:center;color:var(--text-muted);">{{ __('portal.click_play') }}</p>
         </div>
         <div class="playback-controls">
             <button id="playback-prev" class="dp-btn-ghost" style="font-size:18px;">⏮</button>
@@ -609,13 +609,13 @@ document.addEventListener('DOMContentLoaded', function() {
         scoreEl.textContent = step.score_after;
         scoreEl.className = 'score-display ' + (step.score_after >= 70 ? 'score-high' : (step.score_after >= 50 ? 'score-medium' : 'score-low'));
 
-        let html = '<h6 style="font-weight:600;margin-bottom:8px;">Turn ' + step.turn + ' — ' + (step.node_id || '') + '</h6>';
+        let html = '<h6 style="font-weight:600;margin-bottom:8px;">{{ __('portal.turn_label') }} ' + step.turn + ' — ' + (step.node_id || '') + '</h6>';
         if (step.node_text) html += '<p style="font-size:13px;line-height:1.5;">' + escapeHtml(step.node_text).substring(0, 300) + '...</p>';
         if (step.selected_choice_id && step.choices) {
             const sel = step.choices.find(c => c.id === step.selected_choice_id);
-            if (sel) html += '<div style="padding:8px 12px;background:rgba(34,197,94,0.1);border-radius:6px;margin:8px 0;font-size:13px;"><strong>Choice:</strong> ' + escapeHtml(sel.text || sel.id) + '</div>';
+            if (sel) html += '<div style="padding:8px 12px;background:rgba(34,197,94,0.1);border-radius:6px;margin:8px 0;font-size:13px;"><strong>{{ __('portal.choices_label') }}</strong> ' + escapeHtml(sel.text || sel.id) + '</div>';
         }
-        if (step.coach_reply) html += '<div class="coach-advice"><div class="coach-advice-title">🧑‍🏫 Coach</div><div style="font-size:13px;">' + escapeHtml(step.coach_reply).substring(0, 200) + '...</div></div>';
+        if (step.coach_reply) html += '<div class="coach-advice"><div class="coach-advice-title">🧑‍🏫 {{ __('portal.coach_advice') }}</div><div style="font-size:13px;">' + escapeHtml(step.coach_reply).substring(0, 200) + '...</div></div>';
         document.getElementById('playback-content').innerHTML = html;
 
         // Highlight timeline item

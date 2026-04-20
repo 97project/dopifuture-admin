@@ -1,6 +1,6 @@
 @extends('portal.app')
 @section('title', ($student->name ?? '') . ' — ' . __('admin.reports'))
-@section('page-title', ($student->name ?? '') . ' ' . ($student->surname ?? '') . ' — Report')
+@section('page-title', ($student->name ?? '') . ' ' . ($student->surname ?? '') . ' - ' . __('admin.reports'))
 
 @section('content')
 @php
@@ -26,7 +26,7 @@
     </div>
 
     <a href="{{ url()->previous() !== url()->current() ? url()->previous() : route('portal.reports') }}" class="dp-btn-ghost" style="font-size:12px;">
-        ← Back to List
+        ← {{ __('portal.back') }}
     </a>
 </div>
 
@@ -94,7 +94,7 @@
             <div style="font-size:24px;margin-bottom:4px;">{{ $wing['emoji'] }}</div>
             <div style="font-size:12px;font-weight:600;margin-bottom:2px;">{{ $wing['label'] }}</div>
             <div style="font-size:18px;font-weight:700;color:var(--color-primary);">{{ $wing['total_score'] }}</div>
-            <div style="font-size:10px;color:var(--color-txt-muted);">{{ $wing['sessions'] }} session{{ $wing['sessions'] !== 1 ? 's' : '' }}</div>
+            <div style="font-size:10px;color:var(--color-txt-muted);">{{ $wing['sessions'] }} {{ __('portal.session_count') }}</div>
         </div>
         @endforeach
     </div>
@@ -127,7 +127,7 @@
                 <div style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#8B5CF6,#06B6D4);display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 6px;">🦋</div>
             @endif
             <div style="font-size:11px;font-weight:600;">{{ $badge['name'] ?? $badge['title'] ?? __('portal.badge') }}</div>
-            <div style="font-size:10px;color:var(--color-txt-muted);">{{ $badge['pointsRequired'] ?? $badge['points'] ?? 0 }} pts</div>
+            <div style="font-size:10px;color:var(--color-txt-muted);">{{ $badge['pointsRequired'] ?? $badge['points'] ?? 0 }} {{ __('portal.pts') }}</div>
         </div>
         @endforeach
     </div>
@@ -140,7 +140,7 @@
 {{-- ═══ APP TABS — Click to filter ═══ --}}
 <div class="dp-tabs" style="margin-bottom:20px;">
     <a class="dp-tab {{ !$selectedApp ? 'active' : '' }}" href="{{ route('portal.reports.student', $student->id) }}" style="cursor:pointer;">
-        All Apps
+        {{ __('portal.all_apps') }}
     </a>
     @foreach($apps as $a)
         @php $hasData = isset($reportData[$a->slug]); @endphp
@@ -154,7 +154,7 @@
                 @if($cr > 0)
                     <span class="tab-count">{{ $cr }}%</span>
                 @elseif($sess > 0)
-                    <span class="tab-count" style="background:rgba(59,130,246,0.1);color:#3b82f6;">{{ $sess }} sessions</span>
+                    <span class="tab-count" style="background:rgba(59,130,246,0.1);color:#3b82f6;">{{ $sess }} {{ __('portal.sessions') }}</span>
                 @else
                     <span class="tab-count" style="background:rgba(148,163,184,0.1);color:#94a3b8;">{{ __('portal.no_activity') }}</span>
                 @endif
@@ -244,9 +244,9 @@
                 @php
                     $statusValue = $pObj->status ?? 'not_started';
                     $statusMap = [
-                        'completed'   => ['class' => 'dp-badge-active', 'label' => 'Completed'],
-                        'in_progress' => ['class' => 'dp-badge-pending', 'label' => 'In Progress'],
-                        'not_started' => ['class' => 'dp-badge-inactive', 'label' => 'Not Started'],
+                        'completed'   => ['class' => 'dp-badge-active', 'label' => __('portal.completed')],
+                        'in_progress' => ['class' => 'dp-badge-pending', 'label' => __('portal.in_progress')],
+                        'not_started' => ['class' => 'dp-badge-inactive', 'label' => __('portal.not_started')],
                     ];
                     $sm = $statusMap[$statusValue] ?? ['class' => 'dp-badge-error', 'label' => ucfirst($statusValue)];
                 @endphp
@@ -276,7 +276,7 @@
         <thead><tr>
             <th>{{ __('portal.session') }}</th><th>{{ __('portal.type') }}</th>
             <th>{{ __('admin.status') }}</th><th>{{ __('portal.started') }}</th><th>{{ __('portal.duration') }}</th>
-            <th>{{ __('portal.score') }}</th><th>Threshold</th>
+            <th>{{ __('portal.score') }}</th><th>{{ __('portal.threshold') }}</th>
             <th style="width:80px;"></th>
         </tr></thead>
         <tbody>
@@ -304,10 +304,10 @@
                             default => 'dp-badge-inactive',
                         };
                         $statusLabel = match($statusUpper) {
-                            'ACTIVE' => 'Active',
-                            'COMPLETED' => 'Completed',
-                            'ENDED' => 'Ended',
-                            'ABANDONED' => 'Abandoned',
+                            'ACTIVE' => __('portal.active'),
+                            'COMPLETED' => __('portal.completed'),
+                            'ENDED' => __('portal.completed'),
+                            'ABANDONED' => __('portal.inactive'),
                             default => $s->status,
                         };
                     @endphp
@@ -339,7 +339,7 @@
             <td>
                 @if($sessionDbId)
                     <a href="{{ route('portal.reports.session.detail', $sessionDbId) }}" class="dp-btn" style="font-size:11px;padding:4px 10px;">
-                        Detail →
+                        {{ __('portal.detail') }} →
                     </a>
                 @endif
             </td>
@@ -355,7 +355,7 @@
 @if(empty($reportData))
 <div class="dp-card" style="text-align:center;padding:48px;">
     <div style="font-size:32px;margin-bottom:8px;">📭</div>
-    <p style="color:var(--text-muted);">No report data yet. Data will appear after application sync.</p>
+    <p style="color:var(--text-muted);">{{ __('portal.no_report_data') }}</p>
 </div>
 @endif
 @endsection
@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Scenario Breakdown
             if (data.scenario_breakdown && data.scenario_breakdown.length > 0) {
                 html += '<div class="dp-card" style="margin-bottom:16px;">';
-                html += '<div class="dp-card-title" style="font-size:14px;">Scenario Breakdown (Role Galaxy)</div>';
+                html += '<div class="dp-card-title" style="font-size:14px;">{{ __('portal.scenario_breakdown_title') }}</div>';
                 html += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
 
                 const scenarioColors = {
@@ -407,9 +407,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     html += '<span style="font-weight:600;font-size:13px;">' + ucfirst(s.scenario.replace(/_/g, ' ')) + '</span>';
                     html += '</div>';
                     html += '<div style="display:flex;gap:12px;font-size:11px;color:var(--text-muted);">';
-                    html += '<span>' + s.count + ' sessions</span>';
-                    html += '<span>' + s.completed + ' completed</span>';
-                    html += '<span>Avg: ' + avgScore + '</span>';
+                    html += '<span>' + s.count + ' {{ __('portal.sessions') }}</span>';
+                    html += '<span>' + s.completed + ' {{ __('portal.completed') }}</span>';
+                    html += '<span>{{ __('portal.avg_score') }}: ' + avgScore + '</span>';
                     html += '</div>';
                     html += '</div>';
                 });
@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Theme Breakdown
             if (data.theme_breakdown && data.theme_breakdown.length > 0) {
                 html += '<div class="dp-card" style="margin-bottom:16px;">';
-                html += '<div class="dp-card-title" style="font-size:14px;">Theme Breakdown (Way AI Coach & Study Space)</div>';
+                html += '<div class="dp-card-title" style="font-size:14px;">{{ __('portal.theme_breakdown_title') }}</div>';
                 html += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
 
                 const themeColors = {

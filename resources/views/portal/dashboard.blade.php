@@ -6,12 +6,12 @@
     {{-- ═══ HEADER ═══ --}}
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
         <h2 style="font-size:24px; font-weight:700; color:#030719; margin:0; font-family:'Nunito',sans-serif;">
-            License Management
+            {{ __('portal.license_management') }}
         </h2>
         <button type="button" onclick="document.getElementById('addLicenseModal').style.display='flex'"
                 style="display:inline-flex; align-items:center; gap:8px; padding:10px 24px; background:#10B981; color:#fff; border:none; border-radius:999px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Nunito',sans-serif;">
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Add New License
+            {{ __('portal.add_new_license') }}
         </button>
     </div>
 
@@ -48,7 +48,7 @@
                             </span>
                         @else
                             <span class="dp-badge" style="background:rgba(107,114,128,0.1);color:#6B7280;">
-                                Not Started
+                                {{ __('portal.not_started') }}
                             </span>
                         @endif
                     </td>
@@ -75,7 +75,7 @@
                 @empty
                 <tr>
                     <td colspan="9" style="text-align:center;padding:40px;color:var(--color-txt-muted);">
-                        No licenses found.
+                        {{ __('portal.no_licenses_found') }}
                     </td>
                 </tr>
                 @endforelse

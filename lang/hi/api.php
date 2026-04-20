@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'validation_error' => 'सत्यापन त्रुटि।',
+    'not_found' => 'रिकॉर्ड नहीं मिला।',
+    'unauthorized' => 'प्रमाणीकरण आवश्यक है।',
+    'forbidden' => 'इस कार्रवाई के लिए आपके पास अनुमति नहीं है।',
+    'too_many_requests' => 'बहुत अधिक अनुरोध, कृपया प्रतीक्षा करें।',
+    'server_error' => 'सर्वर त्रुटि हुई।',
+    'api_key_missing' => 'API कुंजी अनुपस्थित है।',
+    'api_key_invalid' => 'API कुंजी अमान्य या समाप्त हो चुकी है।',
+    'ip_not_allowed' => 'इस IP पते से पहुँच की अनुमति नहीं है।',
+    'insufficient_ability' => 'API कुंजी के पास आवश्यक क्षमता नहीं है।',
+    'token_not_found' => 'टोकन नहीं मिला।',
+    'token_revoked' => 'टोकन निरस्त किया गया।',
+    'user_deleted' => 'उपयोगकर्ता हटाया गया।',
+    'api_key_created_warning' => 'API कुंजी बनाई गई। यह कुंजी केवल एक बार दिखाई जाएगी, इसे सुरक्षित रखें।',
+    'api_key_rotated_warning' => 'API कुंजी घुमाई गई। नई कुंजी केवल एक बार दिखाई जाएगी।',
+    'api_key_revoked' => 'API कुंजी निरस्त की गई।',
+    'api_key_deleted' => 'API कुंजी हटाई गई।',
+    'notification_read' => 'सूचना पढ़ी गई के रूप में चिह्नित।',
+    'all_notifications_read' => 'सभी सूचनाएँ पढ़ी गई के रूप में चिह्नित।',
+    'notification_deleted' => 'सूचना हटाई गई।',
+    'device_token_updated' => 'डिवाइस टोकन अपडेट किया गया।',
+    'deletion_request_sent' => 'खाता हटाने की पुष्टि ईमेल भेजी गई। कृपया अपना इनबॉक्स जाँचें।',
+];

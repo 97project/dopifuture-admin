@@ -210,7 +210,7 @@ textarea.form-input-v2 { resize: vertical; min-height: 120px; }
                 </div>
                 <div>
                     <div class="info-card-title">{{ __('portal.contact_address_lbl') }}</div>
-                    <div class="info-card-value">Istanbul, Turkey</div>
+                    <div class="info-card-value">{{ __('portal.office_location') }}</div>
                 </div>
             </div>
         </div>

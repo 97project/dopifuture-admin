@@ -46,12 +46,12 @@
         <div class="dp-tabs">
             <a href="{{ route('portal.users.index', ['role' => 'student']) }}"
                class="dp-tab {{ $currentRole === 'student' ? 'active' : '' }}">
-                Students List
+                {{ __('portal.nav_students') }}
                 <span class="tab-count">{{ $studentCount }}</span>
             </a>
             <a href="{{ route('portal.users.index', ['role' => 'teacher']) }}"
                class="dp-tab {{ $currentRole === 'teacher' ? 'active' : '' }}">
-                Teachers List
+                {{ __('portal.nav_teachers') }}
                 <span class="tab-count">{{ $teacherCount }}</span>
             </a>
         </div>
@@ -59,7 +59,7 @@
         <div style="display:flex;gap:8px;">
             <a href="{{ route('portal.users.import-form') }}" class="dp-btn-ghost">
                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                CSV Import
+                {{ __('portal.bulk_import') }}
             </a>
             <button type="button" onclick="document.getElementById('addUserModal').style.display='flex'"
                     style="display:inline-flex;align-items:center;gap:8px;padding:10px 24px;background:#10B981;color:#fff;border:none;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;">
@@ -78,7 +78,7 @@
                     <th style="width:40px;">{{ __('portal.no_num') }}</th>
                     <th>{{ $currentRole === 'student' ? __('portal.student_name') : __('portal.teacher_name') }}</th>
                     <th>{{ __('admin.email') }}</th>
-                    <th>{{ $currentRole === 'student' ? 'Class & Teacher' : 'Assigned Classes' }}</th>
+                    <th>{{ $currentRole === 'student' ? __('portal.class') . ' & ' . __('portal.nav_teachers') : __('portal.assigned_classes') }}</th>
                     <th>{{ __('admin.actions') }}</th>
                 </tr>
             </thead>
@@ -124,21 +124,21 @@
                         <div style="display:flex;gap:16px;align-items:center;white-space:nowrap;">
                             <a href="{{ route('portal.reports.student', $u) }}" style="background:none;border:none;cursor:pointer;color:#667eea;padding:0;display:inline-flex;align-items:center;gap:4px;font-size:13px;text-decoration:none;font-weight:500;">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                Report
+                                {{ __('admin.reports') }}
                             </a>
                             <a href="{{ route('portal.users.edit', $u) }}" style="background:none;border:none;cursor:pointer;color:#A0A0A0;padding:0;display:inline-flex;align-items:center;gap:4px;font-size:13px;text-decoration:none;">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                Edit
+                                {{ __('admin.edit') }}
                             </a>
                             <button type="button" onclick="openResetModal({{ $u->id }})"
                                     style="background:none;border:none;cursor:pointer;color:#003AC9;padding:0;display:inline-flex;align-items:center;gap:4px;font-size:13px;">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                Reset Password
+                                {{ __('portal.reset_password') }}
                             </button>
                             <button type="button" onclick="openDeleteModal({{ $u->id }})"
                                     style="background:none;border:none;cursor:pointer;color:#E33131;padding:0;display:inline-flex;align-items:center;gap:4px;font-size:13px;">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                Delete
+                                {{ __('admin.delete') }}
                             </button>
                         </div>
                     </td>
@@ -146,7 +146,7 @@
                 @empty
                 <tr>
                     <td colspan="5" style="text-align:center;padding:40px;color:var(--color-txt-muted);">
-                        No users found.
+                        {{ __('portal.search_no_results') }}
                     </td>
                 </tr>
                 @endforelse
@@ -180,13 +180,13 @@
             </button>
 
             <div class="dp-modal-title">{{ $currentRole === 'teacher' ? __('portal.add_new_teacher') : __('portal.add_new_student') }}</div>
-            <p class="dp-modal-subtitle">Fill in the details below to add a new {{ $currentRole }}.</p>
+            <p class="dp-modal-subtitle">{{ __('portal.fill_details_new', ['role' => $currentRole]) }}</p>
 
             @if($errors->any())
             <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
                     <svg width="16" height="16" fill="none" stroke="#dc2626" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    <strong style="font-size:13px;color:#dc2626;">Please fix the errors below:</strong>
+                    <strong style="font-size:13px;color:#dc2626;">{{ __('portal.fix_errors_below') }}</strong>
                 </div>
                 @foreach($errors->all() as $err)
                     <div style="font-size:12px;color:#b91c1c;padding-left:24px;">• {{ $err }}</div>
@@ -220,13 +220,13 @@
                 </div>
 
                 <div style="margin-bottom:16px;">
-                    <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">Password *</label>
+                    <label style="display:block;font-size:13px;font-weight:500;color:var(--color-txt);margin-bottom:6px;">{{ __('admin.password') }} *</label>
                     <input type="password" name="password" class="dp-form-input" placeholder="{{ __('portal.min_6_chars') }}" required minlength="6" style="{{ $errors->has('password') ? 'border-color:#ef4444;' : '' }}">
                     @error('password') <p style="font-size:11px;color:#ef4444;margin:4px 0 0 0;">{{ $message }}</p> @enderror
                 </div>
 
                 <button type="submit" class="dp-btn" style="width:100%;justify-content:center;padding:14px;">
-                    Save Information
+                    {{ __('admin.save') }}
                 </button>
             </form>
         </div>
@@ -255,21 +255,21 @@
                     </div>
                 </div>
                 <div style="display:flex;gap:16px;font-size:12px;color:var(--color-txt-muted);">
-                    <span>Role: <strong id="resetUserRole" style="color:var(--color-txt);"></strong></span>
-                    <span>School: <strong id="resetUserSchool" style="color:var(--color-txt);"></strong></span>
+                    <span>{{ __('portal.role') }}: <strong id="resetUserRole" style="color:var(--color-txt);"></strong></span>
+                    <span>{{ __('admin.school_name') }}: <strong id="resetUserSchool" style="color:var(--color-txt);"></strong></span>
                 </div>
             </div>
-            <div id="resetLoading" style="text-align:center;padding:20px;color:var(--color-txt-muted);font-size:13px;">Loading...</div>
+            <div id="resetLoading" style="text-align:center;padding:20px;color:var(--color-txt-muted);font-size:13px;">{{ __('portal.loading') }}</div>
             <form id="resetPasswordForm" method="POST" action="">
                 @csrf
                 <div style="display:flex;gap:12px;">
                     <button type="button" onclick="closeModal('resetPasswordModal')"
                             style="flex:1;padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);background:#fff;color:#333;font-size:14px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;">
-                        Cancel
+                        {{ __('portal.cancel') }}
                     </button>
                     <button type="submit" id="resetSubmitBtn"
                             style="flex:1;padding:12px;border-radius:10px;border:none;background:#3B82F6;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;">
-                        Reset Password
+                        {{ __('portal.reset_password') }}
                     </button>
                 </div>
             </form>
@@ -299,21 +299,21 @@
                     </div>
                 </div>
                 <div style="display:flex;gap:16px;font-size:12px;color:var(--color-txt-muted);">
-                    <span>Role: <strong id="deleteUserRole" style="color:var(--color-txt);"></strong></span>
-                    <span>School: <strong id="deleteUserSchool" style="color:var(--color-txt);"></strong></span>
+                    <span>{{ __('portal.role') }}: <strong id="deleteUserRole" style="color:var(--color-txt);"></strong></span>
+                    <span>{{ __('admin.school_name') }}: <strong id="deleteUserSchool" style="color:var(--color-txt);"></strong></span>
                 </div>
             </div>
-            <div id="deleteLoading" style="text-align:center;padding:20px;color:var(--color-txt-muted);font-size:13px;">Loading...</div>
+            <div id="deleteLoading" style="text-align:center;padding:20px;color:var(--color-txt-muted);font-size:13px;">{{ __('portal.loading') }}</div>
             <form id="deleteUserForm" method="POST" action="">
                 @csrf @method('DELETE')
                 <div style="display:flex;gap:12px;">
                     <button type="button" onclick="closeModal('deleteUserModal')"
                             style="flex:1;padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);background:#fff;color:#333;font-size:14px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;">
-                        Cancel
+                        {{ __('portal.cancel') }}
                     </button>
                     <button type="submit" id="deleteSubmitBtn"
                             style="flex:1;padding:12px;border-radius:10px;border:none;background:#DC2626;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;">
-                        Delete
+                        {{ __('admin.delete') }}
                     </button>
                 </div>
             </form>

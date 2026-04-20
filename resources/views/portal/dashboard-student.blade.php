@@ -1,12 +1,12 @@
-﻿@extends('portal.app')
-@section('title', 'Student Dashboard')
+@extends('portal.app')
+@section('title', __('admin.dashboard'))
 @section('content')
     <div style="margin-bottom:24px;">
         <h2 style="font-size:24px;font-weight:700;color:#030719;margin:0 0 4px;font-family:'Nunito',sans-serif;">
             {{ __('portal.hello_user', ['name' => $user->name]) }} 👋
         </h2>
         <p style="font-size:14px;color:var(--color-txt-muted);margin:0;">
-            Your apps and class information
+            {{ __('portal.student_subtitle') }}
         </p>
     </div>
 
@@ -41,11 +41,11 @@
             <div style="font-size:15px;font-weight:600;color:#030719;">{{ $app->name }}</div>
             <div style="margin-top:8px;">
                 @if($app->sync_status === 'synced')
-                <span class="dp-badge dp-badge-active">✅ Active</span>
+                <span class="dp-badge dp-badge-active">✅ {{ __('portal.active') }}</span>
                 @elseif($app->sync_status === 'failed')
-                <span class="dp-badge" style="background:rgba(239,68,68,0.1);color:#EF4444;">❌ Error</span>
+                <span class="dp-badge" style="background:rgba(239,68,68,0.1);color:#EF4444;">❌ {{ __('portal.failed') }}</span>
                 @else
-                <span class="dp-badge" style="background:rgba(245,158,11,0.1);color:#F59E0B;">⏳ Pending</span>
+                <span class="dp-badge" style="background:rgba(245,158,11,0.1);color:#F59E0B;">⏳ {{ __('portal.pending') }}</span>
                 @endif
             </div>
         </div>
@@ -54,7 +54,7 @@
     @else
     <div class="dp-card" style="padding:48px;text-align:center;">
         <div style="font-size:48px;margin-bottom:16px;">📱</div>
-        <p style="color:var(--color-txt-muted);">No apps assigned yet.</p>
+        <p style="color:var(--color-txt-muted);">{{ __('portal.no_apps_assigned') }}</p>
     </div>
     @endif
 
@@ -62,10 +62,10 @@
     <div class="dp-card" style="padding:20px 24px;">
         <div style="display:flex;gap:16px;flex-wrap:wrap;">
             <a href="{{ route('portal.reports.student', $user) }}" class="dp-btn" style="text-decoration:none;">
-                📊 My Reports
+                📊 {{ __('portal.view_my_report') }}
             </a>
             <a href="{{ route('portal.profile') }}" class="dp-btn-ghost" style="text-decoration:none;">
-                👤 My Profile
+                👤 {{ __('portal.my_profile') }}
             </a>
         </div>
     </div>

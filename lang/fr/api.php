@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'validation_error' => 'Erreur de validation.',
+    'not_found' => 'Enregistrement introuvable.',
+    'unauthorized' => 'Authentification requise.',
+    'forbidden' => 'Vous n\'avez pas la permission pour cette action.',
+    'too_many_requests' => 'Trop de requêtes, veuillez patienter.',
+    'server_error' => 'Une erreur serveur s\'est produite.',
+    'api_key_missing' => 'Clé API manquante.',
+    'api_key_invalid' => 'Clé API invalide ou expirée.',
+    'ip_not_allowed' => 'L\'accès depuis cette adresse IP n\'est pas autorisé.',
+    'insufficient_ability' => 'La clé API ne dispose pas de la capacité requise.',
+    'token_not_found' => 'Jeton introuvable.',
+    'token_revoked' => 'Jeton révoqué.',
+    'user_deleted' => 'Utilisateur supprimé.',
+    'api_key_created_warning' => 'Clé API créée. Cette clé ne sera affichée qu\'une seule fois, conservez-la en lieu sûr.',
+    'api_key_rotated_warning' => 'Clé API renouvelée. La nouvelle clé ne sera affichée qu\'une seule fois.',
+    'api_key_revoked' => 'Clé API révoquée.',
+    'api_key_deleted' => 'Clé API supprimée.',
+    'notification_read' => 'Notification marquée comme lue.',
+    'all_notifications_read' => 'Toutes les notifications marquées comme lues.',
+    'notification_deleted' => 'Notification supprimée.',
+    'device_token_updated' => 'Jeton de l\'appareil mis à jour.',
+    'deletion_request_sent' => 'E-mail de confirmation de suppression de compte envoyé. Veuillez vérifier votre boîte de réception.',
+];

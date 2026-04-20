@@ -1,5 +1,5 @@
 @extends('portal.app')
-@section('title', 'User Detail')
+@section('title', __('portal.user_detail'))
 @section('page-title', $user->name . ' ' . ($user->surname ?? ''))
 
 @section('content')
@@ -91,7 +91,7 @@
     <div class="dp-card">
         <div class="dp-card-title">{{ __('portal.applications') }}</div>
         <table class="dp-table">
-            <thead><tr><th>{{ __('portal.application') }}</th><th>Granted At</th></tr></thead>
+            <thead><tr><th>{{ __('portal.application') }}</th><th>{{ __('portal.granted_at') }}</th></tr></thead>
             <tbody>
                 @foreach($user->applications as $app)
                 <tr>
@@ -106,7 +106,7 @@
 
     {{-- Per-App Report Tabs --}}
     @if(isset($reportData) && count($reportData))
-    <div style="font-size:16px;font-weight:600;margin:24px 0 12px;">📊 Application Reports</div>
+    <div style="font-size:16px;font-weight:600;margin:24px 0 12px;">📊 {{ __('portal.application_reports') }}</div>
 
     @foreach($reportData as $slug => $appData)
     <div class="dp-card">
@@ -144,7 +144,7 @@
 
         {{-- Module Progress --}}
         @if($appData['progress']->count())
-        <div class="dp-card-title" style="font-size:14px;">📋 Module Progress</div>
+        <div class="dp-card-title" style="font-size:14px;">📋 {{ __('portal.module_progress') }}</div>
         <table class="dp-table">
             <thead><tr>
                 <th>{{ __('portal.module') }}</th><th>{{ __('portal.type') }}</th><th>{{ __('admin.status') }}</th><th>{{ __('portal.score') }}</th><th>{{ __('portal.attempts') }}</th><th>{{ __('admin.date') }}</th>
@@ -175,10 +175,10 @@
 
         {{-- Session History --}}
         @if($appData['sessions']->count())
-        <div class="dp-card-title" style="font-size:14px;margin-top:16px;">🕐 Session History</div>
+        <div class="dp-card-title" style="font-size:14px;margin-top:16px;">🕐 {{ __('portal.session_history') }}</div>
         <table class="dp-table">
             <thead><tr>
-                <th>{{ __('portal.session') }}</th><th>{{ __('portal.type') }}</th><th>Start</th><th>{{ __('portal.duration') }}</th><th>{{ __('portal.score') }}</th>
+                <th>{{ __('portal.session') }}</th><th>{{ __('portal.type') }}</th><th>{{ __('portal.started') }}</th><th>{{ __('portal.duration') }}</th><th>{{ __('portal.score') }}</th>
             </tr></thead>
             <tbody>
                 @foreach($appData['sessions']->take(10) as $s)
@@ -202,13 +202,13 @@
         @endif
 
         @if($appData['progress']->count() === 0 && $appData['sessions']->count() === 0)
-        <div style="text-align:center;padding:24px;color:var(--color-txt-muted);">No data for this application yet.</div>
+        <div style="text-align:center;padding:24px;color:var(--color-txt-muted);">{{ __('portal.no_app_data_yet') }}</div>
         @endif
     </div>
     @endforeach
 
     <div style="text-align:center;margin-top:16px;">
-        <a href="{{ route('portal.reports.student', $user) }}" class="dp-btn">📊 View Full Report</a>
+        <a href="{{ route('portal.reports.student', $user) }}" class="dp-btn">📊 {{ __('portal.view_full_report') }}</a>
     </div>
     @endif
 @endsection

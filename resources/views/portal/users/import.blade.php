@@ -1,21 +1,21 @@
 @extends('portal.app')
-@section('title', 'Bulk Student Import')
-@section('page-title', 'Bulk Student Import')
+@section('title', __('portal.bulk_import'))
+@section('page-title', __('portal.bulk_import'))
 
 @section('content')
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-    <div style="font-size:18px;font-weight:600;">📤 Bulk Student Import via CSV</div>
+    <div style="font-size:18px;font-weight:600;">📤 {{ __('portal.bulk_import') }}</div>
     <a href="{{ route('portal.users.index') }}" class="dp-btn-ghost">← {{ __('portal.back') }}</a>
 </div>
 
 <div>
     <div class="dp-card" style="margin-bottom:20px;">
         <div style="padding:16px 20px;background:rgba(67,100,247,0.06);border-radius:10px;margin-bottom:16px;">
-            <div style="font-size:13px;font-weight:600;color:#4364F7;margin-bottom:6px;">📋 CSV Format</div>
+            <div style="font-size:13px;font-weight:600;color:#4364F7;margin-bottom:6px;">📋 {{ __('portal.csv_file') }}</div>
             <div style="font-size:12px;color:var(--text-muted);line-height:1.6;">
-                First row must be headers. Required columns:<br>
+                {{ __('portal.csv_instructions') }}<br>
                 <code>name</code>, <code>email</code><br>
-                Optional: <code>surname</code>
+                {{ __('portal.optional_surname') }}
             </div>
         </div>
         <form action="{{ route('portal.users.import') }}" method="POST" enctype="multipart/form-data">
@@ -33,13 +33,13 @@
                 <input type="file" name="csv_file" accept=".csv,.txt" required class="dp-form-input" style="padding:8px;">
                 @error('csv_file') <p class="dp-form-error">{{ $message }}</p> @enderror
             </div>
-            <button type="submit" class="dp-btn">📤 Upload & Create</button>
+            <button type="submit" class="dp-btn">📤 {{ __('portal.upload_create') }}</button>
         </form>
     </div>
 
     @if(session('import_errors'))
     <div class="dp-card" style="border-left:3px solid #F59E0B;">
-        <div style="font-size:13px;font-weight:600;color:#F59E0B;margin-bottom:8px;">⚠️ Warnings</div>
+        <div style="font-size:13px;font-weight:600;color:#F59E0B;margin-bottom:8px;">⚠️ {{ __('portal.warnings') }}</div>
         <ul style="font-size:12px;color:var(--text-muted);margin:0;padding-left:16px;">
             @foreach(session('import_errors') as $err)
             <li>{{ $err }}</li>

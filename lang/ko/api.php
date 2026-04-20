@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'validation_error' => '유효성 검사 오류.',
+    'not_found' => '레코드를 찾을 수 없습니다.',
+    'unauthorized' => '인증이 필요합니다.',
+    'forbidden' => '이 작업에 대한 권한이 없습니다.',
+    'too_many_requests' => '요청이 너무 많습니다. 잠시 기다려주세요.',
+    'server_error' => '서버 오류가 발생했습니다.',
+    'api_key_missing' => 'API 키가 누락되었습니다.',
+    'api_key_invalid' => 'API 키가 유효하지 않거나 만료되었습니다.',
+    'ip_not_allowed' => '이 IP 주소에서의 접근이 허용되지 않습니다.',
+    'insufficient_ability' => 'API 키에 필요한 권한이 없습니다.',
+    'token_not_found' => '토큰을 찾을 수 없습니다.',
+    'token_revoked' => '토큰이 폐기되었습니다.',
+    'user_deleted' => '사용자가 삭제되었습니다.',
+    'api_key_created_warning' => 'API 키가 생성되었습니다. 이 키는 한 번만 표시되므로 안전하게 저장하세요.',
+    'api_key_rotated_warning' => 'API 키가 교체되었습니다. 새 키는 한 번만 표시됩니다.',
+    'api_key_revoked' => 'API 키가 폐기되었습니다.',
+    'api_key_deleted' => 'API 키가 삭제되었습니다.',
+    'notification_read' => '알림이 읽음으로 표시되었습니다.',
+    'all_notifications_read' => '모든 알림이 읽음으로 표시되었습니다.',
+    'notification_deleted' => '알림이 삭제되었습니다.',
+    'device_token_updated' => '디바이스 토큰이 업데이트되었습니다.',
+    'deletion_request_sent' => '계정 삭제 확인 이메일이 발송되었습니다. 받은편지함을 확인하세요.',
+];

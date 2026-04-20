@@ -30,11 +30,11 @@
     <button type="button" class="dp-btn" onclick="document.getElementById('addAssignmentModal')?.classList.add('show')">
         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-width="2" d="M12 8v8m-4-4h8"/></svg>
         @if($slug === 'mission-way')
-            Add New Mission
+            {{ __('portal.add_new') }}
         @elseif($slug === 'way-startup')
-            Add New Assignment
+            {{ __('portal.add_new') }}
         @else
-            Add New
+            {{ __('portal.add_new') }}
         @endif
     </button>
     @endif
@@ -62,25 +62,25 @@
                             <th>
                                 <span style="display:inline-flex;align-items:center;gap:4px;">
                                     <span style="color:#ef4444;">❤️</span>
-                                    Health Point
+                                    {{ __('portal.health_point') }}
                                 </span>
                             </th>
                             <th>
                                 <span style="display:inline-flex;align-items:center;gap:4px;">
                                     <span style="color:#22c55e;">🌿</span>
-                                    Resource Point
+                                    {{ __('portal.resource_point') }}
                                 </span>
                             </th>
                             <th>
                                 <span style="display:inline-flex;align-items:center;gap:4px;">
                                     <span style="color:#f59e0b;">🧡</span>
-                                    Ethics Point
+                                    {{ __('portal.ethics_point') }}
                                 </span>
                             </th>
                             <th>
                                 <span style="display:inline-flex;align-items:center;gap:4px;">
                                     <span style="color:#22c55e;">✅</span>
-                                    Adaptation Point
+                                    {{ __('portal.adaptation_point') }}
                                 </span>
                             </th>
                             <th>{{ __('portal.action') }}</th>
@@ -181,8 +181,8 @@
             </div>
             {{-- Pagination --}}
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);">Showing {{ ($missions ?? collect())->count() }} missions</span>
-                <span style="color:var(--color-txt-muted);">{{ ($missions ?? collect())->count() }} total</span>
+                <span style="color:var(--color-txt-muted);">{{ ($missions ?? collect())->count() }} {{ __('portal.missions') }}</span>
+                <span style="color:var(--color-txt-muted);">{{ ($missions ?? collect())->count() }} {{ __('portal.total') }}</span>
             </div>
         </div>
 
@@ -240,7 +240,7 @@
                                 @if($startup->status === 'completed')
                                     <span style="display:inline-flex;align-items:center;gap:4px;color:#22c55e;font-weight:500;">
                                         <svg width="14" height="14" fill="none" stroke="#22c55e" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                        Completed
+                                        {{ __('portal.completed') }}
                                     </span>
                                 @elseif($startup->status === 'not_started')
                                     <span class="muted">{{ __('portal.not_started') }}</span>
@@ -273,7 +273,7 @@
                                 @elseif($startup->teacher_point)
                                     <span style="font-weight:500;">{{ $startup->teacher_point }}</span>
                                 @else
-                                    <span class="muted">Pending...</span>
+                                    <span class="muted">{{ __('portal.in_progress') }}...</span>
                                 @endif
                             </td>
                             <td>
@@ -292,8 +292,8 @@
             </div>
             {{-- Pagination --}}
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);">Showing {{ ($startups ?? collect())->count() }} startups</span>
-                <span style="color:var(--color-txt-muted);">{{ ($startups ?? collect())->count() }} total</span>
+                <span style="color:var(--color-txt-muted);">{{ ($startups ?? collect())->count() }} {{ __('portal.way_startup') }}</span>
+                <span style="color:var(--color-txt-muted);">{{ ($startups ?? collect())->count() }} {{ __('portal.total') }}</span>
             </div>
         </div>
 
@@ -328,7 +328,7 @@
                                     <a href="{{ route('portal.reports.student.study-space', $stat['user']->id) }}" class="dp-action dp-action-view" title="{{ __('portal.study_space_detail') }}">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     </a>
-                                    <a href="{{ route('portal.reports.student.study-space', $stat['user']->id) }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">Details →</a>
+                                    <a href="{{ route('portal.reports.student.study-space', $stat['user']->id) }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">{{ __('portal.view_details') }} →</a>
                                 </div>
                             </td>
                         </tr>
@@ -339,8 +339,8 @@
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);">Showing {{ ($user_stats ?? collect())->count() }} students</span>
-                <span style="color:var(--color-txt-muted);">{{ ($user_stats ?? collect())->count() }} total</span>
+                <span style="color:var(--color-txt-muted);">{{ ($user_stats ?? collect())->count() }} {{ __('portal.nav_students') }}</span>
+                <span style="color:var(--color-txt-muted);">{{ ($user_stats ?? collect())->count() }} {{ __('portal.total') }}</span>
             </div>
         </div>
 
@@ -384,7 +384,7 @@
                                     <a href="{{ route('portal.reports.student.way-ai-coach', $stat['user']->id) }}" class="dp-action dp-action-view" title="{{ __('portal.way_ai_coach_detail') }}">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     </a>
-                                    <a href="{{ route('portal.reports.student.way-ai-coach', $stat['user']->id) }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">Details →</a>
+                                    <a href="{{ route('portal.reports.student.way-ai-coach', $stat['user']->id) }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">{{ __('portal.view_details') }} →</a>
                                 </div>
                             </td>
                         </tr>
@@ -395,8 +395,8 @@
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);">Showing {{ ($user_stats ?? collect())->count() }} students</span>
-                <span style="color:var(--color-txt-muted);">{{ ($user_stats ?? collect())->count() }} total</span>
+                <span style="color:var(--color-txt-muted);">{{ ($user_stats ?? collect())->count() }} {{ __('portal.nav_students') }}</span>
+                <span style="color:var(--color-txt-muted);">{{ ($user_stats ?? collect())->count() }} {{ __('portal.total') }}</span>
             </div>
         </div>
 
@@ -424,7 +424,7 @@
                             <th>{{ __('portal.last_interaction') }}</th>
                             <th>{{ __('portal.total_galaxies_joined') }}</th>
                             <th>{{ __('portal.total_duration') }}</th>
-                            <th>Last 5 Role Galaxies Joined</th>
+                            <th>{{ __('portal.last_5_galaxies') }}</th>
                             <th>{{ __('portal.action') }}</th>
                         </tr>
                     </thead>
@@ -465,7 +465,7 @@
                                     <a href="{{ route('portal.reports.student.role-galaxy', $stat['user']->id) }}" class="dp-action dp-action-view" title="{{ __('portal.role_galaxy_detail') }}">
                                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     </a>
-                                    <a href="{{ route('portal.reports.student.role-galaxy', $stat['user']->id) }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">Details →</a>
+                                    <a href="{{ route('portal.reports.student.role-galaxy', $stat['user']->id) }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">{{ __('portal.view_details') }} →</a>
                                 </div>
                             </td>
                         </tr>
@@ -476,8 +476,8 @@
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);">Showing {{ ($user_stats ?? collect())->count() }} students</span>
-                <span style="color:var(--color-txt-muted);">{{ ($user_stats ?? collect())->count() }} total</span>
+                <span style="color:var(--color-txt-muted);">{{ ($user_stats ?? collect())->count() }} {{ __('portal.nav_students') }}</span>
+                <span style="color:var(--color-txt-muted);">{{ ($user_stats ?? collect())->count() }} {{ __('portal.total') }}</span>
             </div>
         </div>
 
@@ -559,7 +559,7 @@
                         <th>{{ __('portal.student') }}</th>
                         <th>{{ __('portal.total') }}</th>
                         <th>{{ __('portal.completed') }}</th>
-                        <th>Completion %</th>
+                        <th>{{ __('portal.completion_pct') }}</th>
                         <th>{{ __('portal.avg_score') }}</th>
                         <th>{{ __('portal.duration') }}</th>
                         <th></th>
@@ -622,7 +622,7 @@
                                 <a href="{{ $detailRoute }}" class="dp-action dp-action-view" title="{{ __('portal.view_details') }}">
                                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 </a>
-                                <a href="{{ $detailRoute }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">Details →</a>
+                                <a href="{{ $detailRoute }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">{{ __('portal.view_details') }} →</a>
                             </div>
                             @endif
                         </td>
@@ -653,19 +653,19 @@
                             <th>{{ __('portal.nav_students') }}</th>
                             <th>
                                 <span style="color:#ef4444;">❤️</span>
-                                Health Point
+                                {{ __('portal.health_point') }}
                             </th>
                             <th>
                                 <span style="color:#22c55e;">🌿</span>
-                                Resource Point
+                                {{ __('portal.resource_point') }}
                             </th>
                             <th>
                                 <span style="color:#f59e0b;">🧡</span>
-                                Ethics Point
+                                {{ __('portal.ethics_point') }}
                             </th>
                             <th>
                                 <span style="color:#22c55e;">✅</span>
-                                Adaptation Point
+                                {{ __('portal.adaptation_point') }}
                             </th>
                             <th>{{ __('portal.action') }}</th>
                         </tr>
@@ -723,8 +723,8 @@
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;font-size:12px;border-top:1px solid var(--color-row-border);">
-                <span style="color:var(--color-txt-muted);">Showing {{ ($missions ?? collect())->count() }} missions</span>
-                <span style="color:var(--color-txt-muted);">{{ ($missions ?? collect())->count() }} total</span>
+                <span style="color:var(--color-txt-muted);">{{ ($missions ?? collect())->count() }} {{ __('portal.missions') }}</span>
+                <span style="color:var(--color-txt-muted);">{{ ($missions ?? collect())->count() }} {{ __('portal.total') }}</span>
             </div>
         </div>
     @else
@@ -736,7 +736,7 @@
                     <th>{{ __('portal.student') }}</th>
                     <th>{{ __('portal.total') }}</th>
                     <th>{{ __('portal.completed') }}</th>
-                    <th>Completion %</th>
+                    <th>{{ __('portal.completion_pct') }}</th>
                     <th>{{ __('portal.avg_score') }}</th>
                     <th>{{ __('portal.duration') }}</th>
                     <th></th>
@@ -766,7 +766,7 @@
                                 <a href="{{ route('portal.reports.student', $us['user']->id ?? 0) }}?app={{ $slug }}" class="dp-action dp-action-view" title="{{ __('portal.student_report') }}">
                                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 </a>
-                                <a href="{{ route('portal.reports.student', $us['user']->id ?? 0) }}?app={{ $slug }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">Details →</a>
+                                <a href="{{ route('portal.reports.student', $us['user']->id ?? 0) }}?app={{ $slug }}" style="color:var(--color-primary);font-size:12px;font-weight:500;text-decoration:none;">{{ __('portal.view_details') }} →</a>
                             </div>
                             @endif
                         </td>
@@ -796,7 +796,7 @@
             @endif
             <div>
                 <div style="font-weight:600;font-size:13px;">{{ $wing['name'] ?? $wing['title'] ?? __('portal.wing') }}</div>
-                <div style="font-size:11px;color:var(--color-txt-muted);">{{ $wing['pointsRequired'] ?? $wing['points'] ?? 0 }} pts</div>
+                <div style="font-size:11px;color:var(--color-txt-muted);">{{ $wing['pointsRequired'] ?? $wing['points'] ?? 0 }} {{ __('portal.pts') }}</div>
             </div>
         </div>
         @endforeach
@@ -828,12 +828,12 @@
                             @if(!empty($lesson['iconUrl'] ?? $lesson['icon']))
                                 <img src="{{ $lesson['iconUrl'] ?? $lesson['icon'] }}" alt="" style="width:28px;height:28px;border-radius:6px;">
                             @endif
-                            {{ $lesson['title'] ?? $lesson['name'] ?? 'Lesson' }}
+                            {{ $lesson['title'] ?? $lesson['name'] ?? __('portal.lesson') }}
                         </div>
                     </td>
                     <td><span class="dp-badge dp-badge-pending">{{ $lesson['category'] ?? $lesson['type'] ?? '-' }}</span></td>
                     <td class="muted">{{ $lesson['difficulty'] ?? $lesson['level'] ?? '-' }}</td>
-                    <td class="muted">{{ ($lesson['duration'] ?? $lesson['durationMinutes'] ?? '-') }} min</td>
+                    <td class="muted">{{ ($lesson['duration'] ?? $lesson['durationMinutes'] ?? '-') }} {{ __('portal.min') }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -1011,12 +1011,12 @@ new Chart(document.getElementById('sessionsChart'), {
         {{-- Title --}}
         <h3 class="figma-modal-title">
             @if($slug === 'mission-way')
-                Add New Mission
+                {{ __('portal.add_new') }}
             @else
-                Add New Assignment
+                {{ __('portal.add_new') }}
             @endif
         </h3>
-        <p class="figma-modal-subtitle">Prepare a new assignment and assign it to your student.</p>
+        <p class="figma-modal-subtitle">{{ __('portal.assignment_subtitle') }}</p>
 
         @if($slug === 'mission-way')
         {{-- ═══ MISSION WAY FORM ═══ --}}

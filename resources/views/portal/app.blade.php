@@ -988,7 +988,7 @@
             <div class="dp-topbar-right">
                 {{-- Language Switcher --}}
                 @php
-                    $flagMap = ['tr' => '🇹🇷', 'en' => '🇬🇧', 'mn' => '🇲🇳'];
+                    $flagMap = ['tr' => '🇹🇷', 'en' => '🇬🇧', 'mn' => '🇲🇳', 'hi' => '🇮🇳', 'ko' => '🇰🇷', 'ja' => '🇯🇵', 'fr' => '🇫🇷', 'es' => '🇪🇸'];
                     $currentLocale = app()->getLocale();
                     $allLangs = \App\Models\Language::where('is_active', true)->get();
                 @endphp
@@ -1081,7 +1081,7 @@
                     })
                     .then(function(r){ return r.json(); })
                     .then(function(data){
-                        if(!data.length){ res.innerHTML='<div style="padding:16px;text-align:center;color:var(--color-txt-muted);font-size:13px;">No students found</div>'; res.style.display='block'; return; }
+                        if(!data.length){ res.innerHTML='<div style="padding:16px;text-align:center;color:var(--color-txt-muted);font-size:13px;">{{ __('portal.search_no_results') }}</div>'; res.style.display='block'; return; }
                         res.innerHTML = data.map(function(s){
                             return '<a href="'+s.url+'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;color:inherit;border-bottom:1px solid var(--color-row-border);transition:background .15s;" onmouseover="this.style.background=\'var(--color-hover)\';" onmouseout="this.style.background=\'transparent\';">'
                                 +'<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;">'+s.initials+'</div>'

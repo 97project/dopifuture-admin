@@ -1,6 +1,6 @@
 @extends('portal.app')
-@section('title', 'License Detail')
-@section('page-title', 'License Detail')
+@section('title', __('portal.license_detail'))
+@section('page-title', __('portal.license_detail'))
 
 @section('content')
     @php
@@ -12,7 +12,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
         <div>
             <div style="font-size:18px;font-weight:600;">{{ $license->school?->name ?? '—' }}</div>
-            <p style="font-size:13px;color:var(--text-muted);margin:4px 0 0;">License Detail — {{ $license->notes ?? '' }}</p>
+            <p style="font-size:13px;color:var(--text-muted);margin:4px 0 0;">{{ __('portal.license_detail') }} — {{ $license->notes ?? '' }}</p>
         </div>
         <a href="{{ route('portal.licenses.index') }}" class="dp-btn-ghost">← {{ __('portal.back') }}</a>
     </div>
@@ -46,8 +46,8 @@
             <div class="dp-progress-fill" style="width:{{ $pct }}%;{{ $pct >= 90 ? 'background:var(--error-red);' : ($pct >= 70 ? 'background:#fbbf24;' : '') }}"></div>
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:12px;color:var(--text-muted);">
-            <span>Start: {{ $license->starts_at?->format('d.m.Y') ?? '—' }}</span>
-            <span>Expiry: {{ $license->expires_at?->format('d.m.Y') ?? '—' }}</span>
+            <span>{{ __('portal.start_date') }}: {{ $license->starts_at?->format('d.m.Y') ?? '—' }}</span>
+            <span>{{ __('portal.end_date') }}: {{ $license->expires_at?->format('d.m.Y') ?? '—' }}</span>
         </div>
     </div>
 
@@ -74,7 +74,7 @@
             </tbody>
         </table>
         @else
-        <div style="padding:32px;text-align:center;color:var(--text-muted);">No purchase history yet.</div>
+        <div style="padding:32px;text-align:center;color:var(--text-muted);">{{ __('portal.no_purchase_history') }}</div>
         @endif
     </div>
 

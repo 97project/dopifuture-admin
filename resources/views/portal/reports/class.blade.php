@@ -6,7 +6,7 @@
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
     <div>
         <div style="font-size:18px;font-weight:600;">{{ $class->name }}</div>
-        <p style="font-size:13px;color:var(--text-muted);margin:4px 0 0;">{{ $class->school->name ?? '' }} — Class report</p>
+        <p style="font-size:13px;color:var(--text-muted);margin:4px 0 0;">{{ $class->school->name ?? '' }} — {{ __('portal.class_report') }}</p>
     </div>
     <a href="{{ route('portal.reports') }}" class="dp-btn-ghost">← {{ __('portal.back') }}</a>
 </div>

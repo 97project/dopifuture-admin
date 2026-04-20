@@ -1,6 +1,6 @@
 @extends('portal.app')
-@section('title', ($isTr ?? false) ? 'Görev Detay' : 'Mission Detail')
-@section('page-title', 'Mission Detail')
+@section('title', __('portal.mission_way'))
+@section('page-title', __('portal.mission_way'))
 @section('content')
 
     {{-- ═══ HERO BANNER — Figma F-62: dark bg image with mission title ═══ --}}
@@ -28,7 +28,7 @@
                 {{-- Result Section --}}
                 <div style="background:rgba(255,255,255,0.9);border-radius:12px;padding:16px;">
                     <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">{{ __('portal.result') }}</div>
-                    <p style="font-size:13px;line-height:1.7;color:#374151;margin:0;">{{ $mission->result ?? 'Awaiting completion data.' }}</p>
+                    <p style="font-size:13px;line-height:1.7;color:#374151;margin:0;">{{ $mission->result ?? __('portal.awaiting_completion') }}</p>
                 </div>
 
                 {{-- Overall Score Section --}}
@@ -36,19 +36,19 @@
                     <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#111;">{{ __('portal.overall_score') }}</div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                         <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
-                            <div style="font-size:10px;font-weight:600;color:#EF4444;text-transform:uppercase;margin-bottom:4px;">❤️ HEALTH POINT:</div>
+                            <div style="font-size:10px;font-weight:600;color:#EF4444;text-transform:uppercase;margin-bottom:4px;">❤️ {{ __('portal.health_point') }}:</div>
                             <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->health ?? '-' }}</div>
                         </div>
                         <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
-                            <div style="font-size:10px;font-weight:600;color:#3B82F6;text-transform:uppercase;margin-bottom:4px;">📦 RESOURCE POINT:</div>
+                            <div style="font-size:10px;font-weight:600;color:#3B82F6;text-transform:uppercase;margin-bottom:4px;">📦 {{ __('portal.resource_point') }}:</div>
                             <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->resource ?? '-' }} @if($mission->resource !== null)<span style="font-size:16px;">{{ $mission->resource >= 50 ? '👍' : '👎' }}</span>@endif</div>
                         </div>
                         <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
-                            <div style="font-size:10px;font-weight:600;color:#22C55E;text-transform:uppercase;margin-bottom:4px;">⚖️ ETHICS POINT:</div>
+                            <div style="font-size:10px;font-weight:600;color:#22C55E;text-transform:uppercase;margin-bottom:4px;">⚖️ {{ __('portal.ethics_point') }}:</div>
                             <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->ethics ?? '-' }} @if($mission->ethics !== null)<span style="font-size:16px;">{{ $mission->ethics >= 50 ? '👍' : '👎' }}</span>@endif</div>
                         </div>
                         <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:10px;text-align:center;">
-                            <div style="font-size:10px;font-weight:600;color:#8B5CF6;text-transform:uppercase;margin-bottom:4px;">✅ ADAPTATION POINT:</div>
+                            <div style="font-size:10px;font-weight:600;color:#8B5CF6;text-transform:uppercase;margin-bottom:4px;">✅ {{ __('portal.adaptation_point') }}:</div>
                             <div style="font-size:24px;font-weight:800;color:#111;">{{ $mission->adaptation ?? '-' }} @if($mission->adaptation !== null)<span style="font-size:16px;">{{ $mission->adaptation >= 50 ? '👍' : '👎' }}</span>@endif</div>
                         </div>
                     </div>
@@ -68,10 +68,10 @@
                 {{-- Question Badge + Unanimity Rate --}}
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
                     <span style="background:{{ $qi === 0 ? '#22C55E' : ($qi === 1 ? '#3B82F6' : '#EF4444') }};color:#fff;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;">
-                        Question {{ $qi + 1 }}
+                        {{ __('portal.question_label') }} {{ $qi + 1 }}
                     </span>
                     @if($q->unanimity !== null)
-                    <span style="font-size:12px;color:#6B7280;">Unanimity Rate: <strong style="color:#111;">{{ $q->unanimity }}/100</strong></span>
+                    <span style="font-size:12px;color:#6B7280;">{{ __('portal.unanimity_rate') }}: <strong style="color:#111;">{{ $q->unanimity_rate }}%</strong></span>
                     @endif
                 </div>
 
@@ -94,23 +94,23 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px;">
                     <div style="background:linear-gradient(135deg,#FCA5A5,#EF4444);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">❤️</span>
-                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">{{ __('portal.health') }}<br>Point:</span>
+                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">{{ __('portal.health') }}<br>{{ __('portal.point_label') }}:</span>
                         <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->health ?? '-' }}</span>
                         @if($q->health !== null)<span style="font-size:12px;">{{ $q->health >= 50 ? '👍' : '👎' }}</span>@endif
                     </div>
                     <div style="background:linear-gradient(135deg,#93C5FD,#3B82F6);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">📦</span>
-                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">{{ __('portal.resource') }}<br>Point:</span>
+                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">{{ __('portal.resource') }}<br>{{ __('portal.point_label') }}:</span>
                         <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->resource ?? '-' }}</span>
                     </div>
                     <div style="background:linear-gradient(135deg,#A7F3D0,#22C55E);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">⚖️</span>
-                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">{{ __('portal.ethics') }}<br>Point:</span>
+                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">{{ __('portal.ethics') }}<br>{{ __('portal.point_label') }}:</span>
                         <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->ethics ?? '-' }}</span>
                     </div>
                     <div style="background:linear-gradient(135deg,#C4B5FD,#8B5CF6);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">✅</span>
-                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">{{ __('portal.adaptation') }}<br>Point:</span>
+                        <span style="color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;">{{ __('portal.adaptation') }}<br>{{ __('portal.point_label') }}:</span>
                         <span style="color:#fff;font-size:18px;font-weight:700;margin-left:auto;">{{ $q->adaptation ?? '-' }}</span>
                         @if($q->adaptation !== null)<span style="font-size:12px;">{{ $q->adaptation >= 50 ? '👍' : '👎' }}</span>@endif
                     </div>
@@ -130,8 +130,8 @@
         @empty
         <div class="dp-card" style="width:100%;text-align:center;padding:40px;">
             <svg width="48" height="48" fill="none" stroke="#9CA3AF" viewBox="0 0 24 24" style="margin:0 auto 12px;display:block;opacity:0.5;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <div style="font-size:14px;font-weight:600;color:#6B7280;">Henüz karar noktası verisi yok</div>
-            <div style="font-size:12px;color:#9CA3AF;margin-top:4px;">Bu görev tamamlandığında Group Flow burada gösterilecek.</div>
+            <div style="font-size:14px;font-weight:600;color:#6B7280;">{{ __('portal.no_decision_data') }}</div>
+            <div style="font-size:12px;color:#9CA3AF;margin-top:4px;">{{ __('portal.group_flow_will_show') }}</div>
         </div>
         @endforelse
     </div>

@@ -5,7 +5,7 @@
 @section('content')
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
     <div>
-        <div style="font-size:22px;font-weight:700;color:var(--text-main);">📊 Command Center</div>
+        <div style="font-size:22px;font-weight:700;color:var(--text-main);">📊 {{ __('portal.command_center') }}</div>
         <p style="font-size:13px;color:var(--text-muted);margin-top:2px;">{{ __('portal.reports_index_subtitle') }}</p>
     </div>
 </div>
@@ -144,7 +144,7 @@
                             <div style="border:1px solid rgba(0,0,0,0.06);border-radius:12px;padding:16px;background:var(--color-card-bg);transition:box-shadow .2s;height:100%;">
                                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                                     <div style="font-weight:600;font-size:14px;color:var(--text-main);">{{ $stat['app']->name }}</div>
-                                    <span style="font-size:11px;padding:4px 8px;background:rgba(67,100,247,0.1);color:var(--primary);border-radius:20px;font-weight:600;">{{ $stat['total_users'] }} Users</span>
+                                    <span style="font-size:11px;padding:4px 8px;background:rgba(67,100,247,0.1);color:var(--primary);border-radius:20px;font-weight:600;">{{ $stat['total_users'] }} {{ __('portal.chart_students') }}</span>
                                 </div>
                                 <div style="display:flex;gap:12px;align-items:end;">
                                     <div style="font-size:24px;font-weight:800;color:var(--text-main);line-height:1;">{{ $stat['completed'] }}</div>
@@ -171,7 +171,7 @@
                 <canvas id="globalRadarChart"></canvas>
             </div>
             <div style="margin-top:16px;font-size:12px;color:var(--text-muted);text-align:center;line-height:1.5;">
-                Highlights the global average of Mission WAY attributes across the current scope.
+                {{ __('portal.radar_description') }}
             </div>
         </div>
         @endif
@@ -184,12 +184,12 @@
         {{-- Gamified Leaderboards --}}
         <div class="dp-card">
             <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;">
-                🚀 Top Achievers
+                🚀 {{ __('portal.top_achievers') }}
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;">
                 {{-- Global Score Top --}}
                 <div>
-                    <div style="font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;">⭐ Highest Global Score</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;">⭐ {{ __('portal.highest_global_score') }}</div>
                     @forelse($leaderboards['top_score'] ?? [] as $i => $row)
                         <div style="display:flex;align-items:center;gap:12px;padding:8px 0;{{ !$loop->last ? 'border-bottom:1px solid rgba(0,0,0,0.04);' : '' }}">
                             <div style="width:24px;height:24px;border-radius:50%;background:{{ $i==0 ? '#fbbf24' : ($i==1 ? '#9ca3af' : ($i==2 ? '#d97706' : 'rgba(0,0,0,0.05)')) }};color:{{ $i<3 ? '#fff' : 'var(--text-muted)' }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">
@@ -201,13 +201,13 @@
                             <div style="font-weight:700;font-size:14px;color:var(--text-main);">{{ $row['score'] }}</div>
                         </div>
                     @empty
-                        <div style="font-size:13px;color:var(--text-muted);">No data yet.</div>
+                        <div style="font-size:13px;color:var(--text-muted);">{{ __('portal.no_recent_logs') }}</div>
                     @endforelse
                 </div>
 
                 {{-- Ethics Top --}}
                 <div>
-                    <div style="font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;">🧡 Most Ethical</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;">🧡 {{ __('portal.most_ethical') }}</div>
                     @forelse($leaderboards['top_ethics'] ?? [] as $i => $row)
                         <div style="display:flex;align-items:center;gap:12px;padding:8px 0;{{ !$loop->last ? 'border-bottom:1px solid rgba(0,0,0,0.04);' : '' }}">
                             <div style="width:24px;height:24px;border-radius:50%;background:{{ $i==0 ? '#f59e0b' : 'rgba(245,158,11,0.1)' }};color:{{ $i==0 ? '#fff' : '#f59e0b' }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">
@@ -219,13 +219,13 @@
                             <div style="font-weight:700;font-size:14px;color:var(--text-main);">{{ $row['ethics'] }}</div>
                         </div>
                     @empty
-                        <div style="font-size:13px;color:var(--text-muted);">No data yet.</div>
+                        <div style="font-size:13px;color:var(--text-muted);">{{ __('portal.no_recent_logs') }}</div>
                     @endforelse
                 </div>
 
                 {{-- Adaptation Top --}}
                 <div>
-                    <div style="font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;">✅ Most Adaptable</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;">✅ {{ __('portal.most_adaptable') }}</div>
                     @forelse($leaderboards['top_adaptation'] ?? [] as $i => $row)
                         <div style="display:flex;align-items:center;gap:12px;padding:8px 0;{{ !$loop->last ? 'border-bottom:1px solid rgba(0,0,0,0.04);' : '' }}">
                             <div style="width:24px;height:24px;border-radius:50%;background:{{ $i==0 ? '#10b981' : 'rgba(16,185,129,0.1)' }};color:{{ $i==0 ? '#fff' : '#10b981' }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">
@@ -237,7 +237,7 @@
                             <div style="font-weight:700;font-size:14px;color:var(--text-main);">{{ $row['adaptation'] }}</div>
                         </div>
                     @empty
-                        <div style="font-size:13px;color:var(--text-muted);">No data yet.</div>
+                        <div style="font-size:13px;color:var(--text-muted);">{{ __('portal.no_recent_logs') }}</div>
                     @endforelse
                 </div>
             </div>
@@ -274,7 +274,7 @@
                         </div>
                     </div>
                 @empty
-                    <div style="text-align:center;padding:32px 0;color:var(--text-muted);font-size:13px;">No recent activities found.</div>
+                    <div style="text-align:center;padding:32px 0;color:var(--text-muted);font-size:13px;">{{ __('portal.no_recent_activities') }}</div>
                 @endforelse
             </div>
         </div>
@@ -285,7 +285,7 @@
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:24px;">
         {{-- Activity Trend --}}
         <div class="dp-card" style="display:flex;flex-direction:column;">
-            <div class="dp-card-title" style="margin-bottom:8px;">30-Day Activity Trend</div>
+            <div class="dp-card-title" style="margin-bottom:8px;">{{ __('portal.activity_trend_30') }}</div>
             <div style="flex:1;position:relative;min-height:220px;">
                 <canvas id="usageTrendChart"></canvas>
             </div>
@@ -311,7 +311,7 @@
     {{-- PHASE 3: PER-APP DEEP DASHBOARDS --}}
     @if(isset($perAppDashboards))
         <div style="margin-top: 48px; border-top: 2px dashed rgba(0,0,0,0.05); padding-top: 32px;">
-            <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 24px;">Deep Dive: Per-App Dashboards</h2>
+            <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 24px;">{{ __('portal.deep_dive_dashboards') }}</h2>
             @foreach($perAppDashboards as $dashboard)
                 @php $slug = $dashboard['app']->slug; @endphp
                 <div class="dp-card" style="margin-bottom: 40px; border-top: 4px solid var(--primary);">
@@ -338,7 +338,7 @@
                         
                         {{-- Top Performers --}}
                         <div style="border:1px solid rgba(0,0,0,0.05);border-radius:12px;padding:16px;">
-                            <div style="font-size:13px;font-weight:800;color:var(--primary);margin-bottom:12px;">🏆 Top Performers</div>
+                            <div style="font-size:13px;font-weight:800;color:var(--primary);margin-bottom:12px;">🏆 {{ __('portal.top_performers') }}</div>
                             @forelse($dashboard['lists']['top'] ?? [] as $tRow)
                                 <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.03);font-size:12px;">
                                     <span style="font-weight:600;color:var(--text-main);">{{ $tRow['name'] }}</span>
@@ -351,27 +351,27 @@
 
                         {{-- Needs Attention --}}
                         <div style="border:1px solid rgba(0,0,0,0.05);border-radius:12px;padding:16px;">
-                            <div style="font-size:13px;font-weight:800;color:#f43f5e;margin-bottom:12px;">⚠️ Needs Attention</div>
+                            <div style="font-size:13px;font-weight:800;color:#f43f5e;margin-bottom:12px;">⚠️ {{ __('portal.needs_attention') }}</div>
                             @forelse($dashboard['lists']['needs_attention'] ?? [] as $aRow)
                                 <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.03);font-size:12px;">
                                     <span style="font-weight:600;color:var(--text-main);">{{ $aRow['name'] }}</span>
                                     <span style="color:#f43f5e;">{{ $aRow['detail'] }}</span>
                                 </div>
                             @empty
-                                <div style="font-size:12px;color:var(--text-muted);padding:8px 0;text-align:center;">All Good!</div>
+                                <div style="font-size:12px;color:var(--text-muted);padding:8px 0;text-align:center;">{{ __('portal.all_good') }}</div>
                             @endforelse
                         </div>
 
                         {{-- Recent Activity --}}
                         <div style="border:1px solid rgba(0,0,0,0.05);border-radius:12px;padding:16px;">
-                            <div style="font-size:13px;font-weight:800;color:#10b981;margin-bottom:12px;">⚡ Recent Highlights</div>
+                            <div style="font-size:13px;font-weight:800;color:#10b981;margin-bottom:12px;">⚡ {{ __('portal.recent_highlights') }}</div>
                             @forelse($dashboard['lists']['recent'] ?? [] as $rRow)
                                 <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.03);font-size:12px;gap:8px;">
                                     <div style="font-weight:600;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $rRow['user'] }} <span style="font-weight:400;color:var(--text-muted);">{{ $rRow['action'] }}</span></div>
                                     <span style="color:var(--text-muted);white-space:nowrap;">{{ $rRow['date'] }}</span>
                                 </div>
                             @empty
-                                <div style="font-size:12px;color:var(--text-muted);padding:8px 0;text-align:center;">No recent logs.</div>
+                                <div style="font-size:12px;color:var(--text-muted);padding:8px 0;text-align:center;">{{ __('portal.no_recent_logs') }}</div>
                             @endforelse
                         </div>
                         
@@ -397,9 +397,9 @@ Chart.defaults.font.family = "'Nunito', sans-serif";
 new Chart(document.getElementById('globalRadarChart'), {
     type: 'radar',
     data: {
-        labels: ['Health 🧬', 'Resource 🍃', 'Ethics ⚖️', 'Adaptation 🧩'],
+        labels: ['{{ __('portal.chart_health') }} 🧬', '{{ __('portal.chart_resource') }} 🌿', '{{ __('portal.chart_ethics') }} ⚖️', '{{ __('portal.chart_adaptation') }} 🧩'],
         datasets: [{
-            label: 'Global Class/School Averages',
+            label: '{{ __('portal.chart_global_avg') }}',
             data: [
                 {{ $radarMetrics['health'] ?? 0 }},
                 {{ $radarMetrics['resource'] ?? 0 }},
@@ -442,7 +442,7 @@ new Chart(utCtx, {
     data: {
         labels: {!! json_encode($usageTrend['labels']) !!},
         datasets: [{
-            label: 'Completions',
+            label: '{{ __('portal.chart_completions') }}',
             data: {!! json_encode($usageTrend['data']) !!},
             borderColor: '#4364F7',
             backgroundColor: gradientBlue,
@@ -471,7 +471,7 @@ new Chart(document.getElementById('scoreDistChart'), {
     data: {
         labels: {!! json_encode($scoreDistribution['labels']) !!},
         datasets: [{
-            label: 'Students',
+            label: '{{ __('portal.chart_students') }}',
             data: {!! json_encode($scoreDistribution['data']) !!},
             backgroundColor: '#10b981',
             borderRadius: 6,
@@ -496,7 +496,7 @@ new Chart(document.getElementById('popularityChart'), {
     data: {
         labels: {!! json_encode($modulePopularity['labels']) !!},
         datasets: [{
-            label: 'Plays',
+            label: '{{ __('portal.chart_plays') }}',
             data: {!! json_encode($modulePopularity['data']) !!},
             backgroundColor: 'rgba(139, 92, 246, 0.8)',
             borderRadius: 4
@@ -548,7 +548,7 @@ perAppArray.forEach(function(dash) {
             data: {
                 labels: dash.charts.scores.labels,
                 datasets: [{
-                    label: 'Students',
+                    label: '{{ __('portal.chart_students') }}',
                     data: dash.charts.scores.data,
                     backgroundColor: ['#10b981', '#f59e0b', '#f43f5e'],
                     borderRadius: 4
@@ -570,7 +570,7 @@ perAppArray.forEach(function(dash) {
             data: {
                 labels: dash.charts.activity.labels,
                 datasets: [{
-                    label: 'Activity',
+                    label: '{{ __('portal.chart_activity') }}',
                     data: dash.charts.activity.data,
                     borderColor: '#8b5cf6',
                     borderWidth: 2,

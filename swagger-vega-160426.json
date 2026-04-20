@@ -1,0 +1,1541 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Vega AI Coach Platform API",
+    "description": "AWS Lambda tabanlı eğitim AI platformu. Chatbot, Sessions, Lecturer ve Simulator modüllerini içerir.\n\n## Mimari\nPlatform 4 bağımsız Lambda servisinden oluşur:\n\n| Servis | Protokol | Lambda |\n|--------|----------|--------|\n| **Sessions** | HTTP REST | vega-ai-chatbot-sessions |\n| **Chatbot** | WebSocket | vega-ai-chatbot |\n| **Lecturer** | HTTP REST | vega-ai-lecturer |\n| **Simulator** | HTTP REST | vega-ai-simulator |\n\n## Çok Dilli Destek (v1.5.0)\nTüm endpoint'ler `language` parametresi ile aşağıdaki **9 dili** destekler:\n- `tr` (Türkçe, varsayılan)\n- `en` (English)\n- `de` (Deutsch)\n- `es` (Español)\n- `mn` (Монгол — Moğolca)\n- `hi` (हिंदी — Hintçe)\n- `ko` (한국어 — Korece)\n- `ja` (日本語 — Japonca)\n- `fr` (Français — Fransızca)\n\nGeçersiz veya boş `language` değeri gönderildiğinde `tr` kullanılır.\n\n## Tema Desteği\nChatbot ve Lecturer modülleri opsiyonel `theme` parametresi ile sohbetin/dersin belirli bir temaya uygun yönlendirilmesini sağlar. WAY tema key'leri (`way_ai_coach_themes.json`'dan) biliniyorsa detaylı prompt uygulanır; bilinmiyorsa jenerik şablon kullanılır.\n\n## Score & Theme Message (Lecturer)\nLecturer `/lecturer/chat` yanıtında `score` (0 veya 1) alanı her zaman döner.\n- Tema **varsa**: tema uyumluluğu değerlendirilir\n- Tema **yoksa**: genel anlamlılık değerlendirilir; score=1 ise otomatik `theme_message` (kategori) eklenir\n\nGeçerli kategoriler: English, Math, Science, Geography, History, Life Science, Computer Science, Physical Science, Biology, Chemistry, Economics, Personal Finance, Space, Government\n\n## Kişiselleştirme Sistemi (v1.4.0)\nLecturer modülü güçlendirilmiş kişiselleştirme içerir. `profile` objesi gönderildiğinde AI asistan:\n- Öğrencinin adını, şehrini, ilgi alanını yanıtlarda doğal referans alır\n- Sınıf düzeyine uygun örnekler üretir\n- Ansiklopedik anlatım yerine profil tabanlı analojiler kullanır\n\n## Sonsuzluk Mantığı — Simulator (v1.4.0)\nSimülatör artık sürekli kriz döngüsü uygular:\n- Her sahne bir mini kriz içerir\n- Kriz çözüldüğünde otomatik olarak yeni ve farklı bir kriz başlar\n- Aynı kriz türü art arda tekrar etmez\n- 6 kriz türü dönüşümlü kullanılır: `human_relations`, `technical`, `ethical`, `time_pressure`, `creativity`, `unexpected_external`\n- Kriz geçmişi `sim_state.crisis_history` içinde tutulur",
+    "version": "1.5.0",
+    "contact": {
+      "name": "Vega AI Team"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.example.com/v1",
+      "description": "Production API"
+    },
+    {
+      "url": "https://api-dev.example.com/v1",
+      "description": "Development API"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Sessions",
+      "description": "Oturum ve mesaj yönetimi (HTTP REST API — vega-ai-chatbot-sessions Lambda)"
+    },
+    {
+      "name": "Chatbot",
+      "description": "WebSocket tabanlı gerçek zamanlı sohbet + DALL-E görsel üretimi (vega-ai-chatbot Lambda)"
+    },
+    {
+      "name": "Lecturer",
+      "description": "W.A.Y. metodolojisi tabanlı kişiselleştirilmiş eğitim asistanı (vega-ai-lecturer Lambda)"
+    },
+    {
+      "name": "Simulator",
+      "description": "Role Galaxy — Senaryo tabanlı interaktif simülasyon motoru (vega-ai-simulator Lambda)"
+    },
+    {
+      "name": "Health",
+      "description": "Sistem durumu kontrolleri"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Sistem durumu kontrolü",
+        "description": "API'nin çalışıp çalışmadığını kontrol eder. Sessions, Lecturer ve Simulator servisleri ayrı `/health` endpoint'lerine sahiptir.",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "description": "Sistem çalışıyor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "examples": {
+                  "sessions": {
+                    "summary": "Sessions servisi",
+                    "value": {
+                      "ok": true,
+                      "service": "Vega AI Assistant - HTTP Lambda"
+                    }
+                  },
+                  "lecturer": {
+                    "summary": "Lecturer servisi",
+                    "value": {
+                      "ok": true,
+                      "service": "vega-lecturer+sessions",
+                      "time": "2026-04-09T10:30:00Z",
+                      "model": "gpt-4o-mini"
+                    }
+                  },
+                  "simulator": {
+                    "summary": "Simulator servisi",
+                    "value": {
+                      "ok": true,
+                      "service": "VEGA Sim Engine (CC+Responses + DDB resume/meta)",
+                      "time": "2026-04-09T10:30:00Z",
+                      "model": "gpt-4o-mini"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/sessions": {
+      "post": {
+        "tags": ["Sessions"],
+        "summary": "Yeni oturum oluştur",
+        "description": "Yeni bir sohbet oturumu oluşturur. OpenAI thread'i otomatik oluşturulur. DynamoDB `vega-ai-session` tablosuna yazar.",
+        "operationId": "createSession",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSessionRequest"
+              },
+              "examples": {
+                "basic": {
+                  "summary": "Temel oturum",
+                  "value": {
+                    "user_id": "user_123",
+                    "language": "tr"
+                  }
+                },
+                "withTitle": {
+                  "summary": "Başlıklı oturum",
+                  "value": {
+                    "user_id": "user_123",
+                    "title": "Matematik Dersi",
+                    "language": "en"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Oturum başarıyla oluşturuldu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                },
+                "example": {
+                  "session_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                  "student_id": "user_123",
+                  "thread_id": "thread_xyz789",
+                  "title": "Yeni Konuşma",
+                  "language": "tr",
+                  "created_at": "2026-04-09T10:30:00",
+                  "updated_at": "2026-04-09T10:30:00",
+                  "message_count": 0
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`user_id` eksik",
+            "content": {
+              "application/json": {
+                "example": { "error": "user_id required" }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "get": {
+        "tags": ["Sessions"],
+        "summary": "Oturum listesi",
+        "description": "Belirli bir öğrencinin oturumlarını listeler. GSI `gsi_student_updated` üzerinden sorgular (yoksa scan fallback).",
+        "operationId": "listSessions",
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "query",
+            "required": true,
+            "description": "Öğrenci ID'si",
+            "schema": { "type": "string" },
+            "example": "user_123"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maksimum sonuç sayısı",
+            "schema": { "type": "integer", "default": 100 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Oturum listesi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`student_id` eksik",
+            "content": {
+              "application/json": {
+                "example": { "error": "student_id required" }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/sessions/{session_id}": {
+      "get": {
+        "tags": ["Sessions"],
+        "summary": "Oturum detayı + mesajlar",
+        "description": "Belirli bir oturumun detaylarını ve tüm mesajlarını kronolojik sırayla getirir.",
+        "operationId": "getSessionDetail",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maksimum mesaj sayısı",
+            "schema": { "type": "integer", "default": 500 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Oturum detayı (mesajlarla birlikte)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`session_id` eksik",
+            "content": {
+              "application/json": {
+                "example": { "error": "session_id required" }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+
+    "/ask": {
+      "post": {
+        "tags": ["Sessions"],
+        "summary": "Soru sor (non-streaming)",
+        "description": "OpenAI Assistant'a soru sorar ve yanıtı döner. Görsel üretimi destekler (DALL-E). Mesaj \"resim\", \"görsel\" gibi anahtar kelimeler içeriyorsa `generate_image` tool call'u tetiklenir.\n\n**Akış:**\n1. Kullanıcı mesajı DDB'ye yazılır\n2. OpenAI thread'e mesaj eklenir\n3. Run başlatılır ve poll edilir (maks ~96 sn)\n4. Tool call varsa (görsel üretim) işlenir\n5. Yanıt link/URL'lerden temizlenir\n6. Asistan mesajı DDB'ye yazılır",
+        "operationId": "askQuestion",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskRequest"
+              },
+              "examples": {
+                "textQuestion": {
+                  "summary": "Metin sorusu",
+                  "value": {
+                    "session_id": "a1b2c3d4-e5f6-7890",
+                    "thread_id": "thread_xyz789",
+                    "message": "Pitagor teoremini açıklar mısın?",
+                    "language": "tr"
+                  }
+                },
+                "imageRequest": {
+                  "summary": "Görsel isteği",
+                  "value": {
+                    "session_id": "a1b2c3d4-e5f6-7890",
+                    "thread_id": "thread_xyz789",
+                    "message": "Bir uzay gemisi çiz",
+                    "language": "tr"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Yanıt başarılı",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AskResponse"
+                },
+                "example": {
+                  "answer": "Pitagor teoremi, dik üçgenlerde hipotenüsün karesinin...",
+                  "audio_text": "Pitagor teoremi, dik üçgenlerde hipotenüsün karesinin...",
+                  "thread_id": "thread_xyz789",
+                  "session_id": "a1b2c3d4-e5f6-7890",
+                  "images": []
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`message` eksik",
+            "content": {
+              "application/json": {
+                "example": { "error": "message required" }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+
+    "/thread": {
+      "post": {
+        "tags": ["Sessions"],
+        "summary": "OpenAI Thread oluştur",
+        "description": "Yeni bir OpenAI thread oluşturur ve ID'sini döner.",
+        "operationId": "createThread",
+        "responses": {
+          "200": {
+            "description": "Thread oluşturuldu",
+            "content": {
+              "application/json": {
+                "example": { "thread_id": "thread_abc123xyz" }
+              }
+            }
+          },
+          "500": {
+            "description": "OpenAI client başlatılamadı",
+            "content": {
+              "application/json": {
+                "example": { "error": "OpenAI client not initialized" }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/images/{key}": {
+      "get": {
+        "tags": ["Sessions"],
+        "summary": "Görsel getir (S3 binary)",
+        "description": "S3'ten görsel dosyasını getirir (base64 encoded binary response).",
+        "operationId": "getImage",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "description": "S3 key (örn: generated/uuid.png)",
+            "schema": { "type": "string" },
+            "example": "generated/abc123-def456.png"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Görsel dosyası (binary, base64 encoded)",
+            "content": {
+              "image/png": {
+                "schema": { "type": "string", "format": "binary" }
+              }
+            }
+          },
+          "400": {
+            "description": "`key` eksik",
+            "content": {
+              "application/json": {
+                "example": { "error": "key required" }
+              }
+            }
+          },
+          "404": {
+            "description": "S3'te dosya bulunamadı",
+            "content": {
+              "application/json": {
+                "example": { "error": "Image fetch failed: NoSuchKey" }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/lecturer/start": {
+      "post": {
+        "tags": ["Lecturer"],
+        "summary": "Lecturer oturumu başlat",
+        "description": "Yeni bir eğitim oturumu başlatır. DynamoDB'de session kaydı oluşturur, PostgreSQL'e sync eder.\n\n**meta** objesi: `subject`, `topic`, `grade`, `name`, `title` alanlarını içerebilir.",
+        "operationId": "lecturerStart",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LecturerStartRequest"
+              },
+              "examples": {
+                "basic": {
+                  "summary": "Temel başlatma",
+                  "value": {
+                    "user_id": "user_123",
+                    "meta": {
+                      "subject": "Matematik",
+                      "topic": "Türev",
+                      "grade": "11. Sınıf",
+                      "name": "Ali"
+                    },
+                    "language": "tr"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Oturum başlatıldı",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LecturerStartResponse"
+                },
+                "example": {
+                  "status": "ok",
+                  "thread_id": "local_abc123def456",
+                  "session_id": "sess_abc123def456"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/lecturer/chat": {
+      "post": {
+        "tags": ["Lecturer"],
+        "summary": "Lecturer ile sohbet",
+        "description": "Devam eden eğitim oturumunda mesaj gönderir. Kişiselleştirilmiş W.A.Y. metodolojisi uygulanır.\n\n**Kişiselleştirme (v1.4.0):** `profile` objesi gönderildiğinde AI asistan öğrencinin adını, şehrini, ilgi alanını yanıtlarda doğal olarak kullanır. Ansiklopedik anlatım yerine kişiselleştirilmiş analojiler ve örnekler üretir.\n\n**Profil alanları:**\n- `name` / `student_name`: Öğrencinin adı\n- `city` / `şehir`: Yaşadığı şehir\n- `grade` / `sınıf`: Sınıf düzeyi\n- `hero` / `ilgi` / `interest`: İlgi alanı / kahramanı\n- `learning_preference` / `tercih`: Öğrenme tercihi (görsel, işitsel vb.)\n- `memory` / `anı`: Öğrencinin paylaştığı bir anı\n\n**Score mantığı:**\n- Tema **varsa**: tema uyumluluğu değerlendirilir → `score` = 0 veya 1\n- Tema **yoksa** ve `score=1`: otomatik kategori tespiti yapılır → `theme_message` eklenir\n- Tema **varsa**: `theme_message` alanı ASLA dönmez\n\n**Geçmiş yönetimi:**\n- `history` array'i body'de gönderilirse o kullanılır\n- Gönderilmezse DynamoDB'den son 8 mesaj çekilir\n- Toplam karakter limiti: 6000",
+        "operationId": "lecturerChat",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LecturerChatRequest"
+              },
+              "examples": {
+                "basic": {
+                  "summary": "Temel soru",
+                  "value": {
+                    "session_id": "sess_abc123",
+                    "prompt": "Türev nedir?",
+                    "language": "tr"
+                  }
+                },
+                "withProfile": {
+                  "summary": "Profilli ve temalı soru",
+                  "value": {
+                    "session_id": "sess_abc123",
+                    "prompt": "Güneş sistemi hakkında bilgi ver",
+                    "profile": {
+                      "name": "Ali",
+                      "city": "İstanbul",
+                      "grade": "7. Sınıf",
+                      "hero": "uzay ve roketler",
+                      "learning_preference": "görsel",
+                      "memory": "Geçen yaz teleskopla Mars gördüm"
+                    },
+                    "theme": "uzay keşfi ve astronomi",
+                    "language": "tr"
+                  }
+                },
+                "withHistory": {
+                  "summary": "Geçmişli sohbet",
+                  "value": {
+                    "session_id": "sess_abc123",
+                    "prompt": "Peki integral ile ilişkisi nedir?",
+                    "history": [
+                      {"role": "user", "content": "Türev nedir?"},
+                      {"role": "assistant", "content": "Türev, bir fonksiyonun değişim hızını ölçer..."}
+                    ],
+                    "language": "tr"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Yanıt başarılı",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LecturerChatResponse"
+                },
+                "examples": {
+                  "withTheme": {
+                    "summary": "Tema uyumlu yanıt (score=1, theme_message yok)",
+                    "value": {
+                      "status": "ok",
+                      "session_id": "sess_abc123",
+                      "thread_id": "local_abc123",
+                      "reply": "Ali, senin İstanbul'daki yaşamından yola çıkarsak...",
+                      "audio_text": "Ali, senin İstanbul'daki yaşamından yola çıkarsak...",
+                      "usage": {"input_tokens": 500, "output_tokens": 200, "total_tokens": 700},
+                      "score": 1
+                    }
+                  },
+                  "noTheme": {
+                    "summary": "Temasız yanıt (score=1, theme_message eklenir)",
+                    "value": {
+                      "status": "ok",
+                      "session_id": "sess_abc123",
+                      "thread_id": "local_abc123",
+                      "reply": "Fotosentez, bitkilerin güneş enerjisini kimyasal enerjiye çevirme sürecidir...",
+                      "audio_text": "Fotosentez, bitkilerin güneş enerjisini kimyasal enerjiye çevirme sürecidir...",
+                      "usage": {"input_tokens": 400, "output_tokens": 150, "total_tokens": 550},
+                      "score": 1,
+                      "theme_message": "Biology"
+                    }
+                  },
+                  "nonsense": {
+                    "summary": "Anlamsız konuşma (score=0)",
+                    "value": {
+                      "status": "ok",
+                      "session_id": "sess_abc123",
+                      "thread_id": "local_abc123",
+                      "reply": "Anlaşılır bir soru sormayı deneyebilir misin?",
+                      "audio_text": "Anlaşılır bir soru sormayı deneyebilir misin?",
+                      "usage": {"input_tokens": 300, "output_tokens": 50, "total_tokens": 350},
+                      "score": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/lecturer/sessions": {
+      "get": {
+        "tags": ["Lecturer"],
+        "summary": "Lecturer oturum listesi",
+        "description": "Öğrencinin tüm lecturer oturumlarını listeler. GSI1 `user_id` index'i üzerinden sorgulanır.",
+        "operationId": "listLecturerSessions",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": true,
+            "description": "Öğrenci/kullanıcı ID'si",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 20 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Oturum listesi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LecturerSessionListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/lecturer/sessions/{session_id}": {
+      "get": {
+        "tags": ["Lecturer"],
+        "summary": "Lecturer oturum detayı",
+        "description": "Belirli bir lecturer oturumunun detaylarını getirir.",
+        "operationId": "getLecturerSession",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Oturum detayı",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LecturerSessionDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+
+    "/lecturer/sessions/{session_id}/end": {
+      "post": {
+        "tags": ["Lecturer"],
+        "summary": "Lecturer oturumu sonlandır",
+        "description": "Aktif bir lecturer oturumunu sonlandırır. DynamoDB ve PostgreSQL'de status='ENDED' olarak güncellenir.",
+        "operationId": "endLecturerSession",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Oturum sonlandırıldı",
+            "content": {
+              "application/json": {
+                "example": { "status": "ok" }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/sessions/overview": {
+      "get": {
+        "tags": ["Lecturer"],
+        "summary": "Tüm modül oturumları özeti",
+        "description": "Öğrencinin chatbot, lecturer ve simulator oturumlarının birleşik özetini getirir. 3 farklı DynamoDB tablosundan veri toplar ve `updated_at` azalan sıralı birleştirir.\n\n**Veri kaynakları:**\n- Chatbot: `vega-ai-session` (GSI: gsi_student_updated)\n- Lecturer: `vega_lecturer_sessions` (GSI: GSI1)\n- Simulator: `vega_sim_sessions` (GSI: GSI1 veya scan fallback)",
+        "operationId": "getSessionsOverview",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": true,
+            "description": "Kullanıcı ID'si",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Toplam maks sonuç",
+            "schema": { "type": "integer", "default": 50 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Birleşik oturum listesi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionsOverviewResponse"
+                },
+                "example": {
+                  "status": "ok",
+                  "items": [
+                    {
+                      "module": "lecturer",
+                      "session_id": "sess_abc123",
+                      "title": "Matematik — Türev",
+                      "status": "ACTIVE",
+                      "updated_at": "2026-04-09T10:30:00Z",
+                      "created_at": "2026-04-09T10:00:00Z",
+                      "subject": "Matematik",
+                      "topic": "Türev"
+                    },
+                    {
+                      "module": "simulator",
+                      "session_id": "sess_def456",
+                      "title": "Simülasyon",
+                      "status": "ACTIVE",
+                      "updated_at": "2026-04-09T09:00:00Z",
+                      "scenario": "village_life_v1",
+                      "score": 73,
+                      "threshold": "denge"
+                    },
+                    {
+                      "module": "chatbot",
+                      "session_id": "sess_ghi789",
+                      "title": "Genel Sohbet",
+                      "status": "ACTIVE",
+                      "updated_at": "2026-04-08T15:00:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`user_id` eksik",
+            "content": {
+              "application/json": {
+                "example": { "error": "user_id required" }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/sessions/{module}/{session_id}": {
+      "get": {
+        "tags": ["Lecturer"],
+        "summary": "Modül bazlı oturum detayı",
+        "description": "Belirli bir modülün (chatbot/lecturer/simulator) oturum detayını getirir. Simulator için step'ler ve seçimler dahil edilir.",
+        "operationId": "getModuleSessionDetail",
+        "parameters": [
+          {
+            "name": "module",
+            "in": "path",
+            "required": true,
+            "description": "Modül adı",
+            "schema": {
+              "type": "string",
+              "enum": ["chatbot", "lecturer", "simulator"]
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maks mesaj/step sayısı",
+            "schema": { "type": "integer", "default": 500 }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "description": "Sıralama yönü",
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"],
+              "default": "asc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Oturum detayı (modüle göre farklı yapı)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {"$ref": "#/components/schemas/ChatbotSessionDetail"},
+                    {"$ref": "#/components/schemas/LecturerSessionDetailResponse"},
+                    {"$ref": "#/components/schemas/SimulatorSessionDetail"}
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Geçersiz modül adı",
+            "content": {
+              "application/json": {
+                "example": { "error": "module must be chatbot|lecturer|simulator" }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+
+    "/scenario/start": {
+      "post": {
+        "tags": ["Simulator"],
+        "summary": "Simülasyon başlat veya devam ettir",
+        "description": "Yeni bir senaryo simülasyonu başlatır veya mevcut bir oturumu devam ettirir.\n\n**Sonsuzluk Mantığı (v1.4.0):**\nSimülasyon artık bitmez. Her sahne bir mini kriz içerir ve kriz çözüldüğünde otomatik yeni bir kriz başlar. `sim_state.crisis_history` içinde son 6 krizin türü ve tur numarası tutulur.\n\n**Kriz türleri:**\n- `human_relations` — İnsan ilişkileri, empati, iletişim\n- `technical` — Teknik/problem çözme\n- `ethical` — Etik karar verme\n- `time_pressure` — Zaman baskısı altında karar\n- `creativity` — Yaratıcılık gerektiren durumlar\n- `unexpected_external` — Beklenmedik dış olaylar\n\n**Devam ettirme:** `session_id` gönderilirse DynamoDB'den mevcut `sim_state` çekilir ve kaldığı yerden devam eder.",
+        "operationId": "scenarioStart",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioStartRequest"
+              },
+              "examples": {
+                "newSession": {
+                  "summary": "Yeni simülasyon",
+                  "value": {
+                    "user_id": "user_123",
+                    "scenario": "village_life_v1",
+                    "language": "tr"
+                  }
+                },
+                "resume": {
+                  "summary": "Devam ettir",
+                  "value": {
+                    "session_id": "sess_abc123",
+                    "user_id": "user_123",
+                    "scenario": "village_life_v1",
+                    "language": "tr"
+                  }
+                },
+                "withProfile": {
+                  "summary": "Profilli başlatma",
+                  "value": {
+                    "user_id": "user_123",
+                    "scenario": "novaris_v1",
+                    "profile": {
+                      "age": 14,
+                      "interests": ["bilim kurgu", "teknoloji"]
+                    },
+                    "language": "tr"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Simülasyon başlatıldı/devam ettirildi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioStartResponse"
+                },
+                "example": {
+                  "status": "ok",
+                  "session_id": "sess_abc123def456",
+                  "turn": 0,
+                  "score": 70,
+                  "scene": {
+                    "node_text": "Kuraklığın etkisiyle köyde yaşam zorlaşıyor...\n\nKöyün su sorununu çözmek için ilk adımın ne olmalı?",
+                    "audio_text": "Kuraklığın etkisiyle köyde yaşam zorlaşıyor...",
+                    "node_intro": "Kuraklığın etkisiyle köyde yaşam zorlaşıyor...",
+                    "node_question": "Köyün su sorununu çözmek için ilk adımın ne olmalı?",
+                    "choices": [
+                      {"id": "opt_a", "text": "Yağmur suyu toplama alanı kur.", "impact": 3},
+                      {"id": "opt_b", "text": "Kuyu bakımını denetle.", "impact": 2},
+                      {"id": "opt_c", "text": "Kısa süre gözlem yap.", "impact": 0}
+                    ],
+                    "delta": 0,
+                    "ended": false
+                  },
+                  "node_id": "node-0",
+                  "history": [],
+                  "sim_state": {
+                    "score": 70,
+                    "threshold": "denge",
+                    "scenario": "village_life_v1",
+                    "history": [],
+                    "impacts": {},
+                    "language": "tr",
+                    "crisis_history": [
+                      {"type": "technical", "turn": 0}
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Geçersiz JSON body",
+            "content": {
+              "application/json": {
+                "example": { "status": "error", "error": "invalid_json" }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/scenario/step": {
+      "post": {
+        "tags": ["Simulator"],
+        "summary": "Simülasyon adımı",
+        "description": "Kullanıcının seçimine göre simülasyonu bir adım ilerletir.\n\n**Akış:**\n1. `sim_state` içindeki `impacts` tablosundan seçimin puan etkisi hesaplanır\n2. Skor güncellenir → `threshold` (denge/uyarı/kriz/yıkım) yeniden hesaplanır\n3. Seçim `history`'ye eklenir\n4. LLM'den yeni sahne üretilir (sonsuzluk kurallarıyla)\n5. `crisis_history` güncellenir (yeni kriz türü eklenir)\n6. DDB ve PostgreSQL'e persistence yapılır\n\n**Sonsuzluk garantisi:**\n- `ended` her zaman `false` döner\n- Kriz çözüldüğünde otomatik yeni kriz başlar\n- Son kullanılan kriz türü tekrar etmez\n\n**Önemli:** `sim_state` opak bir objedir. Client bunu olduğu gibi alıp bir sonraki step'e geri göndermeli, içini parse etmemeli.",
+        "operationId": "scenarioStep",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioStepRequest"
+              },
+              "examples": {
+                "makeChoice": {
+                  "summary": "Seçim yap",
+                  "value": {
+                    "session_id": "sess_abc123def456",
+                    "turn": 0,
+                    "node_id": "node-0",
+                    "choice_id": "opt_a",
+                    "choices_map": {
+                      "opt_a": "Yağmur suyu toplama alanı kur.",
+                      "opt_b": "Kuyu bakımını denetle.",
+                      "opt_c": "Kısa süre gözlem yap."
+                    },
+                    "sim_state": {
+                      "score": 70,
+                      "threshold": "denge",
+                      "scenario": "village_life_v1",
+                      "history": [],
+                      "impacts": {"node-0": {"opt_a": 3, "opt_b": 2, "opt_c": 0}},
+                      "language": "tr",
+                      "crisis_history": [{"type": "technical", "turn": 0}]
+                    },
+                    "language": "tr"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Adım başarılı — yeni sahne, güncel skor ve seçenekler",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioStepResponse"
+                },
+                "example": {
+                  "status": "ok",
+                  "turn": 1,
+                  "score": 73,
+                  "scene": {
+                    "node_text": "Sorunu kontrol altına aldın, yağmur suyu toplama sistemi işliyor. Ancak tam o sırada köy meydanında bir tartışma patlak veriyor — iki aile su paylaşımı konusunda anlaşamıyor ve durum gerginleşiyor.\n\nAralarındaki anlaşmazlığı çözmek için nasıl bir yaklaşım benimsemek istersin: tarafları ayrı ayrı dinleyerek empatiyle yaklaşmak mı, herkesi bir araya toplayıp topluluk kuralı oluşturmak mı, yoksa durup gözlemleyerek doğal çözümü beklemek mi?",
+                    "audio_text": "Sorunu kontrol altına aldın, yağmur suyu toplama sistemi işliyor...",
+                    "choices": [
+                      {"id": "opt_a", "text": "Tarafları ayrı ayrı dinle ve empatiyle yaklaş.", "impact": 4},
+                      {"id": "opt_b", "text": "Herkesi bir araya topla ve topluluk kuralı oluştur.", "impact": 3},
+                      {"id": "opt_c", "text": "Dur ve gözlemle, doğal çözümü bekle.", "impact": -2}
+                    ],
+                    "delta": 3,
+                    "ended": false
+                  },
+                  "node_id": "node-1",
+                  "choices_map": {
+                    "opt_a": "Tarafları ayrı ayrı dinle ve empatiyle yaklaş.",
+                    "opt_b": "Herkesi bir araya topla ve topluluk kuralı oluştur.",
+                    "opt_c": "Dur ve gözlemle, doğal çözümü bekle."
+                  },
+                  "history": [
+                    {"turn": 0, "node_id": "node-0", "choice_id": "opt_a", "choice_text": "Yağmur suyu toplama alanı kur."}
+                  ],
+                  "sim_state": {
+                    "score": 73,
+                    "threshold": "denge",
+                    "scenario": "village_life_v1",
+                    "crisis_history": [
+                      {"type": "technical", "turn": 0},
+                      {"type": "human_relations", "turn": 1}
+                    ]
+                  },
+                  "session_id": "sess_abc123def456"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Geçersiz JSON body",
+            "content": {
+              "application/json": {
+                "example": { "status": "error", "error": "invalid_json" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "components": {
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean" },
+          "service": { "type": "string" },
+          "time": { "type": "string", "format": "date-time", "description": "Sunucu zamanı (UTC)" },
+          "model": { "type": "string", "description": "Kullanılan LLM model adı" }
+        }
+      },
+
+      "CreateSessionRequest": {
+        "type": "object",
+        "required": ["user_id"],
+        "properties": {
+          "user_id": { "type": "string", "description": "Öğrenci/kullanıcı ID'si (zorunlu)" },
+          "title": { "type": "string", "description": "Oturum başlığı (opsiyonel, varsayılan: 'Yeni Konuşma')" },
+          "language": { "type": "string", "enum": ["tr", "en", "de", "es", "mn", "hi", "ko", "ja", "fr"], "default": "tr" }
+        }
+      },
+
+      "SessionResponse": {
+        "type": "object",
+        "properties": {
+          "session_id": { "type": "string", "description": "UUID formatında oturum ID" },
+          "student_id": { "type": "string" },
+          "thread_id": { "type": "string", "description": "OpenAI thread ID" },
+          "title": { "type": "string" },
+          "language": { "type": "string" },
+          "status": { "type": "string", "enum": ["ACTIVE", "ENDED"], "description": "Oturum durumu" },
+          "message_count": { "type": "integer" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+
+      "SessionListResponse": {
+        "type": "object",
+        "properties": {
+          "sessions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/SessionResponse" }
+          }
+        }
+      },
+
+      "SessionDetailResponse": {
+        "type": "object",
+        "properties": {
+          "session_id": { "type": "string" },
+          "student_id": { "type": "string" },
+          "thread_id": { "type": "string" },
+          "title": { "type": "string" },
+          "status": { "type": "string" },
+          "message_count": { "type": "integer" },
+          "messages": { "type": "array", "items": { "$ref": "#/components/schemas/Message" } },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+
+      "Message": {
+        "type": "object",
+        "properties": {
+          "message_id": { "type": "string", "description": "UUID mesaj ID" },
+          "session_id": { "type": "string" },
+          "role": { "type": "string", "enum": ["user", "assistant", "system"] },
+          "content": { "type": "string" },
+          "audio_text": { "type": "string", "description": "TTS için optimize edilmiş metin (LaTeX ve markdown temizlenmiş)" },
+          "images": { "type": "array", "items": { "type": "string" }, "description": "S3 image key'leri (presigned URL ile erişilir)" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "ts_ns": { "type": "string", "description": "Nanosecond timestamp (20 haneli string, sıralama GSI sort key'i)" }
+        }
+      },
+
+      "AskRequest": {
+        "type": "object",
+        "required": ["message"],
+        "properties": {
+          "session_id": { "type": "string", "description": "Mevcut oturum ID (opsiyonel)" },
+          "thread_id": { "type": "string", "description": "OpenAI thread ID (opsiyonel, yoksa otomatik oluşturulur)" },
+          "student_id": { "type": "string" },
+          "message": { "type": "string", "description": "Kullanıcı mesajı (zorunlu)" },
+          "language": { "type": "string", "enum": ["tr", "en", "de", "es", "mn", "hi", "ko", "ja", "fr"], "default": "tr" }
+        }
+      },
+
+      "AskResponse": {
+        "type": "object",
+        "properties": {
+          "answer": { "type": "string", "description": "Asistan yanıtı (link/URL temizlenmiş)" },
+          "audio_text": { "type": "string", "description": "TTS için optimize edilmiş yanıt" },
+          "thread_id": { "type": "string" },
+          "session_id": { "type": "string" },
+          "images": { "type": "array", "items": { "type": "string" }, "description": "Üretilen görsel S3 key'leri" }
+        }
+      },
+
+      "LecturerStartRequest": {
+        "type": "object",
+        "properties": {
+          "user_id": { "type": "string", "description": "Öğrenci ID (varsayılan: 'anon')" },
+          "meta": {
+            "type": "object",
+            "description": "Oturum meta bilgileri",
+            "properties": {
+              "subject": { "type": "string", "description": "Ders adı (Matematik, Fizik vb.)" },
+              "topic": { "type": "string", "description": "Konu başlığı (Türev, Newton vb.)" },
+              "grade": { "type": "string", "description": "Sınıf seviyesi (7. Sınıf vb.)" },
+              "name": { "type": "string", "description": "Öğrenci adı" },
+              "title": { "type": "string", "description": "Oturum başlığı" }
+            }
+          },
+          "language": { "type": "string", "enum": ["tr", "en", "de", "es", "mn", "hi", "ko", "ja", "fr"], "default": "tr" }
+        }
+      },
+
+      "LecturerStartResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["ok", "error"] },
+          "thread_id": { "type": "string", "description": "Dahili thread ID (local_xxx formatında)" },
+          "session_id": { "type": "string", "description": "Oluşturulan oturum ID (sess_xxx formatında)" }
+        }
+      },
+
+      "LecturerChatRequest": {
+        "type": "object",
+        "required": ["prompt"],
+        "properties": {
+          "session_id": { "type": "string", "description": "Mevcut oturum ID" },
+          "thread_id": { "type": "string", "description": "Thread ID (opsiyonel)" },
+          "prompt": { "type": "string", "description": "Kullanıcı mesajı (zorunlu)" },
+          "user_id": { "type": "string", "description": "Kullanıcı ID (opsiyonel)" },
+          "profile": {
+            "type": "object",
+            "description": "Öğrenci profili — kişiselleştirilmiş anlatım için. Tüm alanlar opsiyoneldir.",
+            "properties": {
+              "name": { "type": "string", "description": "Öğrenci adı. Alternatif: student_name" },
+              "city": { "type": "string", "description": "Yaşadığı şehir. Alternatif: şehir" },
+              "grade": { "type": "string", "description": "Sınıf düzeyi. Alternatif: sınıf" },
+              "hero": { "type": "string", "description": "İlgi alanı / kahramanı. Alternatif: ilgi, interest" },
+              "learning_preference": { "type": "string", "description": "Öğrenme tercihi (görsel, işitsel vb.). Alternatif: tercih" },
+              "memory": { "type": "string", "description": "Öğrencinin paylaştığı bir anı/deneyim. Alternatif: anı" }
+            }
+          },
+          "meta": { "type": "object", "description": "Ek meta bilgileri" },
+          "history": {
+            "type": "array",
+            "description": "Sohbet geçmişi (opsiyonel, yoksa DDB'den son 8 mesaj çekilir)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "role": { "type": "string", "enum": ["user", "assistant"] },
+                "content": { "type": "string" }
+              }
+            }
+          },
+          "theme": {
+            "type": "string",
+            "description": "Ders teması (opsiyonel). WAY tema key'i biliniyorsa detaylı prompt, bilinmiyorsa generic şablon uygulanır.",
+            "example": "uzay keşfi ve astronomi"
+          },
+          "language": { "type": "string", "enum": ["tr", "en", "de", "es", "mn", "hi", "ko", "ja", "fr"], "default": "tr" }
+        }
+      },
+
+      "LecturerChatResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["ok", "error"] },
+          "session_id": { "type": "string" },
+          "thread_id": { "type": "string" },
+          "reply": { "type": "string", "description": "AI yanıtı (kişiselleştirilmiş)" },
+          "audio_text": { "type": "string", "description": "TTS için optimize edilmiş yanıt" },
+          "usage": {
+            "type": "object",
+            "properties": {
+              "input_tokens": { "type": "integer" },
+              "output_tokens": { "type": "integer" },
+              "total_tokens": { "type": "integer" }
+            }
+          },
+          "score": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Konuşma değerlendirme skoru.\n- 0 = anlamsız/uyumsuz (etik dışı, saçma vb.)\n- 1 = anlamlı/uyumlu\n\nTema varsa tema uyumluluğu, tema yoksa genel anlamlılık değerlendirilir."
+          },
+          "theme_message": {
+            "type": "string",
+            "description": "Otomatik tespit edilen konu kategorisi.\n\n**Kurallar:**\n- SADECE tema yoksa VE score=1 ise döner\n- Tema varsa bu alan ASLA dönmez\n- Geçersiz kategori tespit edilirse alan dönmez",
+            "enum": ["English", "Math", "Science", "Geography", "History", "Life Science", "Computer Science", "Physical Science", "Biology", "Chemistry", "Economics", "Personal Finance", "Space", "Government"]
+          },
+          "error": { "type": "string", "description": "Hata mesajı (sadece status=error durumunda)" }
+        }
+      },
+
+      "LecturerSessionListResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "session_id": { "type": "string" },
+                "title": { "type": "string" },
+                "status": { "type": "string", "enum": ["ACTIVE", "ENDED"] },
+                "updated_at": { "type": "string", "format": "date-time" },
+                "created_at": { "type": "string", "format": "date-time" },
+                "thread_id": { "type": "string" },
+                "subject": { "type": "string" },
+                "topic": { "type": "string" },
+                "grade": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+
+      "LecturerSessionDetailResponse": {
+        "type": "object",
+        "properties": {
+          "session_id": { "type": "string" },
+          "user_id": { "type": "string" },
+          "thread_id": { "type": "string" },
+          "title": { "type": "string" },
+          "subject": { "type": "string" },
+          "topic": { "type": "string" },
+          "grade": { "type": "string" },
+          "status": { "type": "string", "enum": ["ACTIVE", "ENDED"] },
+          "title_locked": { "type": "boolean", "description": "Başlık kilitlenmiş mi (ilk asistan yanıtından sonra kilitlener)" },
+          "messages": { "type": "array", "items": { "$ref": "#/components/schemas/Message" } },
+          "_module": { "type": "string", "const": "lecturer" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+
+      "SessionsOverviewResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "items": {
+            "type": "array",
+            "description": "Tüm modüllerin oturumları birleşik, updated_at azalan sıralı",
+            "items": {
+              "type": "object",
+              "properties": {
+                "module": { "type": "string", "enum": ["chatbot", "lecturer", "simulator"] },
+                "session_id": { "type": "string" },
+                "title": { "type": "string" },
+                "status": { "type": "string", "enum": ["ACTIVE", "ENDED"] },
+                "updated_at": { "type": "string", "format": "date-time" },
+                "created_at": { "type": "string", "format": "date-time" },
+                "thread_id": { "type": "string", "description": "Sadece chatbot/lecturer" },
+                "subject": { "type": "string", "description": "Sadece lecturer" },
+                "topic": { "type": "string", "description": "Sadece lecturer" },
+                "grade": { "type": "string", "description": "Sadece lecturer" },
+                "scenario": { "type": "string", "description": "Sadece simulator" },
+                "score": { "type": "integer", "description": "Sadece simulator" },
+                "threshold": { "type": "string", "description": "Sadece simulator" }
+              }
+            }
+          }
+        }
+      },
+
+      "ChatbotSessionDetail": {
+        "type": "object",
+        "properties": {
+          "session_id": { "type": "string" },
+          "student_id": { "type": "string" },
+          "thread_id": { "type": "string" },
+          "title": { "type": "string" },
+          "status": { "type": "string" },
+          "message_count": { "type": "integer" },
+          "messages": { "type": "array", "items": { "$ref": "#/components/schemas/Message" } },
+          "_module": { "type": "string", "const": "chatbot" }
+        }
+      },
+
+      "SimulatorSessionDetail": {
+        "type": "object",
+        "properties": {
+          "session_id": { "type": "string" },
+          "scenario": { "type": "string" },
+          "score": { "type": "integer" },
+          "threshold": { "type": "string", "enum": ["denge", "uyarı", "kriz", "yıkım"] },
+          "status": { "type": "string" },
+          "steps": { "type": "array", "items": { "$ref": "#/components/schemas/SimulatorStep" } },
+          "_module": { "type": "string", "const": "simulator" }
+        }
+      },
+
+      "SimulatorStep": {
+        "type": "object",
+        "properties": {
+          "turn": { "type": "integer" },
+          "node_id": { "type": "string" },
+          "node_text": { "type": "string" },
+          "coach_reply": { "type": "string" },
+          "delta": { "type": "integer", "description": "Bu adımdaki puan değişimi" },
+          "score_after": { "type": "integer", "description": "Bu adım sonrası toplam skor" },
+          "threshold_after": { "type": "string", "description": "Bu adım sonrası eşik durumu" },
+          "choices": { "type": "array", "items": { "$ref": "#/components/schemas/SimulatorChoice" } },
+          "selected_choice_id": { "type": "string", "description": "Seçilen seçenek ID" },
+          "selected_choice_text": { "type": "string", "description": "Seçilen seçenek metni" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+
+      "SimulatorChoice": {
+        "type": "object",
+        "required": ["id", "text", "impact"],
+        "properties": {
+          "id": { "type": "string", "description": "Seçenek ID (opt_a, opt_b, opt_c)", "enum": ["opt_a", "opt_b", "opt_c"] },
+          "text": { "type": "string", "description": "Seçenek metni (maks 200 karakter)" },
+          "impact": { "type": "integer", "description": "Puan etkisi (-15 ile +15 arası)", "minimum": -15, "maximum": 15 }
+        }
+      },
+
+      "ScenarioStartRequest": {
+        "type": "object",
+        "properties": {
+          "session_id": { "type": "string", "description": "Mevcut oturum ID (devam ettirmek için). Yoksa yeni session oluşturulur." },
+          "user_id": { "type": "string", "description": "Kullanıcı ID. Header (x-user-id), JWT claims veya body'den çekilir." },
+          "scenario": {
+            "type": "string",
+            "description": "Senaryo anahtarı",
+            "enum": ["village_life_v1", "novaris_v1", "world_traveler_v1", "biolab_v1", "what_if_v1", "lost_egg_v1", "balance_garden_v1", "plan_tomorrow_v1", "heart_bridge_v1", "dream_workshop_v1", "trace_center_v1", "movement_island_v1"],
+            "default": "village_life_v1"
+          },
+          "profile": { "type": "object", "description": "Kullanıcı profili (opsiyonel, LLM'e brief olarak gönderilir)" },
+          "language": { "type": "string", "enum": ["tr", "en", "de", "es", "mn", "hi", "ko", "ja", "fr"], "default": "tr" }
+        }
+      },
+
+      "ScenarioStartResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["ok", "error"] },
+          "session_id": { "type": "string", "description": "Oturum ID (sess_xxx formatında)" },
+          "turn": { "type": "integer", "description": "Mevcut tur numarası (yeni başlangıçta 0)" },
+          "score": { "type": "integer", "description": "Mevcut skor (0-100, başlangıç: 70)" },
+          "scene": { "$ref": "#/components/schemas/SceneData" },
+          "node_id": { "type": "string", "description": "Sahne düğüm ID (node-0, node-1 vb.)" },
+          "history": { "type": "array", "items": { "$ref": "#/components/schemas/HistoryItem" }, "description": "Seçim geçmişi" },
+          "sim_state": { "$ref": "#/components/schemas/SimState" }
+        }
+      },
+
+      "ScenarioStepRequest": {
+        "type": "object",
+        "required": ["session_id", "turn", "node_id", "choice_id", "sim_state"],
+        "properties": {
+          "session_id": { "type": "string" },
+          "turn": { "type": "integer", "description": "Mevcut tur numarası" },
+          "node_id": { "type": "string", "description": "Mevcut sahne düğüm ID (örn: node-0)" },
+          "choice_id": { "type": "string", "description": "Seçilen seçenek ID'si (opt_a, opt_b, opt_c)", "enum": ["opt_a", "opt_b", "opt_c"] },
+          "choices_map": {
+            "type": "object",
+            "description": "Seçenek ID → metin eşlemesi (seçim metnini kaydetmek için)",
+            "additionalProperties": { "type": "string" }
+          },
+          "sim_state": { "$ref": "#/components/schemas/SimState" },
+          "profile": { "type": "object", "description": "Kullanıcı profili (opsiyonel)" },
+          "language": { "type": "string", "enum": ["tr", "en", "de", "es", "mn", "hi", "ko", "ja", "fr"], "default": "tr" }
+        }
+      },
+
+      "ScenarioStepResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["ok", "error"] },
+          "turn": { "type": "integer", "description": "Yeni tur numarası" },
+          "score": { "type": "integer", "description": "Güncel skor" },
+          "scene": { "$ref": "#/components/schemas/SceneData" },
+          "node_id": { "type": "string", "description": "Yeni sahne düğüm ID" },
+          "choices_map": { "type": "object", "description": "Yeni seçeneklerin ID→metin eşlemesi", "additionalProperties": { "type": "string" } },
+          "history": { "type": "array", "items": { "$ref": "#/components/schemas/HistoryItem" } },
+          "sim_state": { "$ref": "#/components/schemas/SimState" },
+          "session_id": { "type": "string" }
+        }
+      },
+
+      "SceneData": {
+        "type": "object",
+        "description": "Sahne verisi — her adımda dönen ana hikâye içeriği",
+        "properties": {
+          "node_text": { "type": "string", "description": "Tam sahne metni (intro + hikâye + soru). Kriz çözülmüşse kapanış cümlesi + yeni kriz burada birleştirilir." },
+          "audio_text": { "type": "string", "description": "TTS için optimize edilmiş metin" },
+          "node_intro": { "type": "string", "description": "Giriş metni (sadece turn 0'da dolu, sonraki tur'larda boş string)" },
+          "node_question": { "type": "string", "description": "Sahne sonu sorusu (25+ kelime, açık uçlu)" },
+          "choices": {
+            "type": "array",
+            "description": "3 seçenek: 2 yapıcı + 1 temkinli",
+            "items": { "$ref": "#/components/schemas/SimulatorChoice" },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "delta": { "type": "integer", "description": "Önceki seçimin puan etkisi (turn 0'da 0)" },
+          "ended": { "type": "boolean", "description": "Sonsuzluk mantığı ile her zaman false döner" }
+        }
+      },
+
+      "SimState": {
+        "type": "object",
+        "description": "Simülasyon durumu — opak obje, client olduğu gibi geri göndermeli.\n\n**Önemli:** Bu objenin iç yapısını parse etmeyin. Sonraki `/scenario/step` çağrısında olduğu gibi geri gönderin.",
+        "properties": {
+          "score": { "type": "integer", "description": "Mevcut skor (0-100)" },
+          "threshold": { "type": "string", "description": "Eşik durumu", "enum": ["denge", "uyarı", "kriz", "yıkım"] },
+          "scenario": { "type": "string", "description": "Aktif senaryo key" },
+          "history": { "type": "array", "items": { "$ref": "#/components/schemas/HistoryItem" } },
+          "impacts": { "type": "object", "description": "Her node için seçenek→impact eşlemesi" },
+          "language": { "type": "string" },
+          "user_id": { "type": "string" },
+          "crisis_history": {
+            "type": "array",
+            "description": "Son 6 krizin geçmişi (v1.4.0). Sonsuzluk mantığı için kullanılır — aynı türün art arda gelmesini engeller.",
+            "items": {
+              "$ref": "#/components/schemas/CrisisHistoryItem"
+            },
+            "maxItems": 6
+          }
+        }
+      },
+
+      "CrisisHistoryItem": {
+        "type": "object",
+        "description": "Tek bir kriz kaydı",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Kriz türü",
+            "enum": ["human_relations", "technical", "ethical", "time_pressure", "creativity", "unexpected_external", "unknown"]
+          },
+          "turn": { "type": "integer", "description": "Krizin oluştuğu tur numarası" }
+        }
+      },
+
+      "HistoryItem": {
+        "type": "object",
+        "description": "Seçim geçmişi kaydı",
+        "properties": {
+          "turn": { "type": "integer" },
+          "node_id": { "type": "string" },
+          "choice_id": { "type": "string" },
+          "choice_text": { "type": "string" }
+        }
+      },
+
+      "ChatbotWebSocketMessage": {
+        "type": "object",
+        "description": "WebSocket `chat` route'una gönderilen mesaj formatı (vega-ai-chatbot Lambda).\n\n**WebSocket Routes:**\n- `$connect` — Bağlantı kurulması\n- `$disconnect` — Bağlantı kopması\n- `ping` → `pong` yanıtı\n- `chat` → Aşağıdaki format\n\n**WebSocket Yanıt Tipleri (type alanı):**\n- `thread_created` — Yeni thread oluşturuldu\n- `typing` — Yanıt hazırlanıyor\n- `image_generation` — Görsel üretimi başladı (status: generating)\n- `image_generated` — Görsel hazır (image_key, image_url, caption)\n- `image_error` — Görsel üretim hatası\n- `assistant_message_start` — Streaming başlangıcı\n- `delta` — Metin parçası (text alanı)\n- `assistant_message_end` — Streaming bitişi\n- `progress` — İlerleme durumu (message alanı)\n- `response_complete` — Tam yanıt (full_response, audio_text, images, thread_id)\n- `error` — Hata (error alanı)\n- `pong` — Ping yanıtı (timestamp alanı)",
+        "required": ["action", "message"],
+        "properties": {
+          "action": { "type": "string", "enum": ["chat"], "description": "WebSocket route adı" },
+          "message": { "type": "string", "description": "Kullanıcı mesajı (zorunlu, boş olamaz)" },
+          "thread_id": { "type": "string", "description": "OpenAI thread ID (opsiyonel, yoksa otomatik oluşturulur)" },
+          "session_id": { "type": "string", "description": "Oturum ID (opsiyonel, yoksa otomatik oluşturulur/bulunur)" },
+          "user_id": { "type": "string", "description": "Kullanıcı ID (opsiyonel)" },
+          "title": { "type": "string", "description": "Oturum başlığı (alternatif: session_title, topic)" },
+          "user_name": { "type": "string", "description": "Kullanıcı görünen adı (PG profil için)" },
+          "theme": { "type": "string", "description": "Sohbet teması (opsiyonel)", "example": "uzay keşfi ve astronomi" },
+          "language": { "type": "string", "enum": ["tr", "en", "de", "es", "mn", "hi", "ko", "ja", "fr"], "default": "tr" }
+        }
+      },
+
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string", "description": "Hata mesajı. İç hatalarda `internal [ID: err_xxx]` formatında error ID içerir." },
+          "status": { "type": "string", "description": "Durum kodu (sadece bazı endpoint'lerde)" }
+        }
+      }
+    },
+
+    "responses": {
+      "BadRequest": {
+        "description": "400 — Geçersiz istek. Zorunlu alan eksik veya format hatalı.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "examples": {
+              "missingField": {
+                "summary": "Zorunlu alan eksik",
+                "value": { "error": "user_id required" }
+              },
+              "invalidJson": {
+                "summary": "Geçersiz JSON",
+                "value": { "status": "error", "error": "invalid_json" }
+              },
+              "invalidModule": {
+                "summary": "Geçersiz modül",
+                "value": { "error": "module must be chatbot|lecturer|simulator" }
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "404 — Kaynak bulunamadı.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "examples": {
+              "sessionNotFound": {
+                "summary": "Oturum bulunamadı",
+                "value": { "error": "Session not found" }
+              },
+              "routeNotFound": {
+                "summary": "Geçersiz route",
+                "value": { "error": "Not found: GET /invalid/path" }
+              }
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "500 — Sunucu hatası. Error ID ile loglara erişilebilir.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "examples": {
+              "withErrorId": {
+                "summary": "Error ID ile (trackable)",
+                "value": { "status": "error", "error": "internal [ID: err_abc123def456]" }
+              },
+              "openaiNotInit": {
+                "summary": "OpenAI client hatası",
+                "value": { "error": "OpenAI client not initialized" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

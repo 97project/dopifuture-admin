@@ -4,8 +4,8 @@
 
 @section('content')
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-        <div style="font-size:18px;font-weight:600;">{{ $editUser->exists ? __('portal.edit_user') : 'New User' }}</div>
-        <a href="{{ route('portal.users.index') }}" class="dp-btn-ghost">← Back to Users</a>
+        <div style="font-size:18px;font-weight:600;">{{ $editUser->exists ? __('portal.edit_user') : __('portal.add_new') }}</div>
+        <a href="{{ route('portal.users.index') }}" class="dp-btn-ghost">← {{ __('portal.back') }}</a>
     </div>
 
     <div>
@@ -31,7 +31,7 @@
                     @error('email') <p class="dp-form-error">{{ $message }}</p> @enderror
                 </div>
                 <div class="dp-form-group">
-                    <label class="dp-form-label">Password {{ $editUser->exists ? '' : '*' }}</label>
+                    <label class="dp-form-label">{{ __('admin.password') }} {{ $editUser->exists ? '' : '*' }}</label>
                     <input type="password" name="password" class="dp-form-input" {{ $editUser->exists ? '' : 'required' }} placeholder="{{ $editUser->exists ? __('portal.fill_to_change') : '' }}">
                     @error('password') <p class="dp-form-error">{{ $message }}</p> @enderror
                 </div>

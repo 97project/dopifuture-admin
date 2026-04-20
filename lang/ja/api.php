@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'validation_error' => 'バリデーションエラー。',
+    'not_found' => 'レコードが見つかりません。',
+    'unauthorized' => '認証が必要です。',
+    'forbidden' => 'この操作に対する権限がありません。',
+    'too_many_requests' => 'リクエストが多すぎます。しばらくお待ちください。',
+    'server_error' => 'サーバーエラーが発生しました。',
+    'api_key_missing' => 'APIキーがありません。',
+    'api_key_invalid' => 'APIキーが無効または期限切れです。',
+    'ip_not_allowed' => 'このIPアドレスからのアクセスは許可されていません。',
+    'insufficient_ability' => 'APIキーに必要な権限がありません。',
+    'token_not_found' => 'トークンが見つかりません。',
+    'token_revoked' => 'トークンが取り消されました。',
+    'user_deleted' => 'ユーザーが削除されました。',
+    'api_key_created_warning' => 'APIキーが作成されました。このキーは一度だけ表示されますので安全に保存してください。',
+    'api_key_rotated_warning' => 'APIキーがローテーションされました。新しいキーは一度だけ表示されます。',
+    'api_key_revoked' => 'APIキーが取り消されました。',
+    'api_key_deleted' => 'APIキーが削除されました。',
+    'notification_read' => '通知が既読になりました。',
+    'all_notifications_read' => 'すべての通知が既読になりました。',
+    'notification_deleted' => '通知が削除されました。',
+    'device_token_updated' => 'デバイストークンが更新されました。',
+    'deletion_request_sent' => 'アカウント削除確認メールが送信されました。受信トレイをご確認ください。',
+];

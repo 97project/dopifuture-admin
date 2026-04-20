@@ -7,7 +7,7 @@
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
             <div>
                 <div class="dp-card-title" style="margin-bottom:4px;">{{ __('admin.classes') }}</div>
-                <p style="font-size:13px;color:var(--text-muted);margin:0;">View and manage school classes.</p>
+                <p style="font-size:13px;color:var(--text-muted);margin:0;">{{ __('portal.manage_classes_subtitle') }}</p>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
                 <form style="display:flex;gap:8px;">
@@ -18,7 +18,7 @@
                     <button type="submit" class="dp-btn-ghost">{{ __('portal.search') }}</button>
                 </form>
                 @if(auth()->user()->hasAnyRole(['super-admin','admin','license-manager','school-admin','school-principal']))
-                    <a href="{{ route('portal.classes.create') }}" class="dp-btn">+ New Class</a>
+                    <a href="{{ route('portal.classes.create') }}" class="dp-btn">+ {{ __('portal.new_class') }}</a>
                 @endif
             </div>
         </div>
@@ -75,7 +75,7 @@
                 @empty
                     <tr>
                         <td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);">
-                            No classes found.
+                            {{ __('portal.no_classes_assigned') }}
                         </td>
                     </tr>
                 @endforelse

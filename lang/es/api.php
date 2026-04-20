@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'validation_error' => 'Error de validación.',
+    'not_found' => 'Registro no encontrado.',
+    'unauthorized' => 'Autenticación requerida.',
+    'forbidden' => 'No tiene permiso para esta acción.',
+    'too_many_requests' => 'Demasiadas solicitudes, por favor espere.',
+    'server_error' => 'Se ha producido un error en el servidor.',
+    'api_key_missing' => 'Falta la clave API.',
+    'api_key_invalid' => 'Clave API inválida o expirada.',
+    'ip_not_allowed' => 'No se permite el acceso desde esta dirección IP.',
+    'insufficient_ability' => 'La clave API no tiene la capacidad requerida.',
+    'token_not_found' => 'Token no encontrado.',
+    'token_revoked' => 'Token revocado.',
+    'user_deleted' => 'Usuario eliminado.',
+    'api_key_created_warning' => 'Clave API creada. Esta clave solo se mostrará una vez, guárdela en un lugar seguro.',
+    'api_key_rotated_warning' => 'Clave API rotada. La nueva clave solo se mostrará una vez.',
+    'api_key_revoked' => 'Clave API revocada.',
+    'api_key_deleted' => 'Clave API eliminada.',
+    'notification_read' => 'Notificación marcada como leída.',
+    'all_notifications_read' => 'Todas las notificaciones marcadas como leídas.',
+    'notification_deleted' => 'Notificación eliminada.',
+    'device_token_updated' => 'Token del dispositivo actualizado.',
+    'deletion_request_sent' => 'Se ha enviado un correo de confirmación de eliminación de cuenta. Por favor, revise su bandeja de entrada.',
+];

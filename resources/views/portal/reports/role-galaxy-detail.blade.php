@@ -1,6 +1,6 @@
 @extends('portal.app')
-@section('title', 'Role Galaxy — ' . ($student->name ?? ''))
-@section('page-title', 'Role Galaxy — ' . ($student->name ?? '') . ' ' . ($student->surname ?? ''))
+@section('title', __('portal.scenario_galaxy') . ' - ' . ($student->name ?? ''))
+@section('page-title', __('portal.scenario_galaxy') . ' - ' . ($student->name ?? '') . ' ' . ($student->surname ?? ''))
 
 @section('content')
 @php
@@ -19,8 +19,8 @@
         </div>
     </div>
     <div style="display:flex;gap:8px;">
-        <a href="{{ route('portal.reports.student', $student) }}?app=role-galaxy" class="dp-btn-ghost" style="font-size:12px;">← Full Report</a>
-        <a href="{{ route('portal.reports.app', 'role-galaxy') }}" class="dp-btn-ghost" style="font-size:12px;">← All Students</a>
+        <a href="{{ route('portal.reports.student', $student) }}?app=role-galaxy" class="dp-btn-ghost" style="font-size:12px;">← {{ __('portal.full_report') }}</a>
+        <a href="{{ route('portal.reports.app', 'role-galaxy') }}" class="dp-btn-ghost" style="font-size:12px;">← {{ __('portal.all_students') }}</a>
     </div>
 </div>
 
@@ -28,7 +28,7 @@
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
     <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#f093fb,#f5576c);display:flex;align-items:center;justify-content:center;font-size:18px;">🌟</div>
     <div style="font-size:18px;font-weight:700;">Role Galaxy</div>
-    <span class="dp-badge dp-badge-active" style="margin-left:auto;">{{ $stats['total_sessions'] }} Sessions</span>
+    <span class="dp-badge dp-badge-active" style="margin-left:auto;">{{ $stats['total_sessions'] }} {{ __('portal.sessions') }}</span>
 </div>
 
 {{-- ═══ STAT CARDS ═══ --}}
@@ -58,8 +58,8 @@
 {{-- ═══ SCENARIO GALAXY — ALL 12 scenarios, matching mobile RoleGalaxyScreen.js card grid ═══ --}}
 <div class="dp-card" style="margin-bottom:24px;">
     <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
-        <span style="font-size:20px;">🎮</span> Scenario Galaxy
-        <span style="font-size:12px;color:var(--color-txt-muted);margin-left:auto;">{{ $scenarioBreakdown->count() }} {{ __('portal.of') }} {{ count($allScenarios) }} explored</span>
+        <span style="font-size:20px;">🎭</span> {{ __('portal.scenario_galaxy') }}
+        <span style="font-size:12px;color:var(--color-txt-muted);margin-left:auto;">{{ $scenarioBreakdown->count() }} {{ __('portal.of') }} {{ count($allScenarios) }} {{ __('portal.explored') }}</span>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
         @foreach($allScenarios as $scenarioKey => $cfg)
@@ -124,12 +124,12 @@
 @if($sessions->count())
 <div class="dp-card">
     <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:20px;">🕐</span> Session History
+        <span style="font-size:20px;">📋</span> {{ __('portal.chat_session_history') }}
     </div>
     <table class="dp-table">
         <thead><tr>
             <th>{{ __('admin.date') }}</th><th>{{ __('portal.scenario') }}</th><th>{{ __('admin.status') }}</th>
-            <th>{{ __('portal.score') }}</th><th>Steps</th><th>{{ __('portal.duration') }}</th><th></th>
+            <th>{{ __('portal.score') }}</th><th>{{ __('portal.steps_count') }}</th><th>{{ __('portal.duration') }}</th><th></th>
         </tr></thead>
         <tbody>
         @foreach($sessions->take(30) as $s)
@@ -159,10 +159,10 @@
                         <span class="dp-badge {{ $s->score >= 70 ? 'dp-badge-active' : ($s->score >= 50 ? 'dp-badge-pending' : 'dp-badge-error') }}">{{ number_format($s->score, 1) }}</span>
                     @else - @endif
                 </td>
-                <td>{{ $s->simulatorSteps->count() }} steps</td>
+                <td>{{ $s->simulatorSteps->count() }} {{ __('portal.steps_count') }}</td>
                 <td>{{ $s->duration_seconds ? \App\Services\ReportService::formatDuration($s->duration_seconds) : '-' }}</td>
                 <td>
-                    <a href="{{ route('portal.reports.session.detail', $s->id) }}" class="dp-btn" style="font-size:11px;padding:4px 10px;">Detail →</a>
+                    <a href="{{ route('portal.reports.session.detail', $s->id) }}" class="dp-btn" style="font-size:11px;padding:4px 10px;">{{ __('portal.detail') }} →</a>
                 </td>
             </tr>
         @endforeach
@@ -174,7 +174,7 @@
 @if($sessions->isEmpty())
 <div class="dp-card" style="text-align:center;padding:48px;">
     <div style="font-size:32px;margin-bottom:8px;">🌟</div>
-    <p style="color:var(--text-muted);">No Role Galaxy simulation data yet.</p>
+    <p style="color:var(--text-muted);">{{ __('portal.no_data_yet') }}</p>
 </div>
 @endif
 @endsection

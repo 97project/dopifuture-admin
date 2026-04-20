@@ -1,6 +1,6 @@
 @extends('portal.app')
-@section('title', ($isTr ?? false) ? 'AI Koç Geri Bildirimi' : 'AI Coach Feedback')
-@section('page-title', 'WAY AI Coach')
+@section('title', __('portal.ai_coach_feedback'))
+@section('page-title', __('portal.way_ai_coach'))
 @section('content')
 
     {{-- ═══ Figma F-73: AI Coach Feedback — vertical timeline ═══ --}}
@@ -56,7 +56,7 @@
                         <svg width="8" height="8" fill="white" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                     </div>
                     <p style="font-size:12px;color:#6B7280;line-height:1.6;margin:0;">
-                        <strong style="color:#8B5CF6;">Feedback:</strong> {{ $q->feedback ?? '-' }}
+                        <strong style="color:#8B5CF6;">{{ __('portal.feedback_label') }}:</strong> {{ $q->feedback ?? '-' }}
                     </p>
                 </div>
             </div>
@@ -67,7 +67,7 @@
         <div style="text-align:center;margin-top:16px;">
             <a href="{{ route('portal.reports.app', 'way-ai-coach') }}" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--color-txt-muted);font-size:13px;font-weight:500;padding:10px 24px;border:1px solid #E5E7EB;border-radius:8px;">
                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                Back
+                {{ __('portal.back') }}
             </a>
         </div>
     </div>

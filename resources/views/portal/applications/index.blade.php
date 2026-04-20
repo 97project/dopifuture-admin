@@ -1,14 +1,14 @@
 @extends('portal.app')
-@section('title', 'Application Status')
-@section('page-title', 'Application Status')
+@section('title', __('portal.application_status'))
+@section('page-title', __('portal.application_status'))
 
 @section('content')
 <div style="margin-bottom:24px;">
     <h2 style="font-size:24px;font-weight:700;color:#030719;margin:0 0 4px;font-family:'Nunito',sans-serif;">
-        Application Status
+        {{ __('portal.application_status') }}
     </h2>
     <p style="font-size:14px;color:var(--color-txt-muted);margin:0;">
-        Your school application sync and connectivity status
+        {{ __('portal.student_subtitle') }}
     </p>
 </div>
 
@@ -31,11 +31,11 @@
             </div>
             {{-- Health Badge --}}
             @if($app->health === 'healthy')
-            <span style="padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(16,185,129,0.1);color:#10B981;">✅ Healthy</span>
+            <span style="padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(16,185,129,0.1);color:#10B981;">✅ {{ __('portal.healthy') }}</span>
             @elseif($app->health === 'down')
-            <span style="padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(239,68,68,0.1);color:#EF4444;">❌ Down</span>
+            <span style="padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(239,68,68,0.1);color:#EF4444;">❌ {{ __('portal.down') }}</span>
             @elseif($app->health === 'error')
-            <span style="padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(245,158,11,0.1);color:#F59E0B;">⚠️ Error</span>
+            <span style="padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(245,158,11,0.1);color:#F59E0B;">⚠️ {{ __('portal.error_label') }}</span>
             @endif
         </div>
 
@@ -76,7 +76,7 @@
 <div class="dp-card" style="text-align:center;padding:48px;">
     <div style="font-size:48px;margin-bottom:16px;">📱</div>
     <h3 style="font-size:18px;font-weight:700;margin:0 0 8px;">{{ __('portal.no_applications_found') }}</h3>
-    <p style="color:var(--color-txt-muted);">No users from your school are assigned to any application yet.</p>
+    <p style="color:var(--color-txt-muted);">{{ __('portal.no_app_users_yet') }}</p>
 </div>
 @endif
 @endsection

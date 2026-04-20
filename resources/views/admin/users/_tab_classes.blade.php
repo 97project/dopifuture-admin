@@ -27,7 +27,7 @@
                                     class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-600">{{ ucfirst($class->pivot->role ?? 'üye') }}</span>
                                 <span
                                     class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $class->is_active ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600' : 'bg-red-50 dark:bg-red-900/20 text-red-500' }}">
-                                    {{ $class->is_active ? 'Aktif' : 'Pasif' }}
+                                    {{ $class->is_active ? __('admin.active') : __('admin.inactive') }}
                                 </span>
                             </div>
                         </div>
@@ -40,18 +40,18 @@
                             </div>
                             <div class="text-center p-3 bg-gray-50 dark:bg-[#0A1628] rounded-lg">
                                 <p class="text-lg font-bold text-gray-900 dark:text-white">{{ $class->students->count() }}</p>
-                                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Öğrenci</p>
+                                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{{ __('admin.auto_student') }}</p>
                             </div>
                             <div class="text-center p-3 bg-gray-50 dark:bg-[#0A1628] rounded-lg">
                                 <p class="text-lg font-bold text-gray-900 dark:text-white">{{ $class->teachers->count() }}</p>
-                                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Öğretmen</p>
+                                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{{ __('admin.teachers') }}</p>
                             </div>
                         </div>
 
                         {{-- Students list --}}
                         @if($class->students->count())
                             <div>
-                                <h4 class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">Öğrenciler</h4>
+                                <h4 class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">{{ __('admin.students') }}</h4>
                                 <div class="space-y-1.5 max-h-48 overflow-y-auto">
                                     @foreach($class->students->take(10) as $student)
                                         <a href="{{ route('admin.users.show', $student) }}"
@@ -76,7 +76,7 @@
                         {{-- Teachers list --}}
                         @if($class->teachers->count())
                             <div class="mt-3 pt-3 border-t border-gray-100 dark:border-[#1A3A5C]">
-                                <h4 class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">Öğretmenler</h4>
+                                <h4 class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">{{ __('admin.teachers') }}</h4>
                                 <div class="flex flex-wrap gap-2">
                                     @foreach($class->teachers as $teacher)
                                         <a href="{{ route('admin.users.show', $teacher) }}"

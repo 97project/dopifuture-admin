@@ -1,6 +1,6 @@
 @extends('portal.app')
-@section('title', 'Study Space — ' . ($student->name ?? ''))
-@section('page-title', 'Study Space — ' . ($student->name ?? '') . ' ' . ($student->surname ?? ''))
+@section('title', __('portal.study_space') . ' — ' . ($student->name ?? ''))
+@section('page-title', __('portal.study_space') . ' — ' . ($student->name ?? '') . ' ' . ($student->surname ?? ''))
 
 @section('content')
 {{-- ═══ PROFILE MINI-HEADER ═══ --}}
@@ -13,8 +13,8 @@
         </div>
     </div>
     <div style="display:flex;gap:8px;">
-        <a href="{{ route('portal.reports.student', $student) }}?app=study-space" class="dp-btn-ghost" style="font-size:12px;">← Full Report</a>
-        <a href="{{ route('portal.reports.app', 'study-space') }}" class="dp-btn-ghost" style="font-size:12px;">← All Students</a>
+        <a href="{{ route('portal.reports.student', $student) }}?app=study-space" class="dp-btn-ghost" style="font-size:12px;">← {{ __('portal.full_report') }}</a>
+        <a href="{{ route('portal.reports.app', 'study-space') }}" class="dp-btn-ghost" style="font-size:12px;">← {{ __('portal.all_students') }}</a>
     </div>
 </div>
 
@@ -22,7 +22,7 @@
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
     <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;font-size:18px;">📚</div>
     <div style="font-size:18px;font-weight:700;">Study Space</div>
-    <span class="dp-badge dp-badge-active" style="margin-left:auto;">{{ $stats['total_sessions'] }} Sessions</span>
+    <span class="dp-badge dp-badge-active" style="margin-left:auto;">{{ $stats['total_sessions'] }} {{ __('portal.sessions') }}</span>
 </div>
 
 {{-- ═══ STAT CARDS ═══ --}}
@@ -45,8 +45,8 @@
 @if($themeBreakdown->count())
 <div class="dp-card" style="margin-bottom:24px;">
     <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
-        <span style="font-size:20px;">📋</span> Topic Distribution
-        <span style="font-size:12px;color:var(--color-txt-muted);margin-left:auto;">{{ $themeBreakdown->count() }} active topics</span>
+        <span style="font-size:20px;">📊</span> {{ __('portal.topic_distribution') }}
+        <span style="font-size:12px;color:var(--color-txt-muted);margin-left:auto;">{{ $themeBreakdown->count() }} {{ __('portal.active_topics') }}</span>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
         @php
@@ -82,7 +82,7 @@
 @if($sessions->count())
 <div class="dp-card">
     <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:20px;">🕐</span> Chat Session History
+        <span style="font-size:20px;">💬</span> {{ __('portal.chat_session_history') }}
     </div>
     <table class="dp-table">
         <thead><tr>
@@ -113,7 +113,7 @@
                 <td>{{ $s->chat_messages_count ?? 0 }}</td>
                 <td>{{ $s->duration_seconds ? \App\Services\ReportService::formatDuration($s->duration_seconds) : '-' }}</td>
                 <td>
-                    <a href="{{ route('portal.reports.session.detail', $s->id) }}" class="dp-btn" style="font-size:11px;padding:4px 10px;">Detail →</a>
+                    <a href="{{ route('portal.reports.session.detail', $s->id) }}" class="dp-btn" style="font-size:11px;padding:4px 10px;">{{ __('portal.detail') }} →</a>
                 </td>
             </tr>
         @endforeach
@@ -125,7 +125,7 @@
 @if($sessions->isEmpty())
 <div class="dp-card" style="text-align:center;padding:48px;">
     <div style="font-size:32px;margin-bottom:8px;">📚</div>
-    <p style="color:var(--text-muted);">No Study Space session data yet.</p>
+    <p style="color:var(--text-muted);">{{ __('portal.no_data_yet') }}</p>
 </div>
 @endif
 @endsection

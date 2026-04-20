@@ -136,7 +136,7 @@
                     'Email' => $remoteUser['email'] ?? '—',
                     'Premium' => isset($remoteUser['is_premium']) ? ($remoteUser['is_premium'] ? '✅ Evet' : '❌ Hayır') : '—',
                     'Roller' => isset($remoteUser['roles']) ? implode(', ', array_column($remoteUser['roles'], 'title')) : '—',
-                    '2FA' => isset($remoteUser['two_factor']) ? ($remoteUser['two_factor'] ? '🔒 Aktif' : 'Pasif') : '—',
+                    '2FA' => isset($remoteUser['two_factor']) ? ($remoteUser['two_factor'] ? __('admin.active') : __('admin.inactive')) : '—',
                 ] as $label => $value)
                     <div class="bg-gray-50 dark:bg-[#0A1628]/40 rounded-lg p-3">
                         <p class="text-[10px] text-gray-400 uppercase tracking-wider">{{ $label }}</p>
@@ -182,7 +182,7 @@
                                 @if(($session['status'] ?? '') === 'completed' || ($session['ended'] ?? false))
                                     <span class="text-emerald-500 text-xs font-bold">✅ Tamamlandı</span>
                                 @elseif(($session['status'] ?? '') === 'active')
-                                    <span class="text-blue-500 text-xs font-bold">🔵 Aktif</span>
+                                    <span class="text-blue-500 text-xs font-bold">🔵 {{ __('admin.active') }}</span>
                                 @else
                                     <span class="text-gray-400 text-xs">—</span>
                                 @endif
@@ -200,7 +200,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
-            <p class="text-sm font-medium text-gray-400">Bu uygulamada henüz oturum kaydı yok</p>
+            <p class="text-sm font-medium text-gray-400">{{ __('admin.no_app_sessions') }}</p>
         </div>
     @endif
 
@@ -234,7 +234,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
             </div>
-            <p class="text-sm font-medium text-gray-500">Bu uygulamanın API entegrasyonu henüz tamamlanmadı</p>
+            <p class="text-sm font-medium text-gray-500">{{ __('admin.api_integration_not_complete') }}</p>
             <p class="text-xs text-gray-400 mt-1">Connector yapılandırıldığında platform verileri burada görüntülenecek.</p>
         </div>
     @endif
@@ -247,7 +247,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                 </svg>
             </div>
-            <p class="text-sm font-medium text-gray-400">Bu uygulama kullanıcıya atanmamış</p>
+            <p class="text-sm font-medium text-gray-400">{{ __('admin.app_not_assigned') }}</p>
         </div>
     @endif
 </div>

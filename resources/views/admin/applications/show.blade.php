@@ -38,7 +38,7 @@
                         @if($connectorReady)
                             <span
                                 class="text-[10px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded font-medium">Connector
-                                Aktif</span>
+                                {{ __('admin.active') }}</span>
                         @endif
                     </div>
                 </div>
@@ -140,7 +140,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">API Bağlantı Aktif</p>
+                                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('admin.api_connection_active') }}</p>
                                 <p class="text-[10px] text-gray-400 mt-0.5">{{ $apiHealth['service'] ?? '' }} — Son kontrol:
                                     {{ now()->format('H:i') }}
                                 </p>
@@ -171,8 +171,8 @@
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
                     <div>
-                        <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">Connector Henüz Hazır Değil</p>
-                        <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">Bu uygulama için entegrasyon tamamlanmamış. API
+                        <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">{{ __('admin.connector_not_ready') }}</p>
+                        <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">{{ __('admin.integration_not_complete') }}
                             endpoint'leri henüz aktif değil.</p>
                     </div>
                 </div>
@@ -313,7 +313,7 @@
                                             @can('update', $application)
                                                 <form action="{{ route('admin.applications.remove-user', [$application, $user]) }}"
                                                     method="POST" class="inline"
-                                                    onsubmit="return confirm('Bu kullanıcıyı uygulamadan kaldırmak istediğinizden emin misiniz?')">
+                                                    onsubmit="return confirm('{{ __('admin.confirm_remove_user_app') }}')">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit"
@@ -337,7 +337,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                         </svg>
-                                        Henüz atanmış kullanıcı yok
+                                        {{ __('admin.no_assigned_users') }}
                                     </td>
                                 </tr>
                             @endforelse
@@ -365,9 +365,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
-                    <h3 class="text-sm font-bold text-amber-800 dark:text-amber-300">Connector Aktif Değil</h3>
+                    <h3 class="text-sm font-bold text-amber-800 dark:text-amber-300">{{ __('admin.connector_not_active') }}</h3>
                     <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">Bu uygulama için raporlama yapılabilmesi için
-                        connector'ın aktif olması gerekir.</p>
+                        {{ __('admin.connector_must_active') }}</p>
                 </div>
             @else
                 @includeWhen($connectorType === 'vega', 'admin.applications.partials._tab_report_vega')

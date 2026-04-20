@@ -4,8 +4,8 @@
 
 @section('content')
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-        <div style="font-size:18px;font-weight:600;">{{ $class->exists ? __('portal.edit_class') : 'New Class' }}</div>
-        <a href="{{ route('portal.classes.index') }}" class="dp-btn-ghost">← Back to Classes</a>
+        <div style="font-size:18px;font-weight:600;">{{ $class->exists ? __('portal.edit_class') : __('portal.add_new') }}</div>
+        <a href="{{ route('portal.classes.index') }}" class="dp-btn-ghost">← {{ __('portal.back') }}</a>
     </div>
 
     <div>

@@ -209,9 +209,9 @@
             <div class="solution-feat"><div class="solution-feat-dot" style="background:#FFB347;"></div>{{ __('portal.sol_f1_4') }}</div>
         </div>
         <div class="solution-chips">
-            <span class="sol-chip" style="border-color: rgba(255,137,4,0.3); color:#FFB347;">🎮 Multiplayer</span>
-            <span class="sol-chip" style="border-color: rgba(255,137,4,0.3); color:#FFB347;">🎯 Scenario-Based</span>
-            <span class="sol-chip" style="border-color: rgba(255,137,4,0.3); color:#FFB347;">📊 Analytics</span>
+            <span class="sol-chip" style="border-color: rgba(255,137,4,0.3); color:#FFB347;">🎮 {{ __('portal.chip_multiplayer') }}</span>
+            <span class="sol-chip" style="border-color: rgba(255,137,4,0.3); color:#FFB347;">🎯 {{ __('portal.chip_scenario') }}</span>
+            <span class="sol-chip" style="border-color: rgba(255,137,4,0.3); color:#FFB347;">📊 {{ __('portal.chip_analytics') }}</span>
         </div>
     </div>
 </div>
@@ -235,9 +235,9 @@
             <div class="solution-feat"><div class="solution-feat-dot" style="background:#7CC8FF;"></div>{{ __('portal.sol_f2_4') }}</div>
         </div>
         <div class="solution-chips">
-            <span class="sol-chip" style="border-color: rgba(67,172,255,0.3); color:#7CC8FF;">🧠 AI Evaluation</span>
-            <span class="sol-chip" style="border-color: rgba(67,172,255,0.3); color:#7CC8FF;">📈 Progressive</span>
-            <span class="sol-chip" style="border-color: rgba(67,172,255,0.3); color:#7CC8FF;">📁 Portfolio</span>
+            <span class="sol-chip" style="border-color: rgba(67,172,255,0.3); color:#7CC8FF;">🧠 {{ __('portal.chip_ai_eval') }}</span>
+            <span class="sol-chip" style="border-color: rgba(67,172,255,0.3); color:#7CC8FF;">📈 {{ __('portal.chip_progressive') }}</span>
+            <span class="sol-chip" style="border-color: rgba(67,172,255,0.3); color:#7CC8FF;">📁 {{ __('portal.chip_portfolio') }}</span>
         </div>
     </div>
 </div>
@@ -261,9 +261,9 @@
             <div class="solution-feat"><div class="solution-feat-dot" style="background:#B794F4;"></div>{{ __('portal.sol_f3_4') }}</div>
         </div>
         <div class="solution-chips">
-            <span class="sol-chip" style="border-color: rgba(141,101,224,0.3); color:#B794F4;">🤖 AI-Generated</span>
-            <span class="sol-chip" style="border-color: rgba(141,101,224,0.3); color:#B794F4;">🌌 Branching</span>
-            <span class="sol-chip" style="border-color: rgba(141,101,224,0.3); color:#B794F4;">👔 Career</span>
+            <span class="sol-chip" style="border-color: rgba(141,101,224,0.3); color:#B794F4;">🤖 {{ __('portal.chip_ai_gen') }}</span>
+            <span class="sol-chip" style="border-color: rgba(141,101,224,0.3); color:#B794F4;">🌌 {{ __('portal.chip_branching') }}</span>
+            <span class="sol-chip" style="border-color: rgba(141,101,224,0.3); color:#B794F4;">👔 {{ __('portal.chip_career') }}</span>
         </div>
     </div>
 </div>
@@ -287,9 +287,9 @@
             <div class="solution-feat"><div class="solution-feat-dot" style="background:#F5A3EE;"></div>{{ __('portal.sol_f4_4') }}</div>
         </div>
         <div class="solution-chips">
-            <span class="sol-chip" style="border-color: rgba(237,132,228,0.3); color:#F5A3EE;">💬 Real-time</span>
-            <span class="sol-chip" style="border-color: rgba(237,132,228,0.3); color:#F5A3EE;">🎯 Personalized</span>
-            <span class="sol-chip" style="border-color: rgba(237,132,228,0.3); color:#F5A3EE;">🧠 AI-Powered</span>
+            <span class="sol-chip" style="border-color: rgba(237,132,228,0.3); color:#F5A3EE;">💬 {{ __('portal.chip_realtime') }}</span>
+            <span class="sol-chip" style="border-color: rgba(237,132,228,0.3); color:#F5A3EE;">🎯 {{ __('portal.chip_personalized') }}</span>
+            <span class="sol-chip" style="border-color: rgba(237,132,228,0.3); color:#F5A3EE;">🧠 {{ __('portal.chip_ai_powered') }}</span>
         </div>
     </div>
 </div>
@@ -313,9 +313,9 @@
             <div class="solution-feat"><div class="solution-feat-dot" style="background:#86EFAC;"></div>{{ __('portal.sol_f5_4') }}</div>
         </div>
         <div class="solution-chips">
-            <span class="sol-chip" style="border-color: rgba(90,199,128,0.3); color:#86EFAC;">📚 Subject-Based</span>
-            <span class="sol-chip" style="border-color: rgba(90,199,128,0.3); color:#86EFAC;">🎓 Adaptive</span>
-            <span class="sol-chip" style="border-color: rgba(90,199,128,0.3); color:#86EFAC;">💡 Interactive</span>
+            <span class="sol-chip" style="border-color: rgba(90,199,128,0.3); color:#86EFAC;">📚 {{ __('portal.chip_subject') }}</span>
+            <span class="sol-chip" style="border-color: rgba(90,199,128,0.3); color:#86EFAC;">🎓 {{ __('portal.chip_adaptive') }}</span>
+            <span class="sol-chip" style="border-color: rgba(90,199,128,0.3); color:#86EFAC;">💡 {{ __('portal.chip_interactive') }}</span>
         </div>
     </div>
 </div>

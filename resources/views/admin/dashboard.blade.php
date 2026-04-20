@@ -365,24 +365,24 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h3 class="text-sm font-bold text-gray-900 dark:text-white">Senkronizasyon</h3>
+                            <h3 class="text-sm font-bold text-gray-900 dark:text-white">{{ __('admin.sync_title') }}</h3>
                             @if($syncStatus['enabled'])
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse-subtle"></span>
-                                    AKTİF
+                                    {{ __('admin.sync_active') }}
                                 </span>
                             @else
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-400">
-                                    KAPALI
+                                    {{ __('admin.sync_disabled') }}
                                 </span>
                             @endif
                         </div>
                         <p class="text-[11px] text-gray-400 mt-0.5">
                             @if($syncStatus['last_sync'])
-                                Son sync: {{ \Carbon\Carbon::parse($syncStatus['last_sync'])->diffForHumans() }}
+                                {{ __('admin.sync_last', ['time' => \Carbon\Carbon::parse($syncStatus['last_sync'])->diffForHumans()]) }}
                                 <span class="mx-1">·</span>
                             @endif
-                            Her {{ $syncStatus['interval'] }} dakikada bir
+                            {{ __('admin.sync_interval', ['interval' => $syncStatus['interval']]) }}
                         </p>
                     </div>
                 </div>
@@ -391,22 +391,22 @@
                         @csrf
                         <button type="submit"
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-[#1A3A5C] text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#0A1628] transition-colors"
-                            onclick="return confirm('Tüm kullanıcıları tüm uygulamalarda reconcile etmek istiyor musunuz?')">
+                            onclick="return confirm('{{ __('admin.confirm_reconcile') }}')">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
-                            Reconcile
+                            {{ __('admin.btn_reconcile') }}
                         </button>
                     </form>
                     <form method="POST" action="{{ route('admin.applications.harvest') }}" class="inline">
                         @csrf
                         <button type="submit"
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#0B6AB2] text-white hover:bg-[#0958A0] transition-colors"
-                            onclick="return confirm('Tüm uygulamalardan veri toplamak istiyor musunuz? Bu işlem biraz sürebilir.')">
+                            onclick="return confirm('{{ __('admin.confirm_harvest') }}')">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                             </svg>
-                            Veri Topla
+                            {{ __('admin.btn_harvest') }}
                         </button>
                     </form>
                 </div>
@@ -461,7 +461,7 @@
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-xs text-gray-700 dark:text-gray-300">
-                                        <span class="font-semibold">{{ $log->actor?->name ?? 'Sistem' }}</span>
+                                        <span class="font-semibold">{{ $log->actor?->name ?? __('admin.system') }}</span>
                                         <span class="text-gray-400 mx-1">·</span>
                                         <span
                                             class="capitalize badge {{ $log->action === 'created' ? 'badge-success' : ($log->action === 'deleted' ? 'badge-danger' : 'badge-info') }}">{{ $log->action }}</span>

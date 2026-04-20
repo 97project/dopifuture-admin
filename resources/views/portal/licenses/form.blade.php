@@ -1,16 +1,16 @@
 @extends('portal.app')
-@section('title', $license->exists ? __('portal.edit_license') : 'Add New License')
-@section('page-title', $license->exists ? __('portal.edit_license') : 'Add New License')
+@section('title', $license->exists ? __('portal.edit_license') : __('portal.add_new'))
+@section('page-title', $license->exists ? __('portal.edit_license') : __('portal.add_new'))
 @section('content')
     {{-- ═══ Figma F-72: Add New Licence form — centered card ═══ --}}
     <div>
 
         {{-- Title + Subtitle --}}
         <h2 style="font-size:24px;font-weight:700;margin:0 0 6px 0;color:#111;font-family:'Nunito',sans-serif;">
-            {{ $license->exists ? __('portal.edit_license') : 'Add New License' }}
+            {{ $license->exists ? __('portal.edit_license') : __('portal.add_new') }}
         </h2>
         <p style="font-size:14px;color:#6B7280;margin:0 0 28px 0;">
-            {{ $license->exists ? 'Update the license details below.' : 'Fill in the details below to create a new license.' }}
+            {{ $license->exists ? __('portal.update_license_subtitle') : __('portal.create_license_subtitle') }}
         </p>
 
         <form action="{{ $license->exists ? route('portal.licenses.update', $license) : route('portal.licenses.store') }}" method="POST">
@@ -49,7 +49,7 @@
 
             {{-- Products Checklist — Figma exact --}}
             <div style="margin-bottom:24px;">
-                <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:12px;">Which products would you like to add?</label>
+                <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:12px;">{{ __('portal.which_products') }}</label>
                 @foreach(['mission_way' => 'Mission WAY', 'startup' => 'Startup', 'role_galaxy' => 'Role Galaxy', 'study_space' => 'Study Space', 'way_ai_coach' => 'WAY AI Coach'] as $key => $label)
                 <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F3F4F6;">
                     <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15px;font-weight:500;color:#111;">
@@ -74,9 +74,9 @@
                     <label style="font-size:14px;font-weight:600;color:#111;display:block;margin-bottom:6px;">{{ __('portal.license_duration') }}</label>
                     <select name="duration" style="width:100%;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;background:#F8FAFC;font-size:14px;color:#9CA3AF;outline:none;font-family:inherit;">
                         <option value="">{{ __('portal.please_select') }}</option>
-                        <option value="6" {{ old('duration', $license->duration ?? '') == 6 ? 'selected' : '' }}>6 Months</option>
-                        <option value="12" {{ old('duration', $license->duration ?? '') == 12 ? 'selected' : '' }}>12 Months</option>
-                        <option value="24" {{ old('duration', $license->duration ?? '') == 24 ? 'selected' : '' }}>24 Months</option>
+                        <option value="6" {{ old('duration', $license->duration ?? '') == 6 ? 'selected' : '' }}>6 {{ __('portal.months') }}</option>
+                        <option value="12" {{ old('duration', $license->duration ?? '') == 12 ? 'selected' : '' }}>12 {{ __('portal.months') }}</option>
+                        <option value="24" {{ old('duration', $license->duration ?? '') == 24 ? 'selected' : '' }}>24 {{ __('portal.months') }}</option>
                     </select>
                 </div>
                 <div>
@@ -89,7 +89,7 @@
             {{-- Full-width blue Submit Button --}}
             <button type="submit" style="width:100%;padding:16px;background:#1E3A8A;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;transition:background 0.2s;"
                 onmouseover="this.style.background='#1E40AF'" onmouseout="this.style.background='#1E3A8A'">
-                Save Changes
+                {{ __('portal.save_changes') }}
             </button>
         </form>
     </div>

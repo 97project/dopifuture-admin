@@ -1,12 +1,12 @@
 @extends('portal.app')
-@section('title', 'Teacher Dashboard')
+@section('title', __('admin.dashboard'))
 @section('content')
     <div style="margin-bottom:24px;">
         <h2 style="font-size:24px;font-weight:700;color:#030719;margin:0 0 4px;font-family:'Nunito',sans-serif;">
             {{ __('portal.welcome_user', ['name' => $user->name]) }}
         </h2>
         <p style="font-size:14px;color:var(--color-txt-muted);margin:0;">
-            Your classes and students overview
+            {{ __('portal.teacher_subtitle') }}
         </p>
     </div>
 
@@ -58,7 +58,7 @@
             </tbody>
         </table>
         @else
-        <div style="padding:32px;text-align:center;color:var(--text-muted);">No classes assigned yet.</div>
+        <div style="padding:32px;text-align:center;color:var(--text-muted);">{{ __('portal.no_classes_assigned') }}</div>
         @endif
     </div>
 

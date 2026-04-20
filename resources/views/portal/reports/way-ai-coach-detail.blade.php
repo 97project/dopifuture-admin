@@ -1,6 +1,6 @@
 @extends('portal.app')
-@section('title', 'WAY AI Coach — ' . ($student->name ?? ''))
-@section('page-title', 'WAY AI Coach — ' . ($student->name ?? '') . ' ' . ($student->surname ?? ''))
+@section('title', __('portal.way_ai_coach') . ' — ' . ($student->name ?? ''))
+@section('page-title', __('portal.way_ai_coach') . ' — ' . ($student->name ?? '') . ' ' . ($student->surname ?? ''))
 
 @section('content')
 @php
@@ -47,8 +47,8 @@
         </div>
     </div>
     <div style="display:flex;gap:8px;">
-        <a href="{{ route('portal.reports.student', $student) }}?app=way-ai-coach" class="dp-btn-ghost" style="font-size:12px;">← Full Report</a>
-        <a href="{{ route('portal.reports.app', 'way-ai-coach') }}" class="dp-btn-ghost" style="font-size:12px;">← All Students</a>
+        <a href="{{ route('portal.reports.student', $student) }}?app=way-ai-coach" class="dp-btn-ghost" style="font-size:12px;">← {{ __('portal.full_report') }}</a>
+        <a href="{{ route('portal.reports.app', 'way-ai-coach') }}" class="dp-btn-ghost" style="font-size:12px;">← {{ __('portal.all_students') }}</a>
     </div>
 </div>
 
@@ -56,7 +56,7 @@
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
     <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:18px;">🤖</div>
     <div style="font-size:18px;font-weight:700;">WAY AI Coach</div>
-    <span class="dp-badge dp-badge-active" style="margin-left:auto;">{{ $stats['total_sessions'] }} Sessions</span>
+    <span class="dp-badge dp-badge-active" style="margin-left:auto;">{{ $stats['total_sessions'] }} {{ __('portal.sessions') }}</span>
 </div>
 
 {{-- ═══ STAT CARDS ═══ --}}
@@ -95,7 +95,7 @@
             <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:22px;">🦅</div>
             <div>
                 <div style="font-size:18px;font-weight:700;">{{ __('portal.my_wings') }}</div>
-                <div style="font-size:12px;color:var(--color-txt-muted);">Achievement points from WAY AI Coach</div>
+                <div style="font-size:12px;color:var(--color-txt-muted);">{{ __('portal.achievement_points_all_apps') }}</div>
             </div>
         </div>
         <div style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:10px 22px;border-radius:24px;font-weight:700;font-size:20px;box-shadow:0 4px 15px rgba(102,126,234,0.4);">
@@ -115,9 +115,9 @@
             <div style="font-size:13px;font-weight:600;color:var(--color-txt);margin-bottom:6px;">{{ $wing['label'] }}</div>
             <div style="font-size:26px;font-weight:800;color:{{ $borderCol }};margin-bottom:4px;">{{ $wing['total_score'] }}</div>
             <div style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;{{ $isHigh ? 'background:rgba(96,165,250,0.15);color:#60A5FA;' : 'background:rgba(248,113,113,0.15);color:#F87171;' }}">
-                {{ $isHigh ? '▲ High' : '▼ Low' }}
+                {{ $isHigh ? '▲ ' . __('portal.high') : '▼ ' . __('portal.low') }}
             </div>
-            <div style="font-size:10px;color:var(--color-txt-muted);margin-top:4px;">{{ $wing['sessions'] }} session{{ $wing['sessions'] !== 1 ? 's' : '' }}</div>
+            <div style="font-size:10px;color:var(--color-txt-muted);margin-top:4px;">{{ $wing['sessions'] }} {{ __('portal.sessions') }}</div>
         </div>
         @endforeach
     </div>
@@ -127,8 +127,8 @@
 {{-- ═══ THEME DISTRIBUTION — Matching mobile WayAICoachScreen.js 13-theme dark card grid ═══ --}}
 <div class="dp-card" style="margin-bottom:24px;">
     <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
-        <span style="font-size:20px;">🎯</span> Theme Distribution
-        <span style="font-size:12px;color:var(--color-txt-muted);margin-left:auto;">{{ $themeBreakdown->count() }} active themes</span>
+        <span style="font-size:20px;">🎯</span> {{ __('portal.theme_distribution') }}
+        <span style="font-size:12px;color:var(--color-txt-muted);margin-left:auto;">{{ $themeBreakdown->count() }} {{ __('portal.active_themes') }}</span>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
         @php
@@ -172,7 +172,7 @@
 {{-- ═══ MODULE DISTRIBUTION — Matching vega-dopi admin module distribution ═══ --}}
 <div class="dp-card" style="margin-bottom:24px;">
     <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:20px;">📊</span> Module Distribution
+        <span style="font-size:20px;">📦</span> {{ __('portal.topic_distribution') }}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div style="text-align:center;padding:24px;background:#1e293b;border-radius:14px;transition:transform .2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='none'">
@@ -192,7 +192,7 @@
 @if($sessions->count())
 <div class="dp-card">
     <div class="dp-card-title" style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:20px;">🕐</span> Session History
+        <span style="font-size:20px;">📋</span> {{ __('portal.chat_session_history') }}
     </div>
     <table class="dp-table">
         <thead><tr>
@@ -235,7 +235,7 @@
                 <td>{{ $msgCount }}</td>
                 <td>{{ $s->duration_seconds ? \App\Services\ReportService::formatDuration($s->duration_seconds) : '-' }}</td>
                 <td>
-                    <a href="{{ route('portal.reports.session.detail', $s->id) }}" class="dp-btn" style="font-size:11px;padding:4px 10px;">Detail →</a>
+                    <a href="{{ route('portal.reports.session.detail', $s->id) }}" class="dp-btn" style="font-size:11px;padding:4px 10px;">{{ __('portal.detail') }} →</a>
                 </td>
             </tr>
         @endforeach
@@ -247,7 +247,7 @@
 @if($sessions->isEmpty())
 <div class="dp-card" style="text-align:center;padding:48px;">
     <div style="font-size:32px;margin-bottom:8px;">🤖</div>
-    <p style="color:var(--text-muted);">No WAY AI Coach session data yet.</p>
+    <p style="color:var(--text-muted);">{{ __('portal.no_data_yet') }}</p>
 </div>
 @endif
 @endsection

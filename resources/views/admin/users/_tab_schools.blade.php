@@ -23,10 +23,10 @@
                                         class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600">{{ ucfirst($school->pivot->role ?? 'üye') }}</span>
                                     @if($school->is_active)
                                         <span
-                                            class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600">Aktif</span>
+                                            class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600">{{ __('admin.active') }}</span>
                                     @else
                                         <span
-                                            class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 dark:bg-red-900/20 text-red-500">Pasif</span>
+                                            class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 dark:bg-red-900/20 text-red-500">{{ __('admin.inactive') }}</span>
                                     @endif
                                 </div>
                             </div>
@@ -68,7 +68,7 @@
                         {{-- Classes in this school --}}
                         @if($school->classes && $school->classes->count())
                             <div class="mt-4 pt-4 border-t border-gray-100 dark:border-[#1A3A5C]">
-                                <h4 class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">Sınıflar
+                                <h4 class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">{{ __('admin.classes') }}
                                     ({{ $school->classes->count() }})</h4>
                                 <div class="flex flex-wrap gap-1.5">
                                     @foreach($school->classes->take(8) as $class)
