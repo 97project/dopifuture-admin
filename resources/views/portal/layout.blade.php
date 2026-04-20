@@ -657,14 +657,14 @@
                 {{-- Language Switcher --}}
                 <div class="lang-divider"></div>
                 @php
-                    $flagMap = ['tr' => '🇹🇷', 'en' => '🇬🇧', 'mn' => '🇲🇳'];
+                    $flagCdns = ['tr' => 'tr', 'en' => 'gb', 'mn' => 'mn', 'es' => 'es', 'fr' => 'fr', 'hi' => 'in', 'ja' => 'jp', 'ko' => 'kr'];
                     $currentLocale = app()->getLocale();
                     $languages = \App\Models\Language::where('is_active', true)->get();
                     $currentLang = $languages->firstWhere('code', $currentLocale) ?? $languages->first();
                 @endphp
                 <div class="lang-switcher" id="langSwitcher">
                     <button type="button" class="lang-switcher-btn" onclick="toggleLangDropdown()">
-                        <span class="lang-flag">{{ $flagMap[$currentLocale] ?? '🌐' }}</span>
+                        <img src="https://flagcdn.com/w20/{{ $flagCdns[$currentLocale] ?? $currentLocale }}.png" width="18" alt="{{ $currentLocale }}" class="lang-flag" style="border-radius: 2px;">
                         <span>{{ strtoupper($currentLocale) }}</span>
                         <span class="lang-chevron">▾</span>
                     </button>
@@ -674,7 +674,7 @@
                                 @csrf
                                 <input type="hidden" name="locale" value="{{ $lang->code }}">
                                 <button type="submit" class="lang-dropdown-item {{ $currentLocale === $lang->code ? 'active' : '' }}">
-                                    <span class="item-flag">{{ $flagMap[$lang->code] ?? '🌐' }}</span>
+                                    <img src="https://flagcdn.com/w20/{{ $flagCdns[$lang->code] ?? $lang->code }}.png" width="20" alt="{{ $lang->code }}" class="item-flag" style="border-radius: 2px;">
                                     <span class="item-name">{{ $lang->native_name }}</span>
                                     @if($currentLocale === $lang->code)
                                         <span class="item-check">✓</span>

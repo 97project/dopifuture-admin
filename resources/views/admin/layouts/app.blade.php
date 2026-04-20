@@ -414,14 +414,16 @@
                     @php
                         $activeLanguages = \App\Models\Language::active()->ordered()->get();
                         $currentLocale = app()->getLocale();
+                        $flagCdns = ['tr' => 'tr', 'en' => 'gb', 'mn' => 'mn', 'es' => 'es', 'fr' => 'fr', 'hi' => 'in', 'ja' => 'jp', 'ko' => 'kr'];
                     @endphp
                     @if($activeLanguages->count() > 2)
                         {{-- Dropdown for 3+ languages --}}
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" type="button"
-                                class="px-2.5 py-1.5 text-[11px] font-bold rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 uppercase tracking-wider"
+                                class="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-bold rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 uppercase tracking-wider"
                                 title="{{ __('admin.switch_language') }}">
-                                {{ strtoupper($currentLocale) }}
+                                <img src="https://flagcdn.com/w20/{{ $flagCdns[$currentLocale] ?? $currentLocale }}.png" width="16" alt="{{ $currentLocale }}" class="rounded-[2px]">
+                                <span>{{ strtoupper($currentLocale) }}</span>
                             </button>
                             <div x-show="open" @click.away="open = false" x-transition
                                 class="absolute right-0 mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 py-1">
@@ -431,8 +433,9 @@
                                             @csrf
                                             <input type="hidden" name="locale" value="{{ $lang->code }}">
                                             <button type="submit"
-                                                class="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                                {{ $lang->native_name }} ({{ strtoupper($lang->code) }})
+                                                class="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                                <img src="https://flagcdn.com/w20/{{ $flagCdns[$lang->code] ?? $lang->code }}.png" width="18" alt="{{ $lang->code }}" class="rounded-[2px]">
+                                                <span>{{ $lang->native_name }} ({{ strtoupper($lang->code) }})</span>
                                             </button>
                                         </form>
                                     @endif
@@ -446,9 +449,10 @@
                             @csrf
                             <input type="hidden" name="locale" value="{{ $otherLang->code }}">
                             <button type="submit"
-                                class="px-2.5 py-1.5 text-[11px] font-bold rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 uppercase tracking-wider"
+                                class="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-bold rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 uppercase tracking-wider"
                                 title="{{ __('admin.switch_language') }}">
-                                {{ strtoupper($otherLang->code) }}
+                                <img src="https://flagcdn.com/w20/{{ $flagCdns[$otherLang->code] ?? $otherLang->code }}.png" width="16" alt="{{ $otherLang->code }}" class="rounded-[2px]">
+                                <span>{{ strtoupper($otherLang->code) }}</span>
                             </button>
                         </form>
                     @endif
