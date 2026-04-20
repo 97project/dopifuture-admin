@@ -45,7 +45,7 @@
                     <div>
                         <label class="form-label">{{ __('admin.country') }} *</label>
                         <select name="country" id="reg_country" class="form-select" required
-                            onchange="loadRegStates(this.value)">
+                            onchange="loadRegStates(this.options[this.selectedIndex].dataset.id)">
                             <option value="">{{ __('admin.select_country') }}</option>
                             @foreach($countries as $c)
                                 <option value="{{ $c->name }}" data-id="{{ $c->id }}" {{ old('country') == $c->name ? 'selected' : '' }}>
@@ -58,7 +58,7 @@
                     <div>
                         <label class="form-label">{{ __('admin.state') }}</label>
                         <select name="state" id="reg_state" class="form-select"
-                            onchange="loadRegCities(this.value)">
+                            onchange="loadRegCities(this.options[this.selectedIndex].dataset.id)">
                             <option value="">{{ __('admin.select_state') }}</option>
                         </select>
                         @error('state') <p class="form-error">{{ $message }}</p> @enderror
@@ -154,15 +154,12 @@
 
 @section('scripts')
 <script>
-async function loadRegStates(countryName) {
+async function loadRegStates(countryId, preselectState = '') {
     const stateSelect = document.getElementById('reg_state');
     const citySelect = document.getElementById('reg_city');
     stateSelect.innerHTML = '<option value="">{{ __("admin.select_state") }}</option>';
     citySelect.innerHTML = '<option value="">{{ __("admin.select_city") }}</option>';
 
-    const opt = document.querySelector(`#reg_country option[value="${countryName}"]`);
-    if (!opt) return;
-    const countryId = opt.dataset.id;
     if (!countryId) return;
 
     try {
@@ -173,18 +170,21 @@ async function loadRegStates(countryName) {
             o.value = s.name;
             o.dataset.id = s.id;
             o.textContent = s.name;
+            if (preselectState && s.name === preselectState) o.selected = true;
             stateSelect.appendChild(o);
         });
+        
+        if (preselectState) {
+            const selInfo = stateSelect.querySelector('option:checked');
+            if (selInfo && selInfo.dataset.id) loadRegCities(selInfo.dataset.id, '{{ old("city") }}');
+        }
     } catch(e) { console.error(e); }
 }
 
-async function loadRegCities(stateName) {
+async function loadRegCities(stateId, preselectCity = '') {
     const citySelect = document.getElementById('reg_city');
     citySelect.innerHTML = '<option value="">{{ __("admin.select_city") }}</option>';
 
-    const opt = document.querySelector(`#reg_state option[value="${stateName}"]`);
-    if (!opt) return;
-    const stateId = opt.dataset.id;
     if (!stateId) return;
 
     try {
@@ -194,9 +194,17 @@ async function loadRegCities(stateName) {
             const o = document.createElement('option');
             o.value = c.name;
             o.textContent = c.name;
+            if (preselectCity && c.name === preselectCity) o.selected = true;
             citySelect.appendChild(o);
         });
     } catch(e) { console.error(e); }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const countryOpt = document.querySelector('#reg_country option:checked');
+    if (countryOpt && countryOpt.dataset.id) {
+        loadRegStates(countryOpt.dataset.id, '{{ old("state") }}');
+    }
+});
 </script>
 @endsection

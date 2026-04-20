@@ -280,6 +280,11 @@
             color: var(--gray-600);
         }
 
+        .form-select option {
+            background-color: var(--gray-900);
+            color: white;
+        }
+
         .form-textarea {
             resize: vertical;
             min-height: 80px;
