@@ -71,7 +71,7 @@
                         {{ __('portal.question_label') }} {{ $qi + 1 }}
                     </span>
                     @if($q->unanimity !== null)
-                    <span style="font-size:12px;color:#6B7280;">{{ __('portal.unanimity_rate') }}: <strong style="color:#111;">{{ $q->unanimity_rate }}%</strong></span>
+                    <span style="font-size:12px;color:#6B7280;">{{ __('portal.unanimity_rate') }}: <strong style="color:#111;">{{ $q->unanimity }}%</strong></span>
                     @endif
                 </div>
 
