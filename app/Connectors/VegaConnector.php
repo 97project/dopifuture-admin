@@ -87,6 +87,8 @@ class VegaConnector implements AppConnectorInterface
                 'email' => $user->email,
                 'password' => $rawPassword,
                 'password_confirmation' => $rawPassword,
+                'language' => $user->locale ?? 'tr',
+                'school_name' => $user->schools()->first()->name ?? null,
             ];
 
             $response = $this->request('POST', '/api/v1/register', $payload);
@@ -160,6 +162,8 @@ class VegaConnector implements AppConnectorInterface
             $payload = [
                 'name' => $user->name ?? $existing['name'],
                 'surname' => $user->surname ?? $existing['surname'] ?? '',
+                'language' => $user->locale ?? 'tr',
+                'school_name' => $user->schools()->first()->name ?? null,
             ];
 
             $response = $this->request('PUT', "/api/v1/users/{$vegaId}", $payload);
