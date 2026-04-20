@@ -36,6 +36,7 @@
                                                         </option>
                                                 @endforeach
                                         </select>
+                                        @error('country') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                                 </div>
                                 <div>
                                         <label class="block text-sm font-medium mb-1">{{ __('admin.state') }}</label>
@@ -43,6 +44,7 @@
                                                 class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#1A3A5C] bg-white dark:bg-[#0A1628] text-sm">
                                                 <option value="">{{ __('admin.select_state') }}</option>
                                         </select>
+                                        @error('state') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                                 </div>
                                 <div>
                                         <label class="block text-sm font-medium mb-1">{{ __('admin.city') }}</label>
@@ -50,6 +52,7 @@
                                                 class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#1A3A5C] bg-white dark:bg-[#0A1628] text-sm">
                                                 <option value="">{{ __('admin.select_city') }}</option>
                                         </select>
+                                        @error('city') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                                 </div>
                         </div>
 
@@ -57,6 +60,7 @@
                         <div><label class="block text-sm font-medium mb-1">{{ __('admin.address') }}</label><textarea
                                         name="address" rows="2"
                                         class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#1A3A5C] bg-white dark:bg-[#0A1628] text-sm">{{ old('address', $school->address ?? '') }}</textarea>
+                                        @error('address') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                         </div>
 
                         {{-- Phone / Email / Website --}}
@@ -64,21 +68,26 @@
                                 <div><label class="block text-sm font-medium mb-1">{{ __('admin.phone') }}</label><input
                                                 type="text" name="phone" value="{{ old('phone', $school->phone ?? '') }}"
                                                 class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#1A3A5C] bg-white dark:bg-[#0A1628] text-sm">
+                                        @error('phone') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                                 </div>
                                 <div><label class="block text-sm font-medium mb-1">{{ __('admin.email') }}</label><input
                                                 type="email" name="email" value="{{ old('email', $school->email ?? '') }}"
                                                 class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#1A3A5C] bg-white dark:bg-[#0A1628] text-sm">
+                                        @error('email') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                                 </div>
                                 <div><label class="block text-sm font-medium mb-1">{{ __('admin.website') }}</label><input
                                                 type="url" name="website" value="{{ old('website', $school->website ?? '') }}"
                                                 class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#1A3A5C] bg-white dark:bg-[#0A1628] text-sm">
+                                        @error('website') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                                 </div>
                         </div>
 
                         {{-- Active --}}
                         <div><label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_active" value="1"
                                                 class="rounded border-gray-300 text-[#0B6AB2]" {{ old('is_active', $school->is_active ?? true) ? 'checked' : '' }}>
-                                        {{ __('admin.active') }}</label></div>
+                                        {{ __('admin.active') }}</label>
+                                        @error('is_active') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                                </div>
 
                         {{-- Actions --}}
                         <div class="flex items-center gap-3 pt-4 border-t"><button type="submit"
