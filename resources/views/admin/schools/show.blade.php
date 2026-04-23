@@ -117,11 +117,10 @@
                                                     __('admin.city') => $school->city,
                                                 ] as $label => $value)
 
-                            <                   div class="flex justify-between py-2 border-b border-gray-50 dark:border-[#1A3A5C]/50 last:border-0">
-                                                    <span class="text-xs font-medium text-gray-500">{{ $label }}</span>
-                                                    <span class="text-xs text-gray-900 dark:text-white text-right">{{ $value ?? '—' }}</span>
-                                                </di
-                            v                       >
+                            <div class="flex justify-between py-2 border-b border-gray-50 dark:border-[#1A3A5C]/50 last:border-0">
+                                <span class="text-xs font-medium text-gray-500">{{ $label }}</span>
+                                <span class="text-xs text-gray-900 dark:text-white text-right">{!! $value ?? '—' !!}</span>
+                            </div>
                         @endforeach
                     </div>
 
