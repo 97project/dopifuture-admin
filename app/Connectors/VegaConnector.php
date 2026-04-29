@@ -81,6 +81,14 @@ class VegaConnector implements AppConnectorInterface
             $name = trim($user->name ?? '') ?: 'Öğrenci';
             $surname = trim($user->surname ?? '') ?: 'Öğrenci';
             
+            // Resolve school_name safely — unsaved dummy users won't have DB relationships
+            $schoolName = null;
+            if ($user->exists) {
+                $schoolName = $user->schools()->first()?->name;
+            } elseif (isset($user->school_name)) {
+                $schoolName = $user->school_name;
+            }
+
             $payload = [
                 'name' => $name,
                 'surname' => $surname,
@@ -88,8 +96,11 @@ class VegaConnector implements AppConnectorInterface
                 'password' => $rawPassword,
                 'password_confirmation' => $rawPassword,
                 'language' => $user->locale ?? 'tr',
-                'school_name' => $user->schools()->first()->name ?? null,
             ];
+
+            if ($schoolName) {
+                $payload['school_name'] = (string) $schoolName;
+            }
 
             $response = $this->request('POST', '/api/v1/register', $payload);
 
@@ -159,12 +170,15 @@ class VegaConnector implements AppConnectorInterface
             }
 
             $vegaId = $existing['id'];
+            $schoolName = $user->schools()->first()?->name;
             $payload = [
                 'name' => $user->name ?? $existing['name'],
                 'surname' => $user->surname ?? $existing['surname'] ?? '',
                 'language' => $user->locale ?? 'tr',
-                'school_name' => $user->schools()->first()->name ?? null,
             ];
+            if ($schoolName) {
+                $payload['school_name'] = (string) $schoolName;
+            }
 
             $response = $this->request('PUT', "/api/v1/users/{$vegaId}", $payload);
 

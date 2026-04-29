@@ -158,10 +158,12 @@ class PortalUserController extends Controller
         }
 
         // Call Vega API FIRST to generate Master ID
+        $schoolName = $schoolId ? School::where('id', $schoolId)->value('name') : null;
         $dummyUser = new User([
             'name' => $data['name'],
             'surname' => $data['surname'] ?? null,
             'email' => $data['email'],
+            'school_name' => $schoolName,
         ]);
         
         $vegaResult = app(\App\Connectors\VegaConnector::class)->syncUser($dummyUser, $data['password']);
@@ -416,6 +418,7 @@ class PortalUserController extends Controller
         $created = 0;
         $skipped = 0;
         $errors = [];
+        $importSchoolName = School::where('id', $schoolId)->value('name');
 
         foreach ($rows as $idx => $row) {
             if (empty(array_filter($row))) continue; // boş satır
@@ -458,6 +461,7 @@ class PortalUserController extends Controller
                 'name'    => $name,
                 'surname' => $surname,
                 'email'   => $email,
+                'school_name' => $importSchoolName ?? null,
             ]);
             
             $vegaResult = app(\App\Connectors\VegaConnector::class)->syncUser($dummyUser, $passwordToStore);
