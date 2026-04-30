@@ -929,7 +929,8 @@
 </div>
 @endif
 
-{{-- ── Simulation Version Roles (mission-way) ────── --}}
+{{-- ── Simulation Version Roles (mission-way) (GİZLENDİ) ────── --}}
+{{-- 
 @if(!empty($simVersionRoles) && $simVersionRoles->count() > 0)
 <div class="dp-card" style="margin-top:24px;">
     <div class="dp-card-title">🎭 {{ __('portal.version_roles') }}</div>
@@ -941,7 +942,8 @@
         @endforeach
     </div>
 </div>
-@endif
+@endif 
+--}}
 
 {{-- ── Languages (mission-way) ─────────────────────── --}}
 @if(!empty($languages) && $languages->count() > 0)

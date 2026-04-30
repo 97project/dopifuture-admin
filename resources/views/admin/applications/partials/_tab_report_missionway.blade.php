@@ -351,7 +351,8 @@
     @endif 
     --}}
 
-    {{-- Version Roles --}}
+    {{-- Version Roles (GİZLENDİ) --}}
+    {{-- 
     @if(!empty($reportData['simVersionRoles']) && count($reportData['simVersionRoles']) > 0)
     <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
         <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">🎭 Simulation Version Roles</h3>
@@ -363,7 +364,8 @@
             @endforeach
         </div>
     </div>
-    @endif
+    @endif 
+    --}}
 
     {{-- Languages --}}
     @if(!empty($reportData['languages']) && count($reportData['languages']) > 0)
