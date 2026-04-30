@@ -97,14 +97,50 @@ class PortalReportController extends Controller
             $data['perAppDashboards'] = $this->getPerAppDeepDashboards($schoolUserIds);
 
         } elseif ($user->hasRole('teacher')) {
-            // Teacher sees class-level overview
+            // Öğretmen — okul admini ile aynı overview verilerine erişir
+            $schoolIds = $user->schools()->pluck('schools.id');
+            $data['overview'] = $this->reportService->getSchoolOverviewStats($schoolIds);
+            $data['apps'] = Application::active()->ordered()->get();
             $data['myClasses'] = $user->classes()
                 ->with('school')
                 ->withCount('students')
                 ->get();
-            $data['apps'] = Application::active()->ordered()->get();
 
-            // Advanced Dashboards (Teacher / Admin Only)
+            // Enrich Vega app cards with real remote DB data
+            try {
+                $panelUserIds = DB::table('school_user')
+                    ->whereIn('school_id', $schoolIds)
+                    ->pluck('user_id')
+                    ->unique()
+                    ->values();
+                $vegaUserMap = $this->vegaReportService->resolveVegaUserIds($panelUserIds);
+                $vegaUserIds = array_values($vegaUserMap);
+                $vegaSummary = $this->vegaReportService->getDashboardSummary($vegaUserIds);
+
+                // Map portal slug → Vega summary key
+                $slugToVega = [
+                    'role-galaxy'  => 'role_galaxy',
+                    'study-space'  => 'study_space',
+                    'way-ai-coach' => 'way_ai_coach',
+                ];
+
+                $data['overview']['app_stats'] = $data['overview']['app_stats']->map(function ($stat) use ($slugToVega, $vegaSummary) {
+                    $vegaKey = $slugToVega[$stat['app']->slug] ?? null;
+                    if ($vegaKey && isset($vegaSummary[$vegaKey])) {
+                        $v = $vegaSummary[$vegaKey];
+                        $stat['total_progress'] = $v['sessions'];
+                        $stat['completed'] = $v['completed'] ?? 0;
+                        $stat['in_progress'] = ($v['sessions']) - ($v['completed'] ?? 0);
+                        $stat['total_users'] = $v['active_students'];
+                        $stat['avg_score'] = $v['avg_score'] ?? null;
+                    }
+                    return $stat;
+                });
+            } catch (\Exception $e) {
+                // Vega DB unavailable — keep local data
+            }
+
+            // Advanced Dashboards
             $classUserIds = $this->getScopedUserIds($user);
             $data['radarMetrics'] = $this->getGlobalRadarMetrics($classUserIds);
             $data['recentActivities'] = $this->getRecentActivities($classUserIds, 8);
@@ -739,11 +775,33 @@ class PortalReportController extends Controller
 
         $stepsCollection = $wsSim->steps;
 
-        // Real completion from member step_progress for this specific class
-        $members = WsMember::where('application_id', $wsSim->application_id)
-            ->whereIn('user_id', $panelUserIds)
-            ->with(['user', 'progress', 'submissions'])
-            ->get();
+        // Bu simülasyona atanmış veya ilerleme kaydeden üyeleri bul
+        // (appReport() ile aynı mantık — assignment + progress bazlı hedefleme)
+        $wsAssignedMemberIds = \App\Models\WsAssignmentMember::whereHas('assignment', fn($q) => $q->where('simulation_id', $wsSim->id))->pluck('member_id');
+        $wsPlayedMemberIds = \App\Models\WsStepProgress::whereHas('step', fn($q) => $q->where('simulation_id', $wsSim->id))->pluck('member_id');
+        $targetMemberIds = $wsAssignedMemberIds->concat($wsPlayedMemberIds)->unique();
+
+        // Eğer assignment/progress bazlı hedefleme boş dönerse, application_id bazlı fallback
+        if ($targetMemberIds->isEmpty()) {
+            $members = WsMember::where('application_id', $wsSim->application_id)
+                ->whereIn('user_id', $panelUserIds)
+                ->with(['user', 'progress', 'submissions'])
+                ->get();
+        } else {
+            $members = WsMember::whereIn('id', $targetMemberIds)
+                ->whereIn('user_id', $panelUserIds)
+                ->with(['user', 'progress', 'submissions'])
+                ->get();
+
+            // user_id null olanlar da dahil — henüz bağlanmamış üyeler
+            $unlinkedMembers = WsMember::whereIn('id', $targetMemberIds)
+                ->whereNull('user_id')
+                ->with(['progress', 'submissions'])
+                ->get();
+
+            $members = $members->concat($unlinkedMembers)->unique('id');
+        }
+
         $allStepProgress = $members->flatMap->progress;
         $stepsCompleted = $allStepProgress->where('status', 'completed')->count();
 

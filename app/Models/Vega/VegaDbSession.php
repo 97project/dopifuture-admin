@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Vega remote DB — vega_sessions tablosu.
  * Read-only kullanım: Panel26 portal raporları için.
  *
- * module: 'simulator' (Role Galaxy), 'lecturer' (Way AI Coach), 'chatbot' (Study Space)
+ * module: 'simulator' (Role Galaxy), 'chatbot' (Way AI Coach), 'lecturer' (Study Space)
  */
 class VegaDbSession extends Model
 {

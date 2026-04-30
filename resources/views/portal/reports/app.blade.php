@@ -1,4 +1,4 @@
-﻿@extends('portal.app')
+@extends('portal.app')
 @section('title', $app->name . ' — ' . __('admin.reports'))
 @section('page-title', $app->name)
 
@@ -903,25 +903,14 @@
 </div>
 @endif
 
-{{-- ── Media Assets (mission-way) ──────────────────── --}}
+{{-- ── Media Assets (mission-way) (GİZLENDİ) ──────────────────── --}}
+{{-- 
 @if(!empty($mediaAssets) && $mediaAssets->count() > 0)
 <div class="dp-card" style="margin-top:24px;">
-    <div class="dp-card-title">🖼️ {{ __('portal.media_assets') }}</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:12px;">
-        @foreach($mediaAssets as $asset)
-        <div style="padding:12px;border-radius:10px;background:var(--color-input-bg);border:1px solid var(--color-row-border);text-align:center;">
-            @if(Str::startsWith($asset['mimeType'] ?? $asset['contentType'] ?? '', 'image'))
-                <img src="{{ $asset['fileUrl'] ?? $asset['url'] ?? '' }}" alt="" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:8px;">
-            @else
-                <div style="width:100%;height:80px;border-radius:6px;background:linear-gradient(135deg,#1e293b,#334155);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:8px;">📁</div>
-            @endif
-            <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $asset['name'] ?? $asset['title'] ?? __('portal.asset') }}</div>
-            <div style="font-size:10px;color:var(--color-txt-muted);">{{ $asset['type'] ?? $asset['assetType'] ?? '' }}</div>
-        </div>
-        @endforeach
-    </div>
+    ... (Kullanılmayan/Çalışmayan medya assetleri bloğu)
 </div>
-@endif
+@endif 
+--}}
 
 {{-- ── SimulationWing Stats (mission-way) ──────────── --}}
 @if(!empty($simWingStats))

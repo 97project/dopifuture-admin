@@ -342,21 +342,14 @@
     </div>
     @endif
 
-    {{-- Media Assets --}}
+    {{-- Media Assets (GİZLENDİ) --}}
+    {{-- 
     @if(!empty($reportData['mediaAssets']) && count($reportData['mediaAssets']) > 0)
     <div class="bg-white dark:bg-[#0E2442]/50 rounded-xl border border-gray-100 dark:border-[#1A3A5C] p-5">
-        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">🖼️ Media Assets ({{ count($reportData['mediaAssets']) }})</h3>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            @foreach(collect($reportData['mediaAssets'])->take(12) as $asset)
-            <div class="bg-gray-50 dark:bg-gray-800/40 rounded-lg p-3 text-center">
-                <div class="text-lg mb-1">📁</div>
-                <p class="text-xs font-medium text-gray-900 dark:text-white truncate">{{ $asset['name'] ?? $asset['title'] ?? 'Asset' }}</p>
-                <p class="text-[10px] text-gray-400">{{ $asset['type'] ?? $asset['assetType'] ?? '' }}</p>
-            </div>
-            @endforeach
-        </div>
+        ... (Kullanılmayan/Çalışmayan medya assetleri bloğu)
     </div>
-    @endif
+    @endif 
+    --}}
 
     {{-- Version Roles --}}
     @if(!empty($reportData['simVersionRoles']) && count($reportData['simVersionRoles']) > 0)

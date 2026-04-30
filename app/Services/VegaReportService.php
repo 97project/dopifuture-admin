@@ -61,11 +61,68 @@ class VegaReportService
 
     /**
      * Resolves a single Panel26 user to their Vega user ID.
+     * If cache returns null (user not found), bypasses cache for a direct lookup
+     * to handle recently synced users.
      */
     public function resolveVegaUserId(int $panelUserId): ?string
     {
         $map = $this->resolveVegaUserIds(collect([$panelUserId]));
-        return $map[$panelUserId] ?? null;
+        $result = $map[$panelUserId] ?? null;
+
+        // Cache may contain stale "not found" — bypass with direct DB lookup
+        if ($result === null) {
+            $email = User::where('id', $panelUserId)->value('email');
+            if ($email) {
+                $vegaMap = VegaDbUser::mapEmailsToIds([$email]);
+                $result = isset($vegaMap[$email]) ? (string) $vegaMap[$email] : null;
+
+                // If found via direct lookup, invalidate cache so next batch includes this user
+                if ($result !== null) {
+                    $this->clearVegaUserCache();
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Vega kullanıcı eşleşme cache'ini temizler.
+     * Yeni kullanıcı sync'i sonrası çağrılmalıdır.
+     */
+    public function clearVegaUserCache(): void
+    {
+        // Pattern-based cache flush for all vega_user_map keys
+        // Since we use md5-based keys, we clear all matching pattern
+        $cacheStore = Cache::getStore();
+        if (method_exists($cacheStore, 'flush')) {
+            // For array/file drivers — flush is too aggressive, use tags or specific keys
+        }
+
+        // Targeted approach: clear all keys starting with vega_user_map_
+        // For Redis/Memcached this uses tags; for file cache we forget known patterns
+        try {
+            // Flush all cached user maps — they'll be rebuilt on next request
+            $prefix = 'vega_user_map_';
+            if ($cacheStore instanceof \Illuminate\Cache\FileStore) {
+                // File store doesn't support pattern deletion, clear entire cache section
+                Cache::flush();
+            } elseif (method_exists($cacheStore, 'connection')) {
+                // Redis — use pattern scan
+                $connection = $cacheStore->connection();
+                $cachePrefix = config('cache.prefix', '') . ':';
+                $keys = $connection->keys($cachePrefix . $prefix . '*');
+                if (!empty($keys)) {
+                    $connection->del($keys);
+                }
+            } else {
+                // Fallback — clear entire cache
+                Cache::flush();
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('[VegaReportService] Cache clear failed: ' . $e->getMessage());
+            // Non-critical — cache will expire naturally in 5 minutes
+        }
     }
 
     /* ─── Role Galaxy (simulator) ────────────────────── */
@@ -173,10 +230,13 @@ class VegaReportService
         ];
     }
 
-    /* ─── Way AI Coach (lecturer) ────────────────────── */
+    /* ─── Way AI Coach (chatbot) ─────────────────────── */
 
     /**
      * Generates Way AI Coach report data.
+     *
+     * Mobil uygulama eşleşmesi: WAY AI Coach = chatbot modülü
+     * (genel yapay zeka sohbet asistanı)
      */
     public function getWayAiCoachReport(array $vegaUserMap, Collection $panelUsers): array
     {
@@ -186,15 +246,15 @@ class VegaReportService
             return $this->emptyReportData();
         }
 
-        $sessions = VegaDbSession::lecturer()
+        $sessions = VegaDbSession::chatbot()
             ->forUsers($vegaUserIds)
-            ->withCount('lecturerMessages')
-            ->with('lecturerMessages:id,session_id,created_at')
+            ->withCount('chatMessages')
+            ->with('chatMessages:id,session_id,created_at')
             ->get();
 
         $totalSessions = $sessions->count();
         $totalDuration = $sessions->sum(fn($s) => $s->duration_seconds);
-        $totalMessages = $sessions->sum('lecturer_messages_count');
+        $totalMessages = $sessions->sum('chat_messages_count');
 
         // Per-user stats
         $perUser = $sessions->groupBy('user_id');
@@ -202,7 +262,7 @@ class VegaReportService
 
         // Average interaction and duration (for alert threshold)
         $avgInteractionPerUser = $perUser->count() > 0
-            ? $perUser->map(fn($items) => $items->sum('lecturer_messages_count'))->avg()
+            ? $perUser->map(fn($items) => $items->sum('chat_messages_count'))->avg()
             : 0;
 
         $userStats = collect();
@@ -212,7 +272,7 @@ class VegaReportService
             $panelUser = $panelUserId ? ($panelUsers[$panelUserId] ?? null) : null;
             if (!$panelUser) continue;
 
-            $userInteractions = $userSessions->sum('lecturer_messages_count');
+            $userInteractions = $userSessions->sum('chat_messages_count');
             $userDuration = $userSessions->sum(fn($s) => $s->duration_seconds);
 
             // Alert: flag low-interaction users
@@ -233,29 +293,27 @@ class VegaReportService
             ]);
         }
 
-        // Empathy score — average lecturer message score
-        $empathyScore = VegaDbLecturerMessage::whereIn(
-            'session_id',
-            $sessions->pluck('id')
-        )->whereNotNull('score')->avg('score');
-
         return [
-            'total_progress'   => $empathyScore !== null ? round((float) $empathyScore, 1) : 0,
+            'total_progress'   => $totalMessages,
             'total_completed'  => $sessions->where('status', 'COMPLETED')->count(),
             'total_sessions'   => $totalSessions,
             'total_duration'   => $totalDuration,
-            'avg_score'        => $empathyScore ? round((float) $empathyScore, 1) : null,
+            'avg_score'        => null,
             'user_stats'       => $userStats,
             'module_stats'     => collect(),
-            'sessions_by_day'  => $this->getSessionsByDay($vegaUserIds, 'lecturer'),
+            'sessions_by_day'  => $this->getSessionsByDay($vegaUserIds, 'chatbot'),
             'recent_sessions'  => collect(),
         ];
     }
 
-    /* ─── Study Space (chatbot) ──────────────────────── */
+    /* ─── Study Space (lecturer) ─────────────────────── */
 
     /**
      * Generates Study Space report data.
+     *
+     * Mobil uygulama eşleşmesi: Study Space = lecturer modülü
+     * (ders/konu bazlı çalışma — subject, topic, theme bilgileri içerir)
+     * POST /lecturer/start → "Start Study Space lecturer"
      */
     public function getStudySpaceReport(array $vegaUserMap, Collection $panelUsers): array
     {
@@ -265,16 +323,17 @@ class VegaReportService
             return $this->emptyReportData();
         }
 
-        $sessions = VegaDbSession::chatbot()
+        $sessions = VegaDbSession::lecturer()
             ->forUsers($vegaUserIds)
-            ->withCount('chatMessages')
-            ->with('chatMessages:id,session_id,created_at')
+            ->withCount('lecturerMessages')
+            ->with('lecturerMessages:id,session_id,created_at,score')
             ->get();
 
         $totalSessions = $sessions->count();
         $totalDuration = $sessions->sum(fn($s) => $s->duration_seconds);
+        $totalMessages = $sessions->sum('lecturer_messages_count');
 
-        // Per-user stats
+        // Per-user stats — ders/konu bazlı gruplandırma
         $perUser = $sessions->groupBy('user_id');
         $vegaIdToPanelId = array_flip($vegaUserMap);
 
@@ -287,34 +346,58 @@ class VegaReportService
 
             $userDuration = $userSessions->sum(fn($s) => $s->duration_seconds);
             $userDurationMinutes = (int) round($userDuration / 60);
+            $userMessages = $userSessions->sum('lecturer_messages_count');
+
+            // Konu bazlı dağılım (hangi dersleri çalıştığı)
+            $subjects = $userSessions->pluck('subject')->filter()->unique()->values()->toArray();
+            $topics = $userSessions->pluck('topic')->filter()->unique()->values()->toArray();
+            $themes = $userSessions->pluck('theme')->filter()->unique()->values()->toArray();
+
+            // Empathy/puan ortalaması — lecturer mesaj puanları
+            $sessionIds = $userSessions->pluck('id');
+            $userAvgScore = VegaDbLecturerMessage::whereIn('session_id', $sessionIds)
+                ->whereNotNull('score')
+                ->avg('score');
 
             $userStats->push([
                 'user'               => $panelUser,
                 'discussion_minutes' => $userDurationMinutes,
                 'discussion_count'   => $userSessions->count(),
+                'message_count'      => $userMessages,
+                'subjects'           => $subjects,
+                'topics'             => $topics,
+                'themes'             => $themes,
+                'avg_score'          => $userAvgScore ? round((float) $userAvgScore, 1) : null,
                 // Performance tab fields
                 'total'              => $userSessions->count(),
                 'completed'          => $userSessions->where('status', 'COMPLETED')->count(),
-                'completion_rate'    => 0,
-                'avg_score'          => null,
+                'completion_rate'    => $userSessions->count() > 0
+                    ? round(($userSessions->where('status', 'COMPLETED')->count() / $userSessions->count()) * 100, 1)
+                    : 0,
                 'total_duration'     => $userDuration,
             ]);
         }
 
-        // Average discussion duration (minutes)
-        $avgDiscussionTime = $totalSessions > 0
+        // Ortalama ders süresi (dakika)
+        $avgLessonTime = $totalSessions > 0
             ? round($totalDuration / $totalSessions / 60, 1)
             : 0;
+
+        // Genel empathy score
+        $empathyScore = VegaDbLecturerMessage::whereIn(
+            'session_id',
+            $sessions->pluck('id')
+        )->whereNotNull('score')->avg('score');
 
         return [
             'total_progress'   => $totalSessions,
             'total_completed'  => $sessions->where('status', 'COMPLETED')->count(),
             'total_sessions'   => $totalSessions,
             'total_duration'   => $totalDuration,
-            'avg_score'        => $avgDiscussionTime,
+            'avg_score'        => $empathyScore ? round((float) $empathyScore, 1) : $avgLessonTime,
             'user_stats'       => $userStats,
             'module_stats'     => collect(),
-            'sessions_by_day'  => $this->getSessionsByDay($vegaUserIds, 'chatbot'),
+            'sessions_by_day'  => $this->getSessionsByDay($vegaUserIds, 'lecturer'),
             'recent_sessions'  => collect(),
         ];
     }
@@ -323,8 +406,9 @@ class VegaReportService
 
     /**
      * Generates question/answer/score/feedback data from
-     * a user's WAY AI Coach lecturer sessions.
+     * a user's WAY AI Coach chatbot sessions.
      *
+     * Mobil eşleşme: WAY AI Coach = chatbot modülü
      * User messages are treated as questions,
      * assistant messages as feedback.
      */
@@ -334,8 +418,8 @@ class VegaReportService
             return collect();
         }
 
-        // Fetch all lecturer sessions for the user
-        $sessions = VegaDbSession::lecturer()
+        // Fetch all chatbot sessions for the user (WAY AI Coach = chatbot)
+        $sessions = VegaDbSession::chatbot()
             ->forUser($vegaUserId)
             ->orderByDesc('created_at')
             ->get();
@@ -345,9 +429,8 @@ class VegaReportService
         }
 
         // Fetch all messages, ordered
-        $allMessages = VegaDbLecturerMessage::whereIn('session_id', $sessions->pluck('id'))
+        $allMessages = VegaDbChatMessage::whereIn('session_id', $sessions->pluck('id'))
             ->orderBy('session_id')
-            ->orderBy('created_at_ext')
             ->orderBy('created_at')
             ->get();
 
@@ -370,7 +453,7 @@ class VegaReportService
                 ];
             } elseif ($msg->role === 'assistant' && $pendingQuestion !== null) {
                 $pendingQuestion->feedback = $msg->content;
-                $pendingQuestion->score = $msg->score ?? (int) min(20, max(0, mb_strlen($msg->content) > 50 ? 15 : 10));
+                $pendingQuestion->score = $msg->metadata['score'] ?? (int) min(20, max(0, mb_strlen($msg->content) > 50 ? 15 : 10));
                 $questions->push($pendingQuestion);
                 $pendingQuestion = null;
             }
@@ -623,13 +706,13 @@ class VegaReportService
         $simSessions = VegaDbSession::simulator()->forUsers($vegaUserIds)->get();
         $simAvgScore = $simSessions->whereNotNull('score')->avg('score');
 
-        // Study Space (chatbot)
-        $chatSessions = VegaDbSession::chatbot()->forUsers($vegaUserIds)->withCount('chatMessages')->get();
-        $chatMessages = $chatSessions->sum('chat_messages_count');
-
-        // WAY AI Coach (lecturer)
+        // Study Space (lecturer) — ders/konu bazlı çalışma
         $lecSessions = VegaDbSession::lecturer()->forUsers($vegaUserIds)->withCount('lecturerMessages')->get();
         $lecMessages = $lecSessions->sum('lecturer_messages_count');
+
+        // WAY AI Coach (chatbot) — genel AI sohbet asistanı
+        $chatSessions = VegaDbSession::chatbot()->forUsers($vegaUserIds)->withCount('chatMessages')->get();
+        $chatMessages = $chatSessions->sum('chat_messages_count');
 
         return [
             'role_galaxy' => [
@@ -639,14 +722,14 @@ class VegaReportService
                 'completed'       => $simSessions->where('status', 'COMPLETED')->count(),
             ],
             'study_space' => [
-                'sessions'        => $chatSessions->count(),
-                'active_students' => $chatSessions->pluck('user_id')->unique()->count(),
-                'total_messages'  => $chatMessages,
-            ],
-            'way_ai_coach' => [
                 'sessions'        => $lecSessions->count(),
                 'active_students' => $lecSessions->pluck('user_id')->unique()->count(),
                 'total_messages'  => $lecMessages,
+            ],
+            'way_ai_coach' => [
+                'sessions'        => $chatSessions->count(),
+                'active_students' => $chatSessions->pluck('user_id')->unique()->count(),
+                'total_messages'  => $chatMessages,
             ],
         ];
     }

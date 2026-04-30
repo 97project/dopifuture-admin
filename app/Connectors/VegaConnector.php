@@ -123,7 +123,20 @@ class VegaConnector implements AppConnectorInterface
                     Log::channel('daily')->error('[Vega] DB update error (new)', ['email' => $user->email, 'error' => $dbEx->getMessage()]);
                 }
 
-                return ['success' => true, 'response' => $response->json(), 'error' => null];
+                // Extract user from nested API response: {status, response: {user: {id,...}}}
+                $json = $response->json();
+                $userData = $json['response']['user'] ?? $json['response'] ?? $json;
+                
+                // If still no ID, try direct DB lookup
+                if (empty($userData['id'])) {
+                    $dbUser = \Illuminate\Support\Facades\DB::connection('vega_db')
+                        ->table('users')->where('email', $user->email)->first();
+                    if ($dbUser) {
+                        $userData = json_decode(json_encode($dbUser), true);
+                    }
+                }
+                
+                return ['success' => true, 'response' => $userData, 'error' => null];
             }
 
             // 422 duplicate email → zaten varsa başarılı say
@@ -133,7 +146,9 @@ class VegaConnector implements AppConnectorInterface
                     Log::channel('daily')->info('[Vega] Kullanıcı zaten kayıtlı (422)', [
                         'userId' => $user->id,
                     ]);
-                    return ['success' => true, 'response' => $response->json(), 'error' => null];
+                    // Look up existing user from Vega DB to get proper ID
+                    $existingVega = $this->findByEmail($user->email);
+                    return ['success' => true, 'response' => $existingVega ?: $response->json(), 'error' => null];
                 }
             }
 

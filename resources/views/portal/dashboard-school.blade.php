@@ -13,6 +13,7 @@
                 {{ $school->city ?? '' }}{{ $school->country ? ', ' . $school->country : '' }}
             </p>
         </div>
+        @if($canManageStudents ?? true)
         <button type="button" onclick="document.getElementById('seatRequestModal').style.display='flex'"
                 style="display:inline-flex;align-items:center;gap:8px;padding:10px 24px;background:linear-gradient(135deg,#4364F7,#003AC9);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;box-shadow:0 4px 14px rgba(67,100,247,0.3);transition:transform 0.15s,box-shadow 0.15s;"
                 onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(67,100,247,0.4)'"
@@ -20,6 +21,7 @@
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             {{ __('portal.request_additional_seats') }}
         </button>
+        @endif
     </div>
 
     {{-- ═══ 4 QUICK STAT CARDS ═══ --}}
@@ -242,7 +244,7 @@
             </div>
             @empty
             <p style="color:var(--color-txt-muted);padding:20px 0;text-align:center;font-size:14px;">
-                {{ __('portal.no_students_yet') }} <a href="{{ route('portal.users.create', ['role' => 'student']) }}" style="color:#4364F7;">{{ __('portal.add_first_student') }} →</a>
+                {{ __('portal.no_students_yet') }} @if($canManageStudents ?? true)<a href="{{ route('portal.users.create', ['role' => 'student']) }}" style="color:#4364F7;">{{ __('portal.add_first_student') }} →</a>@endif
             </p>
             @endforelse
         </div>

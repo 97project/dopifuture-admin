@@ -226,6 +226,13 @@ class PortalUserController extends Controller
         // Vega is already synced above!
         SyncUserToAppsJob::dispatch($newUser, $data['password']);
 
+        // Vega user mapping cache'ini temizle — yeni kullanıcı anında raporlarda görünsün
+        try {
+            app(\App\Services\VegaReportService::class)->clearVegaUserCache();
+        } catch (\Throwable $e) {
+            \Log::channel('daily')->warning('[PortalUser] Vega cache temizleme hatası', ['error' => $e->getMessage()]);
+        }
+
         // Hoş geldin e-postası gönder
         try {
             \Illuminate\Support\Facades\Mail::to($newUser->email)
@@ -512,6 +519,15 @@ class PortalUserController extends Controller
         $msg = $isTr
             ? "{$created} öğrenci oluşturuldu, {$skipped} satır atlandı."
             : "{$created} students created, {$skipped} rows skipped.";
+
+        // Toplu import sonrası Vega user mapping cache temizle
+        if ($created > 0) {
+            try {
+                app(\App\Services\VegaReportService::class)->clearVegaUserCache();
+            } catch (\Throwable $e) {
+                \Log::channel('daily')->warning('[PortalUser] Import sonrası Vega cache temizleme hatası', ['error' => $e->getMessage()]);
+            }
+        }
 
         return redirect()->route('portal.users.index')
             ->with('success', $msg)

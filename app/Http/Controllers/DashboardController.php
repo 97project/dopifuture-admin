@@ -18,14 +18,32 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        // ── Teacher Dashboard ──────────────────────────
+        // ── Teacher Dashboard ── öğretmen okul admini ile aynı zengin dashboard'u görür
+        // Student CRUD işlemleri hariç tüm içerikler gösterilir
         if ($user->hasRole('teacher')) {
-            $classes = \App\Models\SchoolClass::whereIn('id', $user->classes()->pluck('school_classes.id'))
-                ->with('school')
-                ->withCount('students')
-                ->get();
+            $schoolIds = $user->schools()->pluck('schools.id');
+            $school = School::whereIn('id', $schoolIds)
+                ->withCount(['users', 'classes'])
+                ->withCount(['users as students_count' => fn($q) => $q->whereHas('roles', fn($r) => $r->where('name', 'student'))])
+                ->withCount(['users as teachers_count' => fn($q) => $q->whereHas('roles', fn($r) => $r->where('name', 'teacher'))])
+                ->first();
 
-            // Last 5 students (from teacher's classes)
+            $license = License::where('school_id', $school?->id)
+                ->with(['purchases' => fn($q) => $q->orderByDesc('purchased_at'), 'school'])
+                ->first();
+
+            // License warning
+            $licenseWarning = null;
+            if ($license && $license->is_active && $license->expires_at) {
+                $daysLeft = now()->diffInDays($license->expires_at, false);
+                if ($daysLeft <= 7 && $daysLeft >= 0) {
+                    $licenseWarning = 'critical';
+                } elseif ($daysLeft <= 30 && $daysLeft > 7) {
+                    $licenseWarning = 'warning';
+                }
+            }
+
+            // Son 5 öğrenci (öğretmenin sınıflarından)
             $classIds = $user->classes()->pluck('school_classes.id');
             $recentStudents = \App\Models\User::whereHas('classes', fn($q) => $q->whereIn('school_classes.id', $classIds))
                 ->role('student')
@@ -33,11 +51,39 @@ class DashboardController extends Controller
                 ->limit(5)
                 ->get();
 
-            return view('portal.dashboard-teacher', [
+            // Seat requests
+            $seatRequests = \App\Models\SeatRequest::where('school_id', $school?->id)
+                ->orderByDesc('created_at')
+                ->limit(10)
+                ->get();
+
+            // Vega app summary
+            $vegaSummary = [];
+            try {
+                $vegaService = app(\App\Services\VegaReportService::class);
+                $schoolStudentIds = \App\Models\User::whereHas('schools', fn($q) => $q->whereIn('schools.id', $schoolIds))
+                    ->role('student')
+                    ->pluck('id');
+                $vegaUserMap = $vegaService->resolveVegaUserIds($schoolStudentIds);
+                $vegaSummary = $vegaService->getDashboardSummary(array_values($vegaUserMap));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Vega DB Dashboard Error (teacher): ' . $e->getMessage());
+                $vegaSummary = [
+                    'role_galaxy'  => ['sessions' => 0, 'avg_score' => null, 'active_students' => 0, 'completed' => 0],
+                    'study_space'  => ['sessions' => 0, 'active_students' => 0, 'total_messages' => 0],
+                    'way_ai_coach' => ['sessions' => 0, 'active_students' => 0, 'total_messages' => 0],
+                ];
+            }
+
+            return view('portal.dashboard-school', [
                 'user' => $user,
-                'classes' => $classes,
+                'school' => $school,
+                'license' => $license,
+                'licenseWarning' => $licenseWarning,
                 'recentStudents' => $recentStudents,
-                'mode' => 'teacher',
+                'seatRequests' => $seatRequests,
+                'vegaSummary' => $vegaSummary,
+                'canManageStudents' => false,
             ]);
         }
 
@@ -127,6 +173,7 @@ class DashboardController extends Controller
                 'recentStudents' => $recentStudents,
                 'seatRequests' => $seatRequests,
                 'vegaSummary' => $vegaSummary,
+                'canManageStudents' => true,
             ]);
         } else {
             // Super admin → license table
@@ -198,8 +245,8 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        // Route-level role protection
-        if (!$user->hasAnyRole(['super-admin', 'admin', 'moderator', 'school-admin', 'school-principal'])) {
+        // Route-level role protection — öğretmen de görebilir
+        if (!$user->hasAnyRole(['super-admin', 'admin', 'moderator', 'school-admin', 'school-principal', 'teacher'])) {
             abort(403);
         }
 
@@ -208,8 +255,8 @@ class DashboardController extends Controller
         // App usage stats (bar chart)
         $appQuery = Application::active()->ordered()->withCount('users');
 
-        // Scope app users for school-admin
-        if ($user->hasAnyRole(['school-admin', 'school-principal'])) {
+        // Scope app users for school-admin / teacher
+        if ($user->hasAnyRole(['school-admin', 'school-principal', 'teacher'])) {
             $schoolIds = $user->schools()->pluck('schools.id');
             $schoolUserIds = \DB::table('school_user')->whereIn('school_id', $schoolIds)->pluck('user_id');
             $appQuery = Application::active()->ordered()
@@ -221,7 +268,7 @@ class DashboardController extends Controller
         $appDetailsQuery = Application::active()->ordered()
             ->with([
                 'users' => function ($q) use ($user) {
-                    if ($user->hasAnyRole(['school-admin', 'school-principal'])) {
+                    if ($user->hasAnyRole(['school-admin', 'school-principal', 'teacher'])) {
                         $schoolIds = $user->schools()->pluck('schools.id');
                         $schoolUserIds = \DB::table('school_user')->whereIn('school_id', $schoolIds)->pluck('user_id');
                         $q->whereIn('users.id', $schoolUserIds);
@@ -245,7 +292,7 @@ class DashboardController extends Controller
                 ->get();
         }
 
-        if ($user->hasAnyRole(['school-admin', 'school-principal'])) {
+        if ($user->hasAnyRole(['school-admin', 'school-principal', 'teacher'])) {
             $schoolIds = $user->schools()->pluck('schools.id');
             $data['licenseStats'] = License::with('school')
                 ->whereIn('school_id', $schoolIds)
